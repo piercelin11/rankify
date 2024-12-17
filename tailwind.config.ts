@@ -7,10 +7,12 @@ export default {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    fontFamily: {
+      sans: "var(--font-geist-sans)",
+      serif: "var(--font-geist-mono)"
+    },
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
       },
     },
   },
