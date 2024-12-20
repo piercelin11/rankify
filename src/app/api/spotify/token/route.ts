@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 let accessToken = "";
-let tokenExpiry = 0;
+let tokenExpiredAt = 0;
 
 async function getSpotifyToken() {
 	const clientId = process.env.SPOTIFY_CLIENT_ID;
@@ -18,28 +18,42 @@ async function getSpotifyToken() {
 		});
 
 		if (!response.ok)
-			throw new Error(`Failed to fetch spotify token: ${response.status}`);
+			throw new Error(
+				`Failed to fetch Spotify token. HTTP status: ${response.status}`
+			);
 
 		const data = await response.json();
 
 		accessToken = data.access_token;
-		tokenExpiry = Date.now() + data.expires_in * 1000;
+		tokenExpiredAt = Date.now() + data.expires_in * 1000;
 	} catch (error) {
-		console.error("Error fetching spotify token.");
+		throw new Error(
+			error instanceof Error
+				? error.message
+				: "Unexpected error during Spotify token fetch."
+		);
 	}
 }
 
+export type SpotifyTokenRouteProps = {
+	accessToken: string;
+	tokenExpiredAt: number;
+};
+
 export async function GET() {
 	try {
-		if (!accessToken || Date.now() >= tokenExpiry) await getSpotifyToken();
-		return NextResponse.json(accessToken);
+		if (!accessToken || Date.now() >= tokenExpiredAt) await getSpotifyToken();
+		return NextResponse.json({ accessToken, tokenExpiredAt });
 	} catch (error) {
-		if (error instanceof Error)
-			return NextResponse.json({ error: error.message, status: 500 });
-		else
-			return NextResponse.json({
-				error: "Failed to get spotify token",
-				status: 500,
-			});
+		return NextResponse.json(
+			{
+				error:
+					error instanceof Error
+						? error.message
+						: "Failed to get spotify token",
+			},
+			{ status: 500 }
+		);
 	}
 }
+

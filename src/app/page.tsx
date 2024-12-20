@@ -1,8 +1,10 @@
-export default async function Home() {
+import SidebarLayout from "@/components/sidebar/SidebarLayout";
 
+export default async function HomePage() {
 	return (
-		<div className="grid min-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 font-[family-name:var(--font-geist-sans)] sm:p-20">
-			<p className="font-serif font-semibold">homepage</p>
-		</div>
+		<SidebarLayout>
+			<p className="font-serif font-semibold">sidebar</p>
+			<p className="font-serif font-semibold">content</p>
+		</SidebarLayout>
 	);
 }
