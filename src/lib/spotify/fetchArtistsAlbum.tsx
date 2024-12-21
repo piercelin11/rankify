@@ -1,11 +1,12 @@
 import { generateSearchParams } from "@/lib/helper";
-import getSpotifyToken from "@/lib/spotify/getSpotifyToken";
+import getSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
+import { Album } from "spotify-types";
 
-export default async function getArtistsAlbum(
+export default async function fetchArtistsAlbum(
 	artistId: string,
-	limit: number = 20,
+	limit: number = 20, 
 	type: "album" | "single" | "appears_on" | "compilation" = "album"
-) {
+): Promise<Album[] | null> {
 	const accessToken = await getSpotifyToken();
 
 	try {
@@ -23,8 +24,9 @@ export default async function getArtistsAlbum(
 			}
 		);
 		const data = await response.json();
-		return data;
+		return data.items;
 	} catch (error) {
 		console.error("Failed to fetch artist's albums", error);
+        return null
 	}
 }

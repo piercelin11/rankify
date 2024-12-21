@@ -44,33 +44,16 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
-model Genre {
-  id            String          @id @default(uuid())
-  name          String
-  artists       Artist[]
-  artistTogenre ArtistToGenre[]
-}
-
 model Artist {
-  id            String           @id
-  name          String
-  spotifyUrl    String           @unique
-  img           String
-  genres        Genre[]
-  albums        Album[]
-  songs         Song[]
-  rankings      Ranking[]
-  dates         RankingSession[]
-  artistTogenre ArtistToGenre[]
-}
-
-model ArtistToGenre {
-  genreId  String
-  genre    Genre  @relation(fields: [genreId], references: [id])
-  artistId String
-  artist   Artist @relation(fields: [artistId], references: [id])
-
-  @@id([genreId, artistId])
+  id               String           @id
+  name             String
+  spotifyUrl       String           @unique
+  img              String?
+  spotifyFollowers Int
+  albums           Album[]
+  tracks           Track[]
+  rankings         Ranking[]
+  dates            RankingSession[]
 }
 
 model Album {
@@ -78,26 +61,27 @@ model Album {
   name        String
   artistId    String
   spotifyUrl  String    @unique
-  img         String
+  img         String?
   releaseDate DateTime
-  songs       Song[]
+  tracks      Track[]
   artist      Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   rankings    Ranking[]
 
   @@unique([name, artistId])
 }
 
-model Song {
-  id           String    @id
-  name         String
-  albumId      String?
-  trackNumber  Int
-  spotifyUrl   String    @unique
-  rankings     Ranking[]
-  album        Album?    @relation(fields: [albumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  artist       Artist    @relation(fields: [artistId], references: [id])
-  artistId     String
-  release_date DateTime?
+model Track {
+  id          String    @id
+  name        String
+  albumId     String?
+  trackNumber Int
+  spotifyUrl  String    @unique
+  rankings    Ranking[]
+  img         String?
+  album       Album?    @relation(fields: [albumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  artist      Artist    @relation(fields: [artistId], references: [id])
+  artistId    String
+  releaseDate DateTime?
 
   @@unique([albumId, name])
 }
@@ -106,12 +90,12 @@ model Ranking {
   id       String         @id @default(uuid())
   ranking  Int
   dateId   String
-  songId   String
+  trackId  String
   albumId  String?
   artistid String
   userId   String
   date     RankingSession @relation(fields: [dateId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  song     Song           @relation(fields: [songId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  track    Track          @relation(fields: [trackId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   album    Album?         @relation(fields: [albumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   artist   Artist         @relation(fields: [artistid], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user     User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)

@@ -3,9 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { SearchInput } from "@/components/ui/Input";
 import SearchResultItem from "./SearchResultItem";
-import { SearchContent } from "spotify-types";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
 import searchForArtist from "@/lib/spotify/searchForArtist";
+import { SearchContent } from "spotify-types";
 
 type SearchSectionProps = {
 	handleClick: (artistId: string) => void;
@@ -13,7 +13,7 @@ type SearchSectionProps = {
 
 export default function SearchSection({ handleClick }: SearchSectionProps) {
 	const [inputValue, setinputValue] = useState<string>("");
-	const [result, setResult] = useState<SearchContent | null>();
+	const [result, setResult] = useState<SearchContent | null>(null);
 	const [isLoading, setLoading] = useState<boolean>(false);
 
 	function handleInput(e: React.ChangeEvent<HTMLInputElement>) {

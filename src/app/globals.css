@@ -9,10 +9,14 @@ body {
 	line-height: 1.3em;
 }
 
+h1 {
+	@apply text-4xl font-bold;
+	line-height: 1.7em;
+}
+
 h2 {
-	font-size: 1.875rem /* 30px */;
-	line-height: 2.25rem /* 36px */;
-	font-weight: 700;
+	@apply text-3xl font-bold;
+	line-height: 1.7em;
 }
 
 ::-webkit-scrollbar {

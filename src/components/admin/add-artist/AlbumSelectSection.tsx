@@ -1,29 +1,32 @@
-import React, { useEffect, useState } from "react";
-import { Album } from "spotify-api.js";
+import React, { useEffect, useState, useTransition } from "react";
+import { Album } from "spotify-types";
 import AlbumItem from "./AlbumItem";
 import Button from "@/components/ui/Button";
-import { ChevronRightIcon } from "@radix-ui/react-icons";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
-import getArtistsAlbum from "@/lib/spotify/getArtistsAlbum";
-import getAlbumsTrack from "@/lib/spotify/getAlbumsTrack";
+import fetchArtistsAlbum from "@/lib/spotify/fetchArtistsAlbum";
+import addNewArtist from "@/lib/action/admin/addNewArtist";
+import ErrorMessage from "@/components/ui/ErrorMessage";
 
-type AlbumSelectSectionProps = { artistId: string };
+type AlbumSelectSectionProps = {
+	artistId: string;
+	setCurrentView: React.Dispatch<React.SetStateAction<"search" | "album">>;
+};
 
 export default function AlbumSelectSection({
 	artistId,
+	setCurrentView,
 }: AlbumSelectSectionProps) {
 	const [albums, setAlbums] = useState<Album[] | null>(null);
 	const [selectedAlbums, setSelectedAlbums] = useState<string[]>([]);
+	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setLoading] = useState<boolean>(false);
 
 	useEffect(() => {
 		async function fetchaAlbums() {
 			setLoading(true);
 			try {
-				const data = await getArtistsAlbum(artistId, 50, "album");
-				const tracks = await getAlbumsTrack();
-				console.log(tracks)
-				setAlbums(data.items as Album[]);
+				const data = await fetchArtistsAlbum(artistId, 50, "album");
+				setAlbums(data);
 			} catch (error) {
 				console.error("Failed to fetch album data:", error);
 				setAlbums(null);
@@ -43,30 +46,42 @@ export default function AlbumSelectSection({
 		);
 	}
 
-	function handleAddAlbum() {}
+	async function handleSubmit() {
+		const response = await addNewArtist(artistId, selectedAlbums);
+		if (response?.error) setError(response.error);
+		else setError(null);
+	}
 
 	return (
-		<div className="mt-4 space-y-8">
+		<div className="mt-4">
 			{isLoading ? (
 				<LoadingAnimation size="small" />
 			) : (
-				<div className="relaive h-[500px] overflow-y-scroll">
-					{albums?.map((albumItem) => (
-						<AlbumItem
-							key={albumItem.id}
-							data={albumItem}
-							handleClick={handleCheckboxClick}
-							checked={selectedAlbums.includes(albumItem.id)}
-						/>
-					))}
+				<div className="space-y-8">
+					<div className="relaive h-[500px] overflow-y-auto">
+						{albums?.map((albumItem) => (
+							<AlbumItem
+								key={albumItem.id}
+								data={albumItem}
+								handleClick={handleCheckboxClick}
+								checked={selectedAlbums.includes(albumItem.id)}
+							/>
+						))}
+					</div>
+					<div className="flex gap-4">
+						<Button
+							variant="transparent"
+							onClick={() => setCurrentView("search")}
+						>
+							Back
+						</Button>
+						<Button variant="lime" onClick={handleSubmit}>
+							Add Album
+						</Button>
+						{error && <ErrorMessage message={error} />}
+					</div>
 				</div>
 			)}
-			<div className="flex gap-2">
-				<Button variant="transparent">
-					Add Album
-					<ChevronRightIcon width={20} height={20} />
-				</Button>
-			</div>
 		</div>
 	);
 }

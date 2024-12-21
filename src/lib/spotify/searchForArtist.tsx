@@ -1,7 +1,10 @@
+import { SearchContent } from "spotify-types";
 import { generateSearchParams } from "../helper";
-import getSpotifyToken from "./getSpotifyToken";
+import getSpotifyToken from "./fetchSpotifyToken";
 
-export default async function searchForArtist(searchQuery: string) {
+export default async function searchForArtist(
+	searchQuery: string
+): Promise<SearchContent | null> {
 	const accessToken = await getSpotifyToken();
 
 	try {
@@ -20,8 +23,10 @@ export default async function searchForArtist(searchQuery: string) {
 			}
 		);
 		const searchData = await searchResponse.json();
+		console.log(searchData)
 		return searchData;
 	} catch (error) {
 		console.error("Failed to search artist data.", error);
+		return null;
 	}
 }

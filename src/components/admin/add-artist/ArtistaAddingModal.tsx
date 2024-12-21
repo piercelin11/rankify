@@ -14,12 +14,12 @@ export default function ArtistAddingModal() {
 	}
 
 	return (
-		<div>
+		<>
 			{currentView === "album" && selecteArtistId ? (
-				<AlbumSelectSection artistId={selecteArtistId}  />
+				<AlbumSelectSection artistId={selecteArtistId} setCurrentView={setCurrentView}  />
 			) : (
 				<SearchSection handleClick={handleClick} />
 			)}
-		</div>
+		</>
 	);
 }

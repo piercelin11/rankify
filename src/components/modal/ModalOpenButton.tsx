@@ -20,9 +20,9 @@ export default function ModalOpenButton({
 	const [isOpen, setOpen] = useState(false);
 
 	return (
-		<div>
+		<>
 			{isOpen && (
-				<ModalWrapper setOpen={setOpen} title={title} description={description} >
+				<ModalWrapper setOpen={setOpen} title={title} description={description}>
 					{children[0]}
 				</ModalWrapper>
 			)}
@@ -35,6 +35,6 @@ export default function ModalOpenButton({
 			>
 				{children[1]}
 			</Button>
-		</div>
+		</>
 	);
 }

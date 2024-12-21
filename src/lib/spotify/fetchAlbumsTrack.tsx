@@ -1,19 +1,17 @@
-import getSpotifyToken from "@/lib/spotify/getSpotifyToken";
+import getSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
 import { generateSearchParams } from "../helper";
+import { Track } from "spotify-types";
 
-const alabumId = "4VZ7jhV0wHpoNPCB7Vmiml"
-
-export default async function getAlbumsTrack(
+export default async function fetchAlbumsTrack(
     alabumId: string = "4VZ7jhV0wHpoNPCB7Vmiml",
-    limit: number = 20,
-) {
+): Promise<Track[] | null> {
     const accessToken = await getSpotifyToken();
 
     try {
         const response = await fetch(
             `https://api.spotify.com/v1/albums/${alabumId}/tracks?` +
                 generateSearchParams({
-                    limit: `${limit}`,
+                    limit: "50",
                 }),
             {
                 method: "GET",
@@ -23,8 +21,9 @@ export default async function getAlbumsTrack(
             }
         );
         const data = await response.json();
-        return data;
+        return data.items;
     } catch (error) {
         console.error("Failed to fetch albums's tracks", error);
+        return null
     }
 }
