@@ -19,7 +19,7 @@ export default function ModalWrapper({
 		<div className="fixed left-0 top-0 flex h-screen w-screen items-center justify-center">
 			<div className={`relative z-10 w-[680px] rounded-lg border border-zinc-700 bg-zinc-900/70 p-8`}>
 				<Cross2Icon
-					className="absolute right-8 top-8 cursor-pointer text-zinc-500"
+					className="absolute right-4 top-4 cursor-pointer text-zinc-500"
 					onClick={() => setOpen(false)}
 					width={20}
 					height={20}

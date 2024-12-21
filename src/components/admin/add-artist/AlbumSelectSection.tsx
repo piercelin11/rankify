@@ -4,7 +4,8 @@ import AlbumItem from "./AlbumItem";
 import Button from "@/components/ui/Button";
 import { ChevronRightIcon } from "@radix-ui/react-icons";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
-import { generateApiRoute } from "@/lib/helper";
+import getArtistsAlbum from "@/lib/spotify/getArtistsAlbum";
+import getAlbumsTrack from "@/lib/spotify/getAlbumsTrack";
 
 type AlbumSelectSectionProps = { artistId: string };
 
@@ -19,15 +20,10 @@ export default function AlbumSelectSection({
 		async function fetchaAlbums() {
 			setLoading(true);
 			try {
-				const response = await fetch(
-					generateApiRoute("spotify/artists/albums", {
-						artistId,
-						limit: "50"
-					})
-				);
-				const data = await response.json();
-				setAlbums(data.data.items as Album[]);
-				console.log(data.data.items)
+				const data = await getArtistsAlbum(artistId, 50, "album");
+				const tracks = await getAlbumsTrack();
+				console.log(tracks)
+				setAlbums(data.items as Album[]);
 			} catch (error) {
 				console.error("Failed to fetch album data:", error);
 				setAlbums(null);
@@ -47,18 +43,10 @@ export default function AlbumSelectSection({
 		);
 	}
 
-	function handleAddAlbum() {
-
-	}
+	function handleAddAlbum() {}
 
 	return (
-		<div className="space-y-8">
-			<div className="flex gap-2">
-				<Button variant="transparent">
-					Add Album
-					<ChevronRightIcon width={20} height={20} />
-				</Button>
-			</div>
+		<div className="mt-4 space-y-8">
 			{isLoading ? (
 				<LoadingAnimation size="small" />
 			) : (
@@ -73,6 +61,12 @@ export default function AlbumSelectSection({
 					))}
 				</div>
 			)}
+			<div className="flex gap-2">
+				<Button variant="transparent">
+					Add Album
+					<ChevronRightIcon width={20} height={20} />
+				</Button>
+			</div>
 		</div>
 	);
 }

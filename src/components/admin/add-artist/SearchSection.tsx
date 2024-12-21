@@ -5,7 +5,7 @@ import { SearchInput } from "@/components/ui/Input";
 import SearchResultItem from "./SearchResultItem";
 import { SearchContent } from "spotify-types";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
-import { generateApiRoute } from "@/lib/helper";
+import searchForArtist from "@/lib/spotify/searchForArtist";
 
 type SearchSectionProps = {
 	handleClick: (artistId: string) => void;
@@ -30,12 +30,7 @@ export default function SearchSection({ handleClick }: SearchSectionProps) {
 			setLoading(true);
 
 			try {
-				const response = await fetch(
-					generateApiRoute("spotify/search", {
-						q: inputValue,
-					})
-				);
-				const data: SearchContent = await response.json();
+				const data = await searchForArtist(inputValue);
 				setResult(data);
 			} catch (error) {
 				console.error("Failed to fetch artist data:", error);

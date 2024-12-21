@@ -7,22 +7,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model users {
-  id            String     @id @default(cuid())
+model User {
+  id            String           @id @default(cuid())
   name          String?
-  username      String?    @unique
-  email         String?    @unique
+  username      String?          @unique
+  email         String?          @unique
   password      String?
   emailVerified DateTime?
   image         String?
-  dates         dates[]
-  rankings      rankings[]
-  accounts      accounts[]
-  createdAt     DateTime   @default(now()) @map(name: "created_at")
-  updatedAt     DateTime   @updatedAt @map(name: "updated_at")
+  dates         RankingSession[]
+  rankings      Ranking[]
+  accounts      Account[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 }
 
-model accounts {
+model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
@@ -39,82 +39,92 @@ model accounts {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user users @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
 
-model genres {
-  id      String    @id @default(uuid())
-  name    String
-  artists artists[]
-  albums  albums[]
-  songs   songs[]
+model Genre {
+  id            String          @id @default(uuid())
+  name          String
+  artists       Artist[]
+  artistTogenre ArtistToGenre[]
 }
 
-model artists {
-  id          String     @id
-  name        String     @unique
-  spotify_url String
+model Artist {
+  id            String           @id
+  name          String
+  spotifyUrl    String           @unique
+  img           String
+  genres        Genre[]
+  albums        Album[]
+  songs         Song[]
+  rankings      Ranking[]
+  dates         RankingSession[]
+  artistTogenre ArtistToGenre[]
+}
+
+model ArtistToGenre {
+  genreId  String
+  genre    Genre  @relation(fields: [genreId], references: [id])
+  artistId String
+  artist   Artist @relation(fields: [artistId], references: [id])
+
+  @@id([genreId, artistId])
+}
+
+model Album {
+  id          String    @id
+  name        String
+  artistId    String
+  spotifyUrl  String    @unique
   img         String
-  genres      genres[]
-  albums      albums[]
-  songs       songs[]
-  rankings    rankings[]
+  releaseDate DateTime
+  songs       Song[]
+  artist      Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  rankings    Ranking[]
+
+  @@unique([name, artistId])
 }
 
-model albums {
-  id           String     @id
+model Song {
+  id           String    @id
   name         String
-  artist_id    String
-  spotify_url  String
-  img          String
-  release_date DateTime
-  total_tracks Int
-  genres       genres[]
-  songs        songs[]
-  artists      artists    @relation(fields: [artist_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  rankings     rankings[]
-
-  @@unique([name, artist_id])
-}
-
-model songs {
-  id           String     @id
-  name         String
-  album_id     String?
-  track_number Int?
-  genres       genres[]
-  rankings     rankings[]
-  albums       albums?    @relation(fields: [album_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  artists      artists    @relation(fields: [artist_id], references: [id])
-  artist_id    String
+  albumId      String?
+  trackNumber  Int
+  spotifyUrl   String    @unique
+  rankings     Ranking[]
+  album        Album?    @relation(fields: [albumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  artist       Artist    @relation(fields: [artistId], references: [id])
+  artistId     String
   release_date DateTime?
 
-  @@unique([album_id, name])
+  @@unique([albumId, name])
 }
 
-model rankings {
-  id        String  @id @default(uuid())
-  date_id   String
-  song_id   String
-  album_id  String?
-  artist_id String
-  ranking   Int
-  dates     dates   @relation(fields: [date_id], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  songs     songs   @relation(fields: [song_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  albums    albums? @relation(fields: [album_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  artists   artists @relation(fields: [artist_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user      users   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user_id   String
+model Ranking {
+  id       String         @id @default(uuid())
+  ranking  Int
+  dateId   String
+  songId   String
+  albumId  String?
+  artistid String
+  userId   String
+  date     RankingSession @relation(fields: [dateId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  song     Song           @relation(fields: [songId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  album    Album?         @relation(fields: [albumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  artist   Artist         @relation(fields: [artistid], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
-model dates {
-  id       String     @id @default(uuid())
-  date     DateTime   @default(now())
-  user_id  String
-  users    users      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  rankings rankings[]
+model RankingSession {
+  id       String    @id @default(uuid())
+  date     DateTime  @default(now())
+  userId   String
+  artistId String
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  artist   Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  rankings Ranking[]
 
   @@index([date])
 }
