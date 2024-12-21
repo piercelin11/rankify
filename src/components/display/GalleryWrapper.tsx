@@ -5,7 +5,7 @@ type GalleryGridLayoutProps = {
 	children: ReactNode[];
 } & HTMLAttributes<HTMLDivElement>;
 
-export default function GalleryGridLayout({
+export default function GalleryWrapper({
 	children,
 	className
 }: GalleryGridLayoutProps) {
