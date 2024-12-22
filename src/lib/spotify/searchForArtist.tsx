@@ -23,7 +23,6 @@ export default async function searchForArtist(
 			}
 		);
 		const searchData = await searchResponse.json();
-		console.log(searchData)
 		return searchData;
 	} catch (error) {
 		console.error("Failed to search artist data.", error);

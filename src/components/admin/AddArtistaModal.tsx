@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import SearchSection from "./SearchSection";
 import AlbumSelectSection from "./AlbumSelectSection";
 
-export default function ArtistAddingModal() {
+export default function AddArtistaModal() {
 	const [currentView, setCurrentView] = useState<"search" | "album">("search");
 	const [selecteArtistId, setSelecteArtistId] = useState<string | null>(null);
 
@@ -16,7 +16,7 @@ export default function ArtistAddingModal() {
 	return (
 		<>
 			{currentView === "album" && selecteArtistId ? (
-				<AlbumSelectSection artistId={selecteArtistId} setCurrentView={setCurrentView}  />
+				<AlbumSelectSection artistId={selecteArtistId} handleCancel={() => setCurrentView("search")}  />
 			) : (
 				<SearchSection handleClick={handleClick} />
 			)}

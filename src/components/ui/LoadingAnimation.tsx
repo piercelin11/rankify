@@ -1,8 +1,12 @@
+import { cn } from "@/lib/cn";
+
+type LoadingAnimationProps = {
+	size?: "small" | "base";
+};
+
 export default function LoadingAnimation({
 	size = "base",
-}: {
-	size?: "small" | "base";
-}) {
+}: LoadingAnimationProps) {
 	const styles =
 		size === "small"
 			? "border-2 border-t-2 w-4 h-4"

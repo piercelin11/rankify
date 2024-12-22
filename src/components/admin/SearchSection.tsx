@@ -52,7 +52,7 @@ export default function SearchSection({ handleClick }: SearchSectionProps) {
 				placeholder="search for artists"
 				spellCheck={false}
 			/>
-			{isLoading && !result && <LoadingAnimation size="small" />}
+			{isLoading && !result && <LoadingAnimation />}
 			{result && (
 				<div>
 					{result.artists?.items.map((resultItem) => (

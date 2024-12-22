@@ -5,11 +5,12 @@ import { prisma } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
 import { redirect } from "next/navigation";
+import { ActionResponse } from "@/types/action";
 
 export default async function addArtist(
 	artistId: string,
 	albumId: string | string[]
-) {
+): Promise<ActionResponse> {
 	let isSuccess = false;
 
 	const artistData = await getArtist(artistId);
@@ -23,7 +24,8 @@ export default async function addArtist(
 		},
 	});
 
-	if (artistExists) return { error: "This artist already exists." };
+	if (artistExists)
+		return { success: false, message: "This artist already exists." };
 
 	try {
 		await prisma.artist.create({
@@ -32,7 +34,7 @@ export default async function addArtist(
 				name: artistData.name,
 				spotifyUrl: artistData.external_urls.spotify,
 				img: artistData.images?.[0].url,
-				spotifyFollowers: artistData.followers.total
+				spotifyFollowers: artistData.followers.total,
 			},
 		});
 		try {
@@ -91,16 +93,20 @@ export default async function addArtist(
 				isSuccess = true;
 			} catch (error) {
 				console.error("Failed to add album's track:", error);
-				return { error: "Failed to add album's track." };
+				return {
+					success: false,
+					message: "Failed to add album's track.",
+				};
 			}
 		} catch (error) {
-			console.error("Failed to add album:", error);
-			return { error: "Failed to add album." };
+			console.error("Failed to add album. error:", error);
+			return { success: false, message: "Failed to add album's track." };
 		}
 	} catch (error) {
 		console.error("Failed to add artist:", error);
-		return { error: "Failed to add artist." };
+		return { success: false, message: "Failed to add artist." };
 	}
 
 	if (isSuccess) redirect(`/admin/artist/${artistId}`);
+	return { success: true, message: "Successfully added the artist." };
 }

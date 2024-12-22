@@ -1,4 +1,4 @@
-import ArtistAddingModal from "@/components/admin/add-artist/ArtistaAddingModal";
+import AddArtistaModal from "@/components/admin/AddArtistaModal";
 import ModalOpenButton from "@/components/modal/ModalOpenButton";
 import { PlusIcon } from "@radix-ui/react-icons";
 import { prisma } from "@/lib/prisma";
@@ -9,14 +9,17 @@ export default async function AdminArtistsPage() {
 	const artists = await prisma.artist.findMany();
 
 	return (
-		<div className="space-y-8 p-8">
+		<div className="p-8">
+			<div className="mb-8">
 			<ModalOpenButton variant="gray">
-				<ArtistAddingModal />
+				<AddArtistaModal />
 				<div className="flex items-center justify-center gap-2 pr-2">
 					<PlusIcon />
 					Add Artist
 				</div>
 			</ModalOpenButton>
+			</div>
+
 			<GalleryWrapper>
 				{artists.map((artist) => (
 					<GalleryItem

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/cn";
+import { PlusIcon } from "@radix-ui/react-icons";
 import React, { ButtonHTMLAttributes } from "react";
 
 export type ButtonProps = {
@@ -13,8 +14,8 @@ const styles = {
 		disabled: "bg-lime-500 text-zinc-950",
 	},
 	gray: {
-		default: "bg-zinc-800 text-zinc-100 hover:bg-zinc-900",
-		disabled: "bg-zinc-800 text-zinc-100",
+		default: "bg-zinc-800/80 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100",
+		disabled: "bg-zinc-800/80 text-zinc-100",
 	},
 	transparent: {
 		default: "bg-transparent text-zinc-100 border border-zinc-500 hover:border-zinc-100",
@@ -44,6 +45,28 @@ export default function Button({
 			{...props}
 		>
 			{children}
+		</button>
+	);
+}
+
+export function AddButton({
+	variant,
+	disabled,
+	className,
+	...props
+} : Omit<ButtonProps, "children">) {
+	return (
+		<button
+			className={cn(
+				`aspect-square m-3 rounded-full flex items-center justify-center gap-2 ${disabled ? styles[variant].disabled : styles[variant].default}`,
+				className,
+				{
+					"opacity-70": disabled,
+				}
+			)}
+			{...props}
+		>
+			<PlusIcon width={35} height={35} />
 		</button>
 	);
 }

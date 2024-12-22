@@ -3,6 +3,7 @@ import React from "react";
 import HeaderInfoWrapper from "@/components/display/InfoHeader";
 import getAlbumById from "@/lib/data/getAlbumById";
 import getTrackByAlbum from "@/lib/data/getTrackByAlbum";
+import { dateToLong } from "@/lib/helper";
 
 export default async function AdminAlbumPage({
 	params,
@@ -18,8 +19,8 @@ export default async function AdminAlbumPage({
 
 	return (
 		<>
-			<HeaderInfoWrapper data={album} subTitle={`${album.releaseDate}`} />
-			<div className="p-14">
+			<HeaderInfoWrapper data={album} subTitle={`${dateToLong(album.releaseDate)}`} />
+            <div className="p-14">
 				{tracks.map((track) => (
 					<div
 						key={track.id}

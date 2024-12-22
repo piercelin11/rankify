@@ -3,17 +3,19 @@
 import { prisma } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
+import { ActionResponse } from "@/types/action";
 import { revalidatePath } from "next/cache";
 
 export default async function addAlbum(
-	albumId: string | string[],
 	artistId: string,
-	revalidate?: string
-) {
+	albumId: string | string[]
+): Promise<ActionResponse> {
+	let isSuccess = false;
+
 	const albumData = Array.isArray(albumId)
 		? await Promise.all(albumId.map((id) => fetchAlbum(id)))
 		: [await fetchAlbum(albumId)];
-		
+
 	try {
 		await prisma.album.createMany({
 			data: albumData
@@ -36,7 +38,8 @@ export default async function addAlbum(
 									(await fetchAlbumsTrack(id))?.map((track) => ({
 										...track,
 										album_id: id,
-										img: albumData.find(album => album?.id === id)?.images?.[0].url
+										img: albumData.find((album) => album?.id === id)
+											?.images?.[0].url,
 									})) || null
 							)
 						)
@@ -44,7 +47,8 @@ export default async function addAlbum(
 				: (await fetchAlbumsTrack(albumId))?.map((track) => ({
 						...track,
 						album_id: albumId,
-						img: albumData.find(album => album?.id === albumId)?.images?.[0].url
+						img: albumData.find((album) => album?.id === albumId)?.images?.[0]
+							.url,
 					})) || [null];
 
 			await prisma.track.createMany({
@@ -57,17 +61,20 @@ export default async function addAlbum(
 						trackNumber: track.track_number,
 						artistId,
 						spotifyUrl: track.external_urls.spotify,
-						img: track.img
+						img: track.img,
 					})),
 			});
-			revalidatePath(revalidate || "/");
+
+			isSuccess = true;
 		} catch (error) {
-			throw new Error(`Failed to add album's tracks. error: ${error}`);
+			console.error("Failed to add album's track:", error);
+			return { success: false, message: "Failed to add album's track." };
 		}
-		
 	} catch (error) {
-		throw new Error(`Failed to add album. error: ${error}`);
+		console.error("Failed to add album. error:", error);
+		return { success: false, message: "Failed to add album's track." };
 	}
 
-	
+	if (isSuccess) revalidatePath(`/admin/artist/${artistId}`);
+	return { success: true, message: "Successfully added albums." };
 }

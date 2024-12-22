@@ -36,7 +36,7 @@ export default function InfoHeader({
 					<h1>{data.name}</h1>
 					<p className="mb-4 text-lg text-zinc-500">{subTitle}</p>
 					<Link href={data.spotifyUrl}>
-						<SpotifyIcon size={30} />
+						<SpotifyIcon className="text-zinc-600 hover:text-spotify" size={30} />
 					</Link>
 				</div>
 			</div>

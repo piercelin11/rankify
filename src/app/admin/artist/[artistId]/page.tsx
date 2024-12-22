@@ -5,6 +5,8 @@ import GalleryWrapper from "@/components/display/GalleryWrapper";
 import getAlbumByArtist from "@/lib/data/getAlbumByArtist";
 import GalleryItem from "@/components/display/GalleryItem";
 import InfoHeader from "@/components/display/InfoHeader";
+import { AddButton } from "@/components/ui/Button";
+import AddAlbumButton from "@/components/admin/AddAlbumButton";
 
 export default async function AdminArtistPage({
 	params,
@@ -33,6 +35,7 @@ export default async function AdminArtistPage({
 							subTitle="Album"
 						/>
 					))}
+					<AddAlbumButton artistId={artistId} savedAlbums={albums} />
 				</GalleryWrapper>
 			</div>
 		</>

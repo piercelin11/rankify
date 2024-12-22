@@ -5,7 +5,11 @@ import ModalWrapper, { ModalWrapperProps } from "./ModalWrapper";
 import Button, { ButtonProps } from "../ui/Button";
 
 type ModalOpenButtonProps = {
-	children: [React.ReactNode, React.ReactNode];
+	children: [
+		React.ReactNode,
+		React.ReactNode,
+	];
+	submitButton?: boolean,
 } & ButtonProps &
 	Omit<ModalWrapperProps, "setOpen">;
 
