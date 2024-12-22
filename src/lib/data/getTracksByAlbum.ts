@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-export default async function getTrackByAlbum(albumId: string) {
+export default async function getTracksByAlbum(albumId: string) {
     const tracks = await prisma.track.findMany({
         where: {
             albumId,

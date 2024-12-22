@@ -8,9 +8,13 @@ import { revalidatePath } from "next/cache";
 
 export default async function addAlbum(
 	artistId: string,
-	albumId: string | string[]
+	albumId: string | string[],
+	type: "ALBUM" | "EP",
 ): Promise<ActionResponse> {
 	let isSuccess = false;
+
+	if(Array.isArray(albumId) && albumId.length === 0)
+		return { success: false, message: "You need to at least select an album." };
 
 	const albumData = Array.isArray(albumId)
 		? await Promise.all(albumId.map((id) => fetchAlbum(id)))
@@ -27,6 +31,7 @@ export default async function addAlbum(
 					spotifyUrl: data.external_urls.spotify,
 					img: data.images?.[0].url,
 					releaseDate: new Date(data.release_date),
+					type
 				})),
 		});
 		try {
@@ -68,11 +73,11 @@ export default async function addAlbum(
 			isSuccess = true;
 		} catch (error) {
 			console.error("Failed to add album's track:", error);
-			return { success: false, message: "Failed to add album's track." };
+			return { success: false, message: "Failed to add album's tracks." };
 		}
 	} catch (error) {
 		console.error("Failed to add album. error:", error);
-		return { success: false, message: "Failed to add album's track." };
+		return { success: false, message: "Failed to add albums." };
 	}
 
 	if (isSuccess) revalidatePath(`/admin/artist/${artistId}`);

@@ -52,6 +52,7 @@ export default async function addArtist(
 						spotifyUrl: data.external_urls.spotify,
 						img: data.images?.[0].url,
 						releaseDate: new Date(data.release_date),
+						type: "ALBUM"
 					})),
 			});
 			try {
@@ -95,12 +96,12 @@ export default async function addArtist(
 				console.error("Failed to add album's track:", error);
 				return {
 					success: false,
-					message: "Failed to add album's track.",
+					message: "Failed to add album's tracks.",
 				};
 			}
 		} catch (error) {
 			console.error("Failed to add album. error:", error);
-			return { success: false, message: "Failed to add album's track." };
+			return { success: false, message: "Failed to add albums." };
 		}
 	} catch (error) {
 		console.error("Failed to add artist:", error);

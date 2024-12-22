@@ -4,24 +4,27 @@ import React, { useEffect, useState } from "react";
 import { SearchInput } from "@/components/ui/Input";
 import SearchResultItem from "./SearchResultItem";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
-import searchForArtist from "@/lib/spotify/searchForArtist";
+import searchForArtist from "@/lib/spotify/searchInSpotify";
 import { SearchContent } from "spotify-types";
+import useSearchInput from "@/lib/hooks/useSearchInput";
 
 type SearchSectionProps = {
 	handleClick: (artistId: string) => void;
 };
 
 export default function SearchSection({ handleClick }: SearchSectionProps) {
-	const [inputValue, setinputValue] = useState<string>("");
+	/* const [inputValue, setinputValue] = useState<string>("");
 	const [result, setResult] = useState<SearchContent | null>(null);
-	const [isLoading, setLoading] = useState<boolean>(false);
+	const [isLoading, setLoading] = useState<boolean>(false); */
 
-	function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
+	const { inputValue, handleInput, result, isSearcing } = useSearchInput("artist");
+
+	/* function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
 		const value = e.target.value;
 		setinputValue(value);
-	}
+	} */
 
-	useEffect(() => {
+	/* useEffect(() => {
 		async function fetchData() {
 			if (!inputValue.trim()) {
 				setResult(null);
@@ -30,7 +33,7 @@ export default function SearchSection({ handleClick }: SearchSectionProps) {
 			setLoading(true);
 
 			try {
-				const data = await searchForArtist(inputValue);
+				const data = await searchForArtist(inputValue, "artist");
 				setResult(data);
 			} catch (error) {
 				console.error("Failed to fetch artist data:", error);
@@ -42,7 +45,7 @@ export default function SearchSection({ handleClick }: SearchSectionProps) {
 
 		const timer = setTimeout(fetchData, 1000);
 		return () => clearTimeout(timer);
-	}, [inputValue]);
+	}, [inputValue]); */
 
 	return (
 		<div className="space-y-8">
@@ -52,7 +55,7 @@ export default function SearchSection({ handleClick }: SearchSectionProps) {
 				placeholder="search for artists"
 				spellCheck={false}
 			/>
-			{isLoading && !result && <LoadingAnimation />}
+			{isSearcing && !result && <LoadingAnimation />}
 			{result && (
 				<div>
 					{result.artists?.items.map((resultItem) => (

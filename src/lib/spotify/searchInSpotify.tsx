@@ -2,8 +2,9 @@ import { SearchContent } from "spotify-types";
 import { generateSearchParams } from "../helper";
 import getSpotifyToken from "./fetchSpotifyToken";
 
-export default async function searchForArtist(
-	searchQuery: string
+export default async function searchInSpotify(
+	searchQuery: string,
+	type: "album" | "artist" | "track"
 ): Promise<SearchContent | null> {
 	const accessToken = await getSpotifyToken();
 
@@ -12,7 +13,7 @@ export default async function searchForArtist(
 			"https://api.spotify.com/v1/search?" +
 				generateSearchParams({
 					q: searchQuery,
-					type: "artist",
+					type,
 					limit: "8",
 				}),
 			{

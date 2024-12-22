@@ -3,8 +3,18 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("POSTGRES_DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AlbumType {
+  ALBUM
+  EP
 }
 
 model User {
@@ -15,6 +25,7 @@ model User {
   password      String?
   emailVerified DateTime?
   image         String?
+  role          Role             @default(USER)
   dates         RankingSession[]
   rankings      Ranking[]
   accounts      Account[]
@@ -61,8 +72,10 @@ model Album {
   name        String
   artistId    String
   spotifyUrl  String    @unique
+  color       String?
   img         String?
   releaseDate DateTime
+  type        AlbumType
   tracks      Track[]
   artist      Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   rankings    Ranking[]
@@ -74,7 +87,7 @@ model Track {
   id          String    @id
   name        String
   albumId     String?
-  trackNumber Int
+  trackNumber Int?
   spotifyUrl  String    @unique
   rankings    Ranking[]
   img         String?
@@ -84,6 +97,7 @@ model Track {
   releaseDate DateTime?
 
   @@unique([albumId, name])
+  @@unique([artistId, name])
 }
 
 model Ranking {

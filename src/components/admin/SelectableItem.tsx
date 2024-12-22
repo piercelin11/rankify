@@ -1,30 +1,39 @@
 import React from "react";
-import { Album } from "spotify-types";
+import { Album, SimplifiedAlbum, Track } from "spotify-types";
 import CheckBox from "@/components/ui/CheckBox";
 
-type AlbumItemProps = {
-	data: Album;
+type SelectableItemProps = {
+	data: Album | SimplifiedAlbum | Track;
 	handleClick: (albumId: string) => void;
 	checked: boolean;
+	type: string;
 };
 
-export default function AlbumItem({
+export default function SelectableItem({
 	data,
 	handleClick,
 	checked,
-}: AlbumItemProps) {
+	type,
+}: SelectableItemProps) {
+	
+	function isAlbum(
+		data: Album | SimplifiedAlbum | Track
+	): data is Album | SimplifiedAlbum {
+		return "images" in data;
+	}
+
 	return (
 		<div className="grid select-none grid-cols-[50px,_1fr,_100px] items-center gap-2 rounded px-3 py-2 hover:bg-zinc-800">
 			<img
 				className="rounded"
-				src={data.images[2]?.url}
+				src={isAlbum(data) ? data.images[2]?.url : data.album.images[2]?.url}
 				alt={data.name}
 				width={45}
 				height={45}
 			/>
 			<div>
 				<p>{data.name}</p>
-				<p className="text-sm text-zinc-400">Album</p>
+				<p className="text-sm text-zinc-400">{type}</p>
 			</div>
 			<CheckBox
 				onClick={() => handleClick(data.id)}

@@ -1,4 +1,4 @@
-import AddArtistaModal from "@/components/admin/AddArtistaModal";
+import AddArtistaModal from "@/components/admin/AddArtistModal";
 import ModalOpenButton from "@/components/modal/ModalOpenButton";
 import { PlusIcon } from "@radix-ui/react-icons";
 import { prisma } from "@/lib/prisma";
