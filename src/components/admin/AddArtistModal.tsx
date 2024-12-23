@@ -19,7 +19,8 @@ export default function AddArtistModal() {
 				<SelectSection
 					artistId={selecteArtistId}
 					handleCancel={() => setCurrentView("search")}
-					type="Artist"
+					type="Album"
+					actionType="addArtist"
 				/>
 			) : (
 				<SearchSection handleClick={handleClick} />

@@ -4,20 +4,19 @@ import React, { useState } from "react";
 import ModalWrapper from "../modal/ModalWrapper";
 import Button, { AddButton } from "../ui/Button";
 import SelectSection from "./SelectSection";
-import { AlbumData } from "@/types/data";
 import { PlusIcon } from "@radix-ui/react-icons";
 
-type AddProjectButtonProps = {
+type AddItemButtonProps = {
 	artistId: string;
 	type: "Album" | "EP" | "Single";
 	buttonLabel?: string;
 };
 
-export default function AddProjectButton({
+export default function AddItemButton({
 	artistId,
 	type,
 	buttonLabel,
-}: AddProjectButtonProps) {
+}: AddItemButtonProps) {
 	const [isOpen, setOpen] = useState(false);
 
 	return (

@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation";
 import React from "react";
-import HeaderInfoWrapper from "@/components/display/InfoHeader";
+import InfoHeader from "@/components/display/InfoHeader";
 import getAlbumById from "@/lib/data/getAlbumById";
 import getTracksByAlbum from "@/lib/data/getTracksByAlbum";
-import { dateToLong } from "@/lib/helper";
-import ListItem from "@/components/admin/ListItem";
+import { dateToLong } from "@/lib/utils/helper";
+import TrackListItem from "@/components/admin/TrackListItem";
+import getAlbumsByArtist from "@/lib/data/getAlbumsByArtist";
+
+import deleteItem from "@/lib/action/admin/deleteItem";
+import AlbumActionSection from "@/components/admin/AlbumActionSection";
 
 export default async function AdminAlbumPage({
 	params,
@@ -18,12 +22,21 @@ export default async function AdminAlbumPage({
 
 	if (!album) notFound();
 
+	const albums = await getAlbumsByArtist(album.artistId);
+
 	return (
 		<>
-			<HeaderInfoWrapper data={album} subTitle={`${dateToLong(album.releaseDate)}`} />
-            <div className="p-14">
+			<InfoHeader data={album} subTitle={`${dateToLong(album.releaseDate)}`} />
+			<div className="p-14">
+				<div className="mb-12">
+					<AlbumActionSection data={album} />
+				</div>
 				{tracks.map((track) => (
-					<ListItem key={track.id} trackData={track} />
+					<TrackListItem
+						key={track.id}
+						trackData={track}
+						savedAlbums={albums}
+					/>
 				))}
 			</div>
 		</>

@@ -1,8 +1,9 @@
 import { cn } from "@/lib/cn";
 import Link from "next/link";
-import React from "react";
+import React, { ReactNode } from "react";
 import SpotifyIcon from "../../../public/icon/SpotifyIcon";
 import { AlbumData, ArtistData } from "@/types/data";
+import { Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 
 type InfoHeaderProps = {
 	data: AlbumData | ArtistData;
@@ -15,7 +16,7 @@ export default function InfoHeader({
 	data,
 	subTitle,
 	rounded = false,
-	type,
+	type
 }: InfoHeaderProps) {
 	return (
 		<div className="bg-zinc-900/50 p-14">
@@ -36,7 +37,10 @@ export default function InfoHeader({
 					<h1>{data.name}</h1>
 					<p className="mb-4 text-lg text-zinc-500">{subTitle}</p>
 					<Link href={data.spotifyUrl}>
-						<SpotifyIcon className="text-zinc-600 hover:text-spotify" size={30} />
+						<SpotifyIcon
+							className="text-zinc-600 hover:text-spotify"
+							size={30}
+						/>
 					</Link>
 				</div>
 			</div>

@@ -15,7 +15,6 @@ export default function SelectableItem({
 	checked,
 	type,
 }: SelectableItemProps) {
-	
 	function isAlbum(
 		data: Album | SimplifiedAlbum | Track
 	): data is Album | SimplifiedAlbum {
@@ -23,7 +22,10 @@ export default function SelectableItem({
 	}
 
 	return (
-		<div className="grid select-none grid-cols-[50px,_1fr,_100px] items-center gap-2 rounded px-3 py-2 hover:bg-zinc-800">
+		<div
+			className="grid select-none grid-cols-[50px,_1fr,_100px] items-center gap-2 rounded px-3 py-2 hover:bg-zinc-800"
+			onClick={() => handleClick(data.id)}
+		>
 			<img
 				className="rounded"
 				src={isAlbum(data) ? data.images[2]?.url : data.album.images[2]?.url}
@@ -36,7 +38,6 @@ export default function SelectableItem({
 				<p className="text-sm text-zinc-400">{type}</p>
 			</div>
 			<CheckBox
-				onClick={() => handleClick(data.id)}
 				className="justify-self-end"
 				checked={checked}
 			/>

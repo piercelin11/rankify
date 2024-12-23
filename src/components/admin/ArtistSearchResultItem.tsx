@@ -3,15 +3,15 @@ import { Artist } from "spotify-api.js";
 import { ChevronRightIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/cn";
 
-type SearchResultItemProps = {
+type ArtistSearchResultItemProps = {
 	data: Omit<Artist, "externalURL" | "makeCodeImage">;
 } & React.HTMLAttributes<HTMLDivElement>;
 
-export default function SearchResultItem({
+export default function ArtistSearchResultItem({
 	data,
 	className,
 	...props
-}: SearchResultItemProps) {
+}: ArtistSearchResultItemProps) {
 	return (
 		<div
 			className={cn(
@@ -22,7 +22,7 @@ export default function SearchResultItem({
 		>
 			<img
 				className="rounded-full"
-				src={data.images ? data.images[2]?.url : ""}
+				src={data.images?.[2]?.url || "/pic/placeholder.jpg"}
 				alt={data.name}
 				width={45}
 				height={45}

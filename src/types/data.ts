@@ -1,12 +1,14 @@
 import { $Enums } from "@prisma/client";
 
 export type AlbumData = {
-	artistId: string;
-	id: string;
 	name: string;
-	spotifyUrl: string;
-	img: string | null;
-	releaseDate: Date;
+    type: $Enums.AlbumType;
+    id: string;
+    color: string | null;
+    img: string | null;
+    artistId: string;
+    spotifyUrl: string;
+    releaseDate: Date;
 };
 
 export type ArtistData = {

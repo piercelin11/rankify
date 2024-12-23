@@ -1,4 +1,4 @@
-import { generateSearchParams } from "@/lib/helper";
+import { generateSearchParams } from "@/lib/utils/helper";
 import getSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
 import { Album } from "spotify-types";
 

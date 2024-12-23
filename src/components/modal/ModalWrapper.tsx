@@ -5,15 +5,11 @@ import { Description } from "../ui/Text";
 export type ModalWrapperProps = {
 	children: React.ReactNode;
 	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-	title?: string;
-	description?: string;
 };
 
 export default function ModalWrapper({
 	children,
 	setOpen,
-	title,
-	description,
 }: ModalWrapperProps) {
 	return (
 		<div className="fixed left-0 top-0 flex h-screen w-screen items-center justify-center">
@@ -25,12 +21,7 @@ export default function ModalWrapper({
 					height={20}
 				/>
 				<div className="space-y-8">
-					{(title || description) && (
-						<div className="w-11/12 space-y-2">
-							<h2>{title}</h2>
-							<Description>{description}</Description>
-						</div>
-					)}
+					
 					{children}
 				</div>
 			</div>

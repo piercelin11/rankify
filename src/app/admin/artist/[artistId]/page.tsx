@@ -5,9 +5,9 @@ import GalleryWrapper from "@/components/display/GalleryWrapper";
 import getAlbumsByArtist from "@/lib/data/getAlbumsByArtist";
 import GalleryItem from "@/components/display/GalleryItem";
 import InfoHeader from "@/components/display/InfoHeader";
-import AddProjectButton from "@/components/admin/AddProjectButton";
+import AddItemButton from "@/components/admin/AddItemButton";
 import getSinglesByArtist from "@/lib/data/getSinglesByArtist";
-import ListItem from "@/components/admin/ListItem";
+import TrackListItem from "@/components/admin/TrackListItem";
 
 export default async function AdminArtistPage({
 	params,
@@ -49,7 +49,7 @@ export default async function AdminArtistPage({
 								subTitle="Album"
 							/>
 						))}
-						<AddProjectButton artistId={artistId} type="Album" />
+						<AddItemButton artistId={artistId} type="Album" />
 					</GalleryWrapper>
 				</div>
 				<div>
@@ -64,21 +64,21 @@ export default async function AdminArtistPage({
 								subTitle="EP"
 							/>
 						))}
-						<AddProjectButton artistId={artistId} type="EP" />
+						<AddItemButton artistId={artistId} type="EP" />
 					</GalleryWrapper>
 				</div>
 
 				<div>
 					<div className="mb-8 flex items-center justify-between">
 						<h2>Singles</h2>
-						<AddProjectButton
+						<AddItemButton
 							artistId={artistId}
 							type="Single"
 							buttonLabel="Add Singles"
 						/>
 					</div>
 					{singles.map((single, index) => (
-						<ListItem key={single.id} trackData={single} number={index + 1} />
+						<TrackListItem key={single.id} trackData={single} number={index + 1} savedAlbums={allAlbums} />
 					))}
 				</div>
 			</div>

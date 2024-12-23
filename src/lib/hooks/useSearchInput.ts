@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { SearchContent } from "spotify-types";
-import searchInSpotify from "../spotify/searchInSpotify";
+import fetchSearchResults from "../spotify/fetchSearchResults";
+import { SpotifyTypeMap } from "../spotify/fetchSearchResults";
 
-export default function useSearchInput(
-	searchFor: "artist" | "album" | "track",
+export default function useSearchInput<T extends keyof SpotifyTypeMap>(
+	searchFor: T,
 	artistName?: string
 ) {
 	const [inputValue, setinputValue] = useState<string>("");
-	const [result, setResult] = useState<SearchContent | null>(null);
+	const [result, setResult] = useState<SpotifyTypeMap[T] | null>(null);
 	const [isSearcing, setSearcing] = useState<boolean>(false);
 
 	function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
@@ -24,7 +25,7 @@ export default function useSearchInput(
 			setSearcing(true);
 
 			try {
-				const data = await searchInSpotify(
+				const data = await fetchSearchResults(
 					`${artistName ? `artist:${artistName} ${searchFor}:${inputValue}` : inputValue}`,
 					searchFor
 				);
@@ -40,6 +41,7 @@ export default function useSearchInput(
 		const timer = setTimeout(fetchData, 1000);
 		return () => clearTimeout(timer);
 	}, [inputValue]);
+
 
 	return {
 		inputValue,

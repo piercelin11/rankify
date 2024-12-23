@@ -1,11 +1,16 @@
-import { SearchContent } from "spotify-types";
-import { generateSearchParams } from "../helper";
+import { Album, Artist, SearchContent, Track } from "spotify-types";
+import { generateSearchParams } from "../utils/helper";
 import getSpotifyToken from "./fetchSpotifyToken";
 
-export default async function searchInSpotify(
-	searchQuery: string,
-	type: "album" | "artist" | "track"
-): Promise<SearchContent | null> {
+export type SpotifyTypeMap = {
+	album: Album[];
+	artist: Artist[];
+	track: Track[];
+};
+
+export default async function fetchSearchResults<
+	T extends keyof SpotifyTypeMap,
+>(searchQuery: string, type: T): Promise<SpotifyTypeMap[T] | null> {
 	const accessToken = await getSpotifyToken();
 
 	try {
@@ -24,7 +29,7 @@ export default async function searchInSpotify(
 			}
 		);
 		const searchData = await searchResponse.json();
-		return searchData;
+		return (searchData[`${type}s`]?.items as SpotifyTypeMap[T]) ?? null;
 	} catch (error) {
 		console.error("Failed to search artist data.", error);
 		return null;

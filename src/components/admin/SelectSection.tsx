@@ -5,7 +5,7 @@ import Button from "@/components/ui/Button";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
 import fetchArtistsAlbum from "@/lib/spotify/fetchArtistsAlbum";
 import addArtist from "@/lib/action/admin/addArtist";
-import FormMessage from "@/components/ui/FormMessage";
+import FormMessage from "@/components/form/FormMessage";
 import addAlbum from "@/lib/action/admin/addAlbum";
 import { ActionResponse } from "@/types/action";
 import { SearchInput } from "../ui/Input";
@@ -16,31 +16,22 @@ import addSingle from "@/lib/action/admin/addSingle";
 type SelectSectionProps = {
 	artistId: string;
 	handleCancel: () => void;
-	type: "Album" | "EP" | "Single" | "Artist";
+	type: "Album" | "EP" | "Single";
+	actionType?: "addArtist";
 };
 
 export default function SelectSection({
 	artistId,
 	handleCancel,
 	type,
+	actionType,
 }: SelectSectionProps) {
 	const [albums, setAlbums] = useState<Album[] | null>(null);
 	const [artist, setArtist] = useState<Artist | null>(null);
 	const [selectedIds, setSelectedIds] = useState<string[]>([]);
-	const [message, setMessage] = useState<string | null>(null);
-	const [isError, setError] = useState<boolean>(false);
+	const [response, setResponse] = useState<ActionResponse | null>(null);
 	const [isLoading, setLoading] = useState<boolean>(false);
 	const [isPending, setPending] = useState<boolean>(false);
-
-	const timer = useRef<NodeJS.Timeout | null>(null);
-
-	const isButtonDisabled = isPending || (!!message && !isError);
-	const listItemType =
-		type === "Album" || type === "Artist"
-			? "Album"
-			: type === "Single"
-				? "Track"
-				: "Single/EP";
 
 	useEffect(() => {
 		async function fetchaDatas() {
@@ -49,10 +40,10 @@ export default function SelectSection({
 				const data = await fetchArtistsAlbum(
 					artistId,
 					50,
-					type === "Album" || type === "Artist" ? "album" : "single"
+					type === "Album" ? "album" : "single"
 				);
 				setAlbums(data);
-				if (type !== "Artist") {
+				if (actionType !== "addArtist") {
 					const artist = await fetchArtist(artistId);
 					setArtist(artist);
 				}
@@ -65,10 +56,6 @@ export default function SelectSection({
 		}
 
 		fetchaDatas();
-
-		return () => {
-			if (timer.current) clearTimeout(timer.current);
-		};
 	}, [artistId]);
 
 	function handleCheckboxClick(projectId: string) {
@@ -79,36 +66,32 @@ export default function SelectSection({
 		);
 	}
 
-	function handleResponse(response: ActionResponse) {
-		setMessage(response.message);
-		if (response.success) setError(false);
-		else setError(true);
-	}
-
 	async function handleSubmit() {
 		setPending(true);
 		try {
-			if (type === "Artist") {
+			if (actionType === "addArtist") {
 				const response = await addArtist(artistId, selectedIds);
-				handleResponse(response);
+				setResponse(response);
 			} else if (type === "Album" || type === "EP") {
 				const response = await addAlbum(
 					artistId,
 					selectedIds,
-					type === "EP" ? "EP" : "ALBUM"
+					type.toUpperCase() as "EP" | "ALBUM"
 				);
-				handleResponse(response);
-				if (response.success) timer.current = setTimeout(handleCancel, 1000);
+				setResponse(response);
+				if (response.success) handleCancel();
 			} else {
 				const response = await addSingle(artistId, selectedIds);
-				handleResponse(response);
-				if (response.success) timer.current = setTimeout(handleCancel, 1000);
+				setResponse(response);
+				if (response.success) handleCancel();
 			}
 		} catch (error) {
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT") {
-					setError(true);
-					setMessage("Something went wrong.");
+					setResponse({
+						message: "Something went wrong.",
+						success: false
+					});
 				}
 			}
 		} finally {
@@ -118,16 +101,8 @@ export default function SelectSection({
 
 	const { inputValue, handleInput, result, isSearcing } = useSearchInput(
 		type === "Single" ? "track" : "album",
-		type !== "Artist" ? artist?.name : undefined
+		actionType !== "addArtist" ? artist?.name : undefined
 	);
-
-	const searchResult =
-		type === "Single"
-			? result?.tracks?.items
-			: result?.albums?.items.filter((item) => {
-					if (type === "EP") return item.album_type === "single";
-					else return item.album_type === "album";
-				});
 
 	return (
 		<div className="mt-4 space-y-8">
@@ -146,17 +121,21 @@ export default function SelectSection({
 						</div>
 					) : (
 						<>
-							{(searchResult || (type !== "Single" && albums) || []).map(
-								(item) => (
-									<SelectableItem
-										key={item.id}
-										data={item}
-										handleClick={handleCheckboxClick}
-										checked={selectedIds.includes(item.id)}
-										type={listItemType}
-									/>
-								)
-							)}
+							{(result || (type !== "Single" && albums) || []).map((item) => (
+								<SelectableItem
+									key={item.id}
+									data={item}
+									handleClick={handleCheckboxClick}
+									checked={selectedIds.includes(item.id)}
+									type={
+										type === "Album"
+											? "Album"
+											: type === "Single"
+												? "Track"
+												: "Single/EP"
+									}
+								/>
+							))}
 						</>
 					)}
 				</div>
@@ -166,24 +145,24 @@ export default function SelectSection({
 				<Button
 					variant="transparent"
 					onClick={handleCancel}
-					disabled={isButtonDisabled}
+					disabled={isPending}
 				>
 					Cancel
 				</Button>
 				<Button
 					variant="lime"
 					onClick={handleSubmit}
-					disabled={isButtonDisabled}
+					disabled={isPending}
 				>
-					Add {type === "Artist" ? "Album" : type}
+					Add {type}
 				</Button>
 				{isPending && (
 					<div className="px-5">
 						<LoadingAnimation />
 					</div>
 				)}
-				{message && !isPending && (
-					<FormMessage message={message} isError={isError} />
+				{response && !isPending && (
+					<FormMessage message={response.message} isError={!response.success} />
 				)}
 			</div>
 		</div>

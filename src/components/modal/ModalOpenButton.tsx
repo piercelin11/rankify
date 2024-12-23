@@ -17,16 +17,14 @@ export default function ModalOpenButton({
 	children,
 	variant,
 	rounded,
-	title,
-	description,
-	className,
+	className, 
 }: ModalOpenButtonProps) {
 	const [isOpen, setOpen] = useState(false);
 
 	return (
 		<>
 			{isOpen && (
-				<ModalWrapper setOpen={setOpen} title={title} description={description}>
+				<ModalWrapper setOpen={setOpen} >
 					{children[0]}
 				</ModalWrapper>
 			)}
