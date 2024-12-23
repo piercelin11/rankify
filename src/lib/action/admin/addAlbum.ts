@@ -1,5 +1,6 @@
 "use server";
 
+import getAlbumsByArtist from "@/lib/data/getAlbumsByArtist";
 import getTracksByAlbum from "@/lib/data/getTracksByAlbum";
 import getTracksByArtist from "@/lib/data/getTracksByArtist";
 import { prisma } from "@/lib/prisma";
@@ -23,16 +24,21 @@ export default async function addAlbum(
 		: [await fetchAlbum(albumId)];
 
 	try {
+		const savedAlbumsName = (await getAlbumsByArtist(artistId)).map(
+			(album) => album.name
+		);
+
 		await prisma.album.createMany({
 			data: albumData
-				.filter((data) => data !== null)
-				.map((data) => ({
-					id: data.id,
-					name: data.name,
+				.filter((album) => album !== null)
+				.filter((album) => !savedAlbumsName.includes(album.name))
+				.map((album) => ({
+					id: album.id,
+					name: album.name,
 					artistId,
-					spotifyUrl: data.external_urls.spotify,
-					img: data.images?.[0].url,
-					releaseDate: new Date(data.release_date),
+					spotifyUrl: album.external_urls.spotify,
+					img: album.images?.[0].url,
+					releaseDate: new Date(album.release_date),
 					type,
 				})),
 		});
@@ -66,11 +72,16 @@ export default async function addAlbum(
 				data: trackData
 					.filter((track) => track !== null)
 					.filter((track) => !savedTrackNames.includes(track.name))
+					.filter(
+						(item, index, array) =>
+							index === array.findIndex((track) => track.name === item.name)
+					)
 					.map((track) => ({
 						id: track.id,
 						name: track.name,
 						albumId: track.album_id,
 						trackNumber: track.track_number,
+						discNumber: track.disc_number,
 						artistId,
 						spotifyUrl: track.external_urls.spotify,
 						img: track.img,

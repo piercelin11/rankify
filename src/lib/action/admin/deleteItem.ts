@@ -48,7 +48,7 @@ export default async function deleteItem(
 	if (isSuccess) {
 		if (type === "track")revalidatePath("/admin");
 		if (type === "album")redirect(`/admin/artist/${artistId}`);
-		if (type === "artist")revalidatePath("/admin");
+		if (type === "artist")redirect("/admin/artist");
 	}
 	return { success: true, message: `Successfully deleted ${type}.` };
 }

@@ -7,6 +7,9 @@ export default async function getAlbumsByArtist(artistId: string) {
         },
         include: {
             artist: true
+        },
+        orderBy: {
+            releaseDate: "desc"
         }
     });
 

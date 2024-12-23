@@ -8,6 +8,8 @@ import InfoHeader from "@/components/display/InfoHeader";
 import AddItemButton from "@/components/admin/AddItemButton";
 import getSinglesByArtist from "@/lib/data/getSinglesByArtist";
 import TrackListItem from "@/components/admin/TrackListItem";
+import ArtistActionIcons from "@/components/admin/ArtistActionIcons";
+import { prisma } from "@/lib/prisma";
 
 export default async function AdminArtistPage({
 	params,
@@ -37,6 +39,7 @@ export default async function AdminArtistPage({
 				rounded
 			/>
 			<div className="mb-60 space-y-10 p-14">
+				<ArtistActionIcons data={artist} />
 				<div>
 					<h2>Albums</h2>
 					<GalleryWrapper>

@@ -9,10 +9,13 @@ export default async function getTracksByAlbum(albumId: string) {
 			artist: true,
 			album: true,
 		},
+		orderBy: [
+			{
+				discNumber: { sort: "asc", nulls: "last" },
+			},
+			{ trackNumber: "asc" },
+		],
 	});
 
-	return tracks.sort((a, b) => {
-		if (a.trackNumber && b.trackNumber) return a.trackNumber - b.trackNumber;
-		else return 1;
-	});
+	return tracks;
 }

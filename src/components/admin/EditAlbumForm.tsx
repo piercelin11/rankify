@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { Description } from "../ui/Text";
 import FormItem from "../form/FormItem";
 import Button from "../ui/Button";
@@ -36,7 +36,7 @@ export default function EditAlbumForm({ data, setOpen }: EditAlbumFormProps) {
 		try {
 			const updateAlbumResponse = await updateAlbum(data.id, formData);
 			setResponse(updateAlbumResponse);
-			setOpen(false)
+			if(updateAlbumResponse.success) setOpen(false)
 		} catch (error) {
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT") {

@@ -6,6 +6,8 @@ import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
 import { redirect } from "next/navigation";
 import { ActionResponse } from "@/types/action";
+import getAlbumsByArtist from "@/lib/data/getAlbumsByArtist";
+import getTracksByArtist from "@/lib/data/getTracksByArtist";
 
 export default async function addArtist(
 	artistId: string,
@@ -38,21 +40,32 @@ export default async function addArtist(
 			},
 		});
 		try {
+			if (Array.isArray(albumId) && albumId.length === 0)
+				return {
+					success: false,
+					message: "You need to at least select an album.",
+				};
+
 			const albumData = Array.isArray(albumId)
 				? await Promise.all(albumId.map((id) => fetchAlbum(id)))
 				: [await fetchAlbum(albumId)];
 
+			const savedAlbumsName = (await getAlbumsByArtist(artistId)).map(
+				(album) => album.name
+			);
+
 			await prisma.album.createMany({
 				data: albumData
-					.filter((data) => data !== null)
-					.map((data) => ({
-						id: data.id,
-						name: data.name,
+					.filter((album) => album !== null)
+					.filter((album) => !savedAlbumsName.includes(album.name))
+					.map((album) => ({
+						id: album.id,
+						name: album.name,
 						artistId,
-						spotifyUrl: data.external_urls.spotify,
-						img: data.images?.[0].url,
-						releaseDate: new Date(data.release_date),
-						type: "ALBUM"
+						spotifyUrl: album.external_urls.spotify,
+						img: album.images?.[0].url,
+						releaseDate: new Date(album.release_date),
+						type: "ALBUM",
 					})),
 			});
 			try {
@@ -77,14 +90,24 @@ export default async function addArtist(
 								.url,
 						})) || [null];
 
+				const savedTrackNames = (await getTracksByArtist(artistId)).map(
+					(track) => track.name
+				);
+
 				await prisma.track.createMany({
 					data: trackData
-						.filter((data) => data !== null)
+						.filter((track) => track !== null)
+						.filter((track) => !savedTrackNames.includes(track.name))
+						.filter(
+							(item, index, array) =>
+								index === array.findIndex((track) => track.name === item.name)
+						)
 						.map((track) => ({
 							id: track.id,
 							name: track.name,
 							albumId: track.album_id,
 							trackNumber: track.track_number,
+							discNumber: track.disc_number,
 							artistId,
 							spotifyUrl: track.external_urls.spotify,
 							img: track.img,
@@ -94,10 +117,7 @@ export default async function addArtist(
 				isSuccess = true;
 			} catch (error) {
 				console.error("Failed to add album's track:", error);
-				return {
-					success: false,
-					message: "Failed to add album's tracks.",
-				};
+				return { success: false, message: "Failed to add album's tracks." };
 			}
 		} catch (error) {
 			console.error("Failed to add album. error:", error);

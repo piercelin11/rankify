@@ -28,3 +28,9 @@ export const updateAlbumSchema = z.object({
 });
 
 export type updateAlbumType = z.infer<typeof updateAlbumSchema>
+
+export const updateArtistSchema = z.object({
+	name: z.string().min(1, "Artist name is required."),
+});
+
+export type updateArtistType = z.infer<typeof updateArtistSchema>
