@@ -2,7 +2,7 @@
 
 import React from "react";
 import ActionIconsSection from "./ActionIcons";
-import EditAlbumForm from "./EditAlbumForm";
+import AlbumEditingForm from "./AlbumEditingForm";
 import { AlbumData } from "@/types/data";
 
 type AlbumActionIconsProps = {
@@ -12,7 +12,7 @@ type AlbumActionIconsProps = {
 export default function AlbumActionIcons({ data }: AlbumActionIconsProps) {
 	return (
 		<ActionIconsSection data={data} type="album">
-			{(setOpen) => <EditAlbumForm setOpen={setOpen} data={data} />}
+			{(setOpen) => <AlbumEditingForm setOpen={setOpen} data={data} />}
 		</ActionIconsSection>
 	);
 }

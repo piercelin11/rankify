@@ -3,27 +3,27 @@
 import React, { useState } from "react";
 import ModalWrapper from "../modal/ModalWrapper";
 import Button, { AddButton } from "../ui/Button";
-import SelectSection from "./SelectSection";
+import SelectItemForm from "./SelectItemForm";
 import { PlusIcon } from "@radix-ui/react-icons";
 
-type AddItemButtonProps = {
+type AddNewButtonProps = {
 	artistId: string;
 	type: "Album" | "EP" | "Single";
 	buttonLabel?: string;
 };
 
-export default function AddItemButton({
+export default function AddNewButton({
 	artistId,
 	type,
 	buttonLabel,
-}: AddItemButtonProps) {
+}: AddNewButtonProps) {
 	const [isOpen, setOpen] = useState(false);
 
 	return (
 		<>
 			{isOpen && (
 				<ModalWrapper setOpen={setOpen}>
-					<SelectSection
+					<SelectItemForm
 						artistId={artistId}
 						handleCancel={() => setOpen(false)}
 						type={type}

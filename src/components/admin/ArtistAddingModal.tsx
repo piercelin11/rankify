@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import SearchSection from "./SearchSection";
-import SelectSection from "./SelectSection";
+import ArtistSearchingSection from "./ArtistSearchingSection";
+import SelectItemForm from "./SelectItemForm";
 
-export default function AddArtistModal() {
+export default function ArtistAddingModal() {
 	const [currentView, setCurrentView] = useState<"search" | "album">("search");
 	const [selecteArtistId, setSelecteArtistId] = useState<string | null>(null);
 
@@ -16,14 +16,14 @@ export default function AddArtistModal() {
 	return (
 		<>
 			{currentView === "album" && selecteArtistId ? (
-				<SelectSection
+				<SelectItemForm
 					artistId={selecteArtistId}
 					handleCancel={() => setCurrentView("search")}
 					type="Album"
 					actionType="addArtist"
 				/>
 			) : (
-				<SearchSection handleClick={handleClick} />
+				<ArtistSearchingSection handleClick={handleClick} />
 			)}
 		</>
 	);

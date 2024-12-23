@@ -13,12 +13,12 @@ import { ActionResponse } from "@/types/action";
 import LoadingAnimation from "../ui/LoadingAnimation";
 import { useFormStatus } from "react-dom";
 
-type EditAlbumFormProps = {
+type AlbumEditingFormProps = {
 	data: AlbumData;
 	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function EditAlbumForm({ data, setOpen }: EditAlbumFormProps) {
+export default function AlbumEditingForm({ data, setOpen }: AlbumEditingFormProps) {
 	const [colorMode, setcolorMode] = useState<"radio" | "text">("radio");
 	const [response, setResponse] = useState<ActionResponse | null>(null);
 

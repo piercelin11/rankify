@@ -12,12 +12,12 @@ import LoadingAnimation from "../ui/LoadingAnimation";
 import { useFormStatus } from "react-dom";
 import updateArtist from "@/lib/action/admin/updateArtist";
 
-type EditArtistFormProps = {
+type ArtistEditingFormProps = {
     data: ArtistData;
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function EditArtistForm({ data, setOpen }: EditArtistFormProps) {
+export default function ArtistEditingForm({ data, setOpen }: ArtistEditingFormProps) {
     const [response, setResponse] = useState<ActionResponse | null>(null);
 
     const { pending } = useFormStatus();

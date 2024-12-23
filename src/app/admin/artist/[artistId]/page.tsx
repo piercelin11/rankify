@@ -5,11 +5,10 @@ import GalleryWrapper from "@/components/display/GalleryWrapper";
 import getAlbumsByArtist from "@/lib/data/getAlbumsByArtist";
 import GalleryItem from "@/components/display/GalleryItem";
 import InfoHeader from "@/components/display/InfoHeader";
-import AddItemButton from "@/components/admin/AddItemButton";
+import AddNewButton from "@/components/admin/AddNewButton";
 import getSinglesByArtist from "@/lib/data/getSinglesByArtist";
 import TrackListItem from "@/components/admin/TrackListItem";
 import ArtistActionIcons from "@/components/admin/ArtistActionIcons";
-import { prisma } from "@/lib/prisma";
 
 export default async function AdminArtistPage({
 	params,
@@ -52,7 +51,7 @@ export default async function AdminArtistPage({
 								subTitle="Album"
 							/>
 						))}
-						<AddItemButton artistId={artistId} type="Album" />
+						<AddNewButton artistId={artistId} type="Album" />
 					</GalleryWrapper>
 				</div>
 				<div>
@@ -67,14 +66,14 @@ export default async function AdminArtistPage({
 								subTitle="EP"
 							/>
 						))}
-						<AddItemButton artistId={artistId} type="EP" />
+						<AddNewButton artistId={artistId} type="EP" />
 					</GalleryWrapper>
 				</div>
 
 				<div>
 					<div className="mb-8 flex items-center justify-between">
 						<h2>Singles</h2>
-						<AddItemButton
+						<AddNewButton
 							artistId={artistId}
 							type="Single"
 							buttonLabel="Add Singles"

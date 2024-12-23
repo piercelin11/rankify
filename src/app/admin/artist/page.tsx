@@ -1,4 +1,4 @@
-import AddArtistaModal from "@/components/admin/AddArtistModal";
+import ArtistAddingModal from "@/components/admin/ArtistAddingModal";
 import ModalOpenButton from "@/components/modal/ModalOpenButton";
 import { PlusIcon } from "@radix-ui/react-icons";
 import { prisma } from "@/lib/prisma";
@@ -12,7 +12,7 @@ export default async function AdminArtistsPage() {
 		<div className="p-8">
 			<div className="mb-8">
 			<ModalOpenButton variant="gray">
-				<AddArtistaModal />
+				<ArtistAddingModal />
 				<div className="flex items-center justify-center gap-2 pr-2">
 					<PlusIcon />
 					Add Artist

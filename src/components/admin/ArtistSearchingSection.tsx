@@ -6,11 +6,11 @@ import ArtistSearchResultItem from "./ArtistSearchResultItem";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
 import useSearchInput from "@/lib/hooks/useSearchInput";
 
-type SearchSectionProps = {
+type ArtistSearchingSectionProps = {
 	handleClick: (artistId: string) => void;
 };
 
-export default function SearchSection({ handleClick }: SearchSectionProps) {
+export default function ArtistSearchingSection({ handleClick }: ArtistSearchingSectionProps) {
 
 	const { inputValue, handleInput, result, isSearcing } = useSearchInput("artist");
 

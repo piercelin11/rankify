@@ -13,19 +13,19 @@ import useSearchInput from "@/lib/hooks/useSearchInput";
 import fetchArtist from "@/lib/spotify/fetchArtist";
 import addSingle from "@/lib/action/admin/addSingle";
 
-type SelectSectionProps = {
+type SelectItemFormProps = {
 	artistId: string;
 	handleCancel: () => void;
 	type: "Album" | "EP" | "Single";
 	actionType?: "addArtist";
 };
 
-export default function SelectSection({
+export default function SelectItemForm({
 	artistId,
 	handleCancel,
 	type,
 	actionType,
-}: SelectSectionProps) {
+}: SelectItemFormProps) {
 	const [albums, setAlbums] = useState<Album[] | null>(null);
 	const [artist, setArtist] = useState<Artist | null>(null);
 	const [selectedIds, setSelectedIds] = useState<string[]>([]);
