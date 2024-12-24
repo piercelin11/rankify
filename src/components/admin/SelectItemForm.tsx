@@ -143,7 +143,7 @@ export default function SelectItemForm({
 
 			<div className="flex items-center gap-4">
 				<Button
-					variant="transparent"
+					variant="outline"
 					onClick={handleCancel}
 					disabled={isPending}
 				>

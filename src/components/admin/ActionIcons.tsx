@@ -62,7 +62,7 @@ export default function ActionIcons({
 
 						<div className="flex gap-4">
 							<Button
-								variant="transparent"
+								variant="outline"
 								onClick={() => setComfirmationOpen(false)}
 							>
 								Cancel

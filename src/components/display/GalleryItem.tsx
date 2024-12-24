@@ -15,8 +15,8 @@ export default function GalleryItem({
 	subTitle,
 }: GalleryItemProps) {
 	return (
-		<Link href={href}>
-			<div className="p-3 hover:bg-zinc-900">
+		<div className="p-3 hover:bg-zinc-900">
+			<Link href={href}>
 				<img
 					className={cn("mb-4 rounded", {
 						rounded: subTitle !== "Artist",
@@ -25,9 +25,9 @@ export default function GalleryItem({
 					src={img ?? undefined}
 					alt={title}
 				/>
-				<p>{title}</p>
+				<p className="line-clamp-2">{title}</p>
 				<p className="text-sm text-zinc-400">{subTitle}</p>
-			</div>
-		</Link>
+			</Link>
+		</div>
 	);
 }

@@ -71,7 +71,7 @@ export default function AlbumEditingForm({ data, setOpen }: AlbumEditingFormProp
 				</div>
 				<div className="flex items-center gap-6">
 					<Button
-						variant="transparent"
+						variant="outline"
 						onClick={() => setOpen(false)}
 						disabled={pending}
 					>

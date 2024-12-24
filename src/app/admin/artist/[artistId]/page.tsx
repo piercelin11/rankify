@@ -51,7 +51,7 @@ export default async function AdminArtistPage({
 								subTitle="Album"
 							/>
 						))}
-						<AddNewButton artistId={artistId} type="Album" />
+						<AddNewButton kind="default" artistId={artistId} type="Album" />
 					</GalleryWrapper>
 				</div>
 				<div>
@@ -66,7 +66,7 @@ export default async function AdminArtistPage({
 								subTitle="EP"
 							/>
 						))}
-						<AddNewButton artistId={artistId} type="EP" />
+						<AddNewButton kind="default" artistId={artistId} type="EP" />
 					</GalleryWrapper>
 				</div>
 
@@ -74,13 +74,19 @@ export default async function AdminArtistPage({
 					<div className="mb-8 flex items-center justify-between">
 						<h2>Singles</h2>
 						<AddNewButton
+							kind="default"
 							artistId={artistId}
 							type="Single"
 							buttonLabel="Add Singles"
 						/>
 					</div>
 					{singles.map((single, index) => (
-						<TrackListItem key={single.id} trackData={single} number={index + 1} savedAlbums={allAlbums} />
+						<TrackListItem
+							key={single.id}
+							trackData={single}
+							number={index + 1}
+							savedAlbums={allAlbums}
+						/>
 					))}
 				</div>
 			</div>

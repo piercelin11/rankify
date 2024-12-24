@@ -1,44 +1,51 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import ModalWrapper from "../modal/ModalWrapper";
 import Button, { AddButton } from "../ui/Button";
 import SelectItemForm from "./SelectItemForm";
 import { PlusIcon } from "@radix-ui/react-icons";
 
-type AddNewButtonProps = {
+type AddNewButtonProps =
+| {
+	kind: "default";
 	artistId: string;
 	type: "Album" | "EP" | "Single";
 	buttonLabel?: string;
+}
+| {
+	kind: "custom";
+	buttonLabel: string;
+	children: ReactNode;
 };
 
-export default function AddNewButton({
-	artistId,
-	type,
-	buttonLabel,
-}: AddNewButtonProps) {
+export default function AddNewButton(props: AddNewButtonProps) {
 	const [isOpen, setOpen] = useState(false);
 
 	return (
 		<>
 			{isOpen && (
 				<ModalWrapper setOpen={setOpen}>
-					<SelectItemForm
-						artistId={artistId}
-						handleCancel={() => setOpen(false)}
-						type={type}
-					/>
+					{props.kind === "custom" ? (
+						props.children
+					) : (
+						<SelectItemForm
+							artistId={props.artistId}
+							handleCancel={() => setOpen(false)}
+							type={props.type}
+						/>
+					)}
 				</ModalWrapper>
 			)}
 
-			{buttonLabel ? (
+			{props.buttonLabel ? (
 				<Button
 					variant="gray"
-					className="pl-4 pr-5"
+					className="pl-4 pr-6"
 					onClick={() => setOpen(true)}
 				>
 					<PlusIcon />
-					{buttonLabel}
+					{props.buttonLabel}
 				</Button>
 			) : (
 				<AddButton variant="gray" onClick={() => setOpen(true)} />

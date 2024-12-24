@@ -60,7 +60,7 @@ export default function ArtistEditingForm({ data, setOpen }: ArtistEditingFormPr
                 />
                 <div className="flex items-center gap-6">
                     <Button
-                        variant="transparent"
+                        variant="outline"
                         onClick={() => setOpen(false)}
                         disabled={pending}
                     >
