@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchArtist from "@/lib/spotify/fetchArtist";
 import { ActionResponse } from "@/types/action";
@@ -19,7 +19,7 @@ export default async function updateInfo(
 			if (!album)
 				return { success: false, message: "Faild to fetch album data." };
 
-			await prisma.album.update({
+			await db.album.update({
 				where: {
 					id,
 				},
@@ -33,7 +33,7 @@ export default async function updateInfo(
 			if (!artist)
 				return { success: false, message: "Faild to fetch artist data." };
 
-			await prisma.artist.update({
+			await db.artist.update({
 				where: {
 					id,
 				},

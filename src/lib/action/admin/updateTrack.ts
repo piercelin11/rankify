@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/prisma";
 import fetchTracks from "@/lib/spotify/fetchTracks";
 import { ActionResponse } from "@/types/action";
 import { AlbumData, TrackData } from "@/types/data";
@@ -16,7 +16,7 @@ export default async function updateTrack(
 	let newAlbum: AlbumData | null;
 
 	if (formData.album) {
-		newAlbum = await prisma.album.findFirst({
+		newAlbum = await db.album.findFirst({
 			where: {
 				artistId: originalData.artistId,
 				name: formData.album,
@@ -30,7 +30,7 @@ export default async function updateTrack(
 
 	try {
 		if (newAlbum) {
-			await prisma.track.update({
+			await db.track.update({
 				where: {
 					id: originalData.id,
 				},
@@ -41,7 +41,7 @@ export default async function updateTrack(
 				},
 			});
 		} else {
-			await prisma.track.update({
+			await db.track.update({
 				where: {
 					id: originalData.id,
 				},

@@ -3,7 +3,7 @@
 import getAlbumsByArtist from "@/lib/data/getAlbumsByArtist";
 import getTracksByAlbum from "@/lib/data/getTracksByAlbum";
 import getTracksByArtist from "@/lib/data/getTracksByArtist";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
 import { ActionResponse } from "@/types/action";
@@ -28,7 +28,7 @@ export default async function addAlbum(
 			(album) => album.name
 		);
 
-		await prisma.album.createMany({
+		await db.album.createMany({
 			data: albumData
 				.filter((album) => album !== null)
 				.filter((album) => !savedAlbumsName.includes(album.name))
@@ -68,7 +68,7 @@ export default async function addAlbum(
 				(track) => track.name
 			);
 
-			await prisma.track.createMany({
+			await db.track.createMany({
 				data: trackData
 					.filter((track) => track !== null)
 					.filter((track) => !savedTrackNames.includes(track.name))

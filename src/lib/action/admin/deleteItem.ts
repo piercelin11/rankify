@@ -1,7 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
-import fetchTracks from "@/lib/spotify/fetchTracks";
+import { db } from "@/lib/prisma";
 import { ActionResponse } from "@/types/action";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -16,14 +15,14 @@ export default async function deleteItem(
 	try {
 		switch (type) {
 			case "artist":
-				await prisma.artist.delete({
+				await db.artist.delete({
 					where: {
 						id,
 					},
 				});
 				break;
 			case "album":
-				const deletedAlbum = await prisma.album.delete({
+				const deletedAlbum = await db.album.delete({
 					where: {
 						id,
 					},
@@ -31,7 +30,7 @@ export default async function deleteItem(
 				artistId = deletedAlbum.artistId;
 				break;
 			case "track":
-				await prisma.track.delete({
+				await db.track.delete({
 					where: {
 						id,
 					},

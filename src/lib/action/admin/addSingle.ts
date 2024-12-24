@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/prisma";
 import fetchTracks from "@/lib/spotify/fetchTracks";
 import { ActionResponse } from "@/types/action";
 import { revalidatePath } from "next/cache";
@@ -23,7 +23,7 @@ export default async function addSingles(
 		console.log(tracksData);
 
 		if (tracksData)
-			await prisma.track.createMany({
+			await db.track.createMany({
 				data: tracksData.map((track) => ({
 					id: track.id,
 					name: track.name,

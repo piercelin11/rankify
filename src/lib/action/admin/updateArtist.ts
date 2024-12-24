@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/prisma";
 import { ActionResponse } from "@/types/action";
 import { updateArtistType } from "@/types/schemas/admin";
 import { revalidatePath } from "next/cache";
@@ -11,7 +11,7 @@ export default async function updateArtist(
 ): Promise<ActionResponse> {
 	let isSuccess = false;
 
-    const artist = await prisma.artist.findFirst({
+    const artist = await db.artist.findFirst({
         where: {
             id: artistId
         }
@@ -19,7 +19,7 @@ export default async function updateArtist(
 
     if (!artist) return { success: false, message: "Failed to update artist with this id" };
 	try {
-		await prisma.artist.update({
+		await db.artist.update({
 			where: {
 				id: artistId,
 			},

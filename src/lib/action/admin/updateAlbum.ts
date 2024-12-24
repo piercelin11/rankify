@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/prisma";
 import fetchTracks from "@/lib/spotify/fetchTracks";
 import { ActionResponse } from "@/types/action";
 import { AlbumData, TrackData } from "@/types/data";
@@ -13,7 +13,7 @@ export default async function updateAlbum(
 ): Promise<ActionResponse> {
 	let isSuccess = false;
 
-    const album = await prisma.album.findFirst({
+    const album = await db.album.findFirst({
         where: {
             id: albumId
         }
@@ -22,7 +22,7 @@ export default async function updateAlbum(
     if (!album) return { success: false, message: "Failed to update album with this id" };
 
 	try {
-		await prisma.album.update({
+		await db.album.update({
 			where: {
 				id: albumId,
 			},

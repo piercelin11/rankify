@@ -1,9 +1,8 @@
 import { cn } from "@/lib/cn";
 import Link from "next/link";
-import React, { ReactNode } from "react";
-import SpotifyIcon from "../../../public/icon/SpotifyIcon";
+import React from "react";
+import { SpotifyIcon } from "../../../public/icon/LogoIcons";
 import { AlbumData, ArtistData } from "@/types/data";
-import { Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 
 type InfoHeaderProps = {
 	data: AlbumData | ArtistData;
@@ -16,7 +15,7 @@ export default function InfoHeader({
 	data,
 	subTitle,
 	rounded = false,
-	type
+	type,
 }: InfoHeaderProps) {
 	return (
 		<div className="bg-zinc-900/50 p-14">

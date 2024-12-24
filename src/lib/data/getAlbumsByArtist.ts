@@ -1,7 +1,7 @@
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/prisma";
 
 export default async function getAlbumsByArtist(artistId: string) {
-    const albums = await prisma.album.findMany({
+    const albums = await db.album.findMany({
         where: {
             artistId,
         },

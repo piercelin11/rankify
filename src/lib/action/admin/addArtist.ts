@@ -1,7 +1,7 @@
 "use server";
 
 import getArtist from "@/lib/spotify/fetchArtist";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
 import { redirect } from "next/navigation";
@@ -20,7 +20,7 @@ export default async function addArtist(
 	if (!artistData)
 		throw new Error("Can't find any artist matching the given artist id.");
 
-	const artistExists = await prisma.artist.findFirst({
+	const artistExists = await db.artist.findFirst({
 		where: {
 			id: artistId,
 		},
@@ -30,7 +30,7 @@ export default async function addArtist(
 		return { success: false, message: "This artist already exists." };
 
 	try {
-		await prisma.artist.create({
+		await db.artist.create({
 			data: {
 				id: artistData.id,
 				name: artistData.name,
@@ -54,7 +54,7 @@ export default async function addArtist(
 				(album) => album.name
 			);
 
-			await prisma.album.createMany({
+			await db.album.createMany({
 				data: albumData
 					.filter((album) => album !== null)
 					.filter((album) => !savedAlbumsName.includes(album.name))
@@ -94,7 +94,7 @@ export default async function addArtist(
 					(track) => track.name
 				);
 
-				await prisma.track.createMany({
+				await db.track.createMany({
 					data: trackData
 						.filter((track) => track !== null)
 						.filter((track) => !savedTrackNames.includes(track.name))
