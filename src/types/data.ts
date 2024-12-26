@@ -28,21 +28,33 @@ export type TrackData = {
     img: string | null;
     artistId: string;
     releaseDate: Date | null
-	artist?: {
-        id: string;
-        name: string;
-        spotifyUrl: string;
-        img: string | null;
-        spotifyFollowers: number;
-    };
-    album?: {
-        id: string;
-        name: string;
-        spotifyUrl: string;
-        img: string | null;
-        artistId: string;
-        releaseDate: Date;
-        color: string | null;
-        type: $Enums.AlbumType;
-    } | null
+	artist?: ArtistData;
+    album?: AlbumData | null
+}
+
+export type RankingData = {
+    ranking: number;
+    id: string;
+    dateId: string;
+    trackId: string;
+    albumId: string | null;
+    artistId: string;
+    userId: string;
+    rankChange: number | null;
+    artist?: ArtistData;
+    album?: AlbumData | null;
+    user?: UserData;
+}
+
+export type UserData = {
+    id: string;
+    name: string | null;
+    username: string | null;
+    email: string | null;
+    password: string | null;
+    emailVerified: Date | null;
+    image: string | null;
+    role: $Enums.Role;
+    createdAt: Date;
+    updatedAt: Date;
 }

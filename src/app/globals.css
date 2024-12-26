@@ -19,6 +19,11 @@ h2 {
 	line-height: 1.7em;
 }
 
+h3 {
+	@apply text-xl font-medium;
+	line-height: 1.7em;
+}
+
 hr {
 	@apply border-zinc-800
 }

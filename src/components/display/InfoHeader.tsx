@@ -18,9 +18,9 @@ export default function InfoHeader({
 	type,
 }: InfoHeaderProps) {
 	return (
-		<div className="bg-zinc-900/50 p-14">
+		<div className="bg-zinc-900 p-14 lg:p-8">
 			<div
-				className={cn("flex items-center pt-24", {
+				className={cn("flex items-center pt-24 lg:pt-12", {
 					"gap-8": !rounded,
 					"gap-6": rounded,
 				})}

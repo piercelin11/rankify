@@ -1,7 +1,7 @@
 "use client";
 
 import React, { ReactNode, useState } from "react";
-import ModalWrapper from "../modal/ModalWrapper";
+import ModalWrapper from "../general/ModalWrapper";
 import Button, { AddButton } from "../ui/Button";
 import SelectItemForm from "./SelectItemForm";
 import { PlusIcon } from "@radix-ui/react-icons";

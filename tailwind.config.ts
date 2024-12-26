@@ -8,8 +8,9 @@ export default {
 	],
 	theme: {
 		fontFamily: {
-			sans: "var(--font-geist-sans)",
+			sans: "var(--font-geist)",
 			serif: "var(--font-geist-mono)",
+			numeric: "var(--font-lato)",
 		},
 		extend: {
 			colors: {
@@ -25,6 +26,10 @@ export default {
 					800: "#B3A13D",
 					900: "#998629",
 					950: "#7F7320",
+				},
+				zinc: {
+					850: "#1A1A1E",
+					900: "#121216",
 				},
 				spotify: "#1ed760",
 			},

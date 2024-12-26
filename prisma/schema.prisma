@@ -7,6 +7,120 @@ datasource db {
   url      = env("POSTGRES_DATABASE_URL")
 }
 
+model User {
+  id            String           @id @default(cuid())
+  name          String?
+  username      String?          @unique
+  email         String?          @unique
+  password      String?
+  emailVerified DateTime?
+  image         String?
+  role          Role             @default(USER)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  accounts      Account[]
+  rankings      Ranking[]
+  dates         RankingSession[]
+  loggedArtists Artist[]         @relation("ArtistToUser")
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Artist {
+  id               String           @id
+  name             String
+  spotifyUrl       String           @unique
+  img              String?
+  spotifyFollowers Int
+  userId           String?
+  albums           Album[]
+  Ranking          Ranking[]
+  dates            RankingSession[]
+  tracks           Track[]
+  rankedBy         User[]           @relation("ArtistToUser")
+}
+
+model Album {
+  id          String    @id
+  name        String
+  artistId    String
+  spotifyUrl  String    @unique
+  color       String?
+  img         String?
+  releaseDate DateTime
+  type        AlbumType
+  artist      Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  rankings    Ranking[]
+  tracks      Track[]
+
+  @@unique([name, artistId])
+}
+
+model Track {
+  id          String    @id
+  name        String
+  albumId     String?
+  trackNumber Int?
+  spotifyUrl  String    @unique
+  img         String?
+  artistId    String
+  releaseDate DateTime?
+  discNumber  Int?
+  rankings    Ranking[]
+  album       Album?    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  artist      Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@unique([albumId, name])
+  @@unique([artistId, name])
+}
+
+model Ranking {
+  id         String         @id @default(uuid())
+  ranking    Int
+  dateId     String
+  trackId    String
+  albumId    String?
+  artistId   String
+  userId     String
+  rankChange Int?
+  album      Album?         @relation(fields: [albumId], references: [id], onDelete: Restrict)
+  Artist     Artist         @relation(fields: [artistId], references: [id])
+  date       RankingSession @relation(fields: [dateId], references: [id], onUpdate: Restrict)
+  track      Track          @relation(fields: [trackId], references: [id])
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RankingSession {
+  id       String       @id @default(uuid())
+  date     DateTime     @default(now())
+  userId   String
+  artistId String?
+  type     RankingType?
+  rankings Ranking[]
+  artist   Artist?      @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+}
+
 enum Role {
   USER
   ADMIN
@@ -20,129 +134,4 @@ enum AlbumType {
 enum RankingType {
   ALBUM
   ARTIST
-}
-
-model User {
-  id            String           @id @default(cuid())
-  name          String?
-  username      String?          @unique
-  email         String?          @unique
-  password      String?
-  emailVerified DateTime?
-  image         String?
-  role          Role             @default(USER)
-  dates         RankingSession[]
-  rankings      Ranking[]
-  accounts      Account[]
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  loggedArtist  UsersOnArtists[]
-}
-
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-model Artist {
-  id               String           @id
-  name             String
-  spotifyUrl       String           @unique
-  img              String?
-  spotifyFollowers Int
-  albums           Album[]
-  tracks           Track[]
-  rankings         Ranking[]
-  dates            RankingSession[]
-  userId           String?
-  rankedBy         UsersOnArtists[]
-}
-
-model UsersOnArtists {
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  artist    Artist   @relation(fields: [artistId], references: [id])
-  artistId  String
-  createdAt DateTime @default(now())
-
-  @@id([userId, artistId])
-}
-
-model Album {
-  id          String    @id
-  name        String
-  artistId    String
-  spotifyUrl  String    @unique
-  color       String?
-  img         String?
-  releaseDate DateTime
-  type        AlbumType
-  tracks      Track[]
-  artist      Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  rankings    Ranking[]
-
-  @@unique([name, artistId])
-}
-
-model Track {
-  id          String    @id
-  name        String
-  albumId     String?
-  trackNumber Int?
-  discNumber  Int?
-  spotifyUrl  String    @unique
-  rankings    Ranking[]
-  img         String?
-  album       Album?    @relation(fields: [albumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  artist      Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  artistId    String
-  releaseDate DateTime?
-
-  @@unique([albumId, name])
-  @@unique([artistId, name])
-}
-
-model Ranking {
-  id       String         @id @default(uuid())
-  ranking  Int
-  dateId   String
-  trackId  String
-  albumId  String?
-  artistid String
-  userId   String
-  date     RankingSession @relation(fields: [dateId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  track    Track          @relation(fields: [trackId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  album    Album?         @relation(fields: [albumId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  artist   Artist         @relation(fields: [artistid], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-}
-
-model RankingSession {
-  id       String       @id @default(uuid())
-  date     DateTime     @default(now())
-  userId   String
-  artistId String?
-  type     RankingType?
-  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  artist   Artist?      @relation(fields: [artistId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  rankings Ranking[]
-
-  @@index([date])
 }

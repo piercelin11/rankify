@@ -3,7 +3,7 @@
 import React, { ReactNode, useState } from "react";
 import { Pencil1Icon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
 import deleteItem from "@/lib/action/admin/deleteItem";
-import ModalWrapper from "../modal/ModalWrapper";
+import ModalWrapper from "../general/ModalWrapper";
 import { AlbumData, ArtistData } from "@/types/data";
 import EditAlbumForm from "./AlbumEditingForm";
 import updateInfo from "@/lib/action/admin/updateInfo";

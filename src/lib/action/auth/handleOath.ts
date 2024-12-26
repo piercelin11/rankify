@@ -8,7 +8,6 @@ export default async function handleOath(provider: "google") {
 
     try {
         await signIn(provider, {redirectTo: DEFAULT_LOGIN_REDIRECT})
-
         return {success: "successfully sign in."}
     } catch (error) {
         if (error instanceof AuthError) {

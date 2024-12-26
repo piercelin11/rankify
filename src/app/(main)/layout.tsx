@@ -1,3 +1,4 @@
+import SignOutButton from "@/components/auth/SignOutButton";
 import LogoDisplay from "@/components/sidebar/LogoDisplay";
 import SidebarLayout from "@/components/sidebar/SidebarLayout";
 import Button from "@/components/ui/Button";
@@ -23,6 +24,7 @@ export default function MainLayout({ children }: AdminLayoutProps) {
 						</Link>
 					))}
 				</div>
+				<SignOutButton />
 			</div>
 
 			<div>{children}</div>
