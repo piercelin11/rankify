@@ -58,3 +58,13 @@ export type UserData = {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export type RankingSessionData = {
+    artistId: string | null;
+    userId: string;
+    id: string;
+    date: Date;
+    type: $Enums.RankingType | null;
+    artist?: ArtistData;
+    user?: UserData;
+}

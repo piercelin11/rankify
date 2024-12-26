@@ -101,11 +101,13 @@ model Ranking {
   artistId   String
   userId     String
   rankChange Int?
-  album      Album?         @relation(fields: [albumId], references: [id], onDelete: Restrict)
-  Artist     Artist         @relation(fields: [artistId], references: [id])
-  date       RankingSession @relation(fields: [dateId], references: [id], onUpdate: Restrict)
-  track      Track          @relation(fields: [trackId], references: [id])
-  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  album      Album?         @relation(fields: [albumId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  artist     Artist         @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  date       RankingSession @relation(fields: [dateId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  track      Track          @relation(fields: [trackId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  user       User           @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@unique([id, trackId])
 }
 
 model RankingSession {
@@ -115,8 +117,8 @@ model RankingSession {
   artistId String?
   type     RankingType?
   rankings Ranking[]
-  artist   Artist?      @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artist   Artist?      @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  user     User         @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@index([date])
 }

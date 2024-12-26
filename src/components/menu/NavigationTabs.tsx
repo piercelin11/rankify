@@ -17,19 +17,20 @@ export default function NavigationTabs({ menuData }: NavigationTabsProps) {
 	const pathName = usePathname();
 
 	return (
-		<div className="flex rounded-lg border border-zinc-800">
+		<div className="flex rounded-lg border border-zinc-800 select-none">
 			{menuData.map((menuitem) => (
-				<div
-					key={menuitem.link}
-					className={cn(
-						"justify-self-center rounded-lg px-4 py-3 text-zinc-600",
-						{
-							"bg-lime-500 text-zinc-950": pathName === menuitem.link,
-						}
-					)}
-				>
-					<Link href={menuitem.link}>{menuitem.label}</Link>
-				</div>
+				<Link key={menuitem.link} href={menuitem.link} className={pathName === menuitem.link ? "pointer-events-none" : ""}>
+					<div
+						className={cn(
+							"justify-self-center rounded-lg px-4 py-3 text-zinc-600",
+							{
+								"bg-lime-500 text-zinc-950": pathName === menuitem.link,
+							}
+						)}
+					>
+						{menuitem.label}
+					</div>
+				</Link>
 			))}
 		</div>
 	);

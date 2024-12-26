@@ -31,7 +31,7 @@ type getTrackRankingsProps = {
 	time?: getPastDateProps;
 };
 
-export default async function getTrackRankings({
+export default async function getTrackStats({
 	artistId,
 	userId,
 	take,

@@ -7,27 +7,28 @@ import { menuItemProps } from "./NavigationTabs";
 
 type DropDownMenuProps = {
 	menuData: menuItemProps[];
-	placeholder?: string;
+	defaultValue?: string;
 };
 
-export default function DropDownMenu({
+export default function DropdownMenu({
 	menuData,
-	placeholder,
+	defaultValue,
 }: DropDownMenuProps) {
 	const [isOpen, setOPen] = useState(false);
+	const [selected, setSelected] = useState<string | null>(null);
 
 	return (
 		<div className="relative select-none">
 			<div
-				className="flex justify-between rounded-md bg-zinc-900 px-4 py-3 hover:outline hover:outline-1 hover:outline-zinc-700"
+				className="flex justify-between rounded-md bg-zinc-900 px-4 py-3 text-zinc-400 hover:text-zinc-300 hover:outline hover:outline-1 hover:outline-zinc-700"
 				onClick={() => setOPen((prev) => !prev)}
 			>
 				<div
-					className={cn("min-w-52 text-zinc-600", {
+					className={cn("min-w-52", {
 						"text-zinc-100": isOpen,
 					})}
 				>
-					{placeholder || "Select..."}
+					{selected ? selected : defaultValue || "Select..."}
 				</div>
 				<ChevronDownIcon
 					className={cn("self-center text-zinc-400 transition ease-in-out", {
@@ -39,7 +40,7 @@ export default function DropDownMenu({
 			</div>
 			<div
 				className={cn(
-					"absolute w-full rounded-md bg-zinc-900 opacity-0 transition ease-in-out",
+					"absolute max-h-64 w-full overflow-auto rounded-md bg-zinc-900 opacity-0 transition ease-in-out",
 					{
 						"translate-y-3 opacity-100": isOpen,
 						"pointer-events-none": !isOpen,
@@ -47,8 +48,16 @@ export default function DropDownMenu({
 				)}
 			>
 				{menuData.map((menuItem) => (
-					<Link key={menuItem.link} href={menuItem.link} onClick={() => setOPen(false)} replace>
-						<div className="hover:bg-zinc-850 rounded-md px-4 py-3 text-zinc-500 hover:text-zinc-100">
+					<Link
+						key={menuItem.link}
+						href={menuItem.link}
+						onClick={() => {
+							setOPen(false);
+							setSelected(menuItem.label);
+						}}
+						replace
+					>
+						<div className="rounded-md px-4 py-3 text-zinc-500 hover:bg-zinc-850 hover:text-zinc-100">
 							{menuItem.label}
 						</div>
 					</Link>

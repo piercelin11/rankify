@@ -1,48 +1,58 @@
 import React from "react";
 import { auth } from "@/../auth";
-import getTrackStats from "@/lib/data/ranking/overall/getTrackStats";
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import RankingListItem from "@/components/ranking/RankingListItem";
 import { getAlbumStats } from "@/lib/data/ranking/overall/getAlbumStats";
 import DoubleBarChart from "@/components/chart/DoubleBarChart";
 import NavigationTabs from "@/components/menu/NavigationTabs";
-import DropdownMenu from "@/components/menu/DropdownMenu";
 import NoData from "@/components/general/NoData";
 import { dropdownMenuData, getNavMenuData } from "@/config/menuData";
+import DropdownMenu from "@/components/menu/DropdownMenu";
+import getRankingSession from "@/lib/data/user/getRankingSession";
+import { dateToDashFormat } from "@/lib/utils/helper";
+import { getTrackRankingHistory } from "@/lib/data/ranking/history/getTrackRankingHistory";
+import { getAlbumRankingHistory } from "@/lib/data/ranking/history/getAlbumRankingHistory";
 
-export default async function ArtistOverViewPage({
+export default async function ArtistHistoryPage({
 	params,
 	searchParams,
 }: {
 	params: Promise<{ artistId: string }>;
-	searchParams: Promise<{ [key: string]: string }>;
+	searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
 	const artistId = (await params).artistId;
-	const query = await searchParams;
 
 	const session = await auth();
 	if (!session) return null;
 
 	const userId = session.user.id;
 
+  const rankingSessions = await getRankingSession({ artistId, userId });
+  const dateId = (await searchParams).date || rankingSessions[0].id
+
 	const navMenuData = getNavMenuData(artistId);
-	const trackRankings = await getTrackStats({
+	const trackRankings = await getTrackRankingHistory({
 		artistId,
 		userId,
-		take: 5,
-		time: query,
+    dateId,
+    take: 5
 	});
-	const albumRankings = await getAlbumStats({
+	const albumRankings = await getAlbumRankingHistory({
 		artistId,
 		userId,
-		time: query,
+    dateId
 	});
+
+  const dateMenuData = rankingSessions.map(rankingSession => ({
+    label: dateToDashFormat(rankingSession.date),
+    link: `?${new URLSearchParams({date: rankingSession.id})}`
+  }))
 
 	return (
 		<>
 			<div className="flex justify-between">
-				<DropdownMenu defaultValue="lifetime" menuData={dropdownMenuData} />
+				<DropdownMenu menuData={dateMenuData} defaultValue={dateToDashFormat(rankingSessions[0].date)} />
 				<NavigationTabs menuData={navMenuData} />
 			</div>
 			<div className="space-y-6">
@@ -62,7 +72,7 @@ export default async function ArtistOverViewPage({
 						<div className="flex w-full justify-center">
 							<Link
 								className="flex gap-2 text-zinc-500 hover:text-zinc-100"
-								href={`/artist/${artistId}/overview/ranking?${new URLSearchParams(query)}`}
+								href={`/artist/${artistId}/history/${dateId}`}
 							>
 								View All Rankings
 								<ArrowTopRightIcon className="self-center" />
@@ -81,13 +91,14 @@ export default async function ArtistOverViewPage({
 							data={{
 								labels: albumRankings.map((album) => album.name),
 								mainData: albumRankings.map((album) => album.totalPoints),
-								subData: albumRankings.map((album) => album.rawTotalPoints),
+								subData: albumRankings.map((album) => album.previousTotalPoints),
 								color: albumRankings.map((album) => album.color),
 							}}
-							datasetLabels={{
+              datasetLabels={{
 								mainDataLabel: "points",
-								subDataLabel: "raw points",
+								subDataLabel: "previous points",
 							}}
+
 						/>
 					) : (
 						<NoData />

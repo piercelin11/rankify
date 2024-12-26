@@ -1,4 +1,4 @@
-import getTrackRankings from "./getTrackRankings";
+import getTrackStats from "./getTrackStats";
 import { ArtistData, TrackData } from "@/types/data";
 import getLoggedAlbum from "../../user/getLoggedAlbum";
 import { getPastDateProps } from "@/lib/utils/helper";
@@ -24,12 +24,12 @@ type getAlbumRankingsProps = {
 	time?: getPastDateProps;
 };
 
-export async function getAlbumRankings({
+export async function getAlbumStats({
 	artistId,
 	userId,
 	time,
 }: getAlbumRankingsProps): Promise<OverallAlbumRankingsType[]> {
-	const trackRankings = await getTrackRankings({artistId, userId, time});
+	const trackRankings = await getTrackStats({artistId, userId, time});
 	const countSongs = trackRankings.length;
 	const albums = await getLoggedAlbum({artistId, userId, time});
 
@@ -77,7 +77,7 @@ export async function getAlbumRankings({
 	return albumRankings.sort((a, b) => b.totalPoints - a.totalPoints);
 }
 
-function calculateAlbumPoints(
+export function calculateAlbumPoints(
 	ranking: number,
 	countSongs: number,
 	countAlbumsSongs: number
