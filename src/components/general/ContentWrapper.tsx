@@ -9,5 +9,5 @@ export default function ContentWrapper({
 	children,
 	className,
 }: ContentWrapperProps) {
-	return <div className={cn("p-14 lg:p-8", className)}>{children}</div>;
+	return <div className={cn("p-8 2xl:p-14", className)}>{children}</div>;
 }

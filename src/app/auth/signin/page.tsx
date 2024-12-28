@@ -1,7 +1,7 @@
 import Button from '@/components/ui/Button'
 import { Description } from '@/components/ui/Text'
 import React from 'react'
-import { GoogleIcon, SpotifyIcon } from '../../../../public/icon/LogoIcons'
+import { GoogleIcon, SpotifyIcon } from '../../../components/icon/LogoIcons'
 import Link from 'next/link'
 import SocialButton from '@/components/auth/SocialButton'
 

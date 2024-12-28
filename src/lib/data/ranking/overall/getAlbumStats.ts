@@ -1,15 +1,10 @@
 import getTrackStats from "./getTrackStats";
-import { ArtistData, TrackData } from "@/types/data";
-import getLoggedAlbum from "../../user/getLoggedAlbum";
+import { AlbumData, ArtistData, TrackData } from "@/types/data";
+import getLoggedAlbum from "../../user/getLoggedAlbums";
 import { getPastDateProps } from "@/lib/utils/helper";
 
-export type OverallAlbumRankingsType = {
-	id: number;
-	name: string;
-	color: string | null;
-	artist: ArtistData;
-	track: TrackData;
-	top100Count: number;
+export type AlbumStatsType = AlbumData & {
+	top3Count: number;
 	top10Count: number;
 	top1Count: number;
 	top25PercentCount: number;
@@ -18,7 +13,7 @@ export type OverallAlbumRankingsType = {
 	rawTotalPoints: number;
 };
 
-type getAlbumRankingsProps = {
+type getAlbumStatsProps = {
 	artistId: string;
 	userId: string;
 	time?: getPastDateProps;
@@ -28,7 +23,7 @@ export async function getAlbumStats({
 	artistId,
 	userId,
 	time,
-}: getAlbumRankingsProps): Promise<OverallAlbumRankingsType[]> {
+}: getAlbumStatsProps): Promise<AlbumStatsType[]> {
 	const trackRankings = await getTrackStats({artistId, userId, time});
 	const countSongs = trackRankings.length;
 	const albums = await getLoggedAlbum({artistId, userId, time});
@@ -50,7 +45,7 @@ export async function getAlbumStats({
 			const rawScore = Math.floor(score! / (countSongs / albums.length));
 
 			if (existingAlbum) {
-				existingAlbum.top100Count += cur.top100Count;
+				existingAlbum.top3Count += cur.top3Count;
 				existingAlbum.top10Count += cur.top10Count;
 				existingAlbum.top1Count += cur.top1Count;
 				existingAlbum.rawTotalPoints += rawScore;
@@ -63,7 +58,7 @@ export async function getAlbumStats({
 					...albumData,
 					top25PercentCount: cur.ranking <= countSongs / 4 ? 1 : 0,
 					top50PercentCount: cur.ranking <= countSongs / 2 ? 1 : 0,
-					top100Count: cur.top100Count,
+					top3Count: cur.top3Count,
 					top10Count: cur.top10Count,
 					top1Count: cur.top1Count,
 					totalPoints: adjustedScore,

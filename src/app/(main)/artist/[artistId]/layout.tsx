@@ -1,4 +1,4 @@
-import InfoHeader from "@/components/display/InfoHeader";
+import InfoHeader from "@/components/display/showcase/InfoHeader";
 import ContentWrapper from "@/components/general/ContentWrapper";
 import getArtistById from "@/lib/data/getArtistById";
 import { notFound } from "next/navigation";

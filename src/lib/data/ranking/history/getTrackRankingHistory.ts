@@ -1,20 +1,15 @@
 import { db } from "@/lib/prisma";
 import getTrackMetrics from "../overall/getTrackMetrics";
-import { AlbumData, ArtistData, RankingSessionData } from "@/types/data";
+import { RankingSessionData, TrackData } from "@/types/data";
+import getRankingSession from "../../user/getRankingSession";
 
-export type TrackHistoryType = {
-	id: string;
-	name: string;
-	artistId: string;
-	artist: ArtistData;
-	albumId: string | null;
-	album: AlbumData | null;
+export type TrackHistoryType = TrackData & {
 	dateId: string;
 	date: RankingSessionData;
 	ranking: number;
-    img: string | null;
 	peak: number;
 	rankChange: number | null;
+	isLatest: boolean
 };
 
 type GetTrackRankingHistoryProps = {
@@ -31,6 +26,7 @@ export async function getTrackRankingHistory({
 	take
 }: GetTrackRankingHistoryProps): Promise<TrackHistoryType[]> {
 	const trackMetrics = await getTrackMetrics({ artistId, userId });
+	const latestSession = (await getRankingSession({artistId, userId}))[0];
     const rankings = await db.ranking.findMany({
         where: {
             artistId,
@@ -55,7 +51,8 @@ export async function getTrackRankingHistory({
 		return {
 			...ranking,
             ...ranking.track,
-            peak: findPeak!.peak
+            peak: findPeak!.peak,
+			isLatest: latestSession.id === ranking.dateId
 		};
 	});
 

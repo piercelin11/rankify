@@ -1,23 +1,19 @@
-import { ArtistData } from "@/types/data";
+import { AlbumData, ArtistData, TrackData } from "@/types/data";
 import {
 	getTrackRankingHistory,
 	TrackHistoryType,
 } from "./getTrackRankingHistory";
 import getPrevRankingSession from "../../user/getPrevRankingSession";
-import getLoggedAlbum from "../../user/getLoggedAlbum";
+import getLoggedAlbum from "../../user/getLoggedAlbums";
 import { db } from "@/lib/prisma";
 import { calculateAlbumPoints } from "../overall/getAlbumStats";
 
-export type AlbumHistoryType = {
-	id: number;
-	name: string;
-	color: string | null;
-	artist: ArtistData;
-	artistId: string;
+export type AlbumHistoryType = AlbumData & {
 	top25PercentCount: number;
 	top50PercentCount: number;
 	totalPoints: number;
-	previousTotalPoints: number | null;
+	previousTotalPoints: number;
+	pointsChange: number | null;
 	rawTotalPoints: number;
 	releaseDate: Date | null;
 };
@@ -35,7 +31,6 @@ export async function getAlbumRankingHistory({
 }: GetAlbumRankingHistoryProps): Promise<AlbumHistoryType[]> {
 	let prevTrackRankings: null | TrackHistoryType[];
 	let countPrevSongs: null | number;
-	let countDays: null | number;
 
 	const trackRankings = await getTrackRankingHistory({
 		artistId,
@@ -87,22 +82,24 @@ export async function getAlbumRankingHistory({
 	// 結果
 	const result = trackRankings
 		.filter((item) => item.albumId !== null)
-		.reduce((acc: any[], cur) => {
+		.reduce((acc: Omit<AlbumHistoryType, "pointsChange">[], cur) => {
 			const existingAlbum = acc.find((item) => item.id === cur.albumId);
-			const albumData = albums.find((item) => item.id === cur.albumId);
-            const prevAlbumData = prevAlbums.find((item) => item.id === cur.albumId);
-        
+			const albumData = albums.find(
+				(item) => item.id === cur.albumId
+			) as AlbumData & { artist: ArtistData; tracks: TrackData[] };
+			const prevAlbumData = prevAlbums.find((item) => item.id === cur.albumId);
+
 			// 計算當前百分比排名
 			const { score, adjustedScore } = calculateAlbumPoints(
 				cur.ranking,
 				countSongs,
-				albumData!.tracks.length
+				albumData.tracks.length
 			);
-			const rawScore = Math.floor(
-				score! / (countSongs / albums.length)
-			);
+			const rawScore = Math.floor(score! / (countSongs / albums.length));
 
-            const prevRanking = prevSession?.rankings?.find(ranking => ranking.trackId === cur.id)?.ranking;
+			const prevRanking = prevSession?.rankings?.find(
+				(ranking) => ranking.trackId === cur.id
+			)?.ranking;
 
 			// 計算之前百分比排名
 			const { adjustedScore: prevAdjustedScore } = calculateAlbumPoints(
@@ -115,8 +112,10 @@ export async function getAlbumRankingHistory({
 				if (cur.ranking <= countSongs / 4) existingAlbum.top25PercentCount++;
 				if (cur.ranking <= countSongs / 2) existingAlbum.top50PercentCount++;
 
-				existingAlbum.previousTotalPoints += prevRanking ? prevAdjustedScore : 0;
-				existingAlbum.rawtotalPoints += rawScore;
+				existingAlbum.previousTotalPoints += prevRanking
+					? prevAdjustedScore
+					: 0;
+				existingAlbum.rawTotalPoints += rawScore;
 				existingAlbum.totalPoints += adjustedScore;
 			} else {
 				acc.push({
@@ -125,12 +124,16 @@ export async function getAlbumRankingHistory({
 					top50PercentCount: cur.ranking <= countSongs / 2 ? 1 : 0,
 					totalPoints: adjustedScore,
 					previousTotalPoints: prevRanking ? prevAdjustedScore : 0,
-					rawtotalPoints: rawScore,
+					rawTotalPoints: rawScore,
 				});
 			}
-
 			return acc;
 		}, []);
 
-	return result.sort((a, b) => b.totalPoints - a.totalPoints);
+	return result
+		.sort((a, b) => b.totalPoints - a.totalPoints)
+		.map((item) => ({
+			...item,
+			pointsChange: item.previousTotalPoints ? item.totalPoints - item.previousTotalPoints : null,
+		}));
 }

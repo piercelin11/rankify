@@ -3,28 +3,21 @@ import { AlbumData, ArtistData, RankingData, TrackData } from "@/types/data";
 import getTrackMetrics from "./getTrackMetrics";
 import { getPastDate, getPastDateProps } from "@/lib/utils/helper";
 
-export type OverallTrackRankingsType = {
-	id: string;
-	name: string;
-	artist: ArtistData;
-	artistId: string;
-	releaseDate: Date | null;
+export type TrackStatsType = TrackData & {
 	ranking: number;
 	averageRanking: number;
 	peak: number;
 	worst: number;
-	albumId: string | null;
-	album: AlbumData | null;
-	color?: string | null;
-	trackNumber: number | null;
-	top100Count: number;
+	gap: number;
 	top10Count: number;
+	top3Count: number;
 	top1Count: number;
 	totalChartRun: number | null;
 	rankings: (RankingData & { date: Date })[];
-} & Omit<TrackData, "artist" | "album">;
+	loggedCount: number;
+};
 
-type getTrackRankingsProps = {
+type getTrackStatsProps = {
 	artistId: string;
 	userId: string;
 	take?: number;
@@ -36,7 +29,7 @@ export default async function getTrackStats({
 	userId,
 	take,
 	time,
-}: getTrackRankingsProps): Promise<OverallTrackRankingsType[]> {
+}: getTrackStatsProps): Promise<TrackStatsType[]> {
 	const trackMetrics = await getTrackMetrics({ artistId, userId, take, time });
 	const tookTrackIds = take ? trackMetrics.map((track) => track.id) : undefined;
 	const dateThreshold = time && getPastDate(time);
@@ -101,8 +94,9 @@ export default async function getTrackStats({
 				.averageRanking,
 			peak: trackMetric.peak,
 			worst: trackMetric.worst,
-			top100Count: filterRankings(100).length,
+			gap: Math.abs(trackMetric.worst - trackMetric.peak),
 			top10Count: filterRankings(10).length,
+			top3Count: filterRankings(3).length,
 			top1Count: filterRankings(1).length,
 			totalChartRun: track.rankings.reduce((acc: null | number, cur) => {
 				if (!cur.rankChange) return null;
@@ -110,6 +104,7 @@ export default async function getTrackStats({
 				return acc + Math.abs(cur.rankChange);
 			}, null),
 			rankings: track.rankings,
+			loggedCount: track.rankings.length,
 		};
 	});
 

@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn";
 import Link from "next/link";
 import React from "react";
-import { SpotifyIcon } from "../../../public/icon/LogoIcons";
+import { SpotifyIcon } from "../../icon/LogoIcons";
 import { AlbumData, ArtistData } from "@/types/data";
 
 type InfoHeaderProps = {
@@ -18,9 +18,9 @@ export default function InfoHeader({
 	type,
 }: InfoHeaderProps) {
 	return (
-		<div className="bg-zinc-900 p-14 lg:p-8">
+		<div className="bg-zinc-900 p-8 2xl:p-14">
 			<div
-				className={cn("flex items-center pt-24 lg:pt-12", {
+				className={cn("flex items-center pt-12 2xl:pt-24", {
 					"gap-8": !rounded,
 					"gap-6": rounded,
 				})}

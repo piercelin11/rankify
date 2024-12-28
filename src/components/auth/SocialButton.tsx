@@ -2,7 +2,7 @@
 
 import React from "react";
 import Button from "../ui/Button";
-import { GoogleIcon, SpotifyIcon } from "../../../public/icon/LogoIcons";
+import { GoogleIcon, SpotifyIcon } from "../icon/LogoIcons";
 import handleOath from "@/lib/action/auth/handleOath";
 
 export default function SocialButton() {

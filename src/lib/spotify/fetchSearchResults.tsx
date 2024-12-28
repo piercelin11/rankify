@@ -1,7 +1,7 @@
 import { Album, Artist, SearchContent, Track } from "spotify-types";
 import { generateSearchParams } from "../utils/helper";
 import getSpotifyToken from "./fetchSpotifyToken";
-
+ 
 export type SpotifyTypeMap = {
 	album: Album[];
 	artist: Artist[];

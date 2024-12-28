@@ -38,7 +38,7 @@ const options = {
 			},
 			ticks: {
 				color: "#505050",
-				backdropColor: "#151515",
+				backdropColor: "#15151500",
 			},
 		},
 	},

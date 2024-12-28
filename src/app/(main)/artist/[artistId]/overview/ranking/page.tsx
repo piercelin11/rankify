@@ -1,13 +1,10 @@
 import React from "react";
 import { auth } from "@/../auth";
-import InfoHeader from "@/components/display/InfoHeader";
 import getTrackStats from "@/lib/data/ranking/overall/getTrackStats";
-import getArtistById from "@/lib/data/getArtistById";
-import { notFound } from "next/navigation";
-import ContentWrapper from "@/components/general/ContentWrapper";
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
-import Link from "next/link";
-import RankingListItem from "@/components/ranking/RankingListItem";
+import RankingListItem from "@/components/display/ranking/RankingListItem";
+import RankingNavButton from "@/components/display/ranking/RankingNavButton";
+import RankingListHeader from "@/components/display/ranking/RankingListHeader";
+import TrackRankingChart from "@/components/display/ranking/TrackRankingChart";
 
 export default async function ArtistRankingPage({
 	params,
@@ -32,20 +29,12 @@ export default async function ArtistRankingPage({
 
 	return (
 		<>
-			<div>
-				{tracksRankings.map((track) => (
-					<RankingListItem data={track} key={track.id} />
-				))}
-			</div>
-			<div className="flex w-full justify-center">
-				<Link
-					className="item-center flex gap-2 text-zinc-500 hover:text-zinc-100"
-					href={`/artist/${artistId}/overview`}
-				>
-					<ArrowLeftIcon className="self-center" />
-					Back
-				</Link>
-			</div>
+			<TrackRankingChart datas={tracksRankings} />
+			<RankingNavButton
+				type="backward"
+				label="Back"
+				link={`/artist/${artistId}/overview?${new URLSearchParams(query)}`}
+			/>
 		</>
 	);
 }

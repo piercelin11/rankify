@@ -1,15 +1,15 @@
 import React from "react";
 import { auth } from "@/../auth";
 import getTrackStats from "@/lib/data/ranking/overall/getTrackStats";
-import { ArrowTopRightIcon } from "@radix-ui/react-icons";
-import Link from "next/link";
-import RankingListItem from "@/components/ranking/RankingListItem";
+import RankingListItem from "@/components/display/ranking/RankingListItem";
 import { getAlbumStats } from "@/lib/data/ranking/overall/getAlbumStats";
 import DoubleBarChart from "@/components/chart/DoubleBarChart";
 import NavigationTabs from "@/components/menu/NavigationTabs";
 import DropdownMenu from "@/components/menu/DropdownMenu";
 import NoData from "@/components/general/NoData";
 import { dropdownMenuData, getNavMenuData } from "@/config/menuData";
+import RankingNavButton from "@/components/display/ranking/RankingNavButton";
+import TopRankingList from "@/components/display/ranking/TopRankingList";
 
 export default async function ArtistOverViewPage({
 	params,
@@ -45,34 +45,10 @@ export default async function ArtistOverViewPage({
 				<DropdownMenu defaultValue="lifetime" menuData={dropdownMenuData} />
 				<NavigationTabs menuData={navMenuData} />
 			</div>
-			<div className="space-y-6">
-				<h3>Track Rankings</h3>
-
-				{trackRankings.length !== 0 ? (
-					<>
-						<div>
-							{trackRankings.map((track) => (
-								<RankingListItem
-									data={track}
-									key={track.id}
-									length={trackRankings.length}
-								/>
-							))}
-						</div>
-						<div className="flex w-full justify-center">
-							<Link
-								className="flex gap-2 text-zinc-500 hover:text-zinc-100"
-								href={`/artist/${artistId}/overview/ranking?${new URLSearchParams(query)}`}
-							>
-								View All Rankings
-								<ArrowTopRightIcon className="self-center" />
-							</Link>
-						</div>
-					</>
-				) : (
-					<NoData />
-				)}
-			</div>
+			<TopRankingList
+				datas={trackRankings}
+				link={`/artist/${artistId}/overview/ranking?${new URLSearchParams(query)}`}
+			/>
 			<div className="space-y-6">
 				<h3>Album Points</h3>
 				<div className="p-5">
