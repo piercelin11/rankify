@@ -5,7 +5,7 @@ import {
 	RankUpIcon,
 } from "@/components/icon/StatsIcons";
 import { cn } from "@/lib/cn";
-import { TrackHistoryType } from "@/lib/data/ranking/history/getTrackRankingHistory";
+import { TrackHistoryType } from "@/lib/data/ranking/history/getTracksRankingHistory";
 import { TriangleDownIcon, TriangleUpIcon } from "@radix-ui/react-icons";
 import React from "react";
 
@@ -27,9 +27,9 @@ export default function RankChangeIconDisplay({ data }: RankChangeIconProps) {
 	return (
 		<div
 			className={cn("flex min-w-10 items-center gap-1 font-numeric text-sm", {
-				"text-red-800/80": result === "down",
-				"text-green-900": result === "up",
-				"text-blue-900/60": result === "debut",
+				"text-red-700": result === "down",
+				"text-green-700": result === "up",
+				"text-blue-900": result === "debut",
 				"text-yellow-700": result === "stable"
 			})}
 		>

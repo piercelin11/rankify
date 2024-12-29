@@ -1,7 +1,7 @@
 import React from "react";
 import RankingListItem from "./RankingListItem";
-import { TrackStatsType } from "@/lib/data/ranking/overall/getTrackStats";
-import { TrackHistoryType } from "@/lib/data/ranking/history/getTrackRankingHistory";
+import { TrackStatsType } from "@/lib/data/ranking/overview/getTracksStats";
+import { TrackHistoryType } from "@/lib/data/ranking/history/getTracksRankingHistory";
 import RankingNavButton from "./RankingNavButton";
 import NoData from "@/components/general/NoData";
 

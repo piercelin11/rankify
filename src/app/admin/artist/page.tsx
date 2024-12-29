@@ -1,9 +1,7 @@
 import ArtistAddingModal from "@/components/admin/ArtistAddingModal";
-import ModalOpenButton from "@/components/modal/ModalOpenButton";
-import { PlusIcon } from "@radix-ui/react-icons";
 import { db } from "@/lib/prisma";
-import GalleryWrapper from "@/components/display/GalleryWrapper";
-import GalleryItem from "@/components/display/GalleryItem";
+import GalleryWrapper from "@/components/display/showcase/GalleryWrapper";
+import GalleryItem from "@/components/display/showcase/GalleryItem";
 import AddNewButton from "@/components/admin/AddNewButton";
 
 export default async function AdminArtistsPage() {

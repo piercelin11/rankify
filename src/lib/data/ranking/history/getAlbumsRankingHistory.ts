@@ -1,12 +1,12 @@
 import { AlbumData, ArtistData, TrackData } from "@/types/data";
 import {
-	getTrackRankingHistory,
+	getTracksRankingHistory,
 	TrackHistoryType,
-} from "./getTrackRankingHistory";
+} from "./getTracksRankingHistory";
 import getPrevRankingSession from "../../user/getPrevRankingSession";
 import getLoggedAlbum from "../../user/getLoggedAlbums";
 import { db } from "@/lib/prisma";
-import { calculateAlbumPoints } from "../overall/getAlbumStats";
+import { calculateAlbumPoints } from "../overview/getAlbumsStats";
 
 export type AlbumHistoryType = AlbumData & {
 	top25PercentCount: number;
@@ -18,21 +18,21 @@ export type AlbumHistoryType = AlbumData & {
 	releaseDate: Date | null;
 };
 
-type GetAlbumRankingHistoryProps = {
+type getAlbumsRankingHistoryProps = {
 	artistId: string;
 	userId: string;
 	dateId: string;
 };
 
-export async function getAlbumRankingHistory({
+export async function getAlbumsRankingHistory({
 	artistId,
 	dateId,
 	userId,
-}: GetAlbumRankingHistoryProps): Promise<AlbumHistoryType[]> {
+}: getAlbumsRankingHistoryProps): Promise<AlbumHistoryType[]> {
 	let prevTrackRankings: null | TrackHistoryType[];
 	let countPrevSongs: null | number;
 
-	const trackRankings = await getTrackRankingHistory({
+	const trackRankings = await getTracksRankingHistory({
 		artistId,
 		dateId,
 		userId,
@@ -40,7 +40,7 @@ export async function getAlbumRankingHistory({
 	const countSongs = trackRankings.length;
 	const prevSession = await getPrevRankingSession({ artistId, dateId, userId });
 	if (prevSession)
-		prevTrackRankings = await getTrackRankingHistory({
+		prevTrackRankings = await getTracksRankingHistory({
 			artistId,
 			dateId: prevSession.id,
 			userId,

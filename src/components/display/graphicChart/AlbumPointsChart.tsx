@@ -1,7 +1,7 @@
 import DoubleBarChart from "@/components/chart/DoubleBarChart";
 import NoData from "@/components/general/NoData";
-import { AlbumHistoryType } from "@/lib/data/ranking/history/getAlbumRankingHistory";
-import { AlbumStatsType } from "@/lib/data/ranking/overall/getAlbumStats";
+import { AlbumHistoryType } from "@/lib/data/ranking/history/getAlbumsRankingHistory";
+import { AlbumStatsType } from "@/lib/data/ranking/overview/getAlbumsStats";
 import React, { ReactNode } from "react";
 
 type OverviewAlbumPointsProps = {

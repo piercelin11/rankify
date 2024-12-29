@@ -1,19 +1,19 @@
 import { db } from "@/lib/prisma";
 import { getPastDateProps, getPastDate } from "@/lib/utils/helper";
 
-type getTrackMetricsProps = {
+type getTracksMetricsProps = {
 	artistId: string;
 	userId: string;
 	take?: number;
 	time?: getPastDateProps;
 };
 
-export default async function getTrackMetrics({
+export default async function getTracksMetrics({
 	artistId,
 	userId,
 	take,
 	time,
-}: getTrackMetricsProps) {
+}: getTracksMetricsProps) {
 	const dateThreshold = time && getPastDate(time);
 	const rankingData = await db.ranking.groupBy({
 		by: ["trackId"],

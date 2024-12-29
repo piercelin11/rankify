@@ -29,7 +29,7 @@ ChartJS.register(
 type Data = {
 	date: string[];
 	dataset: {
-		song_name: string | undefined;
+		trackName: string | undefined;
 		color: string | null | undefined;
 		rankings: (number | null)[];
 	}[];
@@ -95,7 +95,7 @@ export function LineChart({ data: { date, dataset } }: { data: Data }) {
 	const data = {
 		labels: date,
 		datasets: dataset.map((item) => ({
-			label: item.song_name,
+			label: item.trackName,
 			data: item.rankings,
 			borderWidth: 1.5,
 			borderColor: item.color

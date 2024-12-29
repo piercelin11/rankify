@@ -1,6 +1,6 @@
 import { db } from "@/lib/prisma";
-import { AlbumData, ArtistData, RankingData, TrackData } from "@/types/data";
-import getTrackMetrics from "./getTrackMetrics";
+import { RankingData, TrackData } from "@/types/data";
+import getTracksMetrics from "./getTracksMetrics";
 import { getPastDate, getPastDateProps } from "@/lib/utils/helper";
 
 export type TrackStatsType = TrackData & {
@@ -9,6 +9,9 @@ export type TrackStatsType = TrackData & {
 	peak: number;
 	worst: number;
 	gap: number;
+	top50PercentCount: number;
+	top25PercentCount: number;
+	top5PercentCount: number;
 	top10Count: number;
 	top3Count: number;
 	top1Count: number;
@@ -17,20 +20,20 @@ export type TrackStatsType = TrackData & {
 	loggedCount: number;
 };
 
-type getTrackStatsProps = {
+type getTracksStatsProps = {
 	artistId: string;
 	userId: string;
 	take?: number;
 	time?: getPastDateProps;
 };
 
-export default async function getTrackStats({
+export default async function getTracksStats({
 	artistId,
 	userId,
 	take,
 	time,
-}: getTrackStatsProps): Promise<TrackStatsType[]> {
-	const trackMetrics = await getTrackMetrics({ artistId, userId, take, time });
+}: getTracksStatsProps): Promise<TrackStatsType[]> {
+	const trackMetrics = await getTracksMetrics({ artistId, userId, take, time });
 	const tookTrackIds = take ? trackMetrics.map((track) => track.id) : undefined;
 	const dateThreshold = time && getPastDate(time);
 
@@ -42,9 +45,9 @@ export default async function getTrackStats({
 					userId,
 					date: {
 						date: {
-							gte: dateThreshold
-						}
-					}
+							gte: dateThreshold,
+						},
+					},
 				},
 			},
 			id: { in: tookTrackIds },
@@ -57,17 +60,23 @@ export default async function getTrackStats({
 					userId,
 					date: {
 						date: {
-							gte: dateThreshold
-						}
-					}
+							gte: dateThreshold,
+						},
+					},
 				},
 				include: {
 					date: {
 						select: {
 							date: true,
+							rankings: true,
 						},
 					},
 				},
+				orderBy: {
+					date: {
+						date: "asc"
+					}
+				}
 			},
 		},
 	});
@@ -77,14 +86,27 @@ export default async function getTrackStats({
 		rankings: track.rankings.map((ranking) => ({
 			...ranking,
 			date: ranking.date.date,
+			percentage: ranking.ranking / ranking.date.rankings.length
 		})),
 	}));
 
 	const result = modifiedTracks.map((track) => {
 		const trackMetric = trackMetrics.find((data) => data.id === track.id)!;
 
+		let totalChartRun: number | null = null;
+		for (const ranking of track.rankings) {
+			if (ranking.rankChange) {
+				if (!totalChartRun) totalChartRun = Math.abs(ranking.rankChange);
+				else totalChartRun = totalChartRun + Math.abs(ranking.rankChange);
+			}
+		}
+
 		function filterRankings(max: number) {
 			return track.rankings.filter((data) => data.ranking <= max);
+		}
+
+		function filterPercentage(max: number) {
+			return track.rankings.filter((data) => data.percentage <= max);
 		}
 
 		return {
@@ -98,11 +120,10 @@ export default async function getTrackStats({
 			top10Count: filterRankings(10).length,
 			top3Count: filterRankings(3).length,
 			top1Count: filterRankings(1).length,
-			totalChartRun: track.rankings.reduce((acc: null | number, cur) => {
-				if (!cur.rankChange) return null;
-				if (!acc) return Math.abs(cur.rankChange);
-				return acc + Math.abs(cur.rankChange);
-			}, null),
+			top50PercentCount: filterPercentage(0.5).length,
+			top25PercentCount: filterPercentage(0.25).length,
+			top5PercentCount: filterPercentage(0.05).length,
+			totalChartRun: totalChartRun,
 			rankings: track.rankings,
 			loggedCount: track.rankings.length,
 		};

@@ -14,6 +14,7 @@ export default async function getRankingSession({artistId, userId}: getAlbumRank
         },
         include: {
             artist: true,
+            rankings: true,
         },
         orderBy: {
             date: "desc"

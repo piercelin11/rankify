@@ -1,8 +1,8 @@
 import React from "react";
 import { auth } from "@/../auth";
-import getTrackStats from "@/lib/data/ranking/overall/getTrackStats";
+import getTracksStats from "@/lib/data/ranking/overview/getTracksStats";
 import RankingListItem from "@/components/display/ranking/RankingListItem";
-import { getAlbumStats } from "@/lib/data/ranking/overall/getAlbumStats";
+import { getAlbumsStats } from "@/lib/data/ranking/overview/getAlbumsStats";
 import DoubleBarChart from "@/components/chart/DoubleBarChart";
 import NavigationTabs from "@/components/menu/NavigationTabs";
 import DropdownMenu from "@/components/menu/DropdownMenu";
@@ -10,6 +10,7 @@ import NoData from "@/components/general/NoData";
 import { dropdownMenuData, getNavMenuData } from "@/config/menuData";
 import RankingNavButton from "@/components/display/ranking/RankingNavButton";
 import TopRankingList from "@/components/display/ranking/TopRankingList";
+import { db } from "@/lib/prisma";
 
 export default async function ArtistOverViewPage({
 	params,
@@ -27,20 +28,20 @@ export default async function ArtistOverViewPage({
 	const userId = session.user.id;
 
 	const navMenuData = getNavMenuData(artistId);
-	const trackRankings = await getTrackStats({
+	const trackRankings = await getTracksStats({
 		artistId,
 		userId,
 		take: 5,
 		time: query,
 	});
-	const albumRankings = await getAlbumStats({
+	const albumRankings = await getAlbumsStats({
 		artistId,
 		userId,
 		time: query,
 	});
 
 	return (
-		<>
+		<div className="space-y-16">
 			<div className="flex justify-between">
 				<DropdownMenu defaultValue="lifetime" menuData={dropdownMenuData} />
 				<NavigationTabs menuData={navMenuData} />
@@ -70,6 +71,6 @@ export default async function ArtistOverViewPage({
 					)}
 				</div>
 			</div>
-		</>
+		</div>
 	);
 }

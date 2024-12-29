@@ -1,4 +1,4 @@
-import getTrackStats from "./getTrackStats";
+import getTracksStats from "./getTracksStats";
 import { AlbumData, ArtistData, TrackData } from "@/types/data";
 import getLoggedAlbum from "../../user/getLoggedAlbums";
 import { getPastDateProps } from "@/lib/utils/helper";
@@ -13,18 +13,18 @@ export type AlbumStatsType = AlbumData & {
 	rawTotalPoints: number;
 };
 
-type getAlbumStatsProps = {
+type getAlbumsStatsProps = {
 	artistId: string;
 	userId: string;
 	time?: getPastDateProps;
 };
 
-export async function getAlbumStats({
+export async function getAlbumsStats({
 	artistId,
 	userId,
 	time,
-}: getAlbumStatsProps): Promise<AlbumStatsType[]> {
-	const trackRankings = await getTrackStats({artistId, userId, time});
+}: getAlbumsStatsProps): Promise<AlbumStatsType[]> {
+	const trackRankings = await getTracksStats({artistId, userId, time});
 	const countSongs = trackRankings.length;
 	const albums = await getLoggedAlbum({artistId, userId, time});
 

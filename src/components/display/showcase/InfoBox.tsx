@@ -1,6 +1,6 @@
-import { AlbumHistoryType } from "@/lib/data/ranking/history/getAlbumRankingHistory";
-import { TrackHistoryType } from "@/lib/data/ranking/history/getTrackRankingHistory";
-import { TrackStatsType } from "@/lib/data/ranking/overall/getTrackStats";
+import { AlbumHistoryType } from "@/lib/data/ranking/history/getAlbumsRankingHistory";
+import { TrackHistoryType } from "@/lib/data/ranking/history/getTracksRankingHistory";
+import { TrackStatsType } from "@/lib/data/ranking/overview/getTracksStats";
 import {
 	ArrowDownRoundIcon,
 	ArrowUpRoundIcon,
@@ -78,7 +78,7 @@ function InfoBox({
 		<>
 			{info ? (
 				<div
-					className="flex items-end rounded-xl bg-[length:100%] bg-center bg-no-repeat p-4 transition-all duration-500 ease-in-out hover:bg-[length:110%]"
+					className="flex items-end rounded-xl bg-[length:100%] bg-center bg-no-repeat p-4 transition-all duration-500 ease-in-out hover:bg-[length:110%] 2xl:p-8"
 					style={{
 						backgroundImage: `linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8)), url("${info.img || "/pic/placeholder.jpg"}")`,
 					}}

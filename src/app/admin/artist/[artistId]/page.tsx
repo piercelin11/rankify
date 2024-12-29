@@ -1,10 +1,10 @@
 import getArtistById from "@/lib/data/getArtistById";
 import { notFound } from "next/navigation";
 import React from "react";
-import GalleryWrapper from "@/components/display/GalleryWrapper";
+import GalleryWrapper from "@/components/display/showcase/GalleryWrapper";
 import getAlbumsByArtist from "@/lib/data/getAlbumsByArtist";
-import GalleryItem from "@/components/display/GalleryItem";
-import InfoHeader from "@/components/display/InfoHeader";
+import GalleryItem from "@/components/display/showcase/GalleryItem";
+import InfoHeader from "@/components/display/showcase/InfoHeader";
 import AddNewButton from "@/components/admin/AddNewButton";
 import getSinglesByArtist from "@/lib/data/getSinglesByArtist";
 import TrackListItem from "@/components/admin/TrackListItem";

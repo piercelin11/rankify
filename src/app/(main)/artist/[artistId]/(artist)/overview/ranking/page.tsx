@@ -1,26 +1,28 @@
 import React from "react";
 import { auth } from "@/../auth";
-import { getTrackRankingHistory } from "@/lib/data/ranking/history/getTrackRankingHistory";
+import getTracksStats from "@/lib/data/ranking/overview/getTracksStats";
 import RankingNavButton from "@/components/display/ranking/RankingNavButton";
 import TrackRankingChart from "@/components/display/ranking/TrackRankingChart";
 
 export default async function ArtistRankingPage({
 	params,
+	searchParams,
 }: {
-	params: Promise<{ artistId: string; dateId: string }>;
+	params: Promise<{ artistId: string }>;
+	searchParams: Promise<{ [key: string]: string }>;
 }) {
-	const dateId = (await params).dateId;
 	const artistId = (await params).artistId;
+	const query = await searchParams;
 
 	const session = await auth();
 	if (!session) return null;
 
 	const userId = session.user.id;
 
-	const tracksRankings = await getTrackRankingHistory({
+	const tracksRankings = await getTracksStats({
 		artistId,
 		userId,
-		dateId,
+		time: query,
 	});
 
 	return (
@@ -29,7 +31,7 @@ export default async function ArtistRankingPage({
 			<RankingNavButton
 				type="backward"
 				label="Back"
-				link={`/artist/${artistId}/history?date=${dateId}`}
+				link={`/artist/${artistId}/overview?${new URLSearchParams(query)}`}
 			/>
 		</>
 	);

@@ -1,11 +1,11 @@
 "use client";
 
-import { TrackStatsType } from "@/lib/data/ranking/overall/getTrackStats";
+import { TrackStatsType } from "@/lib/data/ranking/overview/getTracksStats";
 import React, { useEffect, useState } from "react";
-import RankingListHeader, { HeaderSortByType } from "./RankingListHeader";
+import RankingHeader, { HeaderSortByType } from "./RankingHeader";
 import RankingListItem from "./RankingListItem";
 import { useSearchParams } from "next/navigation";
-import { TrackHistoryType } from "@/lib/data/ranking/history/getTrackRankingHistory";
+import { TrackHistoryType } from "@/lib/data/ranking/history/getTracksRankingHistory";
 
 type TrackRankingChartProps = {
 	datas: TrackStatsType[] | TrackHistoryType[];
@@ -34,21 +34,21 @@ export default function TrackRankingChart({ datas }: TrackRankingChartProps) {
 				if (order === "asc")
 					return datas
 						.filter((data) => data[sort])
-						.sort((a, b) => a[sort]! - b[sort]!);
+						.sort((a, b) => b[sort]! - a[sort]!);
 				else
 					return datas
 						.filter((data) => data[sort])
-						.sort((a, b) => b[sort]! - a[sort]!);
+						.sort((a, b) => a[sort]! - b[sort]!);
 			}
 		} else return datas.sort((a, b) => a.ranking - b.ranking);
 	}
 
 	const filteredDatas = sortRanking();
-	const hasStats = isHistoryType ? (datas[0] as TrackHistoryType).isLatest : !!(datas as TrackStatsType[]).filter((data) => data.loggedCount > 2).length;
+	const hasStats = !isHistoryType ? !!(datas as TrackStatsType[]).filter((data) => data.loggedCount > 2).length : true;
 
 	return (
 		<div>
-			<RankingListHeader data={datas[0]} hasStats={hasStats} />
+			<RankingHeader data={datas[0]} hasStats={hasStats} />
 			{filteredDatas?.map((track) => (
 				<RankingListItem data={track} key={track.id} hasStats={hasStats} />
 			))}

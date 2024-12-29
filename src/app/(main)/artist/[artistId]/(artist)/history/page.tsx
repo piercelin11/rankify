@@ -5,8 +5,8 @@ import { getNavMenuData } from "@/config/menuData";
 import DropdownMenu from "@/components/menu/DropdownMenu";
 import getRankingSession from "@/lib/data/user/getRankingSession";
 import { dateToDashFormat } from "@/lib/utils/helper";
-import { getTrackRankingHistory } from "@/lib/data/ranking/history/getTrackRankingHistory";
-import { getAlbumRankingHistory } from "@/lib/data/ranking/history/getAlbumRankingHistory";
+import { getTracksRankingHistory } from "@/lib/data/ranking/history/getTracksRankingHistory";
+import { getAlbumsRankingHistory } from "@/lib/data/ranking/history/getAlbumsRankingHistory";
 import TopRankingList from "@/components/display/ranking/TopRankingList";
 import { HistoryAlbumPointsChart } from "@/components/display/graphicChart/AlbumPointsChart";
 import { AlbumInfoBox } from "@/components/display/showcase/InfoBox";
@@ -28,16 +28,17 @@ export default async function ArtistHistoryPage({
 
 	const rankingSessions = await getRankingSession({ artistId, userId });
 	const dateId = (await searchParams).date || rankingSessions[0].id;
+  const date = rankingSessions.find(session => session.id === dateId)?.date;
 
 	const navMenuData = getNavMenuData(artistId);
 
-	const trackRankings = await getTrackRankingHistory({
+	const trackRankings = await getTracksRankingHistory({
 		artistId,
 		userId,
 		dateId,
 		take: 5,
 	});
-	const albumRankings = await getAlbumRankingHistory({
+	const albumRankings = await getAlbumsRankingHistory({
 		artistId,
 		userId,
 		dateId,
@@ -48,12 +49,14 @@ export default async function ArtistHistoryPage({
 		link: `?${new URLSearchParams({ date: rankingSession.id })}`,
 	}));
 
+  
+
 	return (
-		<>
+		<div className="space-y-16">
 			<div className="flex justify-between">
 				<DropdownMenu
 					menuData={dateMenuData}
-					defaultValue={dateToDashFormat(rankingSessions[0].date)}
+					defaultValue={date ? dateToDashFormat(date) :dateToDashFormat(rankingSessions[0].date)}
 				/>
 				<NavigationTabs menuData={navMenuData} />
 			</div>
@@ -70,6 +73,6 @@ export default async function ArtistHistoryPage({
 			</div>
 
 			<HistoryAlbumPointsChart datas={albumRankings} />
-		</>
+		</div>
 	);
 }

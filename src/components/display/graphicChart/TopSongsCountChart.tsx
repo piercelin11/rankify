@@ -2,8 +2,8 @@
 
 import PolarAreaChart from "@/components/chart/PolarAreaChart";
 import { cn } from "@/lib/cn";
-import { AlbumHistoryType } from "@/lib/data/ranking/history/getAlbumRankingHistory";
-import { AlbumStatsType } from "@/lib/data/ranking/overall/getAlbumStats";
+import { AlbumHistoryType } from "@/lib/data/ranking/history/getAlbumsRankingHistory";
+import { AlbumStatsType } from "@/lib/data/ranking/overview/getAlbumsStats";
 import React, { useState } from "react";
 
 type TopSongsCountChartProps = {
@@ -16,37 +16,37 @@ export default function TopSongsCountChart({ datas }: TopSongsCountChartProps) {
 	const tabData = [
 		{
 			name: "25",
-            onClick: () => setView("25")
+			onClick: () => setView("25"),
 		},
 		{
 			name: "50",
-            onClick: () => setView("50")
+			onClick: () => setView("50"),
 		},
 	];
-    
-    const mainDataKey = view === "50" ? "top25PercentCount" : "top50PercentCount"
+
+	const mainDataKey = view === "50" ? "top25PercentCount" : "top50PercentCount";
 
 	return (
 		<div className="space-y-6 rounded-xl bg-zinc-900 px-8 py-6">
 			<div className="flex justify-end">
-				<div className="flex select-none rounded-lg border border-zinc-800">
+				<div className="flex cursor-pointer select-none rounded-lg border border-zinc-800">
 					{tabData.map((data) => (
 						<div
 							className={cn(
-								"justify-self-center rounded-lg text-sm px-6 py-2 text-zinc-600",
+								"justify-self-center rounded-lg px-6 py-3 text-zinc-600",
 								{
 									"bg-lime-500 text-zinc-950": view === data.name,
 								}
 							)}
-                            key={data.name}
-                            onClick={data.onClick}
+							key={data.name}
+							onClick={data.onClick}
 						>
-							Top {data.name}
+							Songs in top {data.name}%
 						</div>
 					))}
 				</div>
 			</div>
-			<div className="py-4">
+			<div className="py-14 2xl:py-18">
 				<PolarAreaChart
 					data={{
 						labels: datas.map((ranking) => ranking.name),
