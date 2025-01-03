@@ -1,5 +1,6 @@
 import { db } from "@/lib/prisma";
 import { getPastDate, getPastDateProps } from "@/lib/utils/helper";
+import { unstable_cacheTag as cacheTag } from "next/cache";
 
 type getLoggedAlbumsProps = {
 	artistId: string;
@@ -7,7 +8,14 @@ type getLoggedAlbumsProps = {
 	time?: getPastDateProps;
 };
 
-export default async function getLoggedAlbums({artistId, userId, time}: getLoggedAlbumsProps ) {
+export default async function getLoggedAlbums({
+	artistId,
+	userId,
+	time,
+}: getLoggedAlbumsProps) {
+	"use cache";
+	cacheTag("user-data");
+
 	const dateThreshold = time && getPastDate(time);
 	const albums = await db.album.findMany({
 		where: {
@@ -30,9 +38,9 @@ export default async function getLoggedAlbums({artistId, userId, time}: getLogge
 							userId,
 							date: {
 								date: {
-									gte: dateThreshold
-								}
-							}
+									gte: dateThreshold,
+								},
+							},
 						},
 					},
 				},
@@ -41,5 +49,5 @@ export default async function getLoggedAlbums({artistId, userId, time}: getLogge
 		},
 	});
 
-    return albums;
+	return albums;
 }

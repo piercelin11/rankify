@@ -1,5 +1,6 @@
 import { db } from "@/lib/prisma";
 import { getPastDateProps, getPastDate } from "@/lib/utils/helper";
+import { unstable_cacheTag as cacheTag } from "next/cache";
 
 type getTracksMetricsProps = {
 	artistId: string;
@@ -14,6 +15,9 @@ export default async function getTracksMetrics({
 	take,
 	time,
 }: getTracksMetricsProps) {
+	"use cache";
+	cacheTag("user-data");
+
 	const dateThreshold = time && getPastDate(time);
 	const rankingData = await db.ranking.groupBy({
 		by: ["trackId"],

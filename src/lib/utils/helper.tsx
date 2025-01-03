@@ -4,8 +4,7 @@ export function generateSearchParams(object: {
 	return new URLSearchParams(object).toString();
 }
 
-export function dateToLong(date: Date | null) {
-	if (!date) return null;
+export function dateToLong(date: Date) {
 
 	const originalDate = new Date(date);
 	const formattedDate = originalDate.toLocaleDateString("en-US", {

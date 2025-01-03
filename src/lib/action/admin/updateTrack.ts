@@ -5,7 +5,7 @@ import fetchTracks from "@/lib/spotify/fetchTracks";
 import { ActionResponse } from "@/types/action";
 import { AlbumData, TrackData } from "@/types/data";
 import { updateTrackType } from "@/types/schemas/admin";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function updateTrack(
 	originalData: TrackData,
@@ -47,9 +47,9 @@ export default async function updateTrack(
 				},
 				data: {
 					name: formData.name,
-                    album: {
-                        disconnect: true
-                    }
+					album: {
+						disconnect: true,
+					},
 				},
 			});
 		}
@@ -60,6 +60,9 @@ export default async function updateTrack(
 		return { success: false, message: "Failed to update track." };
 	}
 
-	if (isSuccess) revalidatePath("/admin");
+	if (isSuccess) {
+		revalidatePath("/admin");
+		revalidateTag("admin-data");
+	}
 	return { success: true, message: "Successfully updated track." };
 }

@@ -2,6 +2,7 @@ import { db } from "@/lib/prisma";
 import { RankingData, TrackData } from "@/types/data";
 import getTracksMetrics from "./getTracksMetrics";
 import { getPastDate, getPastDateProps } from "@/lib/utils/helper";
+import { unstable_cacheTag as cacheTag } from 'next/cache'
 
 export type TrackStatsType = TrackData & {
 	ranking: number;
@@ -33,6 +34,9 @@ export default async function getTracksStats({
 	take,
 	time,
 }: getTracksStatsProps): Promise<TrackStatsType[]> {
+	"use cache"
+	cacheTag("user-data");
+
 	const trackMetrics = await getTracksMetrics({ artistId, userId, take, time });
 	const tookTrackIds = take ? trackMetrics.map((track) => track.id) : undefined;
 	const dateThreshold = time && getPastDate(time);

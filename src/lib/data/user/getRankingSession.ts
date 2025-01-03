@@ -1,4 +1,5 @@
 import { db } from "@/lib/prisma";
+import { unstable_cacheTag as cacheTag } from "next/cache";
 
 type getAlbumRankingsProps = {
     artistId: string;
@@ -6,7 +7,8 @@ type getAlbumRankingsProps = {
 };
 
 export default async function getRankingSession({artistId, userId}: getAlbumRankingsProps ) {
-
+    "use cache";
+    cacheTag("user-data");
     const rankingSessions = await db.rankingSession.findMany({
         where: {
             artistId,

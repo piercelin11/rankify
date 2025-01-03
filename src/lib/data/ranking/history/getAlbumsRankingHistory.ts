@@ -7,6 +7,7 @@ import getPrevRankingSession from "../../user/getPrevRankingSession";
 import getLoggedAlbum from "../../user/getLoggedAlbums";
 import { db } from "@/lib/prisma";
 import { calculateAlbumPoints } from "../overview/getAlbumsStats";
+import { unstable_cacheTag as cacheTag } from "next/cache";
 
 export type AlbumHistoryType = AlbumData & {
 	top25PercentCount: number;
@@ -29,6 +30,9 @@ export async function getAlbumsRankingHistory({
 	dateId,
 	userId,
 }: getAlbumsRankingHistoryProps): Promise<AlbumHistoryType[]> {
+	"use cache";
+	cacheTag("user-data");
+
 	let prevTrackRankings: null | TrackHistoryType[];
 	let countPrevSongs: null | number;
 
@@ -134,6 +138,8 @@ export async function getAlbumsRankingHistory({
 		.sort((a, b) => b.totalPoints - a.totalPoints)
 		.map((item) => ({
 			...item,
-			pointsChange: item.previousTotalPoints ? item.totalPoints - item.previousTotalPoints : null,
+			pointsChange: item.previousTotalPoints
+				? item.totalPoints - item.previousTotalPoints
+				: null,
 		}));
 }

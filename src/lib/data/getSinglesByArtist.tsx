@@ -1,15 +1,19 @@
 import { db } from "@/lib/prisma";
+import { unstable_cacheTag as cacheTag } from "next/cache";
 
 export default async function getSinglesByArtist(artistId: string) {
-    const singles = await db.track.findMany({
-        where: {
-            artistId,
-            albumId: null
-        },
-        include: {
-            artist: true
-        }
-    });
+	"use cache";
+	cacheTag("admin-data");
 
-    return singles;
+	const singles = await db.track.findMany({
+		where: {
+			artistId,
+			albumId: null,
+		},
+		include: {
+			artist: true,
+		},
+	});
+
+	return singles;
 }

@@ -4,7 +4,7 @@ import SidebarLayout from "@/components/sidebar/SidebarLayout";
 import Button from "@/components/ui/Button";
 import { mainMenuData } from "@/config/menuData";
 import Link from "next/link";
-import { auth } from "../../../auth";
+import { getUserSession } from "../../../auth";
 import getLoggedArtists from "@/lib/data/user/getLoggedArtists";
 
 type AdminLayoutProps = {
@@ -12,17 +12,16 @@ type AdminLayoutProps = {
 };
 
 export default async function MainLayout({ children }: AdminLayoutProps) {
-	const session = await auth();
-	if (!session) return null;
-	const userId = session.user.id;
-
+	const { id: userId } = await getUserSession();
 	const loggedArtists = await getLoggedArtists({ userId });
 
 	return (
 		<SidebarLayout>
 			<div className="p-4">
 				<div className="mb-10">
-					<LogoDisplay />
+					<div className="py-5">
+						<LogoDisplay />
+					</div>
 					<div>
 						{mainMenuData.map((item) => (
 							<Link href={item.link} key={item.name}>
@@ -37,7 +36,7 @@ export default async function MainLayout({ children }: AdminLayoutProps) {
 				</div>
 				{loggedArtists.map((artist) => (
 					<Link key={artist.id} href={`/artist/${artist.id}/overview`}>
-						<div className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-zinc-900">
+						<div className="flex items-center gap-2 rounded-md px-4 py-2 hover:bg-zinc-900">
 							<img
 								className="w-14 rounded-full"
 								src={artist.img || "/pic/placeholder.jpg"}

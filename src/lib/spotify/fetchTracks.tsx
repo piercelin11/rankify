@@ -20,7 +20,6 @@ export default async function fetchTracks(
             }
         );
         const data = await response.json();
-        console.log(data.tracks)
         return data.tracks;
     } catch (error) {
         console.error("Failed to fetch tracks' data", error);

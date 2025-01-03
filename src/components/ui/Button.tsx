@@ -42,7 +42,7 @@ export default function Button({
 	return (
 		<button
 			className={cn(
-				` px-5 py-3 flex items-center gap-2 ${disabled ? styles[variant].disabled : styles[variant].default}`,
+				` px-5 py-3 flex items-center gap-2 select-none ${disabled ? styles[variant].disabled : styles[variant].default}`,
 				className,
 				{
 					"opacity-70": disabled,

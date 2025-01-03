@@ -44,10 +44,6 @@ export const mainMenuData: MenuItem[] = [
 ];
 
 export const getNavMenuData = (artistId: string) => [
-	/* {
-		label: "Global Trend",
-		link: `/artist/${artistId}/trend`,
-	}, */
 	{
 		label: "My Overview",
 		link: `/artist/${artistId}/overview`,
@@ -61,22 +57,27 @@ export const getNavMenuData = (artistId: string) => [
 export const dropdownMenuData = [
 	{
 		label: "past month",
+		query: { months: "1" },
 		link: `?${new URLSearchParams({ months: "1" })}`,
 	},
 	{
-		label: "6 months",
+		label: "past 6 months",
+		query: { months: "6" },
 		link: `?${new URLSearchParams({ months: "6" })}`,
 	},
 	{
 		label: "past year",
+		query: { years: "1" },
 		link: `?${new URLSearchParams({ years: "1" })}`,
 	},
 	{
 		label: "past 2 years",
+		query: { years: "2" },
 		link: `?${new URLSearchParams({ years: "2" })}`,
 	},
 	{
 		label: "lifetime",
+		query: {},
 		link: `?${new URLSearchParams()}`,
 	},
 ];

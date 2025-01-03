@@ -1,6 +1,7 @@
+"use cache"
+
 import InfoHeader from "@/components/display/showcase/InfoHeader";
 import ContentWrapper from "@/components/general/ContentWrapper";
-import getArtistById from "@/lib/data/getArtistById";
 import getTrackById from "@/lib/data/getTrackById";
 import { notFound } from "next/navigation";
 
@@ -24,6 +25,7 @@ export default async function TrackPageLayout({
 				data={trackData}
 				subTitle={trackData.artist.name}
 				type="Track"
+				color={trackData.album?.color}
 			/>
 			<ContentWrapper className="space-y-20">{children}</ContentWrapper>
 		</>

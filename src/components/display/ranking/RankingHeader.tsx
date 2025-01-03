@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { RankingListGridLayout } from "./RankingListItem";
 import { hasRankChange } from "./RankingListItem";
 import { TrackStatsType } from "@/lib/data/ranking/overview/getTracksStats";
@@ -35,31 +35,21 @@ export default function RankingHeader({
 	const orderQuery = searchParams.get("order") as "asc" | "desc" | null;
 
 	function handleClick(sortBy: HeaderSortByType) {
+		const params = new URLSearchParams(searchParams); 
+
 		if (sortBy !== sortQuery) {
-			window.history.replaceState(
-				null,
-				"",
-				`?${new URLSearchParams({
-					sort: sortBy,
-					order: "asc",
-				})}`
-			);
+			params.set("sort", sortBy);
+			params.set("order", "asc");
 		} else {
 			if (orderQuery === "asc") {
-				window.history.replaceState(
-					null,
-					"",
-					`?${new URLSearchParams({
-						sort: sortBy,
-						order: "desc",
-					})}`
-				);
+				params.set("order", "desc");
 			} else {
-				const url = new URL(window.location.href);
-				url.search = "";
-				window.history.replaceState(null, "", url.toString());
+				params.delete("sort");
+				params.delete("order");
 			}
 		}
+
+		window.history.replaceState(null, "", `?${params.toString()}`);
 	}
 
 	function SortButton(sortBy: HeaderSortByType) {

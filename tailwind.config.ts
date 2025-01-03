@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { PluginAPI } from "tailwindcss/types/config";
 
 export default {
 	content: [
@@ -8,7 +9,7 @@ export default {
 	],
 	theme: {
 		fontFamily: {
-			sans: "var(--font-geist)",
+			sans: "var(--font-poppins)",
 			serif: "var(--font-geist-mono)",
 			numeric: "var(--font-lato)",
 		},
@@ -29,13 +30,30 @@ export default {
 				},
 				zinc: {
 					650: "#48484F",
-					750: "#2A2A30",
-					850: "#18181C",
-					900: "#121214",
+					750: "#2F2F37",
+					800: "#25252A",
+					850: "#1C1C20",
+					900: "#161619",
 				},
 				spotify: "#1ed760",
 			},
 		},
 	},
-	plugins: [],
+	plugins: [
+		function ({ addUtilities }: PluginAPI) {
+			addUtilities({
+				".scrollbar-hidden": {
+					"-ms-overflow-style": "none", // IE & Edge
+					"scrollbar-width": "none", // Firefox
+				},
+				".scrollbar-hidden::-webkit-scrollbar": {
+					display: "none", // Chrome, Safari, Edge
+				},
+				".scrollbar-visible": {
+					"-ms-overflow-style": "auto",
+					"scrollbar-width": "auto",
+				},
+			});
+		},
+	],
 } satisfies Config;

@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/prisma";
 import { ActionResponse } from "@/types/action";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 export default async function deleteItem(
@@ -30,7 +30,7 @@ export default async function deleteItem(
 				artistId = deletedAlbum.artistId;
 				break;
 			case "track":
-				await db.track.delete({
+				await db.track.deleteMany({
 					where: {
 						id,
 					},
@@ -48,6 +48,7 @@ export default async function deleteItem(
 		if (type === "track")revalidatePath("/admin");
 		if (type === "album")redirect(`/admin/artist/${artistId}`);
 		if (type === "artist")redirect("/admin/artist");
+		revalidateTag("admin-data")
 	}
 	return { success: true, message: `Successfully deleted ${type}.` };
 }

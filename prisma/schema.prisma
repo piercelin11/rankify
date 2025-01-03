@@ -22,6 +22,7 @@ model User {
   rankings      Ranking[]
   dates         RankingSession[]
   loggedArtists Artist[]         @relation("ArtistToUser")
+  RankingDraft  RankingDraft[]
 }
 
 model Account {
@@ -56,6 +57,7 @@ model Artist {
   dates            RankingSession[]
   tracks           Track[]
   rankedBy         User[]           @relation("ArtistToUser")
+  RankingDraft     RankingDraft[]
 }
 
 model Album {
@@ -120,6 +122,21 @@ model RankingSession {
   artist   Artist?      @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
   user     User         @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
+  @@index([date])
+}
+
+model RankingDraft {
+  id       String       @id @default(uuid())
+  date     DateTime     @default(now())
+  userId   String
+  artistId String?
+  draft    String?
+  result   String?
+  type     RankingType?
+  artist   Artist?      @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  user     User         @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@unique([userId, artistId])
   @@index([date])
 }
 

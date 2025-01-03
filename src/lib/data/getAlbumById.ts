@@ -1,11 +1,15 @@
 import { db } from "@/lib/prisma";
+import { unstable_cacheTag as cacheTag } from "next/cache";
 
 export default async function getAlbumById(albumId: string) {
-    const album = await db.album.findFirst({
-        where: {
-            id: albumId,
-        },
-    });
+	"use cache";
+	cacheTag("admin-data");
 
-    return album;
+	const album = await db.album.findFirst({
+		where: {
+			id: albumId,
+		},
+	});
+
+	return album;
 }

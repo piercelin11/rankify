@@ -1,3 +1,5 @@
+"use cache"
+
 import InfoHeader from "@/components/display/showcase/InfoHeader";
 import ContentWrapper from "@/components/general/ContentWrapper";
 import getArtistById from "@/lib/data/getArtistById";

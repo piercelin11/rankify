@@ -1,13 +1,12 @@
 "use server";
 
 import getAlbumsByArtist from "@/lib/data/getAlbumsByArtist";
-import getTracksByAlbum from "@/lib/data/getTracksByAlbum";
 import getTracksByArtist from "@/lib/data/getTracksByArtist";
 import { db } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
 import { ActionResponse } from "@/types/action";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function addAlbum(
 	artistId: string,
@@ -98,6 +97,9 @@ export default async function addAlbum(
 		return { success: false, message: "Failed to add albums." };
 	}
 
-	if (isSuccess) revalidatePath(`/admin/artist/${artistId}`);
+	if (isSuccess) {
+		revalidateTag("admin-data");
+		revalidatePath(`/admin/artist/${artistId}`);
+	}
 	return { success: true, message: "Successfully added albums." };
 }

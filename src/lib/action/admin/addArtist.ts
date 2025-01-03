@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { ActionResponse } from "@/types/action";
 import getAlbumsByArtist from "@/lib/data/getAlbumsByArtist";
 import getTracksByArtist from "@/lib/data/getTracksByArtist";
+import { revalidateTag } from "next/cache";
 
 export default async function addArtist(
 	artistId: string,
@@ -128,6 +129,9 @@ export default async function addArtist(
 		return { success: false, message: "Failed to add artist." };
 	}
 
-	if (isSuccess) redirect(`/admin/artist/${artistId}`);
+	if (isSuccess) {
+		revalidateTag("admin-data");
+		redirect(`/admin/artist/${artistId}`);
+	}
 	return { success: true, message: "Successfully added the artist." };
 }

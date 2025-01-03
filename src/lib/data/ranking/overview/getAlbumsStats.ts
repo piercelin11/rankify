@@ -1,7 +1,8 @@
 import getTracksStats from "./getTracksStats";
-import { AlbumData, ArtistData, TrackData } from "@/types/data";
+import { AlbumData } from "@/types/data";
 import getLoggedAlbum from "../../user/getLoggedAlbums";
 import { getPastDateProps } from "@/lib/utils/helper";
+import { unstable_cacheTag as cacheTag } from 'next/cache'
 
 export type AlbumStatsType = AlbumData & {
 	top3Count: number;
@@ -24,6 +25,10 @@ export async function getAlbumsStats({
 	userId,
 	time,
 }: getAlbumsStatsProps): Promise<AlbumStatsType[]> {
+	"use cache"
+
+	cacheTag("user-data");
+
 	const trackRankings = await getTracksStats({artistId, userId, time});
 	const countSongs = trackRankings.length;
 	const albums = await getLoggedAlbum({artistId, userId, time});
@@ -81,7 +86,7 @@ export function calculateAlbumPoints(
 	const percentileRank = (countSongs - ranking + 1) / countSongs;
 	// 計算分數
 	let score =
-		percentileRank > 0.5 ? percentileRank * 1000 : percentileRank * 500;
+		percentileRank > 0.5 ? percentileRank * 900 : percentileRank * 600;
 	// 引入平滑係數：若專輯數小於5首且平均排名在前百分之二十五，則引入平滑係數
 	const smoothingFactor =
 		percentileRank > 0.5 && countAlbumsSongs < 5 ? 0.7 : 1;

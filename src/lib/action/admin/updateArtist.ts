@@ -3,7 +3,7 @@
 import { db } from "@/lib/prisma";
 import { ActionResponse } from "@/types/action";
 import { updateArtistType } from "@/types/schemas/admin";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function updateArtist(
 	artistId: string,
@@ -11,13 +11,14 @@ export default async function updateArtist(
 ): Promise<ActionResponse> {
 	let isSuccess = false;
 
-    const artist = await db.artist.findFirst({
-        where: {
-            id: artistId
-        }
-    })
+	const artist = await db.artist.findFirst({
+		where: {
+			id: artistId,
+		},
+	});
 
-    if (!artist) return { success: false, message: "Failed to update artist with this id" };
+	if (!artist)
+		return { success: false, message: "Failed to update artist with this id" };
 	try {
 		await db.artist.update({
 			where: {
@@ -34,6 +35,9 @@ export default async function updateArtist(
 		return { success: false, message: "Failed to update artist." };
 	}
 
-	if (isSuccess) revalidatePath(`/admin/artist/${artistId}`);
+	if (isSuccess) {
+		revalidateTag("admin-data");
+		revalidatePath(`/admin/artist/${artistId}`);
+	}
 	return { success: true, message: "Successfully updated album." };
 }

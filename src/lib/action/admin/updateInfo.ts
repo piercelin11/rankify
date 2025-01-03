@@ -4,7 +4,7 @@ import { db } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchArtist from "@/lib/spotify/fetchArtist";
 import { ActionResponse } from "@/types/action";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function updateInfo(
 	type: "artist" | "album",
@@ -49,6 +49,9 @@ export default async function updateInfo(
 		return { success: false, message: `Failed to update ${type} info.` };
 	}
 
-	if (success) revalidatePath(`/admin/${type}/${id}`);
+	if (success) {
+		revalidatePath(`/admin/${type}/${id}`);
+		revalidateTag("admin-data");
+	}
 	return { success: true, message: "Successfully updated album." };
 }

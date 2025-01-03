@@ -24,7 +24,7 @@ export default function TopSongsCountChart({ datas }: TopSongsCountChartProps) {
 		},
 	];
 
-	const mainDataKey = view === "50" ? "top25PercentCount" : "top50PercentCount";
+	const mainDataKey = view === "50" ? "top50PercentCount" : "top25PercentCount";
 
 	return (
 		<div className="space-y-6 rounded-xl bg-zinc-900 px-8 py-6">
@@ -46,7 +46,7 @@ export default function TopSongsCountChart({ datas }: TopSongsCountChartProps) {
 					))}
 				</div>
 			</div>
-			<div className="py-14 2xl:py-18">
+			<div className="2xl:py-18 py-14">
 				<PolarAreaChart
 					data={{
 						labels: datas.map((ranking) => ranking.name),

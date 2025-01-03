@@ -5,7 +5,7 @@ import fetchTracks from "@/lib/spotify/fetchTracks";
 import { ActionResponse } from "@/types/action";
 import { AlbumData, TrackData } from "@/types/data";
 import { updateAlbumType, updateTrackType } from "@/types/schemas/admin";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function updateAlbum(
 	albumId: string,
@@ -13,13 +13,14 @@ export default async function updateAlbum(
 ): Promise<ActionResponse> {
 	let isSuccess = false;
 
-    const album = await db.album.findFirst({
-        where: {
-            id: albumId
-        }
-    })
+	const album = await db.album.findFirst({
+		where: {
+			id: albumId,
+		},
+	});
 
-    if (!album) return { success: false, message: "Failed to update album with this id" };
+	if (!album)
+		return { success: false, message: "Failed to update album with this id" };
 
 	try {
 		await db.album.update({
@@ -38,6 +39,9 @@ export default async function updateAlbum(
 		return { success: false, message: "Failed to update album." };
 	}
 
-	if (isSuccess) revalidatePath(`/admin/album/${albumId}`);
+	if (isSuccess) {
+		revalidatePath(`/admin/album/${albumId}`);
+		revalidateTag("admin-data");
+	}
 	return { success: true, message: "Successfully updated album." };
 }

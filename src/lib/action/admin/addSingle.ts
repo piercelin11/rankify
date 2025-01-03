@@ -3,7 +3,7 @@
 import { db } from "@/lib/prisma";
 import fetchTracks from "@/lib/spotify/fetchTracks";
 import { ActionResponse } from "@/types/action";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function addSingles(
 	artistId: string,
@@ -19,8 +19,6 @@ export default async function addSingles(
 
 	try {
 		const tracksData = await fetchTracks(trackIds);
-		console.log(trackIds)
-		console.log(tracksData);
 
 		if (tracksData)
 			await db.track.createMany({
@@ -30,7 +28,7 @@ export default async function addSingles(
 					artistId,
 					spotifyUrl: track.external_urls.spotify,
 					img: track.album.images?.[0].url,
-					releaseDate: new Date(track.album.release_date)
+					releaseDate: new Date(track.album.release_date),
 				})),
 			});
 
@@ -40,6 +38,9 @@ export default async function addSingles(
 		return { success: false, message: "Failed to add singles." };
 	}
 
-	if (isSuccess) revalidatePath(`/admin/artist/${artistId}`);
+	if (isSuccess) {
+		revalidatePath(`/admin/artist/${artistId}`);
+		revalidateTag("admin-data");
+	}
 	return { success: true, message: "Successfully added singles." };
 }

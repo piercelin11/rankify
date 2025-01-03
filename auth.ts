@@ -30,14 +30,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 		},
 		async jwt({ token }) {
 			if (!token.sub) return token;
-			const existingUser = 
-				await db.user.findFirst({
-					where: {
-						id: token.sub,
-					},
-				})
-			;
-
+			const existingUser = await db.user.findFirst({
+				where: {
+					id: token.sub,
+				},
+			});
 			if (!existingUser) return token;
 
 			token.role = existingUser.role;
@@ -47,3 +44,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 	},
 	...authConfig,
 });
+
+export async function getUserSession() {
+	const session = await auth();
+	if (!session || !session.user) {
+		throw new Error(
+			"User session is not available. Please ensure the user is authenticated."
+		);
+	}
+
+	const { id, role } = session.user;
+
+	if (!id || !role) {
+		throw new Error("User session is missing required attributes.");
+	}
+
+	return session.user;
+}

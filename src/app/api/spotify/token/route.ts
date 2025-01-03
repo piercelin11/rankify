@@ -22,6 +22,8 @@ async function getSpotifyToken() {
 				`Failed to fetch Spotify token. HTTP status: ${response.status}`
 			);
 
+			
+
 		const data = await response.json();
 
 		accessToken = data.access_token;
@@ -56,4 +58,3 @@ export async function GET() {
 		);
 	}
 }
-

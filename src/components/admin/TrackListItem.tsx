@@ -20,7 +20,7 @@ type TrackListItemProps = {
 	trackData: TrackData;
 	savedAlbums: AlbumData[];
 	number?: number;
-};
+}; 
 
 const gridStyles = "grid grid-cols-[1fr,_1fr,_60px]";
 
@@ -66,7 +66,6 @@ export default function TrackListItem({
 
 	return (
 		<div
-			key={trackData.id}
 			className="grid cursor-pointer select-none grid-cols-[25px,_65px,_1fr] items-center gap-3 rounded px-6 py-2 hover:bg-zinc-900"
 		>
 			<p className="mr-2 justify-self-end font-serif text-lg font-medium text-zinc-500">

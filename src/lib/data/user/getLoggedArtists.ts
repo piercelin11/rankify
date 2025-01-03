@@ -1,19 +1,29 @@
 import { db } from "@/lib/prisma";
+import { unstable_cacheTag as cacheTag } from "next/cache";
 
 type getLoggedArtistsProps = {
 	userId: string;
 };
 
-export default async function getLoggedArtists({userId}: getLoggedArtistsProps ) {
+export default async function getLoggedArtists({
+	userId,
+}: getLoggedArtistsProps) {
+	"use cache";
+	cacheTag("user-data");
 
-	const user = await db.user.findFirst({
+	const artists = await db.artist.findMany({
 		where: {
-			id: userId,
-		},
-		include: {
-			loggedArtists: true
+			tracks: {
+				some: {
+					rankings: {
+						some: {
+							userId
+						}
+					}
+				}
+			}
 		},
 	});
 
-    return user?.loggedArtists || [];
+	return artists;
 }

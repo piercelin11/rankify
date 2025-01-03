@@ -99,10 +99,10 @@ export function LineChart({ data: { date, dataset } }: { data: Data }) {
 			data: item.rankings,
 			borderWidth: 1.5,
 			borderColor: item.color
-				? adjustSaturation(ensureBrightness(item.color), 0.15)
+				? ensureBrightness(item.color)
 				: "#FEF27A",
 			backgroundColor: item.color
-				? `${adjustSaturation(ensureBrightness(item.color), 0.15)}1A`
+				? `${ensureBrightness(item.color)}1A`
 				: "#FEF27A1A",
 			fill: "start",
 		})),

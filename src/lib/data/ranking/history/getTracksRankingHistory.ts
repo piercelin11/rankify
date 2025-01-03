@@ -2,6 +2,7 @@ import { db } from "@/lib/prisma";
 import getTracksMetrics from "../overview/getTracksMetrics";
 import { RankingSessionData, TrackData } from "@/types/data";
 import getRankingSession from "../../user/getRankingSession";
+import { unstable_cacheTag as cacheTag } from "next/cache";
 
 export type TrackHistoryType = TrackData & {
 	dateId: string;
@@ -24,37 +25,42 @@ export async function getTracksRankingHistory({
 	artistId,
 	userId,
 	dateId,
-	take
+	take,
 }: getTracksRankingHistoryProps): Promise<TrackHistoryType[]> {
+	"use cache";
+	cacheTag("user-data");
+
 	const trackMetrics = await getTracksMetrics({ artistId, userId });
-	const latestSession = (await getRankingSession({artistId, userId}))[0];
-    const rankings = await db.ranking.findMany({
-        where: {
-            artistId,
-            userId,
-            dateId,
-        },
-        orderBy: {
-            ranking: "asc"
-        },
-        include: {
-            track: true,
-            album: true,
-            artist: true,
-            date: true,
-        },
-		take
-    });
+	const latestSession = (await getRankingSession({ artistId, userId }))[0];
+	const rankings = await db.ranking.findMany({
+		where: {
+			artistId,
+			userId,
+			dateId,
+		},
+		orderBy: {
+			ranking: "asc",
+		},
+		include: {
+			track: true,
+			album: true,
+			artist: true,
+			date: true,
+		},
+		take,
+	});
 
 	const result = rankings.map((ranking) => {
-		const findPeak = trackMetrics.find((metric) => metric.id === ranking.track.id);
+		const findPeak = trackMetrics.find(
+			(metric) => metric.id === ranking.track.id
+		);
 
 		return {
 			...ranking,
-            ...ranking.track,
-            peak: findPeak!.peak,
+			...ranking.track,
+			peak: findPeak!.peak,
 			isLatest: latestSession.id === ranking.dateId,
-			countSongs: rankings.length
+			countSongs: rankings.length,
 		};
 	});
 

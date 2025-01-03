@@ -18,7 +18,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 	return (
 		<SidebarLayout>
 			<div className="p-4">
-				<LogoDisplay />
+				<div className="py-5">
+					<LogoDisplay />
+				</div>
 				<div>
 					{adminMenuData.map((item) => (
 						<Link href={item.link} key={item.name}>

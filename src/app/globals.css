@@ -10,18 +10,18 @@ body {
 }
 
 h1 {
-	@apply text-4xl font-bold;
-	line-height: 1.7em;
+	@apply text-4xl font-bold 2xl:text-6xl;
+	line-height: 1.5em;
 }
 
 h2 {
 	@apply text-3xl font-bold;
-	line-height: 1.7em;
+	line-height: 1.5em;
 }
 
 h3 {
 	@apply text-xl font-medium;
-	line-height: 1.7em;
+	line-height: 1.5em;
 }
 
 hr {
@@ -29,11 +29,11 @@ hr {
 }
 
 ::-webkit-scrollbar {
-	@apply rounded-full bg-zinc-800 w-1;
+	@apply rounded-full bg-zinc-800 w-1 h-1;
 }
 
 ::-webkit-scrollbar-thumb {
-	@apply rounded-full bg-zinc-700 w-1;
+	@apply rounded-full bg-zinc-700 w-1 h-1;
 }
 
 ::-webkit-scrollbar-button {

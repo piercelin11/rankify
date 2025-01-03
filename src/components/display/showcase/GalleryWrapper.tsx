@@ -9,5 +9,5 @@ export default function GalleryWrapper({
 	children,
 	className
 }: GalleryGridLayoutProps) {
-	return <div className={cn("grid grid-cols-8 -mx-2", className)}>{children}</div>;
+	return <div className={cn("grid grid-cols-6 -mx-2 2xl:grid-cols-8", className)}>{children}</div>;
 }

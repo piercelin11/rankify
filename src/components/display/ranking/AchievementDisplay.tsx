@@ -1,8 +1,3 @@
-import {
-	DownAwardIcon,
-	PeakAwardIcon,
-	UpAwardIcon,
-} from "@/components/icon/StatsIcons";
 import { TrackHistoryType } from "@/lib/data/ranking/history/getTracksRankingHistory";
 import {
 	ArrowDownIcon,
