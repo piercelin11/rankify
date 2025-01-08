@@ -1,9 +1,9 @@
 import FilterField from "@/components/sorter/FilterField";
 import CheckBox from "@/components/ui/CheckBox";
 import { Description } from "@/components/ui/Text";
-import getAlbumsByArtist from "@/lib/data/getAlbumsByArtist";
-import getArtistById from "@/lib/data/getArtistById";
-import getSinglesByArtist from "@/lib/data/getSinglesByArtist";
+import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
+import getArtistById from "@/lib/database/data/getArtistById";
+import getSinglesByArtist from "@/lib/database/data/getSinglesByArtist";
 import { notFound } from "next/navigation";
 import React from "react";
 

@@ -1,6 +1,6 @@
 import SortingStage from "@/components/sorter/SorterResult";
-import getTracksByArtist from "@/lib/data/getTracksByArtist";
-import getRankingDraft from "@/lib/data/user/getRankingDraft";
+import getTracksByArtist from "@/lib/database/data/getTracksByArtist";
+import getRankingDraft from "@/lib/database/user/getRankingDraft";
 import React from "react";
 import { getUserSession } from "@/../auth";
 import SorterField from "@/components/sorter/SorterField";

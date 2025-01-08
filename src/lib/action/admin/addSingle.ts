@@ -1,13 +1,14 @@
-"use server";
+"use server"; 
 
 import { db } from "@/lib/prisma";
 import fetchTracks from "@/lib/spotify/fetchTracks";
 import { ActionResponse } from "@/types/action";
 import { revalidatePath, revalidateTag } from "next/cache";
 
-export default async function addSingles(
+export default async function addSingle(
 	artistId: string,
-	trackIds: string[]
+	trackIds: string[],
+	token?: string,
 ): Promise<ActionResponse> {
 	let isSuccess = false;
 
@@ -18,7 +19,7 @@ export default async function addSingles(
 		};
 
 	try {
-		const tracksData = await fetchTracks(trackIds);
+		const tracksData = await fetchTracks(trackIds, token);
 
 		if (tracksData)
 			await db.track.createMany({

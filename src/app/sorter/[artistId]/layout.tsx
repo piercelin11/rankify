@@ -1,6 +1,6 @@
 import LogoDisplay from "@/components/sidebar/LogoDisplay";
 import SorterHeader from "@/components/sorter/SorterHeader";
-import getArtistById from "@/lib/data/getArtistById";
+import getArtistById from "@/lib/database/data/getArtistById";
 import { SorterContextProvider } from "@/lib/hooks/contexts/SorterContext";
 import { StitchesLogoIcon } from "@radix-ui/react-icons";
 import { notFound } from "next/navigation";
@@ -19,9 +19,9 @@ export default async function layout({
 
 	return (
 		<SorterContextProvider>
-			<div className="max-h-screen min-h-screen flex flex-col">
+			<div className="h-screen flex flex-col overflow-x-hidden">
 				<SorterHeader artist={artist} />
-				<div className="flex flex-grow h-full items-center justify-center px-18">
+				<div className="flex flex-grow h-full items-center justify-center px-24">
 					<div className="w-[1280px] 2xl:w-[1680px]">{children}</div>
 				</div>
 			</div>

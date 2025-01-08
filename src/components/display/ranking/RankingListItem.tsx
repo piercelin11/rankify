@@ -1,7 +1,7 @@
 "use client";
 
-import { TrackHistoryType } from "@/lib/data/ranking/history/getTracksRankingHistory";
-import { TrackStatsType } from "@/lib/data/ranking/overview/getTracksStats";
+import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
+import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
 import React, { ReactNode } from "react";
 import RankChangeIconDisplay from "./RankChangeIconDisplay";
 import AchievementDisplay from "./AchievementDisplay";

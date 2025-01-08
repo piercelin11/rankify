@@ -1,6 +1,6 @@
-import { AlbumHistoryType } from "@/lib/data/ranking/history/getAlbumsRankingHistory";
-import { TrackHistoryType } from "@/lib/data/ranking/history/getTracksRankingHistory";
-import { TrackStatsType } from "@/lib/data/ranking/overview/getTracksStats";
+import { AlbumHistoryType } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
+import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
+import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
 import {
 	ArrowDownRoundIcon,
 	ArrowUpRoundIcon,

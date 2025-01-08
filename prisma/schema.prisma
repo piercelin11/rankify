@@ -8,21 +8,28 @@ datasource db {
 }
 
 model User {
-  id            String           @id @default(cuid())
-  name          String?
-  username      String?          @unique
-  email         String?          @unique
-  password      String?
-  emailVerified DateTime?
-  image         String?
-  role          Role             @default(USER)
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  accounts      Account[]
-  rankings      Ranking[]
-  dates         RankingSession[]
-  loggedArtists Artist[]         @relation("ArtistToUser")
-  RankingDraft  RankingDraft[]
+  id             String           @id @default(cuid())
+  name           String?
+  username       String?          @unique
+  email          String?          @unique
+  password       String?
+  emailVerified  DateTime?
+  image          String?
+  role           Role             @default(USER)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  accounts       Account[]
+  rankings       Ranking[]
+  dates          RankingSession[]
+  RankingDraft   RankingDraft[]
+  UserPreference UserPreference[]
+}
+
+model UserPreference {
+  id              String @id @default(cuid())
+  rankingSettings Json
+  user            User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId          String
 }
 
 model Account {
@@ -53,11 +60,10 @@ model Artist {
   spotifyFollowers Int
   userId           String?
   albums           Album[]
-  Ranking          Ranking[]
+  rankings         Ranking[]
   dates            RankingSession[]
   tracks           Track[]
-  rankedBy         User[]           @relation("ArtistToUser")
-  RankingDraft     RankingDraft[]
+  rankingDrafts    RankingDraft[]
 }
 
 model Album {
@@ -131,7 +137,7 @@ model RankingDraft {
   userId   String
   artistId String?
   draft    String?
-  result   String?
+  result   Json?
   type     RankingType?
   artist   Artist?      @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
   user     User         @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)

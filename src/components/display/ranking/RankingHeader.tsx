@@ -2,8 +2,8 @@
 import React from "react";
 import { RankingListGridLayout } from "./RankingListItem";
 import { hasRankChange } from "./RankingListItem";
-import { TrackStatsType } from "@/lib/data/ranking/overview/getTracksStats";
-import { TrackHistoryType } from "@/lib/data/ranking/history/getTracksRankingHistory";
+import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
+import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import {
 	ArrowDownIcon,
 	ArrowUpIcon,

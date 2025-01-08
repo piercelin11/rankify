@@ -5,7 +5,7 @@ import {
 	RankUpIcon,
 } from "@/components/icon/StatsIcons";
 import { cn } from "@/lib/cn";
-import { TrackHistoryType } from "@/lib/data/ranking/history/getTracksRankingHistory";
+import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import { TriangleDownIcon, TriangleUpIcon } from "@radix-ui/react-icons";
 import React from "react";
 

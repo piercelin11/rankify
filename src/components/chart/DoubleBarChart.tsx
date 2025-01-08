@@ -61,7 +61,6 @@ const options = {
 };
 
 type DataType = {
-	datasetLabels: { mainDataLabel: string; subDataLabel: string };
 	data: {
 		labels: string[];
 		mainData: number[];
@@ -71,14 +70,13 @@ type DataType = {
 };
 
 export default function DoubleBarChart({
-	datasetLabels: { mainDataLabel, subDataLabel },
 	data: { labels, mainData, subData, color },
 }: DataType) {
 	const data = {
 		labels: labels.map((label) => toAcronym(label)),
 		datasets: [
 			{
-				label: mainDataLabel,
+				label: "points",
 				data: mainData,
 				borderWidth: 1.5,
 				borderColor: "#FEF27ABF",
@@ -91,7 +89,7 @@ export default function DoubleBarChart({
 				),
 			},
 			{
-				label: subDataLabel,
+				label: "raw points",
 				data: subData,
 				borderWidth: 1.5,
 				borderColor: "#464748BF",

@@ -26,8 +26,8 @@ const styles = {
 		disabled: "bg-transparent text-zinc-300",
 	},
 	menu: {
-		default: "w-full text-lg bg-transparent text-zinc-300 hover:text-zinc-100 hover:bg-zinc-900",
-		disabled: "w-full text-lg bg-transparent text-zinc-300",
+		default: "w-full text-md bg-transparent text-zinc-300 hover:text-zinc-100 hover:bg-zinc-900 2xl:text-lg",
+		disabled: "w-full text-md bg-transparent text-zinc-300 2xl:text-lg",
 	}
 };
 

@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import React from "react";
 import InfoHeader from "@/components/display/showcase/InfoHeader";
-import getAlbumById from "@/lib/data/getAlbumById";
-import getTracksByAlbum from "@/lib/data/getTracksByAlbum";
+import getAlbumById from "@/lib/database/data/getAlbumById";
+import getTracksByAlbum from "@/lib/database/data/getTracksByAlbum";
 import { dateToLong } from "@/lib/utils/helper";
 import TrackListItem from "@/components/admin/TrackListItem";
-import getAlbumsByArtist from "@/lib/data/getAlbumsByArtist";
+import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import AlbumActionIcons from "@/components/admin/AlbumActionIcons";
 import ContentWrapper from "@/components/general/ContentWrapper";
 

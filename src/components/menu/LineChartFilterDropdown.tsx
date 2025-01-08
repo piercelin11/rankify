@@ -2,7 +2,7 @@
 
 import { DEFAULT_COLOR } from "@/config/variables";
 import { cn } from "@/lib/cn";
-import { TrackStatsType } from "@/lib/data/ranking/overview/getTracksStats";
+import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
 import { ensureBrightness } from "@/lib/utils/adjustColor";
 import { AlbumData } from "@/types/data";
 import { ChevronDownIcon, Cross2Icon } from "@radix-ui/react-icons";

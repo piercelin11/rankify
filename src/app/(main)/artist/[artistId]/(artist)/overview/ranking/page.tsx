@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
-import getTracksStats from "@/lib/data/ranking/overview/getTracksStats";
+import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
 import RankingNavButton from "@/components/display/ranking/RankingNavButton";
 import TrackRankingChart from "@/components/display/ranking/TrackRankingChart";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";

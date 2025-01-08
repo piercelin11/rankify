@@ -1,7 +1,7 @@
-"use server";
+"use server"; 
 
-import getAlbumsByArtist from "@/lib/data/getAlbumsByArtist";
-import getTracksByArtist from "@/lib/data/getTracksByArtist";
+import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
+import getTracksByArtist from "@/lib/database/data/getTracksByArtist";
 import { db } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
@@ -11,7 +11,8 @@ import { revalidatePath, revalidateTag } from "next/cache";
 export default async function addAlbum(
 	artistId: string,
 	albumId: string | string[],
-	type: "ALBUM" | "EP"
+	type: "ALBUM" | "EP",
+	token?: string,
 ): Promise<ActionResponse> {
 	let isSuccess = false;
 
@@ -19,8 +20,8 @@ export default async function addAlbum(
 		return { success: false, message: "You need to at least select an album." };
 
 	const albumData = Array.isArray(albumId)
-		? await Promise.all(albumId.map((id) => fetchAlbum(id)))
-		: [await fetchAlbum(albumId)];
+		? await Promise.all(albumId.map((id) => fetchAlbum(id, token)))
+		: [await fetchAlbum(albumId, token)];
 
 	try {
 		const savedAlbumsName = (await getAlbumsByArtist(artistId)).map(
@@ -47,7 +48,7 @@ export default async function addAlbum(
 						await Promise.all(
 							albumId.map(
 								async (id) =>
-									(await fetchAlbumsTrack(id))?.map((track) => ({
+									(await fetchAlbumsTrack(id, token))?.map((track) => ({
 										...track,
 										album_id: id,
 										img: albumData.find((album) => album?.id === id)
@@ -56,7 +57,7 @@ export default async function addAlbum(
 							)
 						)
 					).flat()
-				: (await fetchAlbumsTrack(albumId))?.map((track) => ({
+				: (await fetchAlbumsTrack(albumId, token))?.map((track) => ({
 						...track,
 						album_id: albumId,
 						img: albumData.find((album) => album?.id === albumId)?.images?.[0]

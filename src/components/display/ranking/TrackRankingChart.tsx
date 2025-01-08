@@ -1,11 +1,11 @@
 "use client";
 
-import { TrackStatsType } from "@/lib/data/ranking/overview/getTracksStats";
+import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
 import React, { useEffect, useState } from "react";
 import RankingHeader, { HeaderSortByType } from "./RankingHeader";
 import RankingListItem from "./RankingListItem";
 import { useSearchParams } from "next/navigation";
-import { TrackHistoryType } from "@/lib/data/ranking/history/getTracksRankingHistory";
+import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import RankingAlbumFilterDropdown from "@/components/menu/RankingAlbumFilterDropdown";
 import { AlbumData } from "@/types/data";
 

@@ -1,4 +1,6 @@
 import { $Enums } from "@prisma/client";
+import { RankingSettingsType } from "./schemas/settings";
+import { RankingResultData } from "@/components/sorter/SorterField";
 
 export type AlbumData = {
 	name: string;
@@ -9,6 +11,7 @@ export type AlbumData = {
     artistId: string;
     spotifyUrl: string;
     releaseDate: Date;
+    tracks?: TrackData[]
 };
 
 export type ArtistData = {
@@ -71,10 +74,16 @@ export type RankingSessionData = {
 
 export type RankingDraftData = {
     id: string;
-    result: string | null;
+    result: RankingResultData[] | null;
     date: Date;
     userId: string;
-    artistId: string | null;
+    artistId: string;
     draft: string | null;
     type: $Enums.RankingType | null;
+}
+
+export type UserPreferenceData = {
+    id: string;
+    userId: string;
+    rankingSettings: RankingSettingsType;
 }

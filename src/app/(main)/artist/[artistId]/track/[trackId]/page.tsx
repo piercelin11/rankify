@@ -1,6 +1,6 @@
 import getTracksStats, {
 	TrackStatsType,
-} from "@/lib/data/ranking/overview/getTracksStats";
+} from "@/lib/database/ranking/overview/getTracksStats";
 import { notFound } from "next/navigation";
 import React from "react";
 import { getUserSession } from "@/../auth";

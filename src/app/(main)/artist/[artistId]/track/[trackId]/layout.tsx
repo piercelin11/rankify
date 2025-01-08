@@ -1,8 +1,6 @@
-"use cache"
-
 import InfoHeader from "@/components/display/showcase/InfoHeader";
 import ContentWrapper from "@/components/general/ContentWrapper";
-import getTrackById from "@/lib/data/getTrackById";
+import getTrackById from "@/lib/database/data/getTrackById";
 import { notFound } from "next/navigation";
 
 type AdminLayoutProps = {

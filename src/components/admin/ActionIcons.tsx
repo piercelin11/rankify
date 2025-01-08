@@ -5,11 +5,11 @@ import { Pencil1Icon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
 import deleteItem from "@/lib/action/admin/deleteItem";
 import ModalWrapper from "../general/ModalWrapper";
 import { AlbumData, ArtistData } from "@/types/data";
-import EditAlbumForm from "./AlbumEditingForm";
 import updateInfo from "@/lib/action/admin/updateInfo";
 import { cn } from "@/lib/cn";
 import Button from "../ui/Button";
-import { Description } from "../ui/Text";
+import fetchSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
+import ComfirmationModal from "../general/ComfirmationModal";
 
 const svgAttributes = {
 	className: "text-zinc-400 hover:text-zinc-100",
@@ -35,47 +35,38 @@ export default function ActionIcons({
 
 	const { id } = data;
 
+	async function handleUpdate() {
+		const accessToken = await fetchSpotifyToken();
+		updateInfo(type, id, accessToken);
+	}
+
 	return (
 		<div
 			className={cn("flex gap-6", {
 				"justify-end": type === "artist",
 			})}
 		>
-			<UpdateIcon {...svgAttributes} onClick={() => updateInfo(type, id)} />
+			<UpdateIcon {...svgAttributes} onClick={handleUpdate} />
 			<Pencil1Icon {...svgAttributes} onClick={() => setOpen(true)} />
-			<TrashIcon onClick={() => setComfirmationOpen(true)} {...svgAttributes} />
+			<ComfirmationModal
+				onConfirm={() => deleteItem(type, id)}
+				onCancel={() => setComfirmationOpen(false)}
+				comfirmLabel="Delete"
+				cancelLabel="Cancel"
+				isOpen={isComfirmationOpen}
+				setOpen={setComfirmationOpen}
+				title="Are You Sure?"
+				description="This action cannot be undone."
+				warning="Warning: All associated data will also be removed."
+			>
+				<TrashIcon
+					onClick={() => setComfirmationOpen(true)}
+					{...svgAttributes}
+				/>
+			</ComfirmationModal>
 
 			{isOpen && (
 				<ModalWrapper setOpen={setOpen}>{children(setOpen)}</ModalWrapper>
-			)}
-
-			{isComfirmationOpen && (
-				<ModalWrapper setOpen={setComfirmationOpen}>
-					<div className="flex flex-col items-center p-8">
-						<h2 className="mb-8">Are You Sure?</h2>
-						<div className="mb-14 space-y-2">
-							<p className="text-center">This action cannot be undone.</p>
-							<p className="font-semibold text-zinc-100">
-								Warning: All associated data will also be removed.
-							</p>
-						</div>
-
-						<div className="flex gap-4">
-							<Button
-								variant="outline"
-								onClick={() => setComfirmationOpen(false)}
-							>
-								Cancel
-							</Button>
-							<Button
-								variant="lime"
-								onClick={() => deleteItem(type, id)}
-							>
-								Delete
-							</Button>
-						</div>
-					</div>
-				</ModalWrapper>
 			)}
 		</div>
 	);

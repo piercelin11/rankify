@@ -3,16 +3,18 @@
 import { getUserSession } from "@/../auth";
 import { db } from "@/lib/prisma";
 import { RankingResultData } from "@/components/sorter/SorterField";
+import { revalidatePath } from "next/cache";
 
-export default async function saveRankingDraft(
+export default async function saveDraftResult(
     artistId: string,
-    result: RankingResultData[]
+    result: RankingResultData[],
+    draft?: string,
 ) {
     const { id: userId } = await getUserSession();
     let isSuccess = false;
 
     const existingDraft = await db.rankingDraft.findFirst({
-        where: {
+        where: { 
             artistId,
             userId,
         },
@@ -24,7 +26,8 @@ export default async function saveRankingDraft(
                 data: {
                     userId,
                     artistId,
-                    result: JSON.stringify(result)
+                    result,
+                    draft
                 },
             });
         else
@@ -33,7 +36,8 @@ export default async function saveRankingDraft(
                     id: existingDraft.id,
                 },
                 data: {
-                    result: JSON.stringify(result)
+                    result,
+                    draft
                 },
             });
 
@@ -43,5 +47,6 @@ export default async function saveRankingDraft(
         return { success: false, message: "Failed to save draft result" };
     }
 
+    revalidatePath(`/sorter/${artistId}/result`);
     return { success: true, message: "Draft result is successfully saved." };
 }

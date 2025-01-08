@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { SearchInput } from "@/components/ui/Input";
 import ArtistSearchResultItem from "./ArtistSearchResultItem";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";

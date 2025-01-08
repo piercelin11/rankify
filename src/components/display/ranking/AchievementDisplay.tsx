@@ -1,4 +1,4 @@
-import { TrackHistoryType } from "@/lib/data/ranking/history/getTracksRankingHistory";
+import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import {
 	ArrowDownIcon,
 	ArrowUpIcon,

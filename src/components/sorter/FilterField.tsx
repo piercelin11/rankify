@@ -59,7 +59,7 @@ export default function FilterField({ albums, singles }: FilterFieldProps) {
 				</Link>
 			</div>
 			<div className="scrollbar-hidden overflow-auto">
-				<div className="flex gap-2">
+				<div className="flex gap-3">
 					{albums.map((album) => (
 						<div
 							key={album.id}

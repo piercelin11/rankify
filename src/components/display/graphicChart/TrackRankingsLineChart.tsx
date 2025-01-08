@@ -2,7 +2,7 @@
 
 import { LineChart } from "@/components/chart/LineChart";
 import LineChartFilterDropdown from "@/components/menu/LineChartFilterDropdown";
-import { TrackStatsType } from "@/lib/data/ranking/overview/getTracksStats";
+import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
 import { dateToDashFormat } from "@/lib/utils/helper";
 import { useSearchParams } from "next/navigation";
 import React from "react";

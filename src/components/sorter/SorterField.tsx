@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, startTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeftIcon } from "@radix-ui/react-icons";
 import { RankingDraftData, TrackData } from "@/types/data";
@@ -8,6 +8,7 @@ import saveDraft from "@/lib/action/user/saveDraft";
 import deleteRankingDraft from "@/lib/action/user/deleteRankingDraft";
 import saveDraftResult from "@/lib/action/user/saveDraftResult";
 import useSorterContext from "@/lib/hooks/contexts/SorterContext";
+import ComfirmationModal from "../general/ComfirmationModal";
 
 type HistoryState = {
 	cmp1: number;
@@ -35,7 +36,10 @@ type SorterFieldProps = {
 };
 
 export default function SorterField({ datas, draft }: SorterFieldProps) {
-	const { excluded, setPercentage } = useSorterContext();
+	const { excluded, setPercentage, setSaving, isSaved, setSaved } =
+		useSorterContext();
+	const [isOpen, setOpen] = useState<boolean>(false);
+	const autoSaveCounter = 15;
 	const tracks = excluded
 		? datas.filter(
 				(data) =>
@@ -287,8 +291,8 @@ export default function SorterField({ datas, draft }: SorterFieldProps) {
 		history.current.push(prevState);
 	}
 
-	//每次sort變儲存記錄到本地存儲
-	function handleSave() {
+	//儲存記錄到本地存儲
+	async function handleSave() {
 		var currentState = {
 			cmp1: cmp1.current,
 			cmp2: cmp2.current,
@@ -305,7 +309,12 @@ export default function SorterField({ datas, draft }: SorterFieldProps) {
 			namMember: namMember.current,
 			percent: percent.current,
 		};
-		saveDraft(artistId, JSON.stringify(currentState));
+		await saveDraft(artistId, JSON.stringify(currentState));
+	}
+
+	//放棄或退出排名遊戲並回到歌手頁面
+	function handleQuit() {
+		router.replace(`/artist/${artistId}/overview`);
 	}
 
 	//將所有變數與陣列資料重回上一步驟的資料
@@ -333,7 +342,7 @@ export default function SorterField({ datas, draft }: SorterFieldProps) {
 		}
 	}
 
-	//刪除本地存儲資料
+	//刪除草稿資料
 	function handleClear() {
 		deleteRankingDraft(artistId);
 		setPercentage(0);
@@ -373,7 +382,24 @@ export default function SorterField({ datas, draft }: SorterFieldProps) {
 			array.current[i] = namMember.current[lstMember.current[0][i]];
 		}
 
-		await saveDraftResult(artistId, resultArray);
+		var currentState = {
+			cmp1: cmp1.current,
+			cmp2: cmp2.current,
+			head1: head1.current,
+			head2: head2.current,
+			rec: rec.current.slice(),
+			nrec: nrec.current,
+			equal: equal.current.slice(),
+			finishSize: finishSize.current,
+			finishFlag: finishFlag.current,
+			lstMember: lstMember.current.slice(),
+			parent: parent.current.slice(),
+			totalSize: totalSize.current,
+			namMember: namMember.current,
+			percent: percent.current,
+		};
+
+		await saveDraftResult(artistId, resultArray, JSON.stringify(currentState));
 		router.replace(`/sorter/${artistId}/result`);
 	}
 
@@ -404,24 +430,31 @@ export default function SorterField({ datas, draft }: SorterFieldProps) {
 		}
 	}, [datas]);
 
+	useEffect(() => {
+		if (history.current.length === 0) return;
+		setSaved(false);
+		const autoSaveTimer = setTimeout(() => {
+			startTransition(async () => {
+				setSaving(true);
+				try {
+					setTimeout(async () => {
+						if (isOpen) return;
+						await handleSave();
+						setSaving(false);
+						setSaved(true);
+					}, 1000);
+				} catch (error) {
+					console.error("Failed to save draft:", error);
+				}
+			});
+		}, 1000 * autoSaveCounter);
+		return () => {
+			clearTimeout(autoSaveTimer);
+		};
+	}, [leftField, rightField]);
+
 	//用鍵盤選擇歌曲
 	const [pressedBtn, setPressedBtn] = useState<string>("");
-
-	function handleKeyUp(e: KeyboardEvent): void {
-		const key = e.key;
-		if (key === "ArrowLeft") {
-			if (finishFlag.current === 0) sortList(-1);
-			setPressedBtn("");
-		}
-		if (key === "ArrowRight") {
-			if (finishFlag.current === 0) sortList(1);
-			setPressedBtn("");
-		}
-		if (key === "ArrowUp" || key === "ArrowDown") {
-			if (finishFlag.current === 0) sortList(0);
-			setPressedBtn("");
-		}
-	}
 
 	function handleKeyDown(e: KeyboardEvent): void {
 		const key = e.key;
@@ -436,6 +469,22 @@ export default function SorterField({ datas, draft }: SorterFieldProps) {
 		}
 		if (key === "ArrowDown") {
 			setPressedBtn("ArrowDown");
+		}
+	}
+
+	function handleKeyUp(e: KeyboardEvent): void {
+		const key = e.key;
+		if (key === "ArrowLeft") {
+			if (finishFlag.current === 0) sortList(-1);
+			setPressedBtn("");
+		}
+		if (key === "ArrowRight") {
+			if (finishFlag.current === 0) sortList(1);
+			setPressedBtn("");
+		}
+		if (key === "ArrowUp" || key === "ArrowDown") {
+			if (finishFlag.current === 0) sortList(0);
+			setPressedBtn("");
 		}
 	}
 
@@ -481,8 +530,10 @@ export default function SorterField({ datas, draft }: SorterFieldProps) {
 								alt="cover"
 							/>
 							<div className="space-y-1 pb-3 pt-8 text-center">
-								<p className="text-lg font-semibold">{leftField?.name}</p>
-								<p className="text-zinc-500">
+								<p className="line-clamp-1 text-lg font-semibold">
+									{leftField?.name}
+								</p>
+								<p className="line-clamp-1 text-zinc-500">
 									{leftField?.album?.name || "Non-album track"}
 								</p>
 							</div>
@@ -537,8 +588,10 @@ export default function SorterField({ datas, draft }: SorterFieldProps) {
 								alt="cover"
 							/>
 							<div className="space-y-1 pb-3 pt-8 text-center">
-								<p className="text-lg font-semibold">{rightField?.name}</p>
-								<p className="text-zinc-500">
+								<p className="line-clamp-1 text-lg font-semibold">
+									{rightField?.name}
+								</p>
+								<p className="line-clamp-1 text-zinc-500">
 									{rightField?.album?.name || "Non-album track"}
 								</p>
 							</div>
@@ -561,12 +614,35 @@ export default function SorterField({ datas, draft }: SorterFieldProps) {
 							>
 								<p>Clear and Restart</p>
 							</div>
-							<div
-								className="flex cursor-pointer items-center gap-5 rounded-lg bg-zinc-900 p-5 hover:bg-zinc-800"
-								onClick={handleSave}
-							>
-								<p>Save and Quit</p>
-							</div>
+							{!isSaved && history.current.length !== 0 ? (
+								<ComfirmationModal
+									onConfirm={async () => {
+										await handleSave();
+										handleQuit();
+									}}
+									onCancel={() => handleQuit()}
+									isOpen={isOpen}
+									setOpen={setOpen}
+									cancelLabel="Quit"
+									comfirmLabel="Save"
+									description="Your ranking record has not been saved."
+									warning="Are you sure you want to leave?"
+								>
+									<div
+										className="flex cursor-pointer items-center gap-5 rounded-lg bg-zinc-900 p-5 hover:bg-zinc-800"
+										onClick={() => setOpen(true)}
+									>
+										<p>Quit</p>
+									</div>
+								</ComfirmationModal>
+							) : (
+								<div
+									className="flex cursor-pointer items-center gap-5 rounded-lg bg-zinc-900 p-5 hover:bg-zinc-800"
+									onClick={() => handleQuit()}
+								>
+									<p>Quit</p>
+								</div>
+							)}
 						</div>
 					</div>
 				</>

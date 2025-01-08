@@ -14,6 +14,10 @@ type SorterContextType = {
 	setExcluded: Dispatch<SetStateAction<FilterType | null>>;
 	percentage: number;
 	setPercentage: Dispatch<SetStateAction<number>>;
+	isSaved: boolean;
+	setSaved: Dispatch<SetStateAction<boolean>>;
+	isSaving: boolean;
+	setSaving: Dispatch<SetStateAction<boolean>>;
 };
 
 export type FilterType = { albums: string[]; tracks: string[] };
@@ -23,10 +27,21 @@ const SorterContext = createContext<SorterContextType | null>(null);
 export function SorterContextProvider({ children }: { children: ReactNode }) {
 	const [excluded, setExcluded] = useState<FilterType | null>(null);
 	const [percentage, setPercentage] = useState<number>(0);
+	const [isSaving, setSaving] = useState<boolean>(false);
+	const [isSaved, setSaved] = useState<boolean>(false);
 
 	return (
 		<SorterContext.Provider
-			value={{ excluded, setExcluded, percentage, setPercentage }}
+			value={{
+				excluded,
+				setExcluded,
+				percentage,
+				setPercentage,
+				isSaving,
+				setSaving,
+				isSaved,
+				setSaved,
+			}}
 		>
 			{children}
 		</SorterContext.Provider>

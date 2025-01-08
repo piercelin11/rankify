@@ -18,29 +18,44 @@ export const adminMenuData: MenuItem[] = [
 		icon: () => <StarIcon />,
 		link: "/admin/artist",
 	},
-    {
-        name: "Users",
+	{
+		name: "Users",
 		icon: () => <AvatarIcon />,
 		link: "/admin/user",
-    },
-    {
-        name: "Settings",
+	},
+	{
+		name: "Settings",
 		icon: () => <GearIcon />,
 		link: "/admin/setting",
-    }
+	},
 ];
 
 export const mainMenuData: MenuItem[] = [
-    {
-        name: "Home",
+	{
+		name: "Home",
 		icon: () => <HomeIcon />,
 		link: "/",
-    },
-    {
-        name: "Settings",
+	},
+	{
+		name: "Settings",
 		icon: () => <GearIcon />,
-		link: "/setting",
-    }
+		link: "/settings",
+	},
+];
+
+export const settingsMenuData: Omit<MenuItem, "icon">[] = [
+	{
+		name: "Profile",
+		link: "/settings/profile",
+	},
+	{
+		name: "Ranking",
+		link: "/settings/ranking",
+	},
+	{
+		name: "Notifications",
+		link: "/settings/notification",
+	},
 ];
 
 export const getNavMenuData = (artistId: string) => [

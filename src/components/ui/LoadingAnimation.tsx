@@ -2,10 +2,12 @@ import { cn } from "@/lib/cn";
 
 type LoadingAnimationProps = {
 	size?: "small" | "base";
+	isFull?: boolean;
 };
 
 export default function LoadingAnimation({
 	size = "base",
+	isFull = true
 }: LoadingAnimationProps) {
 	const styles =
 		size === "small"
@@ -14,7 +16,7 @@ export default function LoadingAnimation({
 
 	return (
 		<div
-			className={`border-zinc-500 ${styles} mx-auto animate-spin rounded-full border-t-zinc-800`}
+			className={`border-zinc-500 ${styles} ${isFull ? "mx-auto" : ""} animate-spin rounded-full border-t-zinc-800`}
 		></div>
 	);
 }

@@ -1,4 +1,4 @@
-"use server";
+"use server"; 
 
 import { redirect } from "next/navigation";
 import { getUserSession } from "@/../auth";
@@ -41,10 +41,6 @@ export default async function saveDraft(
 	} catch (error) {
 		console.error("Failed to save draft:", error);
 		return { success: false, message: "Failed to save draft" };
-	}
-
-	if (isSuccess) {
-		redirect(`/artist/${artistId}/overview`);
 	}
 
 	return { success: true, message: "Draft is successfully saved." };

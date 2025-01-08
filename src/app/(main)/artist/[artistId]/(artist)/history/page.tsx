@@ -3,10 +3,10 @@ import { getUserSession } from "@/../auth";
 import NavigationTabs from "@/components/menu/NavigationTabs";
 import { getNavMenuData } from "@/config/menuData";
 import DropdownMenu from "@/components/menu/DropdownMenu";
-import getRankingSession from "@/lib/data/user/getRankingSession";
+import getRankingSession from "@/lib/database/user/getRankingSession";
 import { dateToDashFormat } from "@/lib/utils/helper";
-import { getTracksRankingHistory } from "@/lib/data/ranking/history/getTracksRankingHistory";
-import { getAlbumsRankingHistory } from "@/lib/data/ranking/history/getAlbumsRankingHistory";
+import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTracksRankingHistory";
+import { getAlbumsRankingHistory } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
 import TopRankingList from "@/components/display/ranking/TopRankingList";
 import { AlbumInfoBox } from "@/components/display/showcase/InfoBox";
 import TopSongsCountChart from "@/components/display/graphicChart/TopSongsCountChart";
@@ -28,7 +28,7 @@ export default async function ArtistHistoryPage({
 	const { id: userId } = await getUserSession();
 
 	const rankingSessions = await getRankingSession({ artistId, userId });
-	const dateId = (await searchParams).date || rankingSessions[0].id;
+	const dateId = (await searchParams).date || rankingSessions[0]?.id;
 	const date = rankingSessions.find((session) => session.id === dateId)?.date;
 
 	const navMenuData = getNavMenuData(artistId);
@@ -46,12 +46,12 @@ export default async function ArtistHistoryPage({
 					defaultValue={
 						date
 							? dateToDashFormat(date)
-							: dateToDashFormat(rankingSessions[0].date)
+							: dateToDashFormat(rankingSessions[0]?.date)
 					}
 				/>
 				<div className="flex gap-4">
 					<NavigationTabs menuData={navMenuData} />
-					<Link href={`/sorter/${artistId}`} replace>
+					<Link href={`/sorter/${artistId}`}>
 						<div className="aspect-square rounded-full bg-lime-500 p-4 text-zinc-950 hover:bg-zinc-100">
 							<PlusIcon width={16} height={16} />
 						</div>
@@ -59,7 +59,15 @@ export default async function ArtistHistoryPage({
 				</div>
 			</div>
 			<Suspense fallback={<LoadingAnimation />}>
-				<HistoryContents artistId={artistId} userId={userId} dateId={dateId} />
+				{rankingSessions.length !== 0 ? (
+					<HistoryContents
+						artistId={artistId}
+						userId={userId}
+						dateId={dateId}
+					/>
+				) : (
+					<NoData />
+				)}
 			</Suspense>
 		</div>
 	);
@@ -108,13 +116,9 @@ async function HistoryContents({
 								labels: albumRankings.map((album) => album.name),
 								mainData: albumRankings.map((album) => album.totalPoints),
 								subData: albumRankings.map(
-									(album) => album.previousTotalPoints
+									(album) => album.rawTotalPoints
 								),
 								color: albumRankings.map((album) => album.color),
-							}}
-							datasetLabels={{
-								mainDataLabel: "points",
-								subDataLabel: "previous points",
 							}}
 						/>
 					) : (

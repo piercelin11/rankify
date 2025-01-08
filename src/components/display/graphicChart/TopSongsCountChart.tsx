@@ -2,8 +2,8 @@
 
 import PolarAreaChart from "@/components/chart/PolarAreaChart";
 import { cn } from "@/lib/cn";
-import { AlbumHistoryType } from "@/lib/data/ranking/history/getAlbumsRankingHistory";
-import { AlbumStatsType } from "@/lib/data/ranking/overview/getAlbumsStats";
+import { AlbumHistoryType } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
+import { AlbumStatsType } from "@/lib/database/ranking/overview/getAlbumsStats";
 import React, { useState } from "react";
 
 type TopSongsCountChartProps = {

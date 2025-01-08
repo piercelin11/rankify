@@ -2,9 +2,12 @@ import getSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
 import { Artist } from "spotify-types";
 
 export default async function fetchArtist(
-	artistId: string
+	artistId: string,
+	token?: string
 ): Promise<Artist | null> {
-	const accessToken = await getSpotifyToken();
+	let accessToken: string;
+	if (token) accessToken = token;
+	else accessToken = await getSpotifyToken();
 
 	try {
 		const response = await fetch(

@@ -6,11 +6,26 @@ type SidebarLayoutProps = {
 
 export default function SidebarLayout({ children }: SidebarLayoutProps) {
 	return (
-		<div className="min-h-screen">
-			<div className="fixed min-h-screen w-[80px] border-r border-zinc-850 md:w-[300px] 2xl:w-[350px]">
+		<>
+			<div className="fixed z-10 h-screen w-[80px] border-r border-zinc-850 md:w-[300px] 2xl:w-[350px]">
 				{children[0]}
 			</div>
-			<div className="pl-[80px] md:pl-[300px] 2xl:pl-[350px]">{children[1]}</div>
+			<div className="h-screen overflow-auto pl-[80px] scrollbar-hidden md:pl-[300px] 2xl:pl-[350px]">
+				{children[1]}
+			</div>
+		</>
+	);
+}
+
+export function SettingsSidebarLayout({ children }: SidebarLayoutProps) {
+	return (
+		<div className="h-screen">
+			<div className="fixed h-screen w-[80px] md:w-[300px] 2xl:w-[350px]">
+				{children[0]}
+			</div>
+			<div className="pl-[80px] md:pl-[300px] 2xl:pl-[350px]">
+				{children[1]}
+			</div>
 		</div>
 	);
 }

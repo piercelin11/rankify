@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Album, Artist } from "spotify-types";
 import SelectableItem from "./SelectableItem";
 import Button from "@/components/ui/Button";
@@ -12,13 +12,14 @@ import { SearchInput } from "../ui/Input";
 import useSearchInput from "@/lib/hooks/useSearchInput";
 import fetchArtist from "@/lib/spotify/fetchArtist";
 import addSingle from "@/lib/action/admin/addSingle";
+import fetchSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
 
 type SelectItemFormProps = {
 	artistId: string;
 	handleCancel: () => void;
 	type: "Album" | "EP" | "Single";
 	actionType?: "addArtist";
-};
+}; 
 
 export default function SelectItemForm({
 	artistId,
@@ -67,21 +68,23 @@ export default function SelectItemForm({
 	}
 
 	async function handleSubmit() {
+		const accessToken = await fetchSpotifyToken();
 		setPending(true);
 		try {
 			if (actionType === "addArtist") {
-				const response = await addArtist(artistId, selectedIds);
+				const response = await addArtist(artistId, selectedIds, accessToken);
 				setResponse(response);
 			} else if (type === "Album" || type === "EP") {
 				const response = await addAlbum(
 					artistId,
 					selectedIds,
-					type.toUpperCase() as "EP" | "ALBUM"
+					type.toUpperCase() as "EP" | "ALBUM",
+					accessToken
 				);
 				setResponse(response);
 				if (response.success) handleCancel();
 			} else {
-				const response = await addSingle(artistId, selectedIds);
+				const response = await addSingle(artistId, selectedIds, accessToken);
 				setResponse(response);
 				if (response.success) handleCancel();
 			}

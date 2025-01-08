@@ -1,22 +1,23 @@
-"use server";
+"use server"; 
 
-import getArtist from "@/lib/spotify/fetchArtist";
+import fetchArtist from "@/lib/spotify/fetchArtist";
 import { db } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
 import { redirect } from "next/navigation";
 import { ActionResponse } from "@/types/action";
-import getAlbumsByArtist from "@/lib/data/getAlbumsByArtist";
-import getTracksByArtist from "@/lib/data/getTracksByArtist";
+import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
+import getTracksByArtist from "@/lib/database/data/getTracksByArtist";
 import { revalidateTag } from "next/cache";
 
 export default async function addArtist(
 	artistId: string,
-	albumId: string | string[]
+	albumId: string | string[],
+	token?: string,
 ): Promise<ActionResponse> {
 	let isSuccess = false;
 
-	const artistData = await getArtist(artistId);
+	const artistData = await fetchArtist(artistId, token);
 
 	if (!artistData)
 		throw new Error("Can't find any artist matching the given artist id.");
@@ -48,8 +49,8 @@ export default async function addArtist(
 				};
 
 			const albumData = Array.isArray(albumId)
-				? await Promise.all(albumId.map((id) => fetchAlbum(id)))
-				: [await fetchAlbum(albumId)];
+				? await Promise.all(albumId.map((id) => fetchAlbum(id, token)))
+				: [await fetchAlbum(albumId, token)];
 
 			const savedAlbumsName = (await getAlbumsByArtist(artistId)).map(
 				(album) => album.name
@@ -75,7 +76,7 @@ export default async function addArtist(
 							await Promise.all(
 								albumId.map(
 									async (id) =>
-										(await fetchAlbumsTrack(id))?.map((track) => ({
+										(await fetchAlbumsTrack(id, token))?.map((track) => ({
 											...track,
 											album_id: id,
 											img: albumData.find((album) => album?.id === id)
@@ -84,7 +85,7 @@ export default async function addArtist(
 								)
 							)
 						).flat()
-					: (await fetchAlbumsTrack(albumId))?.map((track) => ({
+					: (await fetchAlbumsTrack(albumId, token))?.map((track) => ({
 							...track,
 							album_id: albumId,
 							img: albumData.find((album) => album?.id === albumId)?.images?.[0]

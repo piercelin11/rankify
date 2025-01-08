@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
-import getTracksStats from "@/lib/data/ranking/overview/getTracksStats";
-import { getAlbumsStats } from "@/lib/data/ranking/overview/getAlbumsStats";
+import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
+import { getAlbumsStats } from "@/lib/database/ranking/overview/getAlbumsStats";
 import DoubleBarChart from "@/components/chart/DoubleBarChart";
 import NavigationTabs from "@/components/menu/NavigationTabs";
 import DropdownMenu from "@/components/menu/DropdownMenu";
@@ -39,7 +39,7 @@ export default async function ArtistOverViewPage({
 				/>
 				<div className="flex gap-4">
 					<NavigationTabs menuData={navMenuData} />
-					<Link href={`/sorter/${artistId}`} replace>
+					<Link href={`/sorter/${artistId}`}>
 						<div className="aspect-square rounded-full bg-lime-500 p-4 text-zinc-950 hover:bg-zinc-100">
 							<PlusIcon width={16} height={16} />
 						</div>
@@ -90,10 +90,6 @@ async function OverviewContents({
 								mainData: albumRankings.map((album) => album.totalPoints),
 								subData: albumRankings.map((album) => album.rawTotalPoints),
 								color: albumRankings.map((album) => album.color),
-							}}
-							datasetLabels={{
-								mainDataLabel: "points",
-								subDataLabel: "raw points",
 							}}
 						/>
 					) : (

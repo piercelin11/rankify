@@ -11,18 +11,19 @@ import updateAlbum from "@/lib/action/admin/updateAlbum";
 import FormMessage from "../form/FormMessage";
 import { ActionResponse } from "@/types/action";
 import LoadingAnimation from "../ui/LoadingAnimation";
-import { useFormStatus } from "react-dom";
 
 type AlbumEditingFormProps = {
 	data: AlbumData;
 	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function AlbumEditingForm({ data, setOpen }: AlbumEditingFormProps) {
+export default function AlbumEditingForm({
+	data,
+	setOpen,
+}: AlbumEditingFormProps) {
 	const [colorMode, setcolorMode] = useState<"radio" | "text">("radio");
 	const [response, setResponse] = useState<ActionResponse | null>(null);
-
-	const { pending } = useFormStatus();
+	const [isPending, setPending] = useState<boolean>(false);
 
 	const {
 		register,
@@ -33,16 +34,19 @@ export default function AlbumEditingForm({ data, setOpen }: AlbumEditingFormProp
 	});
 
 	async function onSubmit(formData: updateAlbumType) {
+		setPending(true);
 		try {
 			const updateAlbumResponse = await updateAlbum(data.id, formData);
 			setResponse(updateAlbumResponse);
-			if(updateAlbumResponse.success) setOpen(false)
+			if (updateAlbumResponse.success) setOpen(false);
 		} catch (error) {
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT") {
 					setResponse({ success: false, message: "Something went wrong." });
 				}
 			}
+		} finally {
+			setPending(false);
 		}
 	}
 
@@ -73,14 +77,14 @@ export default function AlbumEditingForm({ data, setOpen }: AlbumEditingFormProp
 					<Button
 						variant="outline"
 						onClick={() => setOpen(false)}
-						disabled={pending}
+						disabled={isPending}
 					>
 						Cancel
 					</Button>
-					<Button variant="lime" type="submit" disabled={pending}>
+					<Button variant="lime" type="submit" disabled={isPending}>
 						Save
 					</Button>
-					{pending && (
+					{isPending && (
 						<div className="px-5">
 							<LoadingAnimation />
 						</div>
