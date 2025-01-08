@@ -40,16 +40,11 @@ export default async function MainLayout({ children }: AdminLayoutProps) {
 						<Link key={artist.id} href={`/artist/${artist.id}/overview`}>
 							<div className="flex items-center gap-2 rounded-md px-2 py-2 hover:bg-zinc-900">
 								<img
-									className="w-16 rounded-full"
+									className="w-14 rounded-full"
 									src={artist.img || "/pic/placeholder.jpg"}
 									alt={artist.name}
 								/>
-								<div className="space-y-1">
-									<p>{artist.name}</p>
-									<p className="text-sm text-zinc-500">
-										{artist.dates.length} logs
-									</p>
-								</div>
+								<p>{artist.name}</p>
 							</div>
 						</Link>
 					))}
