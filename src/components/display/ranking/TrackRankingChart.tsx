@@ -17,7 +17,6 @@ type TrackRankingChartProps<T> = {
 	albums: AlbumData[];
 	columns: Column<T>[];
 	title: string;
-	extraColumn?: ReactNode;
 };
 
 export default function TrackRankingChart<T extends RankingTableDataTypeExtend>({
@@ -25,7 +24,6 @@ export default function TrackRankingChart<T extends RankingTableDataTypeExtend>(
 	data,
 	columns,
 	title,
-	extraColumn
 }: TrackRankingChartProps<T>) {
 	const searchParams = useSearchParams();
 	const album = searchParams.get("album");

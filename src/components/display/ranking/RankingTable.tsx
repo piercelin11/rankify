@@ -3,7 +3,6 @@
 import React from "react";
 import RankChangeIconDisplay from "./RankChangeIconDisplay";
 import { useSearchParams } from "next/navigation";
-import { AlbumData, ArtistData } from "@/types/data";
 import {
 	ArrowDownIcon,
 	ArrowUpIcon,
@@ -11,18 +10,11 @@ import {
 } from "@radix-ui/react-icons";
 import { cn } from "@/lib/cn";
 import Link from "next/link";
+import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
+import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
+import AchievementDisplay from "./AchievementDisplay";
 
-export type RankingTableDataTypeExtend = {
-	id: string;
-	ranking: number;
-	img: string | null;
-	name: string;
-	albumId?: string | null
-	album?: AlbumData | null;
-	artist?: ArtistData;
-	artistId: string;
-	rankChange?: number | null;
-};
+export type RankingTableDataTypeExtend = TrackHistoryType & TrackStatsType;
 
 type Column<T> = {
 	key: keyof T;
@@ -42,7 +34,7 @@ export default function RankingTable<T extends RankingTableDataTypeExtend>({
 }: RankingTableProps<T>) {
 	return (
 		<div>
-			{hasHeader && <RankingHeader columns={columns} />}
+			{hasHeader && <RankingHeader columns={columns} data={data} />}
 			{data.map((row) => (
 				<RankingRow key={row.id} data={row} columns={columns} />
 			))}
@@ -59,56 +51,65 @@ export function RankingRow<T extends RankingTableDataTypeExtend>({
 	data,
 	columns,
 }: RankingRowProps<T>) {
+	const isHistory = data.rankChange !== undefined;
 	const searchParams = useSearchParams();
 	const sortQuery = searchParams.get("sort");
 
 	return (
 		<Link href={`/artist/${data.artistId}/track/${data.id}`}>
-		<div className="grid cursor-pointer select-none grid-cols-[45px,_3fr,_2fr] items-center gap-3 rounded border-b border-zinc-900 py-3 pl-2 pr-6 hover:bg-zinc-900">
-			<p className="mr-1 justify-self-end font-numeric text-lg font-medium tabular-nums text-zinc-400">
-				{data.ranking}
-			</p>
-			<div className="flex items-center gap-3">
-				{data.rankChange !== undefined && <RankChangeIconDisplay data={data} />}
-				<img
-					className="rounded"
-					src={data.img || undefined}
-					alt={data.name}
-					width={65}
-					height={65}
-				/>
-				<div>
-					<p className="font-medium">{data.name}</p>
-					<p className="text-sm text-zinc-500">{data.album?.name}</p>
+			<div className="grid cursor-pointer select-none grid-cols-[45px,_3fr,_2fr] items-center gap-3 rounded border-b border-zinc-900 py-3 pl-2 pr-6 hover:bg-zinc-900">
+				<p className="mr-1 justify-self-end font-numeric text-lg font-medium tabular-nums text-zinc-400">
+					{data.ranking}
+				</p>
+				<div className="flex items-center gap-3">
+					{data.rankChange !== undefined && (
+						<RankChangeIconDisplay data={data} />
+					)}
+					<img
+						className="rounded"
+						src={data.img || undefined}
+						alt={data.name}
+						width={65}
+						height={65}
+					/>
+					<div>
+						<p className="font-medium">{data.name}</p>
+						<p className="text-sm text-zinc-500">{data.album?.name}</p>
+					</div>
+				</div>
+				<div
+					className="grid items-center justify-items-end font-numeric"
+					style={{
+						gridTemplateColumns: `repeat(${columns.length + (isHistory ? 1 : 0)}, 1fr)`,
+					}}
+				>
+					{columns.map((column) => (
+						<p
+							className={
+								sortQuery === column.key ? "text-zinc-100" : "text-zinc-500"
+							}
+							key={String(column.key)}
+						>
+							{(data[column.key] as number) || ""}
+						</p>
+					))}
+					{isHistory && <AchievementDisplay data={data} />}
 				</div>
 			</div>
-			<div
-				className="grid items-center justify-items-end font-numeric"
-				style={{ gridTemplateColumns: `repeat(${columns.length}, 1fr)` }}
-			>
-				{columns.map((column) => (
-					<p
-						className={
-							sortQuery === column.key ? "text-zinc-100" : "text-zinc-500"
-						}
-						key={String(column.key)}
-					>
-						{(data[column.key] as number) || ""}
-					</p>
-				))}
-			</div>
-		</div>
 		</Link>
 	);
 }
 
 type RankingHeaderProps<T> = {
+	data: T[];
 	columns: Column<T>[];
 };
 
 export function RankingHeader<T extends RankingTableDataTypeExtend>({
+	data,
 	columns,
 }: RankingHeaderProps<T>) {
+	const isHistory = data[0].rankChange !== undefined;
 	const searchParams = useSearchParams();
 	const sortQuery = searchParams.get("sort");
 	return (
@@ -117,16 +118,21 @@ export function RankingHeader<T extends RankingTableDataTypeExtend>({
 			<p>info</p>
 			<div
 				className="grid items-center justify-items-end font-numeric"
-				style={{ gridTemplateColumns: `repeat(${columns.length}, 1fr)` }}
+				style={{
+					gridTemplateColumns: `repeat(${columns.length + (isHistory ? 1 : 0)}, 1fr)`,
+				}}
 			>
 				{columns.map((column) => (
 					<div
-						className={sortQuery === column.key ? "text-zinc-100" : ""}
+						className={cn({
+							"text-zinc-100": sortQuery === column.key,
+						})}
 						key={String(column.key)}
 					>
 						<RankingHeaderCell column={column} />
 					</div>
 				))}
+				{isHistory}
 			</div>
 		</div>
 	);
