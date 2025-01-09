@@ -36,7 +36,7 @@ export default function RankingTable<T extends RankingTableDataTypeExtend>({
 		<div>
 			{hasHeader && <RankingHeader columns={columns} data={data} />}
 			{data.map((row) => (
-				<RankingRow key={row.id} data={row} columns={columns} />
+				<RankingRow key={row.id} data={row} columns={columns} hasHeader={hasHeader} />
 			))}
 		</div>
 	);
@@ -45,13 +45,15 @@ export default function RankingTable<T extends RankingTableDataTypeExtend>({
 type RankingRowProps<T> = {
 	data: T;
 	columns: Column<T>[];
+	hasHeader: boolean;
 };
 
 export function RankingRow<T extends RankingTableDataTypeExtend>({
 	data,
 	columns,
+	hasHeader,
 }: RankingRowProps<T>) {
-	const isHistory = data.rankChange !== undefined;
+	const isHistory = data.rankChange !== undefined && hasHeader;
 	const searchParams = useSearchParams();
 	const sortQuery = searchParams.get("sort");
 
@@ -132,7 +134,6 @@ export function RankingHeader<T extends RankingTableDataTypeExtend>({
 						<RankingHeaderCell column={column} />
 					</div>
 				))}
-				{isHistory}
 			</div>
 		</div>
 	);
