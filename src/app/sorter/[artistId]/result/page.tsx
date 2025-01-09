@@ -19,9 +19,9 @@ export default async function SorterResultPage({
 	}
 
 	return (
-		<div className="flex items-center justify-center py-32">
+		<div className="flex items-center justify-center py-20 2xl:py-32">
 			<div className="flex-auto">
-				<SorterResult draft={draft} />
+				<SorterResult draft={draft} /> 
 			</div>
 		</div>
 	);

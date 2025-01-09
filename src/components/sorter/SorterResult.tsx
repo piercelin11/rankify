@@ -71,7 +71,7 @@ export default function SorterResult({ draft }: SorterResultProps) {
 	}
 
 	return (
-		<div className="relative">
+		<div>
 			<div className="sticky top-0 flex items-center justify-between bg-zinc-950 py-10">
 				<h3>Your ranking result</h3>
 				<div className="flex gap-5">

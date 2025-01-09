@@ -1,35 +1,23 @@
-import { ArrowLeftIcon, ArrowTopRightIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
-import React from "react";
+import React, { ReactNode } from "react";
 
 type NavButtonProps = {
-	type: "forward" | "backward";
-	label: string;
+	children: [ReactNode, ReactNode];
 	link: string;
 };
 
 export default function RankingNavButton({
-	type,
-	label,
+	children,
 	link,
 }: NavButtonProps) {
 	return (
-		<div className="flex w-full justify-center">
+		<div className="flex w-full justify-center [&_svg]:self-center">
 			<Link
 				className="flex gap-2 text-zinc-500 hover:text-zinc-100"
 				href={link}
 			>
-				{type === "forward" ? (
-					<>
-						{label}
-						<ArrowTopRightIcon className="self-center" />
-					</>
-				) : (
-					<>
-						<ArrowLeftIcon className="self-center" />
-						{label}
-					</>
-				)}
+				{children[0]}
+				{children[1]}
 			</Link>
 		</div>
 	);

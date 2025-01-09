@@ -7,10 +7,10 @@ import { AlbumStatsType } from "@/lib/database/ranking/overview/getAlbumsStats";
 import React, { useState } from "react";
 
 type TopSongsCountChartProps = {
-	datas: AlbumStatsType[] | AlbumHistoryType[];
+	data: AlbumStatsType[] | AlbumHistoryType[];
 };
 
-export default function TopSongsCountChart({ datas }: TopSongsCountChartProps) {
+export default function TopSongsCountChart({ data }: TopSongsCountChartProps) {
 	const [view, setView] = useState<"25" | "50">("50");
 
 	const tabData = [
@@ -49,9 +49,9 @@ export default function TopSongsCountChart({ datas }: TopSongsCountChartProps) {
 			<div className="2xl:py-18 py-14">
 				<PolarAreaChart
 					data={{
-						labels: datas.map((ranking) => ranking.name),
-						mainData: datas.map((ranking) => ranking[mainDataKey]),
-						color: datas.map((ranking) => ranking.color),
+						labels: data.map((ranking) => ranking.name),
+						mainData: data.map((ranking) => ranking[mainDataKey]),
+						color: data.map((ranking) => ranking.color),
 					}}
 				/>
 			</div>

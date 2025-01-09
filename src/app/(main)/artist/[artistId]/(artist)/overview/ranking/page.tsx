@@ -1,10 +1,14 @@
 import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
-import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
+import getTracksStats, {
+	TrackStatsType,
+} from "@/lib/database/ranking/overview/getTracksStats";
 import RankingNavButton from "@/components/display/ranking/RankingNavButton";
 import TrackRankingChart from "@/components/display/ranking/TrackRankingChart";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
+import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import { dropdownMenuData } from "@/config/menuData";
+import { ArrowLeftIcon } from "@radix-ui/react-icons";
 
 export default async function ArtistRankingPage({
 	params,
@@ -27,10 +31,11 @@ export default async function ArtistRankingPage({
 				/>
 
 				<RankingNavButton
-					type="backward"
-					label="Back"
 					link={`/artist/${artistId}/overview?${new URLSearchParams(query)}`}
-				/>
+				>
+					<ArrowLeftIcon />
+					Back
+				</RankingNavButton>
 			</Suspense>
 		</>
 	);
@@ -45,18 +50,41 @@ async function OverviewRankingChart({
 	userId: string;
 	query: { [key: string]: string };
 }) {
+	const albums = await getLoggedAlbums({ artistId, userId });
 	const tracksRankings = await getTracksStats({
 		artistId,
 		userId,
 		time: query,
 	});
 
-	const dropdownDefaultValue =
-		dropdownMenuData.find(
-			(data) => JSON.stringify(data.query) === JSON.stringify(query)
-		)?.label ?? "lifetime";
+	const timeThreshold = dropdownMenuData.find(
+		(data) => JSON.stringify(data.query) === JSON.stringify(query)
+	)?.label;
+
+	const columns: {
+		key: keyof TrackStatsType;
+		header: string;
+	}[] = [
+		{
+			key: "peak",
+			header: "peak",
+		},
+		{
+			key: "gap",
+			header: "gap",
+		},
+		{
+			key: "totalChartRun",
+			header: "chartrun",
+		},
+	];
 
 	return (
-		<TrackRankingChart datas={tracksRankings} title={dropdownDefaultValue} />
+		<TrackRankingChart
+			data={tracksRankings}
+			columns={columns}
+			albums={albums}
+			title={timeThreshold || "lifetime"}
+		/>
 	);
 }

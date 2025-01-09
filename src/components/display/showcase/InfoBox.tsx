@@ -11,56 +11,56 @@ import NoData from "@/components/general/NoData";
 
 type TrackInfoBoxProps = {
 	type: "gainer" | "loser";
-	datas: TrackHistoryType[];
+	data: TrackHistoryType[];
 };
 
-export function TrackInfoBox({ type, datas }: TrackInfoBoxProps) {
+export function TrackInfoBox({ type, data }: TrackInfoBoxProps) {
 	function getInfo() {
 		switch (type) {
 			case "gainer":
-				const gainer = datas
+				const gainer = data
 					.filter((data) => data.rankChange !== null && data.rankChange > 0)
 					.sort((a, b) => b.rankChange! - a.rankChange!)[0];
 				return gainer;
 			case "loser":
-				const loser = datas
+				const loser = data
 					.filter((data) => data.rankChange !== null && data.rankChange < 0)
 					.sort((a, b) => a.rankChange! - b.rankChange!)[0];
 				return loser;
 		}
 	}
 
-	const data = getInfo();
-	const info = { ...data, change: data.rankChange! };
+	const track = getInfo();
+	const info = { ...track, change: track.rankChange! };
 
 	return <InfoBox info={info} type={type} unit="ranking" />;
 }
 
 type AlbumInfoBoxProps = {
 	type: "gainer" | "loser";
-	datas: AlbumHistoryType[];
+	data: AlbumHistoryType[];
 };
 
-export function AlbumInfoBox({ type, datas }: AlbumInfoBoxProps) {
+export function AlbumInfoBox({ type, data }: AlbumInfoBoxProps) {
 	function getInfo() {
-		if (datas.filter((data) => data.pointsChange !== null).length === 0)
+		if (data.filter((data) => data.pointsChange !== null).length === 0)
 			return null;
 		switch (type) {
 			case "gainer":
-				const gainer = datas
+				const gainer = data
 					.filter((data) => data.pointsChange !== null && data.pointsChange > 0)
 					.sort((a, b) => b.pointsChange! - a.pointsChange!)[0];
 				return gainer;
 			case "loser":
-				const loser = datas
+				const loser = data
 					.filter((data) => data.pointsChange !== null && data.pointsChange < 0)
 					.sort((a, b) => a.pointsChange! - b.pointsChange!)[0];
 				return loser;
 		}
 	}
 
-	const data = getInfo();
-	const info = data ? { ...data, change: data.pointsChange! } : null;
+	const album = getInfo();
+	const info = album ? { ...album, change: album.pointsChange! } : null;
 
 	return <InfoBox info={info} type={type} unit="points" />;
 }

@@ -7,10 +7,12 @@ import NavigationTabs from "@/components/menu/NavigationTabs";
 import DropdownMenu from "@/components/menu/DropdownMenu";
 import NoData from "@/components/general/NoData";
 import { dropdownMenuData, getNavMenuData } from "@/config/menuData";
-import TopRankingList from "@/components/display/ranking/TopRankingList";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
 import Link from "next/link";
-import { PlusIcon } from "@radix-ui/react-icons";
+import { ArrowTopRightIcon, PlusIcon } from "@radix-ui/react-icons";
+import RankingTable from "@/components/display/ranking/RankingTable";
+import RankingNavButton from "@/components/display/ranking/RankingNavButton";
+import getRankingSession from "@/lib/database/user/getRankingSession";
 
 export default async function ArtistOverViewPage({
 	params,
@@ -24,6 +26,7 @@ export default async function ArtistOverViewPage({
 	const { id: userId } = await getUserSession();
 
 	const navMenuData = getNavMenuData(artistId);
+	const rankingSessions = await getRankingSession({ artistId, userId });
 
 	const dropdownDefaultValue =
 		dropdownMenuData.find(
@@ -47,7 +50,11 @@ export default async function ArtistOverViewPage({
 				</div>
 			</div>
 			<Suspense fallback={<LoadingAnimation />}>
-				<OverviewContents artistId={artistId} userId={userId} query={query} />
+				{rankingSessions.length !== 0 ? (
+					<OverviewContents artistId={artistId} userId={userId} query={query} />
+				) : (
+					<NoData />
+				)}
 			</Suspense>
 		</div>
 	);
@@ -76,25 +83,27 @@ async function OverviewContents({
 
 	return (
 		<>
-			<TopRankingList
-				datas={trackRankings}
-				link={`/artist/${artistId}/overview/ranking?${new URLSearchParams(query)}`}
-			/>
+			<div className="space-y-6">
+				<h3>Track Rankings</h3>
+				<RankingTable data={trackRankings} hasHeader={false} columns={[]} />
+				<RankingNavButton
+					link={`/artist/${artistId}/overview/ranking?${new URLSearchParams(query)}`}
+				>
+					View All Rankings
+					<ArrowTopRightIcon />
+				</RankingNavButton>
+			</div>
 			<div className="space-y-6">
 				<h3>Album Points</h3>
 				<div className="p-5">
-					{albumRankings.length !== 0 ? (
-						<DoubleBarChart
-							data={{
-								labels: albumRankings.map((album) => album.name),
-								mainData: albumRankings.map((album) => album.totalPoints),
-								subData: albumRankings.map((album) => album.rawTotalPoints),
-								color: albumRankings.map((album) => album.color),
-							}}
-						/>
-					) : (
-						<NoData />
-					)}
+					<DoubleBarChart
+						data={{
+							labels: albumRankings.map((album) => album.name),
+							mainData: albumRankings.map((album) => album.totalPoints),
+							subData: albumRankings.map((album) => album.rawTotalPoints),
+							color: albumRankings.map((album) => album.color),
+						}}
+					/>
 				</div>
 			</div>
 		</>

@@ -17,6 +17,6 @@ export default async function SorterPage({
 	const draft = await getRankingDraft({ artistId, userId });
 
 	return (
-		<SorterField datas={tracks} draft={draft} />
+		<SorterField data={tracks} draft={draft} />
 	);
 }

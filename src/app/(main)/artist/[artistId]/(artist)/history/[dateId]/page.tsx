@@ -1,10 +1,12 @@
 import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
-import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTracksRankingHistory";
+import { getTracksRankingHistory, TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import RankingNavButton from "@/components/display/ranking/RankingNavButton";
 import TrackRankingChart from "@/components/display/ranking/TrackRankingChart";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
 import { dateToLong } from "@/lib/utils/helper";
+import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
+import { ArrowLeftIcon, ArrowTopRightIcon } from "@radix-ui/react-icons";
 
 export default async function ArtistRankingPage({
 	params,
@@ -25,10 +27,11 @@ export default async function ArtistRankingPage({
 					dateId={dateId}
 				/>
 				<RankingNavButton
-					type="backward"
-					label="Back"
 					link={`/artist/${artistId}/history?date=${dateId}`}
-				/>
+				>
+					<ArrowLeftIcon />
+					Back
+				</RankingNavButton>
 			</Suspense>
 		</>
 	);
@@ -43,15 +46,28 @@ async function HistoryRankingChart({
 	userId: string;
 	dateId: string;
 }) {
+	const albums = await getLoggedAlbums({ artistId, userId });
 	const tracksRankings = await getTracksRankingHistory({
 		artistId,
 		userId,
 		dateId,
 	});
 
+	const columns: {
+			key: keyof TrackHistoryType;
+			header: string;
+		}[] = [
+			{
+				key: "peak",
+				header: "peak",
+			},
+		];
+
 	return (
 		<TrackRankingChart
-			datas={tracksRankings}
+			data={tracksRankings}
+			albums={albums}
+			columns={columns}
 			title={dateToLong(tracksRankings[0].date.date)}
 		/>
 	);

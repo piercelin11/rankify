@@ -7,14 +7,15 @@ import getRankingSession from "@/lib/database/user/getRankingSession";
 import { dateToDashFormat } from "@/lib/utils/helper";
 import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import { getAlbumsRankingHistory } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
-import TopRankingList from "@/components/display/ranking/TopRankingList";
 import { AlbumInfoBox } from "@/components/display/showcase/InfoBox";
 import TopSongsCountChart from "@/components/display/graphicChart/TopSongsCountChart";
 import DoubleBarChart from "@/components/chart/DoubleBarChart";
 import NoData from "@/components/general/NoData";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
 import Link from "next/link";
-import { PlusIcon } from "@radix-ui/react-icons";
+import { ArrowTopRightIcon, PlusIcon } from "@radix-ui/react-icons";
+import RankingTable from "@/components/display/ranking/RankingTable";
+import RankingNavButton from "@/components/display/ranking/RankingNavButton";
 
 export default async function ArtistHistoryPage({
 	params,
@@ -96,34 +97,32 @@ async function HistoryContents({
 
 	return (
 		<>
-			<TopRankingList
-				datas={trackRankings}
-				link={`/artist/${artistId}/history/${dateId}`}
-			/>
+			<div className="space-y-6">
+				<h3>Track Rankings</h3>
+				<RankingTable data={trackRankings} hasHeader={false} columns={[]} />
+				<RankingNavButton link={`/artist/${artistId}/history/${dateId}`}>
+					View All Rankings
+					<ArrowTopRightIcon />
+				</RankingNavButton>
+			</div>
 			<div className="grid grid-flow-col grid-cols-2 grid-rows-2 gap-4">
-				<AlbumInfoBox type="gainer" datas={albumRankings} />
-				<AlbumInfoBox type="loser" datas={albumRankings} />
+				<AlbumInfoBox type="gainer" data={albumRankings} />
+				<AlbumInfoBox type="loser" data={albumRankings} />
 				<div className="row-span-2">
-					<TopSongsCountChart datas={albumRankings} />
+					<TopSongsCountChart data={albumRankings} />
 				</div>
 			</div>
 			<div className="space-y-6">
 				<h3>Album Points</h3>
 				<div className="p-5">
-					{albumRankings.length !== 0 ? (
-						<DoubleBarChart
-							data={{
-								labels: albumRankings.map((album) => album.name),
-								mainData: albumRankings.map((album) => album.totalPoints),
-								subData: albumRankings.map(
-									(album) => album.rawTotalPoints
-								),
-								color: albumRankings.map((album) => album.color),
-							}}
-						/>
-					) : (
-						<NoData />
-					)}
+					<DoubleBarChart
+						data={{
+							labels: albumRankings.map((album) => album.name),
+							mainData: albumRankings.map((album) => album.totalPoints),
+							subData: albumRankings.map((album) => album.rawTotalPoints),
+							color: albumRankings.map((album) => album.color),
+						}}
+					/>
 				</div>
 			</div>
 		</>

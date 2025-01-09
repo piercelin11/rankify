@@ -1,83 +1,59 @@
 "use client";
 
-import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
-import React, { useEffect, useState } from "react";
-import RankingHeader, { HeaderSortByType } from "./RankingHeader";
-import RankingListItem from "./RankingListItem";
+import React, { ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
-import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import RankingAlbumFilterDropdown from "@/components/menu/RankingAlbumFilterDropdown";
 import { AlbumData } from "@/types/data";
+import RankingTable, { RankingTableDataTypeExtend } from "./RankingTable";
+import { dropdownMenuData } from "@/config/menuData";
 
-type TrackRankingChartProps = {
-	title: string;
-	datas: TrackStatsType[] | TrackHistoryType[];
+type Column<T> = {
+	key: keyof T;
+	header: string;
 };
 
-export function hasRankChange(
-	datas: TrackStatsType[] | TrackHistoryType[]
-): datas is TrackHistoryType[] {
-	return datas[0] != null && "rankChange" in datas[0];
-}
+type TrackRankingChartProps<T> = {
+	data: T[];
+	albums: AlbumData[];
+	columns: Column<T>[];
+	title: string;
+	extraColumn?: ReactNode;
+};
 
-export default function TrackRankingChart({ title, datas }: TrackRankingChartProps) {
+export default function TrackRankingChart<T extends RankingTableDataTypeExtend>({
+	albums,
+	data,
+	columns,
+	title,
+	extraColumn
+}: TrackRankingChartProps<T>) {
 	const searchParams = useSearchParams();
 	const album = searchParams.get("album");
-	const sort = searchParams.get("sort") as HeaderSortByType | null;
+	const sort = searchParams.get("sort") as keyof T | null;
 	const order = searchParams.get("order") as "asc" | "desc" | null;
 
-	const isHistoryType = hasRankChange(datas);
-
-	const albums = datas
-		.reduce((acc: AlbumData[], cur) => {
-			const exisitingAlbum = acc.find((data) => data.id === cur.albumId);
-			if (!exisitingAlbum && cur.album) acc.push(cur.album);
-
-			return acc;
-		}, [])
-		.sort((a, b) => b.releaseDate.getTime() - a.releaseDate.getTime());
-
 	function sortRanking() {
-		let sortedDatas: TrackStatsType[] | TrackHistoryType[] = [];
+		let sortedDatas;
 
 		if (sort) {
-			if (sort === "peak") {
-				if (order === "asc")
-					sortedDatas = datas.sort((a, b) => a[sort] - b[sort]);
-				else sortedDatas = datas.sort((a, b) => b[sort] - a[sort]);
-			}
-			if (!isHistoryType) {
-				if (order === "asc")
-					sortedDatas = datas
-						.filter((data) => data[sort])
-						.sort((a, b) => b[sort]! - a[sort]!);
-				else
-					sortedDatas = datas
-						.filter((data) => data[sort])
-						.sort((a, b) => a[sort]! - b[sort]!);
-			}
-		} else sortedDatas = datas.sort((a, b) => a.ranking - b.ranking);
+			if (order === "asc")
+				sortedDatas = data.sort((a, b) => Number(a[sort]) - Number(b[sort]));
+			else sortedDatas = data.sort((a, b) => Number(b[sort]) - Number(a[sort]));
+		} else sortedDatas = data.sort((a, b) => a.ranking - b.ranking);
+		if (album) sortedDatas.filter((data) => data.albumId === album);
 
-		if (album) return sortedDatas.filter((data) => data.albumId === album);
-		else return sortedDatas;
+		return sortedDatas;
 	}
 
 	const filteredDatas = sortRanking();
-	const hasStats = !isHistoryType
-		? !!(datas as TrackStatsType[]).filter((data) => data.loggedCount > 2)
-				.length
-		: true;
 
 	return (
 		<div>
-			<div className="mb-10 flex justify-between items-center">
+			<div className="mb-10 flex items-center justify-between">
 				<RankingAlbumFilterDropdown menuData={albums} />
 				<p className="text-zinc-500">{title}</p>
 			</div>
-			<RankingHeader data={datas[0]} hasStats={hasStats} />
-			{filteredDatas?.map((track) => (
-				<RankingListItem data={track} key={track.id} hasStats={hasStats} />
-			))}
+			<RankingTable data={filteredDatas} columns={columns} />
 		</div>
 	);
 }

@@ -10,7 +10,7 @@ import { revalidateTag } from "next/cache";
 import deleteRankingDraft from "./deleteRankingDraft";
 
 export default async function submitRanking(
-	datas: RankingResultData[],
+	data: RankingResultData[],
 	type: $Enums.RankingType
 ): Promise<ActionResponse> {
 	const { id: userId } = await getUserSession();
@@ -21,12 +21,12 @@ export default async function submitRanking(
 		await db.rankingSession.create({
 			data: {
 				userId,
-				artistId: datas[0].artistId,
+				artistId: data[0].artistId,
 				type,
 				rankings: {
 					createMany: {
 						data: await Promise.all(
-							datas.map(async (data) => {
+							data.map(async (data) => {
 								const trackLatestRanking = await db.ranking.findFirst({
 									where: {
 										userId,
@@ -54,7 +54,7 @@ export default async function submitRanking(
 				},
 			},
 		});
-		await deleteRankingDraft(datas[0].artistId);
+		await deleteRankingDraft(data[0].artistId);
 		isSuccess = true;
 	} catch (error) {
 		console.error("Failed to submit the rankings:", error);
@@ -63,7 +63,7 @@ export default async function submitRanking(
 
 	if (isSuccess) {
 		revalidateTag("user-data");
-		redirect(`/artist/${datas[0].artistId}/history`);
+		redirect(`/artist/${data[0].artistId}/history`);
 	}
 
 	return { success: true, message: "You successfully submitted the rankings." };

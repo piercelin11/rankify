@@ -47,6 +47,9 @@ export default async function getLoggedAlbums({
 			},
 			artist: true,
 		},
+		orderBy: {
+			releaseDate: "desc"
+		}
 	});
 
 	return albums;

@@ -116,8 +116,8 @@ export function calculateAlbumPoints(
 
 export function getFilteredTrackData<
 	T extends TrackStatsType | TrackHistoryType,
->(datas: T[], settings: RankingSettingsType): T[] {
-	let tracks = datas;
+>(data: T[], settings: RankingSettingsType): T[] {
+	let tracks = data;
 	if (!settings.includeInterlude)
 		tracks = tracks.filter(
 			(track) => !track.name.toLowerCase().includes("interlude")
@@ -132,10 +132,10 @@ export function getFilteredTrackData<
 }
 
 export function getFilteredAlbumData(
-	datas: AlbumData[],
+	data: AlbumData[],
 	settings: RankingSettingsType
 ) {
-	let albums = datas;
+	let albums = data;
 	if (!settings.includeInterlude)
 		albums = albums.map((album) => ({
 			...album,

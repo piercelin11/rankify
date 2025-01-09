@@ -31,22 +31,22 @@ export type RankingResultData = TrackData & {
 };
 
 type SorterFieldProps = {
-	datas: TrackData[];
+	data: TrackData[];
 	draft: RankingDraftData | null;
 };
 
-export default function SorterField({ datas, draft }: SorterFieldProps) {
+export default function SorterField({ data, draft }: SorterFieldProps) {
 	const { excluded, setPercentage, setSaving, isSaved, setSaved } =
 		useSorterContext();
 	const [isOpen, setOpen] = useState<boolean>(false);
 	const autoSaveCounter = 15;
 	const tracks = excluded
-		? datas.filter(
+		? data.filter(
 				(data) =>
 					!excluded.albums.includes(data.albumId as string) &&
 					!excluded.tracks.includes(data.id)
 			)
-		: datas;
+		: data;
 	const artistId = tracks[0]?.artistId;
 	const router = useRouter();
 
@@ -428,7 +428,7 @@ export default function SorterField({ datas, draft }: SorterFieldProps) {
 			initList();
 			showImage();
 		}
-	}, [datas]);
+	}, [data]);
 
 	useEffect(() => {
 		if (history.current.length === 0) return;
