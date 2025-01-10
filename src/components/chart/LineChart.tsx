@@ -10,10 +10,11 @@ import {
 	Title,
 	Tooltip,
 	Legend,
+	Ticks,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { Filler } from "chart.js";
-import { adjustSaturation, ensureBrightness } from "@/lib/utils/adjustColor";
+import { ensureBrightness } from "@/lib/utils/adjustColor";
 
 ChartJS.register(
 	CategoryScale,
@@ -72,7 +73,9 @@ export function LineChart({ data: { date, dataset } }: { data: Data }) {
 		},
 		scales: {
 			y: {
-				beginAtZero: true,
+				beginAtZero: false,
+				suggestedMin: 1,
+				
 				reverse: true,
 				grid: {
 					color: "#181818",
@@ -80,6 +83,9 @@ export function LineChart({ data: { date, dataset } }: { data: Data }) {
 				border: {
 					color: "#181818",
 				},
+				ticks: {
+					precision: 0
+				}
 			},
 			x: {
 				border: {
