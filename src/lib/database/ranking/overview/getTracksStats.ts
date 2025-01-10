@@ -1,14 +1,14 @@
 import { db } from "@/lib/prisma";
 import { RankingData, TrackData } from "@/types/data";
 import getTracksMetrics from "./getTracksMetrics";
-import { getPastDate, getPastDateProps } from "@/lib/utils/helper";
+import getLatestRankingSession from "../../user/getLatestRankingSession";
 
 export type TrackStatsType = TrackData & {
 	ranking: number;
 	averageRanking: number;
 	peak: number;
 	worst: number;
-	gap: number;
+	gap: number | null;
 	top50PercentCount: number;
 	top25PercentCount: number;
 	top5PercentCount: number;
@@ -18,13 +18,19 @@ export type TrackStatsType = TrackData & {
 	totalChartRun: number | null;
 	rankings: (RankingData & { date: Date })[];
 	loggedCount: number;
+	rankChange?: number | null;
 };
 
-type getTracksStatsProps = {
+export type TimeFilterType = {
+	threshold?: Date;
+	filter: "gte" | "lte" | "gt" | "lt";
+};
+
+export type getTracksStatsProps = {
 	artistId: string;
 	userId: string;
 	take?: number;
-	time?: getPastDateProps;
+	time?: TimeFilterType;
 };
 
 export default async function getTracksStats({
@@ -33,10 +39,22 @@ export default async function getTracksStats({
 	take,
 	time,
 }: getTracksStatsProps): Promise<TrackStatsType[]> {
-
+	const date = time
+		? {
+				[time.filter]: time.threshold,
+			}
+		: undefined;
+	const latestSession = await getLatestRankingSession({ artistId, userId });
+	const prevTrackMetrics = await getTracksMetrics({
+		artistId,
+		userId,
+		time: {
+			threshold: latestSession?.date,
+			filter: "lt",
+		},
+	});
 	const trackMetrics = await getTracksMetrics({ artistId, userId, take, time });
 	const tookTrackIds = take ? trackMetrics.map((track) => track.id) : undefined;
-	const dateThreshold = time && getPastDate(time);
 
 	const tracks = await db.track.findMany({
 		where: {
@@ -45,9 +63,7 @@ export default async function getTracksStats({
 				some: {
 					userId,
 					date: {
-						date: {
-							gte: dateThreshold,
-						},
+						date,
 					},
 				},
 			},
@@ -60,9 +76,7 @@ export default async function getTracksStats({
 				where: {
 					userId,
 					date: {
-						date: {
-							gte: dateThreshold,
-						},
+						date,
 					},
 				},
 				include: {
@@ -93,10 +107,13 @@ export default async function getTracksStats({
 
 	const result = modifiedTracks.map((track) => {
 		const trackMetric = trackMetrics.find((data) => data.id === track.id)!;
+		const prevTrackMetric = prevTrackMetrics.find(
+			(data) => data.id === track.id
+		);
 
 		let totalChartRun: number | null = null;
 		for (const ranking of track.rankings) {
-			if (ranking.rankChange) {
+			if (ranking.rankChange !== null) {
 				if (!totalChartRun) totalChartRun = Math.abs(ranking.rankChange);
 				else totalChartRun = totalChartRun + Math.abs(ranking.rankChange);
 			}
@@ -117,18 +134,25 @@ export default async function getTracksStats({
 				.averageRanking,
 			peak: trackMetric.peak,
 			worst: trackMetric.worst,
-			gap: Math.abs(trackMetric.worst - trackMetric.peak),
+			gap:
+				track.rankings.length > 1
+					? Math.abs(trackMetric.worst - trackMetric.peak)
+					: null,
 			top10Count: filterRankings(10).length,
 			top3Count: filterRankings(3).length,
 			top1Count: filterRankings(1).length,
 			top50PercentCount: filterPercentage(0.5).length,
 			top25PercentCount: filterPercentage(0.25).length,
 			top5PercentCount: filterPercentage(0.05).length,
-			totalChartRun: totalChartRun,
+			totalChartRun: track.rankings.length > 1 ? totalChartRun : null,
 			rankings: track.rankings,
 			loggedCount: track.rankings.length,
+			rankChange: time?.threshold
+				? undefined
+				: prevTrackMetric
+					? prevTrackMetric.ranking - trackMetric.ranking
+					: null,
 		};
 	});
-
 	return result.sort((a, b) => a.ranking - b.ranking);
 }

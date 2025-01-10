@@ -1,4 +1,4 @@
-import getTracksStats, { TrackStatsType } from "./getTracksStats";
+import getTracksStats, { TimeFilterType, TrackStatsType } from "./getTracksStats";
 import { AlbumData } from "@/types/data";
 import getLoggedAlbum from "../../user/getLoggedAlbums";
 import { getPastDateProps } from "@/lib/utils/helper";
@@ -20,7 +20,7 @@ export type AlbumStatsType = AlbumData & {
 type getAlbumsStatsProps = {
 	artistId: string;
 	userId: string;
-	time?: getPastDateProps;
+	time?: TimeFilterType;
 };
 
 export async function getAlbumsStats({

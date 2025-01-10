@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { ReactNode } from "react";
 import RankChangeIconDisplay from "./RankChangeIconDisplay";
 import { useSearchParams } from "next/navigation";
 import {
@@ -12,13 +12,13 @@ import { cn } from "@/lib/cn";
 import Link from "next/link";
 import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
-import AchievementDisplay from "./AchievementDisplay";
 
-export type RankingTableDataTypeExtend = TrackHistoryType & TrackStatsType;
+export type RankingTableDataTypeExtend = TrackHistoryType | TrackStatsType;
 
-type Column<T> = {
+export type Column<T> = {
 	key: keyof T;
 	header: string;
+	render?: (value: T[keyof T]) => ReactNode;
 };
 
 type RankingTableProps<T> = {
@@ -34,9 +34,13 @@ export default function RankingTable<T extends RankingTableDataTypeExtend>({
 }: RankingTableProps<T>) {
 	return (
 		<div>
-			{hasHeader && <RankingHeader columns={columns} data={data} />}
+			{hasHeader && <RankingHeader columns={columns} />}
 			{data.map((row) => (
-				<RankingRow key={row.id} data={row} columns={columns} hasHeader={hasHeader} />
+				<RankingRow
+					key={row.id}
+					data={row}
+					columns={columns}
+				/>
 			))}
 		</div>
 	);
@@ -45,18 +49,12 @@ export default function RankingTable<T extends RankingTableDataTypeExtend>({
 type RankingRowProps<T> = {
 	data: T;
 	columns: Column<T>[];
-	hasHeader: boolean;
 };
 
 export function RankingRow<T extends RankingTableDataTypeExtend>({
 	data,
 	columns,
-	hasHeader,
 }: RankingRowProps<T>) {
-	const isHistory = data.rankChange !== undefined && hasHeader;
-	const searchParams = useSearchParams();
-	const sortQuery = searchParams.get("sort");
-
 	return (
 		<Link href={`/artist/${data.artistId}/track/${data.id}`}>
 			<div className="grid cursor-pointer select-none grid-cols-[45px,_3fr,_2fr] items-center gap-3 rounded border-b border-zinc-900 py-3 pl-2 pr-6 hover:bg-zinc-900">
@@ -82,36 +80,60 @@ export function RankingRow<T extends RankingTableDataTypeExtend>({
 				<div
 					className="grid items-center justify-items-end font-numeric"
 					style={{
-						gridTemplateColumns: `repeat(${columns.length + (isHistory ? 1 : 0)}, 1fr)`,
+						gridTemplateColumns: `repeat(${columns.length}, 1fr)`,
 					}}
 				>
 					{columns.map((column) => (
-						<p
-							className={
-								sortQuery === column.key ? "text-zinc-100" : "text-zinc-500"
-							}
+						<RankingRowCell
 							key={String(column.key)}
-						>
-							{(data[column.key] as number) || ""}
-						</p>
+							columnKey={String(column.key)}
+							render={column.render}
+							value={data[column.key]}
+						/>
 					))}
-					{isHistory && <AchievementDisplay data={data} />}
 				</div>
 			</div>
 		</Link>
 	);
 }
 
+type RankingRowCellProps<T> = {
+	columnKey: string;
+	render?: (value: T) => ReactNode;
+	value: T;
+};
+
+export function RankingRowCell<T>({
+	columnKey,
+	render,
+	value,
+}: RankingRowCellProps<T>) {
+	const searchParams = useSearchParams();
+	const sortQuery = searchParams.get("sort");
+	return (
+		<div>
+			{render ? (
+				render(value)
+			) : (
+				<p
+					className={
+						sortQuery === columnKey ? "text-zinc-100" : "text-zinc-500"
+					}
+				>
+					{value !== null ? String(value) : ""}
+				</p>
+			)}
+		</div>
+	);
+}
+
 type RankingHeaderProps<T> = {
-	data: T[];
 	columns: Column<T>[];
 };
 
 export function RankingHeader<T extends RankingTableDataTypeExtend>({
-	data,
 	columns,
 }: RankingHeaderProps<T>) {
-	const isHistory = data[0].rankChange !== undefined;
 	const searchParams = useSearchParams();
 	const sortQuery = searchParams.get("sort");
 	return (
@@ -121,7 +143,7 @@ export function RankingHeader<T extends RankingTableDataTypeExtend>({
 			<div
 				className="grid items-center justify-items-end font-numeric"
 				style={{
-					gridTemplateColumns: `repeat(${columns.length + (isHistory ? 1 : 0)}, 1fr)`,
+					gridTemplateColumns: `repeat(${columns.length }, 1fr)`,
 				}}
 			>
 				{columns.map((column) => (

@@ -1,4 +1,3 @@
-import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import {
 	ArrowDownIcon,
 	ArrowUpIcon,
@@ -6,28 +5,31 @@ import {
 } from "@radix-ui/react-icons";
 import React from "react";
 
+export type AchievementType = "New Peak" | "Big Jump" | "Big Drop" | null;
+
 type AchievementDisplayProps = {
-	data: TrackHistoryType;
+	achievement?: AchievementType | null;
 };
 
-export default function AchievementDisplay({ data }: AchievementDisplayProps) {
+export default function AchievementDisplay({
+	achievement,
+}: AchievementDisplayProps) {
 	function getAchievement() {
-		if (!data.rankChange) return;
-		if (data.peak === data.ranking && data.isLatest)
+		if (achievement === "New Peak")
 			return (
 				<div className="flex items-center gap-2 rounded-md border border-lime-500 p-3 text-sm text-lime-500">
 					<StarFilledIcon />
-					<p>Hit Peak</p>
+					<p>New Peak</p>
 				</div>
 			);
-		else if (data.rankChange > data.countSongs / 5)
+		else if (achievement === "Big Jump")
 			return (
 				<div className="flex items-center gap-2 rounded-md border border-green-500 p-3 text-sm text-green-500">
 					<ArrowUpIcon />
 					<p>Big Jump</p>
 				</div>
 			);
-		if (data.rankChange < -(data.countSongs / 5))
+		if (achievement === "Big Drop")
 			return (
 				<div className="flex items-center gap-2 rounded-md border border-red-500 p-3 text-sm text-red-500">
 					<ArrowDownIcon />
@@ -36,5 +38,5 @@ export default function AchievementDisplay({ data }: AchievementDisplayProps) {
 			);
 	}
 
-	return <div>{getAchievement()}</div>;
+	return <>{getAchievement()}</>;
 }

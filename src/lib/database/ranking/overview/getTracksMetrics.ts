@@ -1,21 +1,20 @@
 import { db } from "@/lib/prisma";
 import { getPastDateProps, getPastDate } from "@/lib/utils/helper";
-
-type getTracksMetricsProps = {
-	artistId: string;
-	userId: string;
-	take?: number;
-	time?: getPastDateProps;
-};
+import { getTracksStatsProps } from "./getTracksStats";
 
 export default async function getTracksMetrics({
 	artistId,
 	userId,
 	take,
 	time,
-}: getTracksMetricsProps) {
+}: getTracksStatsProps) {
+	const date = time
+		? {
+				[time.filter]: time.threshold,
+			}
+		: undefined;
 
-	const dateThreshold = time && getPastDate(time);
+	//const dateThreshold = time && getPastDate(time);
 	const rankingData = await db.ranking.groupBy({
 		by: ["trackId"],
 		where: {
@@ -25,9 +24,7 @@ export default async function getTracksMetrics({
 			},
 			date: {
 				type: "ARTIST",
-				date: {
-					gte: dateThreshold,
-				},
+				date,
 			},
 		},
 		_min: {
@@ -39,11 +36,26 @@ export default async function getTracksMetrics({
 		_avg: {
 			ranking: true,
 		},
-		orderBy: {
-			_avg: {
-				ranking: "asc",
+		orderBy: [
+			{
+				_avg: {
+					ranking: "asc",
+				},
 			},
-		},
+			{
+				_min: {
+					ranking: "asc",
+				},
+			},
+			{
+				_max: {
+					ranking: "asc",
+				},
+			},
+			{
+				trackId: "desc",
+			},
+		],
 		take,
 	});
 

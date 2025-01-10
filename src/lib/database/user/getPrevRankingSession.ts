@@ -1,4 +1,5 @@
 import { db } from "@/lib/prisma";
+import getLatestRankingSession from "./getLatestRankingSession";
 //import { unstable_cacheTag as cacheTag } from "next/cache";
 
 type getPrevRankingSessionProps = {
@@ -12,16 +13,14 @@ export default async function getPrevRankingSession({
 	userId,
 	dateId,
 }: getPrevRankingSessionProps) {
-	//"use cache";
-	//cacheTag("user-data");
-    
+	const latestSession = await getLatestRankingSession({ artistId, userId });
+
 	const previousRankingSessions = await db.rankingSession.findFirst({
 		where: {
 			artistId,
 			userId,
 			date: {
-				lt: (await db.rankingSession.findFirst({ where: { id: dateId } }))
-					?.date,
+				lt: latestSession?.date,
 			},
 		},
 		include: {

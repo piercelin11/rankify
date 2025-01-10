@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
 import getTracksStats, {
+	TimeFilterType,
 	TrackStatsType,
 } from "@/lib/database/ranking/overview/getTracksStats";
 import RankingNavButton from "@/components/display/ranking/RankingNavButton";
@@ -9,6 +10,8 @@ import LoadingAnimation from "@/components/ui/LoadingAnimation";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import { dropdownMenuData } from "@/config/menuData";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
+import { Column } from "@/components/display/ranking/RankingTable";
+import { getPastDate } from "@/lib/utils/helper";
 
 export default async function ArtistRankingPage({
 	params,
@@ -50,21 +53,22 @@ async function OverviewRankingChart({
 	userId: string;
 	query: { [key: string]: string };
 }) {
+	const time: TimeFilterType = {
+		threshold: getPastDate(query),
+		filter: "gte",
+	};
+
 	const albums = await getLoggedAlbums({ artistId, userId });
 	const tracksRankings = await getTracksStats({
 		artistId,
 		userId,
-		time: query,
+		time,
 	});
 
 	const timeThreshold = dropdownMenuData.find(
 		(data) => JSON.stringify(data.query) === JSON.stringify(query)
 	)?.label;
-
-	const columns: {
-		key: keyof TrackStatsType;
-		header: string;
-	}[] = [
+	const columns: Column<TrackStatsType>[] = [
 		{
 			key: "peak",
 			header: "peak",

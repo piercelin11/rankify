@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
-import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
+import getTracksStats, { TimeFilterType } from "@/lib/database/ranking/overview/getTracksStats";
 import { getAlbumsStats } from "@/lib/database/ranking/overview/getAlbumsStats";
 import DoubleBarChart from "@/components/chart/DoubleBarChart";
 import NavigationTabs from "@/components/menu/NavigationTabs";
@@ -13,6 +13,7 @@ import { ArrowTopRightIcon, PlusIcon } from "@radix-ui/react-icons";
 import RankingTable from "@/components/display/ranking/RankingTable";
 import RankingNavButton from "@/components/display/ranking/RankingNavButton";
 import getRankingSession from "@/lib/database/user/getRankingSession";
+import { getPastDate } from "@/lib/utils/helper";
 
 export default async function ArtistOverViewPage({
 	params,
@@ -69,16 +70,21 @@ async function OverviewContents({
 	userId: string;
 	query: { [key: string]: string };
 }) {
+	const time: TimeFilterType = {
+		threshold: getPastDate(query),
+		filter: "gte"
+	}
+
 	const trackRankings = await getTracksStats({
 		artistId,
 		userId,
 		take: 5,
-		time: query,
+		time,
 	});
 	const albumRankings = await getAlbumsStats({
 		artistId,
 		userId,
-		time: query,
+		time,
 	});
 
 	return (
