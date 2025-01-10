@@ -10,7 +10,6 @@ import {
 	Title,
 	Tooltip,
 	Legend,
-	Ticks,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { Filler } from "chart.js";
@@ -30,13 +29,13 @@ ChartJS.register(
 type Data = {
 	date: string[];
 	dataset: {
-		trackName: string | undefined;
+		name: string | undefined;
 		color: string | null | undefined;
-		rankings: (number | null)[];
+		datas: (number | null)[];
 	}[];
 };
 
-export function LineChart({ data: { date, dataset } }: { data: Data }) {
+export function LineChart({ data: { date, dataset }, isReverse = true }: { data: Data, isReverse?:boolean }) {
 	const options = {
 		responsive: true,
 		plugins: {
@@ -74,9 +73,9 @@ export function LineChart({ data: { date, dataset } }: { data: Data }) {
 		scales: {
 			y: {
 				beginAtZero: false,
-				suggestedMin: 1,
+				suggestedMin: isReverse ? 1 : undefined,
 				
-				reverse: true,
+				reverse: isReverse,
 				grid: {
 					color: "#181818",
 				},
@@ -101,8 +100,8 @@ export function LineChart({ data: { date, dataset } }: { data: Data }) {
 	const data = {
 		labels: date,
 		datasets: dataset.map((item) => ({
-			label: item.trackName,
-			data: item.rankings,
+			label: item.name,
+			data: item.datas,
 			borderWidth: 1.5,
 			borderColor: item.color
 				? ensureBrightness(item.color)

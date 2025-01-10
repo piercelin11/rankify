@@ -15,6 +15,9 @@ import { defaultRankingSettings } from "@/components/settings/RankingSettings";
 import getRankingSession from "../../user/getRankingSession";
 
 export type AlbumHistoryType = AlbumData & {
+	dateId: string;
+	date: Date;
+	ranking: number;
 	top25PercentCount: number;
 	top50PercentCount: number;
 	totalPoints: number;
@@ -69,19 +72,25 @@ export async function getAlbumsRankingHistory({
 		await getLoggedAlbums({
 			artistId,
 			userId,
-			date: sessions.find((session) => session.id === dateId)?.date,
+			time: {
+				threshold: sessions.find((session) => session.id === dateId)?.date,
+				filter: "equals",
+			},
 		}),
 		rankingSettings
 	);
 	const prevAlbums = getFilteredAlbumData(
-		await getLoggedAlbums({ artistId, userId, date: prevSession?.date }),
+		await getLoggedAlbums({
+			artistId,
+			userId,
+			time: { threshold: prevSession?.date, filter: "equals" },
+		}),
 		rankingSettings
 	);
 
-	// 結果
 	const result = trackRankings
 		.filter((item) => item.albumId !== null)
-		.reduce((acc: Omit<AlbumHistoryType, "pointsChange">[], cur) => {
+		.reduce((acc: Omit<AlbumHistoryType, "pointsChange" | "ranking">[], cur) => {
 			const existingAlbum = acc.find((item) => item.id === cur.albumId);
 			const albumData = albums.find(
 				(item) => item.id === cur.albumId
@@ -120,6 +129,8 @@ export async function getAlbumsRankingHistory({
 			} else {
 				acc.push({
 					...albumData,
+					dateId,
+					date: sessions.find((session) => session.id === dateId)!.date,
 					top25PercentCount: cur.ranking <= countSongs / 4 ? 1 : 0,
 					top50PercentCount: cur.ranking <= countSongs / 2 ? 1 : 0,
 					totalPoints: adjustedScore,
@@ -132,8 +143,9 @@ export async function getAlbumsRankingHistory({
 
 	return result
 		.sort((a, b) => b.totalPoints - a.totalPoints)
-		.map((item) => ({
+		.map((item, index) => ({
 			...item,
+			ranking: index + 1,
 			pointsChange: item.previousTotalPoints
 				? item.totalPoints - item.previousTotalPoints
 				: null,

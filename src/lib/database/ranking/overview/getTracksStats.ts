@@ -23,7 +23,7 @@ export type TrackStatsType = TrackData & {
 
 export type TimeFilterType = {
 	threshold?: Date;
-	filter: "gte" | "lte" | "gt" | "lt";
+	filter: "gte" | "lte" | "gt" | "lt" | "equals";
 };
 
 export type getTracksStatsProps = {

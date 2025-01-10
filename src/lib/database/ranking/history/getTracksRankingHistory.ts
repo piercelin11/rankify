@@ -73,7 +73,7 @@ export async function getTracksRankingHistory({
 			...ranking,
 			...ranking.track,
 			peak:
-				ranking.ranking < Number(findPrevPeak?.peak)
+				!findPrevPeak?.peak || ranking.ranking < Number(findPrevPeak?.peak)
 					? ranking.ranking
 					: Number(findPrevPeak?.peak),
 			isLatest: latestSession.id === ranking.dateId,

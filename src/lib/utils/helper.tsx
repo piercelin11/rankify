@@ -5,7 +5,6 @@ export function generateSearchParams(object: {
 }
 
 export function dateToLong(date: Date) {
-
 	const originalDate = new Date(date);
 	const formattedDate = originalDate.toLocaleDateString("en-US", {
 		year: "numeric",
@@ -46,7 +45,7 @@ export type getPastDateProps = {
 	weeks?: number;
 	months?: number;
 	years?: number;
-}
+};
 
 export function getPastDate({
 	days = 0,
@@ -62,5 +61,22 @@ export function getPastDate({
 	date.setMonth(date.getMonth() - months);
 	date.setFullYear(date.getFullYear() - years);
 
-  return date;
+	return date;
+}
+
+type GetPrevNextIndex<T> = {
+	data: T[];
+	key: T[keyof T];
+};
+
+export function getPrevNextIndex<T extends { id: string }>({
+	data,
+	key,
+}: GetPrevNextIndex<T>) {
+	const currentIndex = data.findIndex((data) => data.id === key);
+	const previousIndex =
+		currentIndex !== 0 ? currentIndex - 1 : data.length - 1;
+	const nextIndex = currentIndex !== data.length - 1 ? currentIndex + 1 : 0;
+
+	return {previousIndex, nextIndex}
 }

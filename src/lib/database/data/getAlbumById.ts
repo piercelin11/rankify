@@ -6,6 +6,10 @@ export default async function getAlbumById(albumId: string) {
 		where: {
 			id: albumId,
 		},
+		include: {
+			artist: true,
+			tracks: true,
+		}
 	});
 
 	return album;

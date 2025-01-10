@@ -8,7 +8,7 @@ type TrackStatsBoxProps = {
 	color?: string | null;
 };
 
-export default function TrackStatsBox({
+export default function StatsBox({
 	children,
 	stats,
 	subtitle,

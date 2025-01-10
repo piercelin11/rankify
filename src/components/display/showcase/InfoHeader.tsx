@@ -1,12 +1,12 @@
 import { cn } from "@/lib/cn";
 import Link from "next/link";
-import React from "react";
+import React, { ReactNode } from "react";
 import { SpotifyIcon } from "../../icon/LogoIcons";
 import { AlbumData, ArtistData, TrackData } from "@/types/data";
 
 type InfoHeaderProps = {
 	data: AlbumData | ArtistData | TrackData;
-	subTitle: string;
+	subTitle: string | ReactNode;
 	rounded?: boolean;
 	type?: string;
 	color?: string | null;
