@@ -71,6 +71,7 @@ export function RankingRow<T extends RankingTableDataTypeExtend>({
 						alt={data.name}
 						width={65}
 						height={65}
+						loading="lazy"
 					/>
 					<div>
 						<p className="font-medium">{data.name}</p>

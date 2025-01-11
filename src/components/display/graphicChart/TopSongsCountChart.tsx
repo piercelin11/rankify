@@ -1,6 +1,6 @@
 "use client";
 
-import PolarAreaChart from "@/components/chart/PolarAreaChart";
+import PolarAreaChart from "@/components/chartjs/PolarAreaChart";
 import { cn } from "@/lib/cn";
 import { AlbumHistoryType } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
 import { AlbumStatsType } from "@/lib/database/ranking/overview/getAlbumsStats";

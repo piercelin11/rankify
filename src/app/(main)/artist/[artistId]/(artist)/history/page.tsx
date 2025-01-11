@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
-import NavigationTabs from "@/components/menu/NavigationTabs";
+import Tabs from "@/components/menu/Tabs";
 import { getNavMenuData } from "@/config/menuData";
 import DropdownMenu from "@/components/menu/DropdownMenu";
 import getRankingSession from "@/lib/database/user/getRankingSession";
@@ -9,7 +9,7 @@ import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTrack
 import { getAlbumsRankingHistory } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
 import { AlbumInfoBox } from "@/components/display/showcase/InfoBox";
 import TopSongsCountChart from "@/components/display/graphicChart/TopSongsCountChart";
-import DoubleBarChart from "@/components/chart/DoubleBarChart";
+import DoubleBarChart from "@/components/chartjs/DoubleBarChart";
 import NoData from "@/components/general/NoData";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
 import Link from "next/link";
@@ -51,7 +51,7 @@ export default async function ArtistHistoryPage({
 					}
 				/>
 				<div className="flex gap-4">
-					<NavigationTabs menuData={navMenuData} />
+					<Tabs menuData={navMenuData} />
 					<Link href={`/sorter/${artistId}`}>
 						<div className="aspect-square rounded-full bg-lime-500 p-4 text-zinc-950 hover:bg-zinc-100">
 							<PlusIcon width={16} height={16} />
@@ -105,7 +105,7 @@ async function HistoryContents({
 					<ArrowTopRightIcon />
 				</RankingNavButton>
 			</div>
-			<div className="grid grid-flow-col grid-cols-2 grid-rows-2 gap-4">
+			<div className="grid grid-flow-col grid-cols-2 grid-rows-2 gap-4 2xl:gap-8">
 				<AlbumInfoBox type="gainer" data={albumRankings} />
 				<AlbumInfoBox type="loser" data={albumRankings} />
 				<div className="row-span-2">

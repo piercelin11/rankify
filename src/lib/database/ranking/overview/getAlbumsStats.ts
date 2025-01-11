@@ -4,7 +4,6 @@ import getTracksStats, {
 } from "./getTracksStats";
 import { AlbumData } from "@/types/data";
 import getLoggedAlbum from "../../user/getLoggedAlbums";
-import { getPastDateProps } from "@/lib/utils/helper";
 import getUserPreference from "../../user/getUserPreference";
 import { defaultRankingSettings } from "@/components/settings/RankingSettings";
 import { RankingSettingsType } from "@/types/schemas/settings";
@@ -21,6 +20,7 @@ export type AlbumStatsType = AlbumData & {
 	top10Count: number;
 	top1Count: number;
 	top5PercentCount: number;
+	top10PercentCount: number;
 	top25PercentCount: number;
 	top50PercentCount: number;
 	totalPoints: number;
@@ -88,12 +88,15 @@ export async function getAlbumsStats({
 				existingAlbum.rawTotalPoints += rawScore;
 				existingAlbum.totalPoints += adjustedScore;
 
+				if (cur.ranking <= countSongs / 20) existingAlbum.top5PercentCount++;
+				if (cur.ranking <= countSongs / 10) existingAlbum.top10PercentCount++;
 				if (cur.ranking <= countSongs / 4) existingAlbum.top25PercentCount++;
 				if (cur.ranking <= countSongs / 2) existingAlbum.top50PercentCount++;
 			} else {
 				acc.push({
 					...albumData,
 					top5PercentCount: cur.ranking <= countSongs / 20 ? 1 : 0,
+					top10PercentCount: cur.ranking <= countSongs / 10 ? 1 : 0,
 					top25PercentCount: cur.ranking <= countSongs / 4 ? 1 : 0,
 					top50PercentCount: cur.ranking <= countSongs / 2 ? 1 : 0,
 					top3Count: cur.top3Count,

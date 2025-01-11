@@ -3,8 +3,9 @@ import ContentWrapper from "@/components/general/ContentWrapper";
 import getTrackById from "@/lib/database/data/getTrackById";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-type AdminLayoutProps = {
+type LayoutProps = {
 	params: Promise<{ trackId: string; artistId: string }>;
 	children: React.ReactNode;
 };
@@ -12,7 +13,18 @@ type AdminLayoutProps = {
 export default async function TrackPageLayout({
 	params,
 	children,
-}: AdminLayoutProps) {
+}: LayoutProps) {
+	return (
+		<>
+			<Suspense fallback={<InfoHeader />}>
+				<Header params={params} />
+			</Suspense>
+			<ContentWrapper className="space-y-10 2xl:space-y-20">{children}</ContentWrapper>
+		</>
+	);
+}
+
+async function Header({ params }: Omit<LayoutProps, "children">) {
 	const trackId = (await params).trackId;
 	const artistId = (await params).artistId;
 	const trackData = await getTrackById(trackId);
@@ -20,22 +32,19 @@ export default async function TrackPageLayout({
 	if (!trackData) notFound();
 
 	return (
-		<>
-			<InfoHeader
-				data={trackData}
-				subTitle={
-					trackData.album?.name ? (
-						<Link href={`/artist/${artistId}/album/${trackData.albumId}`}>
-							{trackData.album?.name}
-						</Link>
-					) : (
-						"Non-album track"
-					)
-				}
-				type="Track"
-				color={trackData.album?.color}
-			/>
-			<ContentWrapper className="space-y-20">{children}</ContentWrapper>
-		</>
+		<InfoHeader
+			data={trackData}
+			subTitle={
+				trackData.album?.name ? (
+					<Link href={`/artist/${artistId}/album/${trackData.albumId}`}>
+						{trackData.album?.name}
+					</Link>
+				) : (
+					"Non-album track"
+				)
+			}
+			type="Track"
+			color={trackData.album?.color}
+		/>
 	);
 }

@@ -12,7 +12,7 @@ export type TrackHistoryType = TrackData & {
 	rankChange: number | null;
 	achievement: AchievementType;
 };
-
+ 
 type getTracksRankingHistoryProps = {
 	artistId: string;
 	userId: string;
@@ -84,3 +84,5 @@ export async function getTracksRankingHistory({
 
 	return result;
 }
+
+

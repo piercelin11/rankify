@@ -1,3 +1,4 @@
+
 import React from "react";
 
 type SidebarLayoutProps = {
@@ -10,7 +11,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 			<div className="fixed z-10 h-screen w-[80px] border-r border-zinc-850 md:w-[300px] 2xl:w-[350px]">
 				{children[0]}
 			</div>
-			<div className="h-screen overflow-auto pl-[80px] scrollbar-hidden md:pl-[300px] 2xl:pl-[350px]">
+			<div className="main-content h-screen overflow-auto scrollbar-hidden pl-[80px] md:pl-[300px] 2xl:pl-[350px]">
 				{children[1]}
 			</div>
 		</>

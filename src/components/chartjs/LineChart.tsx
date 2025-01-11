@@ -73,7 +73,7 @@ export function LineChart({ data: { date, dataset }, isReverse = true }: { data:
 		scales: {
 			y: {
 				beginAtZero: false,
-				suggestedMin: isReverse ? 1 : undefined,
+				min: isReverse ? 1 : undefined,
 				
 				reverse: isReverse,
 				grid: {
@@ -107,7 +107,7 @@ export function LineChart({ data: { date, dataset }, isReverse = true }: { data:
 				? ensureBrightness(item.color)
 				: "#FEF27A",
 			backgroundColor: item.color
-				? `${ensureBrightness(item.color)}1A`
+				? `${ensureBrightness(item.color)}25`
 				: "#FEF27A1A",
 			fill: "start",
 		})),

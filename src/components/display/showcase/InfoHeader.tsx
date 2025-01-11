@@ -5,8 +5,8 @@ import { SpotifyIcon } from "../../icon/LogoIcons";
 import { AlbumData, ArtistData, TrackData } from "@/types/data";
 
 type InfoHeaderProps = {
-	data: AlbumData | ArtistData | TrackData;
-	subTitle: string | ReactNode;
+	data?: AlbumData | ArtistData | TrackData;
+	subTitle?: string | ReactNode;
 	rounded?: boolean;
 	type?: string;
 	color?: string | null;
@@ -43,24 +43,30 @@ export default function InfoHeader({
 						"rounded-full": rounded,
 						"rounded-md": !rounded,
 					})}
-					src={data.img || undefined}
-					alt={data.name}
+					src={data?.img || "/pic/placeholder.jpg"}
+					alt={data?.name}
 				/>
-				<div>
-					{type && <p>{type}</p>}
-					<h1>{data.name}</h1>
-					<p className={cn("mb-4 text-lg text-zinc-500", {
+				{data && (
+					<div>
+						{type && <p>{type}</p>}
+						<h1>{data.name}</h1>
+						<p
+							className={cn("mb-4 text-lg text-zinc-500", {
 								"text-zinc-100": color,
-							})}>{subTitle}</p>
-					<Link href={data.spotifyUrl} className="inline-block">
-						<SpotifyIcon
-							className={cn("text-zinc-600 hover:text-spotify", {
-								"text-zinc-300": color,
 							})}
-							size={30}
-						/>
-					</Link>
-				</div>
+						>
+							{subTitle}
+						</p>
+						<Link href={data.spotifyUrl} className="inline-block">
+							<SpotifyIcon
+								className={cn("text-zinc-600 hover:text-spotify", {
+									"text-zinc-300": color,
+								})}
+								size={30}
+							/>
+						</Link>
+					</div>
+				)}
 			</div>
 		</div>
 	);

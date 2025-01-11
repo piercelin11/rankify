@@ -9,10 +9,9 @@ import RankingTable, {
 	RankingTableDataTypeExtend,
 } from "./RankingTable";
 import {
-	AchievementType,
 	TrackHistoryType,
 } from "@/lib/database/ranking/history/getTracksRankingHistory";
-import AchievementDisplay from "./AchievementDisplay";
+import AchievementDisplay, { AchievementType } from "./AchievementDisplay";
 
 type TrackRankingChartProps<T> = {
 	data: T[];

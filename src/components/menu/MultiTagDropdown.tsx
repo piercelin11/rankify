@@ -2,9 +2,7 @@
 
 import { DEFAULT_COLOR } from "@/config/variables";
 import { cn } from "@/lib/cn";
-import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
 import { ensureBrightness } from "@/lib/utils/adjustColor";
-import { AlbumData } from "@/types/data";
 import { ChevronDownIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { useSearchParams } from "next/navigation";
 import React, { useState } from "react";
@@ -60,7 +58,7 @@ export default function MultiTagDropdown({
 	}
 
 	return (
-		<div className="relative select-none w-[580px]">
+		<div className="relative w-[580px] select-none">
 			<div
 				className="flex justify-between gap-3 rounded-md bg-zinc-900 p-3"
 				onClick={() => setOPen((prev) => !prev)}
@@ -68,12 +66,13 @@ export default function MultiTagDropdown({
 				<div className="flex gap-2 overflow-auto scrollbar-hidden">
 					<TrackTag tag={defaultTag} isDefault={true} />
 					{comparisonQuery.map((query) => {
-						const track = menuLists.find((track) => track.id === query)!;
+						const listTag = menuLists.find((track) => track.id === query);
+						if (!listTag) return;
 						return (
 							<TrackTag
-								key={track.id}
-								tag={track}
-								onClick={() => handleTagDelete(track.id)}
+								key={listTag.id}
+								tag={listTag}
+								onClick={() => handleTagDelete(listTag.id)}
 							/>
 						);
 					})}
@@ -96,7 +95,7 @@ export default function MultiTagDropdown({
 				)}
 			>
 				{parentLists && (
-					<div className="sticky top-0 flex gap-2 overflow-auto bg-zinc-900/90 px-3 py-6">
+					<div className="sticky top-0 flex gap-2 overflow-auto bg-zinc-900/90 px-3 py-6 scrollbar-hidden">
 						{parentLists.map((listItem) => (
 							<AlbumTag
 								key={listItem.id}
@@ -112,11 +111,11 @@ export default function MultiTagDropdown({
 						if (filteredParentId) return listItem.parentId === filteredParentId;
 						else return listItem;
 					})
-					.map((track) => (
+					.map((listItem) => (
 						<MenuItem
-							key={track.id}
-							tag={track}
-							onClick={() => handleMenuItemClick(track.id)}
+							key={listItem.id}
+							tag={listItem}
+							onClick={() => handleMenuItemClick(listItem.id)}
 						/>
 					))}
 			</div>

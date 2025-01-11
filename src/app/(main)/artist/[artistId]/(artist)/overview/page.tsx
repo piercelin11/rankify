@@ -2,8 +2,8 @@ import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
 import getTracksStats, { TimeFilterType } from "@/lib/database/ranking/overview/getTracksStats";
 import { getAlbumsStats } from "@/lib/database/ranking/overview/getAlbumsStats";
-import DoubleBarChart from "@/components/chart/DoubleBarChart";
-import NavigationTabs from "@/components/menu/NavigationTabs";
+import DoubleBarChart from "@/components/chartjs/DoubleBarChart";
+import Tabs from "@/components/menu/Tabs";
 import DropdownMenu from "@/components/menu/DropdownMenu";
 import NoData from "@/components/general/NoData";
 import { dropdownMenuData, getNavMenuData } from "@/config/menuData";
@@ -42,7 +42,7 @@ export default async function ArtistOverViewPage({
 					menuData={dropdownMenuData}
 				/>
 				<div className="flex gap-4">
-					<NavigationTabs menuData={navMenuData} />
+					<Tabs menuData={navMenuData} />
 					<Link href={`/sorter/${artistId}`}>
 						<div className="aspect-square rounded-full bg-lime-500 p-4 text-zinc-950 hover:bg-zinc-100">
 							<PlusIcon width={16} height={16} />

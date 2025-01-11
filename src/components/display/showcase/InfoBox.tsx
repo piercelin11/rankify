@@ -1,6 +1,5 @@
 import { AlbumHistoryType } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
 import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
-import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
 import {
 	ArrowDownRoundIcon,
 	ArrowUpRoundIcon,
@@ -8,6 +7,7 @@ import {
 import { ArrowUpIcon, TriangleUpIcon } from "@radix-ui/react-icons";
 import React, { ReactNode } from "react";
 import NoData from "@/components/general/NoData";
+import Link from "next/link";
 
 type TrackInfoBoxProps = {
 	type: "gainer" | "loser";

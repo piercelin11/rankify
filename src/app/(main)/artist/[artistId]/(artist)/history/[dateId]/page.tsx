@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
 import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import RankingNavButton from "@/components/display/ranking/RankingNavButton";
-import TrackRankingChart, {
+import {
 	HistoryTrackRankingChart,
 } from "@/components/display/ranking/TrackRankingChart";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";

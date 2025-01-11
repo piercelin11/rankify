@@ -60,10 +60,12 @@ export const settingsMenuData: Omit<MenuItem, "icon">[] = [
 
 export const getNavMenuData = (artistId: string) => [
 	{
+		id:"overview",
 		label: "My Overview",
 		link: `/artist/${artistId}/overview`,
 	},
 	{
+		id:"history",
 		label: "Ranking History",
 		link: `/artist/${artistId}/history`,
 	},

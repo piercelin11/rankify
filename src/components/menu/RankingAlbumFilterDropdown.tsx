@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import React, { useState } from "react";
-import { menuItemProps } from "./NavigationTabs";
+import { menuItemProps } from "./Tabs";
 import { useSearchParams } from "next/navigation";
 import { AlbumData } from "@/types/data";
 

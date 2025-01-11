@@ -103,7 +103,7 @@ export function ensureBrightness(hex: string | null, threshold = 0.5) {
     let luminance = calculateLuminance(r, g, b);
 
     if (luminance < threshold) {
-        const factor = (threshold - luminance) / (threshold * 5);
+        const factor = (threshold - luminance) / (threshold * 3);
         
         [r, g, b] = adjustBrightness(r, g, b, factor);
     }

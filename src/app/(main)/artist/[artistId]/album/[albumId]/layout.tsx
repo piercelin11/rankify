@@ -1,32 +1,40 @@
 import InfoHeader from "@/components/display/showcase/InfoHeader";
 import ContentWrapper from "@/components/general/ContentWrapper";
 import getAlbumById from "@/lib/database/data/getAlbumById";
-import getTrackById from "@/lib/database/data/getTrackById";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-type AdminLayoutProps = {
+type LayoutProps = {
 	params: Promise<{ albumId: string }>;
 	children: React.ReactNode;
 };
 
-export default async function TrackPageLayout({
+export default async function AlbumPageLayout({
 	params,
 	children,
-}: AdminLayoutProps) {
+}: LayoutProps) {
+	return (
+		<>
+			<Suspense fallback={<InfoHeader />}>
+				<Header params={params} />
+			</Suspense>
+			<ContentWrapper className="space-y-10 2xl:space-y-20">{children}</ContentWrapper>
+		</>
+	);
+}
+
+async function Header({ params }: Omit<LayoutProps, "children">) {
 	const albumId = (await params).albumId;
 	const albumData = await getAlbumById(albumId);
 
 	if (!albumData) notFound();
 
 	return (
-		<>
-			<InfoHeader
-				data={albumData}
-				subTitle={albumData.artist.name}
-				type="Album"
-				color={albumData.color}
-			/>
-			<ContentWrapper className="space-y-20">{children}</ContentWrapper>
-		</>
+		<InfoHeader
+			data={albumData}
+			subTitle={albumData.artist.name}
+			type="Album"
+			color={albumData.color}
+		/>
 	);
 }

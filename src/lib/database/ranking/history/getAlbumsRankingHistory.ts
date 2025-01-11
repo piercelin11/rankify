@@ -3,7 +3,6 @@ import {
 	getTracksRankingHistory,
 	TrackHistoryType,
 } from "./getTracksRankingHistory";
-import getPrevRankingSession from "../../user/getPrevRankingSession";
 import getLoggedAlbums from "../../user/getLoggedAlbums";
 import {
 	calculateAlbumPoints,
@@ -42,8 +41,8 @@ export async function getAlbumsRankingHistory({
 		(await getUserPreference({ userId }))?.rankingSettings ||
 		defaultRankingSettings;
 
-	let prevTrackRankings: null | TrackHistoryType[];
-	let countPrevSongs: null | number;
+	let prevTrackRankings: null | TrackHistoryType[] = null;
+	let countPrevSongs: null | number = null;
 
 	const trackRankings = getFilteredTrackData(
 		await getTracksRankingHistory({
@@ -55,7 +54,16 @@ export async function getAlbumsRankingHistory({
 	);
 	const countSongs = trackRankings.length;
 	const sessions = await getRankingSession({ artistId, userId });
-	const prevSession = await getPrevRankingSession({ artistId, dateId, userId });
+	const prevSession = (
+		await getRankingSession({
+			artistId,
+			userId,
+			time: {
+				threshold: sessions.find((session) => session.id === dateId)!.date,
+				filter: "lt",
+			},
+		})
+	)?.[0];
 	if (prevSession)
 		prevTrackRankings = getFilteredTrackData(
 			await getTracksRankingHistory({
@@ -90,56 +98,61 @@ export async function getAlbumsRankingHistory({
 
 	const result = trackRankings
 		.filter((item) => item.albumId !== null)
-		.reduce((acc: Omit<AlbumHistoryType, "pointsChange" | "ranking">[], cur) => {
-			const existingAlbum = acc.find((item) => item.id === cur.albumId);
-			const albumData = albums.find(
-				(item) => item.id === cur.albumId
-			) as AlbumData & { artist: ArtistData; tracks: TrackData[] };
-			const prevAlbumData = prevAlbums.find((item) => item.id === cur.albumId);
+		.reduce(
+			(acc: Omit<AlbumHistoryType, "pointsChange" | "ranking">[], cur) => {
+				const existingAlbum = acc.find((item) => item.id === cur.albumId);
+				const albumData = albums.find(
+					(item) => item.id === cur.albumId
+				) as AlbumData & { artist: ArtistData; tracks: TrackData[] };
+				const prevAlbumData = prevAlbums.find(
+					(item) => item.id === cur.albumId
+				);
 
-			// 計算當前百分比排名
-			const { adjustedScore, rawScore } = calculateAlbumPoints(
-				cur.ranking,
-				countSongs,
-				albumData.tracks.length,
-				albums.length
-			);
+				// 計算當前百分比排名
+				const { adjustedScore, rawScore } = calculateAlbumPoints(
+					cur.ranking,
+					countSongs,
+					albumData.tracks.length,
+					albums.length
+				);
 
-			const prevRanking = prevSession?.rankings?.find(
-				(ranking) => ranking.trackId === cur.id
-			)?.ranking;
+				const prevRanking = prevSession?.rankings?.find(
+					(ranking) => ranking.trackId === cur.id
+				)?.ranking;
 
-			// 計算之前百分比排名
-			const { adjustedScore: prevAdjustedScore } = calculateAlbumPoints(
-				prevRanking || 0,
-				countPrevSongs || 0,
-				prevAlbumData?.tracks!.length || 0,
-				prevAlbums.length
-			);
+				// 計算之前百分比排名
+				const { adjustedScore: prevAdjustedScore } = calculateAlbumPoints(
+					prevRanking || 0,
+					countPrevSongs || 0,
+					prevAlbumData?.tracks!.length || 0,
+					prevAlbums.length
+				);
 
-			if (existingAlbum) {
-				if (cur.ranking <= countSongs / 4) existingAlbum.top25PercentCount++;
-				if (cur.ranking <= countSongs / 2) existingAlbum.top50PercentCount++;
+				if (existingAlbum) {
+					if (cur.ranking <= countSongs / 4) existingAlbum.top25PercentCount++;
+					if (cur.ranking <= countSongs / 2) existingAlbum.top50PercentCount++;
 
-				existingAlbum.previousTotalPoints += prevRanking
-					? prevAdjustedScore
-					: 0;
-				existingAlbum.rawTotalPoints += rawScore;
-				existingAlbum.totalPoints += adjustedScore;
-			} else {
-				acc.push({
-					...albumData,
-					dateId,
-					date: sessions.find((session) => session.id === dateId)!.date,
-					top25PercentCount: cur.ranking <= countSongs / 4 ? 1 : 0,
-					top50PercentCount: cur.ranking <= countSongs / 2 ? 1 : 0,
-					totalPoints: adjustedScore,
-					previousTotalPoints: prevRanking ? prevAdjustedScore : 0,
-					rawTotalPoints: rawScore,
-				});
-			}
-			return acc;
-		}, []);
+					existingAlbum.previousTotalPoints += prevRanking
+						? prevAdjustedScore
+						: 0;
+					existingAlbum.rawTotalPoints += rawScore;
+					existingAlbum.totalPoints += adjustedScore;
+				} else {
+					acc.push({
+						...albumData,
+						dateId,
+						date: sessions.find((session) => session.id === dateId)!.date,
+						top25PercentCount: cur.ranking <= countSongs / 4 ? 1 : 0,
+						top50PercentCount: cur.ranking <= countSongs / 2 ? 1 : 0,
+						totalPoints: adjustedScore,
+						previousTotalPoints: prevRanking ? prevAdjustedScore : 0,
+						rawTotalPoints: rawScore,
+					});
+				}
+				return acc;
+			},
+			[]
+		);
 
 	return result
 		.sort((a, b) => b.totalPoints - a.totalPoints)
