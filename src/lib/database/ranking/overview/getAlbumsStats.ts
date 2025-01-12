@@ -42,13 +42,14 @@ export async function getAlbumsStats({
 	const rankingSettings =
 		(await getUserPreference({ userId }))?.rankingSettings ||
 		defaultRankingSettings;
+	const originalTrackRankings = await getTracksStats({
+		artistId,
+		userId,
+		time,
+	})
 
 	const trackRankings = getFilteredTrackData(
-		await getTracksStats({
-			artistId,
-			userId,
-			time,
-		}),
+		originalTrackRankings,
 		rankingSettings
 	);
 	const albums = getFilteredAlbumData(
@@ -65,7 +66,7 @@ export async function getAlbumsStats({
 	)
 		.flat()
 		.sort((a, b) => a.date.getTime() - b.date.getTime());
-	const countSongs = trackRankings.length;
+	const countSongs = originalTrackRankings.length;
 
 	// 計算專輯的平均排名
 	const albumRankings = trackRankings
@@ -158,7 +159,9 @@ export function getFilteredTrackData<
 				!track.name.toLowerCase().includes("intro") &&
 				!track.name.toLowerCase().includes("outro")
 		);
-	return tracks;
+	if (!settings.includeReissueTrack)
+		tracks = tracks.filter((track) => track.type !== "REISSUE");
+	return tracks/* .map((track, index) => ({ ...track, ranking: index + 1 })) */;
 }
 
 export function getFilteredAlbumData(
@@ -181,6 +184,11 @@ export function getFilteredAlbumData(
 					!track.name.toLowerCase().includes("outro") &&
 					!track.name.toLowerCase().includes("intro")
 			),
+		}));
+	if (!settings.includeReissueTrack)
+		albums = albums.map((album) => ({
+			...album,
+			tracks: album.tracks?.filter((track) => track.type !== "REISSUE"),
 		}));
 	return albums;
 }

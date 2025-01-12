@@ -33,6 +33,7 @@ export type TrackData = {
     releaseDate: Date | null
 	artist?: ArtistData;
     album?: AlbumData | null
+    type: $Enums.TrackType;
 }
 
 export type RankingData = {

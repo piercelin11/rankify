@@ -92,6 +92,7 @@ model Track {
   artistId    String
   releaseDate DateTime?
   discNumber  Int?
+  type        TrackType @default(STANDARD)
   rankings    Ranking[]
   album       Album?    @relation(fields: [albumId], references: [id], onDelete: Cascade)
   artist      Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade)
@@ -154,6 +155,11 @@ enum Role {
 enum AlbumType {
   ALBUM
   EP
+}
+
+enum TrackType {
+  STANDARD
+  REISSUE
 }
 
 enum RankingType {

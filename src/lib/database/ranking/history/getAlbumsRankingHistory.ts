@@ -43,16 +43,16 @@ export async function getAlbumsRankingHistory({
 
 	let prevTrackRankings: null | TrackHistoryType[] = null;
 	let countPrevSongs: null | number = null;
-
+	const originalTrackRankings = await getTracksRankingHistory({
+		artistId,
+		dateId,
+		userId,
+	});
 	const trackRankings = getFilteredTrackData(
-		await getTracksRankingHistory({
-			artistId,
-			dateId,
-			userId,
-		}),
+		originalTrackRankings,
 		rankingSettings
 	);
-	const countSongs = trackRankings.length;
+	const countSongs = originalTrackRankings.length;
 	const sessions = await getRankingSession({ artistId, userId });
 	const prevSession = (
 		await getRankingSession({
@@ -64,16 +64,19 @@ export async function getAlbumsRankingHistory({
 			},
 		})
 	)?.[0];
-	if (prevSession)
+
+	if (prevSession) {
+		const originalPrevTrackRankings = await getTracksRankingHistory({
+			artistId,
+			dateId: prevSession.id,
+			userId,
+		});
 		prevTrackRankings = getFilteredTrackData(
-			await getTracksRankingHistory({
-				artistId,
-				dateId: prevSession.id,
-				userId,
-			}),
+			originalPrevTrackRankings,
 			rankingSettings
-		) as TrackHistoryType[];
-	if (prevSession) countPrevSongs = prevSession.rankings.length;
+		);
+		countPrevSongs = originalPrevTrackRankings.length;
+	}
 
 	// 計算當前與前次每個專輯中的歌曲數量
 	const albums = getFilteredAlbumData(

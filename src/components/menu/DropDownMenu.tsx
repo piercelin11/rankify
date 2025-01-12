@@ -3,10 +3,14 @@ import { cn } from "@/lib/cn";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import React, { useState } from "react";
-import { menuItemProps } from "./Tabs";
+
+export type MenuItemProps = {
+	label: string;
+	link: string;
+};
 
 type DropDownMenuProps = {
-	menuData: menuItemProps[];
+	menuData: MenuItemProps[];
 	defaultValue?: string;
 };
 

@@ -23,6 +23,7 @@ type RankingSettingsProps = {
 export const defaultRankingSettings: RankingSettingsType = {
 	includeInterlude: true,
 	includeIntroOutro: true,
+	includeReissueTrack: true,
 };
 
 export default function RankingSettings({ settings }: RankingSettingsProps) {
@@ -33,17 +34,17 @@ export default function RankingSettings({ settings }: RankingSettingsProps) {
 	const {
 		register,
 		handleSubmit,
-		formState: { errors },
 		watch,
 	} = useForm<RankingSettingsType>({
 		resolver: zodResolver(rankingSettingsSchema),
 	});
 
-	const [includeInterlude, includeIntroOutro] = watch(
-		["includeInterlude", "includeIntroOutro"],
+	const [includeInterlude, includeIntroOutro, includeReissueTrack] = watch(
+		["includeInterlude", "includeIntroOutro", "includeReissueTrack"],
 		{
 			includeInterlude: defaultSettings.includeInterlude,
 			includeIntroOutro: defaultSettings.includeIntroOutro,
+			includeReissueTrack: defaultSettings.includeReissueTrack,
 		}
 	);
 
@@ -95,6 +96,18 @@ export default function RankingSettings({ settings }: RankingSettingsProps) {
 							{...register("includeIntroOutro")}
 							className="hidden"
 							defaultChecked={includeIntroOutro}
+							type="checkbox"
+						/>
+					</label>
+				</div>
+				<div className="flex items-center gap-10">
+					<h4>Include deluxe/reissue track</h4>
+					<label>
+						<ToggleButton selected={includeReissueTrack} />
+						<input
+							{...register("includeReissueTrack")}
+							className="hidden"
+							defaultChecked={includeReissueTrack}
 							type="checkbox"
 						/>
 					</label>

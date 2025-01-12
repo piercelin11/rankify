@@ -4,12 +4,12 @@ import { db } from "@/lib/prisma";
 import fetchTracks from "@/lib/spotify/fetchTracks";
 import { ActionResponse } from "@/types/action";
 import { AlbumData, TrackData } from "@/types/data";
-import { updateTrackType } from "@/types/schemas/admin";
+import { UpdateTrackType } from "@/types/schemas/admin";
 import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function updateTrack(
 	originalData: TrackData,
-	formData: updateTrackType
+	formData: UpdateTrackType
 ): Promise<ActionResponse> {
 	let isSuccess = false;
 
@@ -38,6 +38,7 @@ export default async function updateTrack(
 					name: formData.name,
 					albumId: newAlbum.id,
 					img: newAlbum.img,
+					type: formData.type,
 				},
 			});
 		} else {
@@ -50,6 +51,7 @@ export default async function updateTrack(
 					album: {
 						disconnect: true,
 					},
+					type: formData.type,
 				},
 			});
 		}

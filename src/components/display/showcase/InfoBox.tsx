@@ -42,6 +42,7 @@ type AlbumInfoBoxProps = {
 };
 
 export function AlbumInfoBox({ type, data }: AlbumInfoBoxProps) {
+	//console.log(data)
 	function getInfo() {
 		if (data.filter((data) => data.pointsChange !== null).length === 0)
 			return null;
@@ -50,6 +51,7 @@ export function AlbumInfoBox({ type, data }: AlbumInfoBoxProps) {
 				const gainer = data
 					.filter((data) => data.pointsChange !== null && data.pointsChange > 0)
 					.sort((a, b) => b.pointsChange! - a.pointsChange!)[0];
+					
 				return gainer;
 			case "loser":
 				const loser = data

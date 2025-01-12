@@ -6,13 +6,14 @@ import { mainMenuData } from "@/config/menuData";
 import Link from "next/link";
 import { getUserSession } from "../../../auth";
 import getLoggedArtists from "@/lib/database/user/getLoggedArtists";
+import { LockClosedIcon } from "@radix-ui/react-icons";
 
 type AdminLayoutProps = {
 	children: React.ReactNode;
 };
 
 export default async function MainLayout({ children }: AdminLayoutProps) {
-	const { id: userId } = await getUserSession();
+	const { id: userId, role } = await getUserSession();
 	const loggedArtists = await getLoggedArtists({ userId });
 
 	return (
@@ -31,6 +32,14 @@ export default async function MainLayout({ children }: AdminLayoutProps) {
 								</Button>
 							</Link>
 						))}
+						{
+							role === "ADMIN"&&  <Link href={"/admin/artist"}>
+							<Button variant="menu">
+								<LockClosedIcon />
+								Admin
+							</Button>
+						</Link>
+						}
 					</div>
 					<SignOutButton />
 				</div>

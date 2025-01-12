@@ -87,7 +87,7 @@ export default async function AdminArtistPage({
 								key={single.id}
 								trackData={single}
 								number={index + 1}
-								savedAlbums={allAlbums}
+								albums={allAlbums}
 							/>
 						))}
 					</div>

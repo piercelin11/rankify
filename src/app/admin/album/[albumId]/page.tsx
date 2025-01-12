@@ -34,7 +34,7 @@ export default async function AdminAlbumPage({
 					<TrackListItem
 						key={track.id}
 						trackData={track}
-						savedAlbums={albums}
+						albums={albums}
 					/>
 				))}
 			</ContentWrapper>
