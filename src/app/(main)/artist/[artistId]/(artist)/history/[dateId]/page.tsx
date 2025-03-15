@@ -46,12 +46,15 @@ async function HistoryRankingChart({
 	userId: string;
 	dateId: string;
 }) {
-	const albums = await getLoggedAlbums({ artistId, userId });
 	const tracksRankings = await getTracksRankingHistory({
 		artistId,
 		userId,
 		dateId,
 	});
+	const albums = await getLoggedAlbums({ artistId, userId, time: {
+		threshold: tracksRankings[0].date.date,
+		filter: "equals"
+	} });
 
 	return (
 		<HistoryTrackRankingChart

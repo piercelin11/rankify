@@ -1,6 +1,6 @@
 import { db } from "@/lib/prisma";
-import { getPastDateProps, getPastDate } from "@/lib/utils/helper";
 import { getTracksStatsProps } from "./getTracksStats";
+import { getUserRankingPreference } from "../../user/getUserPreference";
 
 export default async function getTracksMetrics({
 	artistId,
@@ -8,6 +8,7 @@ export default async function getTracksMetrics({
 	take,
 	time,
 }: getTracksStatsProps) {
+	const trackConditions = await getUserRankingPreference({userId});
 	const date = time
 		? {
 				[time.filter]: time.threshold,
@@ -21,6 +22,7 @@ export default async function getTracksMetrics({
 			userId,
 			track: {
 				artistId,
+				...trackConditions
 			},
 			date: {
 				type: "ARTIST",

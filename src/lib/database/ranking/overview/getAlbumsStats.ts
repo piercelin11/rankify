@@ -39,23 +39,13 @@ export async function getAlbumsStats({
 	userId,
 	time,
 }: getAlbumsStatsProps): Promise<AlbumStatsType[]> {
-	const rankingSettings =
-		(await getUserPreference({ userId }))?.rankingSettings ||
-		defaultRankingSettings;
-	const originalTrackRankings = await getTracksStats({
+
+	const trackRankings = await getTracksStats({
 		artistId,
 		userId,
 		time,
-	})
-
-	const trackRankings = getFilteredTrackData(
-		originalTrackRankings,
-		rankingSettings
-	);
-	const albums = getFilteredAlbumData(
-		await getLoggedAlbum({ artistId, userId, time }),
-		rankingSettings
-	);
+	});
+	const albums = await getLoggedAlbum({ artistId, userId, time });
 	const sessions = await getRankingSession({ artistId, userId });
 	const allAlbumsRankingHistory = (
 		await Promise.all(
@@ -66,7 +56,7 @@ export async function getAlbumsStats({
 	)
 		.flat()
 		.sort((a, b) => a.date.getTime() - b.date.getTime());
-	const countSongs = originalTrackRankings.length;
+	const countSongs = trackRankings.length;
 
 	// 計算專輯的平均排名
 	const albumRankings = trackRankings
@@ -129,7 +119,13 @@ export function calculateAlbumPoints(
 	const percentileRank = (countSongs - ranking + 1) / countSongs;
 	// 計算分數
 	let score =
-		percentileRank > 0.5 ? percentileRank * 900 : percentileRank * 600;
+		percentileRank > 0.75
+			? percentileRank * 1000
+			: percentileRank > 0.5
+				? percentileRank * 950
+				: percentileRank > 0.25
+					? percentileRank * 650
+					: percentileRank * 500;
 	// 引入平滑係數：若專輯數小於5首且歌曲排名在前百分之五十，則引入平滑係數
 	const smoothingFactor =
 		percentileRank > 0.5 && countAlbumsSongs < 5
@@ -143,52 +139,4 @@ export function calculateAlbumPoints(
 	const rawScore = Math.floor(score / (countSongs / countAlbums));
 
 	return { adjustedScore, rawScore };
-}
-
-export function getFilteredTrackData<
-	T extends TrackStatsType | TrackHistoryType,
->(data: T[], settings: RankingSettingsType): T[] {
-	let tracks = data;
-	if (!settings.includeInterlude)
-		tracks = tracks.filter(
-			(track) => !track.name.toLowerCase().includes("interlude")
-		);
-	if (!settings.includeIntroOutro)
-		tracks = tracks.filter(
-			(track) =>
-				!track.name.toLowerCase().includes("intro") &&
-				!track.name.toLowerCase().includes("outro")
-		);
-	if (!settings.includeReissueTrack)
-		tracks = tracks.filter((track) => track.type !== "REISSUE");
-	return tracks/* .map((track, index) => ({ ...track, ranking: index + 1 })) */;
-}
-
-export function getFilteredAlbumData(
-	data: AlbumData[],
-	settings: RankingSettingsType
-) {
-	let albums = data;
-	if (!settings.includeInterlude)
-		albums = albums.map((album) => ({
-			...album,
-			tracks: album.tracks?.filter(
-				(track) => !track.name.toLowerCase().includes("interlude")
-			),
-		}));
-	if (!settings.includeIntroOutro)
-		albums = albums.map((album) => ({
-			...album,
-			tracks: album.tracks?.filter(
-				(track) =>
-					!track.name.toLowerCase().includes("outro") &&
-					!track.name.toLowerCase().includes("intro")
-			),
-		}));
-	if (!settings.includeReissueTrack)
-		albums = albums.map((album) => ({
-			...album,
-			tracks: album.tracks?.filter((track) => track.type !== "REISSUE"),
-		}));
-	return albums;
 }

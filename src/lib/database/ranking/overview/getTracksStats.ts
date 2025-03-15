@@ -2,6 +2,7 @@ import { db } from "@/lib/prisma";
 import { RankingData, TrackData } from "@/types/data";
 import getTracksMetrics from "./getTracksMetrics";
 import getRankingSession from "../../user/getRankingSession";
+import { getUserRankingPreference } from "../../user/getUserPreference";
 
 export type TrackStatsType = TrackData & {
 	ranking: number;
@@ -39,6 +40,7 @@ export default async function getTracksStats({
 	take,
 	time,
 }: getTracksStatsProps): Promise<TrackStatsType[]> {
+	const trackConditions = await getUserRankingPreference({userId});
 	const date = time
 		? {
 				[time.filter]: time.threshold,
@@ -71,6 +73,7 @@ export default async function getTracksStats({
 				},
 			},
 			id: { in: tookTrackIds },
+			...trackConditions
 		},
 		include: {
 			album: true,

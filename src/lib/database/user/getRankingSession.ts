@@ -36,3 +36,29 @@ export default async function getRankingSession({
 
 	return rankingSessions;
 }
+
+type getRankingSessionByIdProps = {
+	artistId: string;
+	userId: string;
+	dateId: string;
+};
+
+export async function getRankingSessionById({
+	dateId
+}: getRankingSessionByIdProps) {
+
+	const rankingSessions = await db.rankingSession.findMany({
+		where: {
+			id: dateId,
+		},
+		include: {
+			artist: true,
+			rankings: true,
+		},
+		orderBy: {
+			date: "desc",
+		},
+	});
+
+	return rankingSessions;
+}

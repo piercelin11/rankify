@@ -3,6 +3,7 @@ import getTracksMetrics from "../overview/getTracksMetrics";
 import { RankingSessionData, TrackData } from "@/types/data";
 import getRankingSession from "../../user/getRankingSession";
 import { AchievementType } from "@/components/display/ranking/AchievementDisplay";
+import { getUserRankingPreference } from "../../user/getUserPreference";
 
 export type TrackHistoryType = TrackData & {
 	dateId: string;
@@ -23,23 +24,16 @@ type getTracksRankingHistoryProps = {
 export async function getTracksRankingHistory({
 	artistId,
 	userId,
-	dateId,
+	dateId, 
 	take,
 }: getTracksRankingHistoryProps): Promise<TrackHistoryType[]> {
-	const sessions = await getRankingSession({ artistId, userId });
-	const latestSession = sessions[0];
-	const currentSession = sessions.find((session) => session.id === dateId);
-	const prevTrackMetrics = await getTracksMetrics({
-		artistId,
-		userId,
-		time: { threshold: currentSession?.date, filter: "lt" },
-	});
-
+	const trackConditions = await getUserRankingPreference({userId});
 	const rankings = await db.ranking.findMany({
 		where: {
 			artistId,
 			userId,
 			dateId,
+			track: trackConditions
 		},
 		orderBy: {
 			ranking: "asc",
@@ -51,6 +45,15 @@ export async function getTracksRankingHistory({
 			date: true,
 		},
 		take,
+	});
+
+	const sessions = await getRankingSession({ artistId, userId });
+	const latestSession = sessions[0];
+	const currentSession = rankings[0].date;
+	const prevTrackMetrics = await getTracksMetrics({
+		artistId,
+		userId,
+		time: { threshold: currentSession.date, filter: "lt" },
 	});
 
 	const result = rankings.map((ranking) => {
@@ -67,7 +70,7 @@ export async function getTracksRankingHistory({
 			else if (Number(ranking.rankChange) < -(rankings.length / 5))
 				return "Big Drop";
 			else return null;
-		}
+		} 
 
 		return {
 			...ranking,
@@ -76,7 +79,6 @@ export async function getTracksRankingHistory({
 				!findPrevPeak?.peak || ranking.ranking < Number(findPrevPeak?.peak)
 					? ranking.ranking
 					: Number(findPrevPeak?.peak),
-			isLatest: latestSession.id === ranking.dateId,
 			countSongs: rankings.length,
 			achievement: getAchievement(),
 		};
@@ -84,5 +86,3 @@ export async function getTracksRankingHistory({
 
 	return result;
 }
-
-

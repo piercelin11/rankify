@@ -1,7 +1,6 @@
 import { db } from "@/lib/prisma";
-import { getPastDate, getPastDateProps } from "@/lib/utils/helper";
 import { TimeFilterType } from "../ranking/overview/getTracksStats";
-//import { unstable_cacheTag as cacheTag } from "next/cache";
+import { getUserRankingPreference } from "./getUserPreference";
 
 type getLoggedAlbumsProps = {
 	artistId: string;
@@ -14,9 +13,7 @@ export default async function getLoggedAlbums({
 	userId,
 	time,
 }: getLoggedAlbumsProps) {
-	//"use cache";
-	//cacheTag("user-data");
-
+	const trackConditions = await getUserRankingPreference({userId});
 	const date = time
 		? {
 				date: {
@@ -48,6 +45,7 @@ export default async function getLoggedAlbums({
 							date,
 						},
 					},
+					...trackConditions
 				},
 			},
 			artist: true,
