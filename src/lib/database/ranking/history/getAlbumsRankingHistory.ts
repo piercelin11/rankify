@@ -4,9 +4,7 @@ import {
 	TrackHistoryType,
 } from "./getTracksRankingHistory";
 import getLoggedAlbums from "../../user/getLoggedAlbums";
-import {
-	calculateAlbumPoints,
-} from "../overview/getAlbumsStats";
+import { calculateAlbumPoints } from "../overview/getAlbumsStats";
 import getRankingSession from "../../user/getRankingSession";
 
 export type AlbumHistoryType = AlbumData & {
@@ -77,17 +75,21 @@ export async function getAlbumsRankingHistory({
 		time: { threshold: prevSession?.date, filter: "equals" },
 	});
 
+	const albumsMap = new Map(albums.map((album) => [album.id, album]));
+	const prevAlbumsMap = new Map(prevAlbums.map((album) => [album.id, album]));
+	const prevTrackRankingsMap = prevTrackRankings
+		? new Map(prevTrackRankings.map((track) => [track.id, track]))
+		: null;
+
 	const result = trackRankings
 		.filter((item) => item.albumId !== null)
 		.reduce(
 			(acc: Omit<AlbumHistoryType, "pointsChange" | "ranking">[], cur) => {
-				const existingAlbum = acc.find((item) => item.id === cur.albumId);
-				const albumData = albums.find(
-					(item) => item.id === cur.albumId
-				) as AlbumData & { artist: ArtistData; tracks: TrackData[] };
-				const prevAlbumData = prevAlbums.find(
-					(item) => item.id === cur.albumId
-				);
+				const albumId = cur.albumId!;
+				const existingAlbum = acc.find((item) => item.id === albumId);
+				const albumData = albumsMap.get(albumId)!;
+				const prevAlbumData = prevAlbumsMap.get(albumId);
+				const prevRanking = prevTrackRankingsMap?.get(cur.id)?.ranking;
 
 				// 計算當前百分比排名
 				const { adjustedScore, rawScore } = calculateAlbumPoints(
@@ -96,10 +98,6 @@ export async function getAlbumsRankingHistory({
 					albumData.tracks.length,
 					albums.length
 				);
-
-				const prevRanking = prevTrackRankings?.find(
-					(track) => track.id === cur.id
-				)?.ranking;
 
 				// 計算之前百分比排名
 				const { adjustedScore: prevAdjustedScore } = calculateAlbumPoints(
@@ -145,4 +143,3 @@ export async function getAlbumsRankingHistory({
 				: null,
 		}));
 }
- 

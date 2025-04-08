@@ -56,10 +56,10 @@ export async function getTracksRankingHistory({
 		time: { threshold: currentSession.date, filter: "lt" },
 	});
 
+	const prevTrackMetricsMap = new Map(prevTrackMetrics.map(track => [track.id, track]))
+
 	const result = rankings.map((ranking) => {
-		const findPrevPeak = prevTrackMetrics.find(
-			(metric) => metric.id === ranking.track.id
-		);
+		const findPrevPeak = prevTrackMetricsMap.get(ranking.trackId);
 		const dataIsLatest = latestSession.id === ranking.dateId;
 
 		function getAchievement(): AchievementType {

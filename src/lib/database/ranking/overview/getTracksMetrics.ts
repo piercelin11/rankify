@@ -8,21 +8,20 @@ export default async function getTracksMetrics({
 	take,
 	time,
 }: getTracksStatsProps) {
-	const trackConditions = await getUserRankingPreference({userId});
+	const trackConditions = await getUserRankingPreference({ userId });
 	const date = time
 		? {
 				[time.filter]: time.threshold,
 			}
 		: undefined;
 
-	//const dateThreshold = time && getPastDate(time);
 	const rankingData = await db.ranking.groupBy({
 		by: ["trackId"],
 		where: {
 			userId,
 			track: {
 				artistId,
-				...trackConditions
+				...trackConditions,
 			},
 			date: {
 				type: "ARTIST",

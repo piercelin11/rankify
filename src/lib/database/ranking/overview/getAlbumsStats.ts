@@ -1,13 +1,6 @@
-import getTracksStats, {
-	TimeFilterType,
-	TrackStatsType,
-} from "./getTracksStats";
+import getTracksStats, { TimeFilterType } from "./getTracksStats";
 import { AlbumData } from "@/types/data";
 import getLoggedAlbum from "../../user/getLoggedAlbums";
-import getUserPreference from "../../user/getUserPreference";
-import { defaultRankingSettings } from "@/components/settings/RankingSettings";
-import { RankingSettingsType } from "@/types/schemas/settings";
-import { TrackHistoryType } from "../history/getTracksRankingHistory";
 import getRankingSession from "../../user/getRankingSession";
 import {
 	AlbumHistoryType,
@@ -39,13 +32,13 @@ export async function getAlbumsStats({
 	userId,
 	time,
 }: getAlbumsStatsProps): Promise<AlbumStatsType[]> {
-
 	const trackRankings = await getTracksStats({
 		artistId,
 		userId,
 		time,
 	});
 	const albums = await getLoggedAlbum({ artistId, userId, time });
+	const albumsMap = new Map(albums.map((album) => [album.id, album]));
 	const sessions = await getRankingSession({ artistId, userId });
 	const allAlbumsRankingHistory = (
 		await Promise.all(
@@ -53,17 +46,30 @@ export async function getAlbumsStats({
 				getAlbumsRankingHistory({ artistId, userId, dateId: session.id })
 			)
 		)
-	)
-		.flat()
-		.sort((a, b) => a.date.getTime() - b.date.getTime());
+	).flat();
+
+	const rankingsByAlbum = allAlbumsRankingHistory.reduce(
+		(acc, album) => {
+			if (!acc[album.id]) acc[album.id] = [];
+			acc[album.id].push(album);
+			return acc;
+		},
+		{} as Record<string, AlbumHistoryType[]>
+	);
+	/* for (const albumId in rankingsByAlbum) {
+		rankingsByAlbum[albumId].sort(
+			(a, b) => a.date.getTime() - b.date.getTime()
+		);
+	} */
 	const countSongs = trackRankings.length;
 
 	// 計算專輯的平均排名
 	const albumRankings = trackRankings
 		.filter((item) => item.albumId)
 		.reduce((acc: Omit<AlbumStatsType, "ranking">[], cur) => {
-			const existingAlbum = acc.find((item) => item.id === cur.albumId);
-			const albumData = albums.find((item) => item.id === cur.albumId)!;
+			const albumId = cur.albumId!;
+			const existingAlbum = acc.find((item) => item.id === albumId);
+			const albumData = albumsMap.get(albumId)!;
 
 			const { adjustedScore, rawScore } = calculateAlbumPoints(
 				cur.ranking,
@@ -95,9 +101,7 @@ export async function getAlbumsStats({
 					top1Count: cur.top1Count,
 					totalPoints: adjustedScore,
 					rawTotalPoints: rawScore,
-					rankings: allAlbumsRankingHistory.filter(
-						(album) => album.id === cur.albumId
-					),
+					rankings: rankingsByAlbum[albumId],
 				});
 			}
 

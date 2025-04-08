@@ -38,8 +38,6 @@ export default async function getRankingSession({
 }
 
 type getRankingSessionByIdProps = {
-	artistId: string;
-	userId: string;
 	dateId: string;
 };
 

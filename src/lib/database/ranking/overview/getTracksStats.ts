@@ -40,16 +40,23 @@ export default async function getTracksStats({
 	take,
 	time,
 }: getTracksStatsProps): Promise<TrackStatsType[]> {
-	const trackConditions = await getUserRankingPreference({userId});
+	const trackConditions = await getUserRankingPreference({ userId });
 	const date = time
 		? {
 				[time.filter]: time.threshold,
 			}
 		: undefined;
-	const latestSession = (await getRankingSession({ artistId, userId, time: {
-		threshold: new Date(),
-		filter: "lte",
-	}}))?.[0];
+	const latestSession = (
+		await getRankingSession({
+			artistId,
+			userId,
+			time: {
+				threshold: new Date(),
+				filter: "lte",
+			},
+		})
+	)?.[0];
+	const trackMetrics = await getTracksMetrics({ artistId, userId, take, time });
 	const prevTrackMetrics = await getTracksMetrics({
 		artistId,
 		userId,
@@ -58,7 +65,6 @@ export default async function getTracksStats({
 			filter: "lt",
 		},
 	});
-	const trackMetrics = await getTracksMetrics({ artistId, userId, take, time });
 	const tookTrackIds = take ? trackMetrics.map((track) => track.id) : undefined;
 
 	const tracks = await db.track.findMany({
@@ -73,7 +79,7 @@ export default async function getTracksStats({
 				},
 			},
 			id: { in: tookTrackIds },
-			...trackConditions
+			...trackConditions,
 		},
 		include: {
 			album: true,
@@ -102,35 +108,39 @@ export default async function getTracksStats({
 		},
 	});
 
-	const modifiedTracks = tracks.map((track) => ({
-		...track,
-		rankings: track.rankings.map((ranking) => ({
+	const trackMetricsMap = new Map(trackMetrics.map(track => [track.id, track]));
+	const prevTrackMetricsMap = new Map(prevTrackMetrics.map(track => [track.id, track]));
+
+	const result = tracks.map((track) => {
+		const trackMetric = trackMetricsMap.get(track.id)!;
+		const prevTrackMetric = prevTrackMetricsMap.get(track.id);
+
+		const rankings = track.rankings.map((ranking) => ({
 			...ranking,
 			date: ranking.date.date,
 			percentage: ranking.ranking / ranking.date.rankings.length,
-		})),
-	}));
-
-	const result = modifiedTracks.map((track) => {
-		const trackMetric = trackMetrics.find((data) => data.id === track.id)!;
-		const prevTrackMetric = prevTrackMetrics.find(
-			(data) => data.id === track.id
-		);
+		}));
 
 		let totalChartRun: number | null = null;
-		for (const ranking of track.rankings) {
+		const stats = {
+			top10Count: 0,
+			top3Count: 0,
+			top1Count: 0,
+			top50PercentCount: 0,
+			top25PercentCount: 0,
+			top5PercentCount: 0,
+		};
+		for (const ranking of rankings) {
 			if (ranking.rankChange !== null) {
-				if (!totalChartRun) totalChartRun = Math.abs(ranking.rankChange);
-				else totalChartRun = totalChartRun + Math.abs(ranking.rankChange);
+				totalChartRun = (totalChartRun || 0) + Math.abs(ranking.rankChange);
 			}
-		}
 
-		function filterRankings(max: number) {
-			return track.rankings.filter((data) => data.ranking <= max);
-		}
-
-		function filterPercentage(max: number) {
-			return track.rankings.filter((data) => data.percentage <= max);
+			if (ranking.ranking <= 10) stats.top10Count++;
+			if (ranking.ranking <= 3) stats.top3Count++;
+			if (ranking.ranking <= 1) stats.top1Count++;
+			if (ranking.percentage <= 0.5) stats.top50PercentCount++;
+			if (ranking.percentage <= 0.25) stats.top25PercentCount++;
+			if (ranking.percentage <= 0.05) stats.top5PercentCount++;
 		}
 
 		return {
@@ -144,14 +154,9 @@ export default async function getTracksStats({
 				track.rankings.length > 1
 					? Math.abs(trackMetric.worst - trackMetric.peak)
 					: null,
-			top10Count: filterRankings(10).length,
-			top3Count: filterRankings(3).length,
-			top1Count: filterRankings(1).length,
-			top50PercentCount: filterPercentage(0.5).length,
-			top25PercentCount: filterPercentage(0.25).length,
-			top5PercentCount: filterPercentage(0.05).length,
+			...stats,
 			totalChartRun: track.rankings.length > 1 ? totalChartRun : null,
-			rankings: track.rankings,
+			rankings,
 			loggedCount: track.rankings.length,
 			rankChange: time?.threshold
 				? undefined
