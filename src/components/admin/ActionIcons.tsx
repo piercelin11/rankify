@@ -3,13 +3,14 @@
 import React, { ReactNode, useState } from "react";
 import { Pencil1Icon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
 import deleteItem from "@/lib/action/admin/deleteItem";
-import ModalWrapper from "../general/ModalWrapper";
 import { AlbumData, ArtistData } from "@/types/data";
 import updateInfo from "@/lib/action/admin/updateInfo";
 import { cn } from "@/lib/cn";
-import Button from "../ui/Button";
 import fetchSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
 import ComfirmationModal from "../general/ComfirmationModal";
+import dynamic from "next/dynamic";
+
+const ModalWrapper = dynamic(() => import("../general/ModalWrapper"), { ssr: false });
 
 const svgAttributes = {
 	className: "text-zinc-400 hover:text-zinc-100",

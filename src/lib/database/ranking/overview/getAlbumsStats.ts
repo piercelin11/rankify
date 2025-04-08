@@ -56,11 +56,6 @@ export async function getAlbumsStats({
 		},
 		{} as Record<string, AlbumHistoryType[]>
 	);
-	/* for (const albumId in rankingsByAlbum) {
-		rankingsByAlbum[albumId].sort(
-			(a, b) => a.date.getTime() - b.date.getTime()
-		);
-	} */
 	const countSongs = trackRankings.length;
 
 	// 計算專輯的平均排名

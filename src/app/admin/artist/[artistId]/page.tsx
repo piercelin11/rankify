@@ -53,7 +53,7 @@ export default async function AdminArtistPage({
 									subTitle="Album"
 								/>
 							))}
-							<AddNewButton kind="default" artistId={artistId} type="Album" />
+							<AddNewButton artistId={artistId} type="Album" />
 						</GalleryWrapper>
 					</div>
 					<div>
@@ -68,7 +68,7 @@ export default async function AdminArtistPage({
 									subTitle="EP"
 								/>
 							))}
-							<AddNewButton kind="default" artistId={artistId} type="EP" />
+							<AddNewButton artistId={artistId} type="EP" />
 						</GalleryWrapper>
 					</div>
 
@@ -76,7 +76,6 @@ export default async function AdminArtistPage({
 						<div className="mb-8 flex items-center justify-between">
 							<h2>Singles</h2>
 							<AddNewButton
-								kind="default"
 								artistId={artistId}
 								type="Single"
 								buttonLabel="Add Singles"

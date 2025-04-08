@@ -1,8 +1,10 @@
 "use client";
 
 import React, { Dispatch, ReactNode, SetStateAction, useState } from "react";
-import ModalWrapper from "./ModalWrapper";
 import Button from "../ui/Button";
+import dynamic from "next/dynamic";
+
+const ModalWrapper = dynamic(() => import("./ModalWrapper"), { ssr: false });
 
 type ComfirmationModalProps = {
 	children: ReactNode;

@@ -2,7 +2,7 @@ import ArtistAddingModal from "@/components/admin/ArtistAddingModal";
 import { db } from "@/lib/prisma";
 import GalleryWrapper from "@/components/display/showcase/GalleryWrapper";
 import GalleryItem from "@/components/display/showcase/GalleryItem";
-import AddNewButton from "@/components/admin/AddNewButton";
+import { AddArtistButton } from "@/components/admin/AddNewButton";
 
 export default async function AdminArtistsPage() {
 	const artists = await db.artist.findMany();
@@ -10,9 +10,7 @@ export default async function AdminArtistsPage() {
 	return (
 		<div className="p-8">
 			<div className="mb-8">
-				<AddNewButton kind="custom" buttonLabel="Add Artist">
-					<ArtistAddingModal />
-				</AddNewButton>
+				<AddArtistButton />
 			</div>
 
 			<GalleryWrapper>

@@ -106,7 +106,7 @@ export default function SelectItemForm({
 		type === "Single" ? "track" : "album",
 		actionType !== "addArtist" ? artist?.name : undefined
 	);
-
+ 
 	return (
 		<div className="mt-4 space-y-8">
 			<SearchInput

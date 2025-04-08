@@ -1,23 +1,21 @@
 "use client";
 
-import React, { ReactNode, useState } from "react";
-import ModalWrapper from "../general/ModalWrapper";
+import React, { useState } from "react";
 import Button, { AddButton } from "../ui/Button";
 import SelectItemForm from "./SelectItemForm";
 import { PlusIcon } from "@radix-ui/react-icons";
+import ArtistAddingModal from "./ArtistAddingModal";
+import dynamic from "next/dynamic";
+
+const ModalWrapper = dynamic(() => import("../general/ModalWrapper"), { ssr: false });
+
 
 type AddNewButtonProps =
-| {
-	kind: "default";
+{
 	artistId: string;
 	type: "Album" | "EP" | "Single";
 	buttonLabel?: string;
 }
-| {
-	kind: "custom";
-	buttonLabel: string;
-	children: ReactNode;
-};
 
 export default function AddNewButton(props: AddNewButtonProps) {
 	const [isOpen, setOpen] = useState(false);
@@ -26,15 +24,11 @@ export default function AddNewButton(props: AddNewButtonProps) {
 		<>
 			{isOpen && (
 				<ModalWrapper setOpen={setOpen}>
-					{props.kind === "custom" ? (
-						props.children
-					) : (
-						<SelectItemForm
+					<SelectItemForm
 							artistId={props.artistId}
 							handleCancel={() => setOpen(false)}
 							type={props.type}
 						/>
-					)}
 				</ModalWrapper>
 			)}
 
@@ -50,6 +44,29 @@ export default function AddNewButton(props: AddNewButtonProps) {
 			) : (
 				<AddButton variant="gray" onClick={() => setOpen(true)} />
 			)}
+		</>
+	);
+}
+
+export function AddArtistButton() {
+	const [isOpen, setOpen] = useState(false);
+
+	return (
+		<>
+			{isOpen && (
+				<ModalWrapper setOpen={setOpen}>
+					<ArtistAddingModal />
+				</ModalWrapper>
+			)}
+
+			<Button
+				variant="gray"
+				className="pl-4 pr-6"
+				onClick={() => setOpen(true)}
+			>
+				<PlusIcon />
+				Add Artist
+			</Button>
 		</>
 	);
 }
