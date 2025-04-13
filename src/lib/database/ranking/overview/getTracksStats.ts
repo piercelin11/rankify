@@ -146,8 +146,7 @@ export default async function getTracksStats({
 		return {
 			...track,
 			ranking: trackMetric.ranking,
-			averageRanking: trackMetrics.find((data) => data.id === track.id)!
-				.averageRanking,
+			averageRanking: trackMetric.averageRanking,
 			peak: trackMetric.peak,
 			worst: trackMetric.worst,
 			gap:

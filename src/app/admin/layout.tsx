@@ -1,5 +1,4 @@
-import LogoDisplay from "@/components/sidebar/LogoDisplay";
-import SidebarLayout from "@/components/sidebar/SidebarLayout";
+import SidebarWrapper from "@/components/sidebar/SidebarWrapper";
 import Button from "@/components/ui/Button";
 import { adminMenuData } from "@/config/menuData";
 import {
@@ -16,24 +15,19 @@ type AdminLayoutProps = {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
 	return (
-		<SidebarLayout>
-			<div className="p-4">
-				<div className="py-5">
-					<LogoDisplay />
-				</div>
-				<div>
-					{adminMenuData.map((item) => (
-						<Link href={item.link} key={item.name}>
-							<Button variant="menu">
-								{item.icon()}
-								{item.name}
-							</Button>
-						</Link>
-					))}
-				</div>
+		<SidebarWrapper>
+			<div>
+				{adminMenuData.map((item) => (
+					<Link href={item.link} key={item.name}>
+						<Button variant="menu">
+							{item.icon()}
+							{item.name}
+						</Button>
+					</Link>
+				))}
 			</div>
 
 			<div>{children}</div>
-		</SidebarLayout>
+		</SidebarWrapper>
 	);
 }

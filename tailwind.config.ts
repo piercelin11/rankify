@@ -13,6 +13,9 @@ export default {
 			serif: "var(--font-geist-mono)",
 			numeric: "var(--font-lato)",
 		},
+		container: {
+			center: true,
+		},
 		extend: {
 			colors: {
 				lime: {

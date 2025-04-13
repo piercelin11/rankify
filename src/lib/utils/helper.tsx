@@ -74,9 +74,23 @@ export function getPrevNextIndex<T extends { id: string }>({
 	key,
 }: GetPrevNextIndex<T>) {
 	const currentIndex = data.findIndex((data) => data.id === key);
-	const previousIndex =
-		currentIndex !== 0 ? currentIndex - 1 : data.length - 1;
+	const previousIndex = currentIndex !== 0 ? currentIndex - 1 : data.length - 1;
 	const nextIndex = currentIndex !== data.length - 1 ? currentIndex + 1 : 0;
 
-	return {previousIndex, nextIndex}
+	return { previousIndex, nextIndex };
+}
+
+export function throttle<T extends (...args: any[]) => any>(
+	fn: T,
+	delay: number = 500
+): (...args: Parameters<T>) => void {
+	let timer: null | NodeJS.Timeout = null;
+	return function (...args: Parameters<T>) {
+		if (!timer) {
+			timer = setTimeout(() => {
+				fn(...args);
+				timer = null;
+			}, delay);
+		}
+	};
 }

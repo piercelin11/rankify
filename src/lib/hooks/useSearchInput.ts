@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { SearchContent } from "spotify-types";
 import fetchSearchResults from "../spotify/fetchSearchResults";
 import { SpotifyTypeMap } from "../spotify/fetchSearchResults";
 

@@ -1,4 +1,3 @@
-import ArtistAddingModal from "@/components/admin/ArtistAddingModal";
 import { db } from "@/lib/prisma";
 import GalleryWrapper from "@/components/display/showcase/GalleryWrapper";
 import GalleryItem from "@/components/display/showcase/GalleryItem";
