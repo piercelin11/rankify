@@ -25,9 +25,9 @@ export default function AlbumRankingLineChart({
 		},
 	];
 
-	return (
-		<div className="space-y-20 p-6">
-			<div className="flex items-center justify-between">
+	return ( 
+		<div className="space-y-8 sm:space-y-20">
+			<div className="flex flex-col gap-4 justify-between sm:flex-row sm:items-center">
 				<Tabs menuData={menuData} color={defaultData.color} activeId={view} />
 				{children}
 			</div>

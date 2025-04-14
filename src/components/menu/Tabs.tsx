@@ -26,7 +26,7 @@ export default function Tabs({
 }: NavigationTabsProps) {
 	const pathname = usePathname();
 	return (
-		<div className="flex select-none rounded-lg border border-zinc-800">
+		<div className="flex w-max select-none rounded-lg border border-zinc-800">
 			{menuData.map((menuItem) => (
 				<TabItem
 					key={menuItem.id}
