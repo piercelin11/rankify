@@ -98,7 +98,7 @@ export default async function TrackPage({
 
 	return (
 		<>
-			<div className="flex gap-6">
+			<div className="grid grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-6">
 				{statsBoxData.map((data) => (
 					<StatsBox
 						key={data.subtitle}
@@ -109,10 +109,19 @@ export default async function TrackPage({
 						{data.icon}
 					</StatsBox>
 				))}
+				<HorizontalBarChart
+					bars={barData}
+					color={trackData.album?.color}
+					className="hidden sm:flex"
+				/>
+			</div>
+			<div className="sm:hidden">
+				<h3>Track Ranking Record</h3>
 				<HorizontalBarChart bars={barData} color={trackData.album?.color} />
 			</div>
-			<div className="space-y-20 p-6">
-				<div className="flex items-center justify-between">
+
+			<div className="space-y-8 sm:space-y-20">
+				<div className="flex flex-col justify-between sm:flex-row sm:items-center">
 					<h3>Track Chart Run</h3>
 					<MultiTagDropdown
 						defaultTag={{ ...trackData, color: trackData.album?.color || null }}
@@ -145,19 +154,19 @@ export function NavButton({
 	direction: "forward" | "backward";
 }) {
 	return (
-		<div className="flex items-center gap-6 rounded-lg bg-zinc-900 px-8 py-6 hover:bg-zinc-800">
+		<button className="flex items-center gap-3 rounded-lg bg-zinc-900 px-4 py-3 hover:bg-zinc-800 sm:gap-6 sm:px-8 sm:py-6">
 			{direction === "backward" ? (
 				<>
 					<ChevronLeftIcon className="self-center" width={25} height={25} />
-					<p>{data.name}</p>
+					<p className="text-left">{data.name}</p>
 				</>
 			) : (
 				<>
-					<p>{data.name}</p>
+					<p className="text-right">{data.name}</p>
 					<ChevronRightIcon className="self-center" width={25} height={25} />
 				</>
 			)}
-		</div>
+		</button>
 	);
 }
 
@@ -173,7 +182,7 @@ export function NavButtons({
 	nextData: { id: string; name: string };
 }) {
 	return (
-		<div className="mb-30 flex items-center justify-between">
+		<div className="mb-30 flex items-center justify-between gap-3">
 			<Link href={`/artist/${artistId}/${type}/${prevData.id}`}>
 				<NavButton data={prevData} direction="backward" />
 			</Link>

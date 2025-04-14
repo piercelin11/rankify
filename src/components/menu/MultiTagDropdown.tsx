@@ -58,7 +58,7 @@ export default function MultiTagDropdown({
 	}
 
 	return (
-		<div className="relative w-[580px] select-none">
+		<div className="relative w-full select-none sm:w-[580px]">
 			<div
 				className="flex justify-between gap-3 rounded-md bg-zinc-900 p-3"
 				onClick={() => setOPen((prev) => !prev)}
@@ -134,7 +134,7 @@ function TrackTag({
 }) {
 	return (
 		<div
-			className="flex flex-none flex-grow-0 items-center gap-1 rounded px-3 py-2 text-zinc-100"
+			className="flex flex-none flex-grow-0 items-center gap-1 rounded px-2 py-1 sm:px-3 sm:py-2 text-zinc-100"
 			style={{
 				backgroundColor: ensureBrightness(tag.color ?? DEFAULT_COLOR) + "90",
 			}}

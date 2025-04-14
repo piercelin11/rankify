@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/cn";
 import { ensureBrightness } from "@/lib/utils/adjustColor";
 import React, { useEffect, useState } from "react";
 
@@ -12,14 +13,20 @@ export type BarData = {
 type HorizontalBarChartProps = {
 	bars: BarData[];
 	color?: string | null;
-};
+} & Omit<React.DelHTMLAttributes<HTMLDivElement>, "color">;
 
 export default function HorizontalBarChart({
 	bars,
 	color,
+	className,
 }: HorizontalBarChartProps) {
 	return (
-		<div className="flex flex-1 flex-col justify-between rounded-3xl bg-zinc-900 p-8">
+		<div
+			className={cn(
+				"flex flex-1 flex-col justify-between rounded-2xl bg-zinc-900 gap-6 p-5 sm:gap-0 2xl:p-8",
+				className
+			)}
+		>
 			{bars.map((bar) => (
 				<Bar key={bar.label} bar={bar} color={color} />
 			))}

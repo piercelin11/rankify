@@ -16,7 +16,7 @@ export default function StatsBox({
 }: TrackStatsBoxProps) {
 	return (
 		<div
-			className={cn("flex flex-1 flex-col items-start gap-20 rounded-3xl p-8", {
+			className={cn("flex flex-1 flex-col items-start gap-10 rounded-2xl p-5 order-1 2xl:p-8 2xl:gap-20", {
 				"bg-zinc-900": !color,
 			})}
 			style={
@@ -28,7 +28,7 @@ export default function StatsBox({
 			}
 		>
 			<div
-				className={cn("rounded-full bg-zinc-750 p-4", {
+				className={cn("rounded-full bg-zinc-750 p-4 hidden sm:block", {
 					"bg-zinc-100 text-zinc-800": color,
 				})}
 			>

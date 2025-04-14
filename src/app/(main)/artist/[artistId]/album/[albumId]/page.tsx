@@ -91,7 +91,7 @@ export default async function TrackPage({
 
 	return (
 		<>
-			<div className="flex gap-6">
+			<div className="grid grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-6">
 				{statsBoxData.map((data) => (
 					<StatsBox
 						key={data.subtitle}
@@ -102,8 +102,17 @@ export default async function TrackPage({
 						{data.icon}
 					</StatsBox>
 				))}
+				<HorizontalBarChart
+					bars={barData}
+					color={albumData.color}
+					className="hidden sm:flex"
+				/>
+			</div>
+			<div className="sm:hidden">
+				<h3>Track Ranking Record</h3>
 				<HorizontalBarChart bars={barData} color={albumData.color} />
 			</div>
+			
 			<AlbumRankingLineChart defaultData={albumData} allStats={albumStats}>
 				<MultiTagDropdown defaultTag={albumData} menuLists={menuLists} />
 			</AlbumRankingLineChart>

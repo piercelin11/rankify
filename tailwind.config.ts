@@ -39,7 +39,7 @@ export default {
 					900: "#161619",
 				},
 				spotify: "#1ed760",
-			},
+			}
 		},
 	},
 	plugins: [

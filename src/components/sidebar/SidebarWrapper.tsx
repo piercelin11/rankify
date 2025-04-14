@@ -27,13 +27,13 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
 		<>
 			{isMobile && <MobileSidebarWrapper>{children[0]}</MobileSidebarWrapper>}
 
-			<aside className="fixed z-10 hidden h-screen border-r border-zinc-850 p-4 lg:block lg:w-[300px]">
+			<aside className="fixed z-10 hidden h-screen border-r border-zinc-850 lg:block lg:w-[250px] xl:w-[300px]">
 				<div className="py-5">
 					<LogoDisplay />
 				</div>
 				{children[0]}
 			</aside>
-			<main className="h-screen overflow-auto scrollbar-hidden lg:pl-[300px]">
+			<main className="h-screen overflow-auto scrollbar-hidden lg:pl-[250px] xl:pl-[300px]">
 				{children[1]}
 			</main>
 		</>
