@@ -42,9 +42,11 @@ export async function getAlbumsStats({
 	const sessions = await getRankingSession({ artistId, userId });
 	const allAlbumsRankingHistory = (
 		await Promise.all(
-			sessions.map((session) =>
-				getAlbumsRankingHistory({ artistId, userId, dateId: session.id })
-			)
+			sessions
+				.sort((a, b) => a.date.getTime() - b.date.getTime())
+				.map((session) =>
+					getAlbumsRankingHistory({ artistId, userId, dateId: session.id })
+				)
 		)
 	).flat();
 
