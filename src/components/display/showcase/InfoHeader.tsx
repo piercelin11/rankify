@@ -33,12 +33,7 @@ export default function InfoHeader({
 						: undefined
 				}
 			>
-				<div
-					className={cn("flex items-center pt-20 2xl:pt-24", {
-						"gap-8": !rounded,
-						"gap-6": rounded,
-					})}
-				>
+				<div className="flex items-center gap-6 pt-20 2xl:pt-24">
 					<img
 						className={cn("w-full sm:w-[220px] 2xl:w-[280px]", {
 							"rounded-full": rounded,

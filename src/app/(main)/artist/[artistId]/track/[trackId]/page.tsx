@@ -98,7 +98,7 @@ export default async function TrackPage({
 
 	return (
 		<>
-			<div className="grid grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-6">
+			<div className="grid grid-cols-2 gap-2 lg:grid-cols-2 lg:gap-6 xl:grid-cols-4">
 				{statsBoxData.map((data) => (
 					<StatsBox
 						key={data.subtitle}

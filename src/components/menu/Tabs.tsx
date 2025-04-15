@@ -54,29 +54,32 @@ function TabItem({
 }) {
 	const activeColor = color ? ensureBrightness(color) : DEFAULT_COLOR;
 
-	return itemData.link ? (
-		<Link
-			href={itemData.link}
-			className={isActive ? "pointer-events-none" : ""}
-		>
-			<div
-				className={cn(
-					"justify-self-center rounded-lg px-4 py-3 text-zinc-600",
-					{
-						"text-zinc-950": isActive,
-					}
-				)}
-				style={{
-					backgroundColor: isActive ? activeColor : "#09090b",
-				}}
+	if (itemData.link)
+		return (
+			<Link
+				href={itemData.link}
+				className={isActive ? "pointer-events-none" : ""}
 			>
-				{itemData.label}
-			</div>
-		</Link>
-	) : (
-		<div
+				<button
+					className={cn(
+						"justify-self-center rounded-lg px-4 py-3 text-zinc-600 lg:text-lg",
+						{
+							"text-zinc-950": isActive,
+						}
+					)}
+					style={{
+						backgroundColor: isActive ? activeColor : "#09090b",
+					}}
+				>
+					{itemData.label}
+				</button>
+			</Link>
+		);
+
+	return (
+		<button
 			className={cn(
-				"justify-self-center rounded-lg px-4 py-3 text-lg text-zinc-600",
+				"justify-self-center rounded-lg px-4 py-3 text-zinc-600 lg:text-lg",
 				{
 					"text-zinc-950": isActive,
 				}
@@ -87,6 +90,6 @@ function TabItem({
 			onClick={itemData.onClick}
 		>
 			{itemData.label}
-		</div>
+		</button>
 	);
 }

@@ -1,5 +1,11 @@
 "use client";
-import React, { useState, useEffect, useRef, startTransition } from "react";
+import React, {
+	useState,
+	useEffect,
+	useRef,
+	startTransition,
+	useCallback,
+} from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeftIcon } from "@radix-ui/react-icons";
 import { RankingDraftData, TrackData } from "@/types/data";
@@ -9,6 +15,7 @@ import deleteRankingDraft from "@/lib/action/user/deleteRankingDraft";
 import saveDraftResult from "@/lib/action/user/saveDraftResult";
 import useSorterContext from "@/lib/hooks/contexts/SorterContext";
 import ComfirmationModal from "../general/ComfirmationModal";
+import { debounce } from "chart.js/helpers";
 
 type HistoryState = {
 	cmp1: number;
@@ -38,7 +45,7 @@ type SorterFieldProps = {
 export default function SorterField({ data, draft }: SorterFieldProps) {
 	const { excluded, setPercentage, setSaving, isSaved, setSaved } =
 		useSorterContext();
-	const [isOpen, setOpen] = useState<boolean>(false);
+	const [quitIsOpen, setQuitOpen] = useState<boolean>(false);
 	const autoSaveCounter = 15;
 	const tracks = excluded
 		? data.filter(
@@ -241,9 +248,10 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 			showResult();
 			finishFlag.current = 1;
 		} else {
-			//saveHistory();
 			showImage();
 		}
+
+		handleAutoSave();
 	}
 
 	//將歌名顯示於比較兩首歌曲的表格中
@@ -403,6 +411,27 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 		router.replace(`/sorter/${artistId}/result`);
 	}
 
+	//處理自動儲存的部分
+	const autoSave = useRef(
+		debounce(() => {
+			startTransition(async () => {
+				setSaving(true);
+				try {
+					await handleSave();
+					setSaving(false);
+					setSaved(true);
+				} catch (error) {
+					console.error("Failed to save draft:", error);
+				}
+			});
+		}, 1000 * autoSaveCounter)
+	).current;
+
+	function handleAutoSave() {
+		if (isSaved) setSaved(false);
+		autoSave();
+	}
+
 	useEffect(() => {
 		if (draft?.result) {
 			router.replace(`/sorter/${artistId}/result`);
@@ -428,30 +457,7 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 			initList();
 			showImage();
 		}
-	}, [data]);
-
-	useEffect(() => {
-		if (history.current.length === 0) return;
-		setSaved(false);
-		const autoSaveTimer = setTimeout(() => {
-			startTransition(async () => {
-				setSaving(true);
-				try {
-					setTimeout(async () => {
-						if (isOpen) return;
-						await handleSave();
-						setSaving(false);
-						setSaved(true);
-					}, 1000);
-				} catch (error) {
-					console.error("Failed to save draft:", error);
-				}
-			});
-		}, 1000 * autoSaveCounter);
-		return () => {
-			clearTimeout(autoSaveTimer);
-		};
-	}, [leftField, rightField]);
+	}, [draft]);
 
 	//用鍵盤選擇歌曲
 	const [pressedBtn, setPressedBtn] = useState<string>("");
@@ -472,25 +478,30 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 		}
 	}
 
-	function handleKeyUp(e: KeyboardEvent): void {
-		const key = e.key;
-		if (key === "ArrowLeft") {
-			if (finishFlag.current === 0) sortList(-1);
-			setPressedBtn("");
-		}
-		if (key === "ArrowRight") {
-			if (finishFlag.current === 0) sortList(1);
-			setPressedBtn("");
-		}
-		if (key === "ArrowUp" || key === "ArrowDown") {
-			if (finishFlag.current === 0) sortList(0);
-			setPressedBtn("");
-		}
-	}
+	const handleKeyUp = useCallback(
+		(e: KeyboardEvent): void => {
+			const key = e.key;
+			if (key === "ArrowLeft") {
+				if (finishFlag.current === 0) sortList(-1);
+				setPressedBtn("");
+			}
+			if (key === "ArrowRight") {
+				if (finishFlag.current === 0) sortList(1);
+				setPressedBtn("");
+			}
+			if (key === "ArrowUp" || key === "ArrowDown") {
+				if (finishFlag.current === 0) sortList(0);
+				setPressedBtn("");
+			}
+		},
+		[data]
+	);
 
 	useEffect(() => {
 		document.addEventListener("keydown", handleKeyDown);
 		document.addEventListener("keyup", handleKeyUp);
+
+		console.log("keyup");
 
 		return function cleanup() {
 			document.removeEventListener("keydown", handleKeyDown);
@@ -621,8 +632,8 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 										handleQuit();
 									}}
 									onCancel={() => handleQuit()}
-									isOpen={isOpen}
-									setOpen={setOpen}
+									isOpen={quitIsOpen}
+									setOpen={setQuitOpen}
 									cancelLabel="Quit"
 									comfirmLabel="Save"
 									description="Your ranking record has not been saved."
@@ -630,7 +641,7 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 								>
 									<div
 										className="flex cursor-pointer items-center gap-5 rounded-lg bg-zinc-900 p-5 hover:bg-zinc-800"
-										onClick={() => setOpen(true)}
+										onClick={() => setQuitOpen(true)}
 									>
 										<p>Quit</p>
 									</div>
