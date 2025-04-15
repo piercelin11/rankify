@@ -3,13 +3,12 @@
 import React, { useState } from "react";
 import CheckBox from "../ui/CheckBox";
 import { AlbumData, TrackData } from "@/types/data";
-import useSorterContext, {
-	FilterType,
-} from "@/lib/hooks/contexts/SorterContext";
 import { cn } from "@/lib/cn";
 import Button from "../ui/Button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { FilterType, setExcluded } from "@/features/sorter/sorterSlice";
+import { useAppDispatch } from "@/store/hooks";
 
 type FilterFieldProps = {
 	albums: AlbumData[];
@@ -21,7 +20,7 @@ export default function FilterField({ albums, singles }: FilterFieldProps) {
 		albums: [],
 		tracks: [],
 	});
-	const { setExcluded } = useSorterContext();
+	const dispatch = useAppDispatch();
 	const router = useRouter();
 
 	function handleItemClick(id: string, type: "albums" | "tracks") {
@@ -41,7 +40,7 @@ export default function FilterField({ albums, singles }: FilterFieldProps) {
 		if (filteredAlbums.length < 2) {
 			alert("You need to at least select 2 albums.");
 		} else {
-			setExcluded(excludedIds);
+			dispatch(setExcluded(excludedIds))
 			router.replace(`/sorter/${albums[0].artistId}`);
 		}
 	}

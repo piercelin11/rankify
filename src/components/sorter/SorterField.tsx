@@ -13,9 +13,10 @@ import { cn } from "@/lib/cn";
 import saveDraft from "@/lib/action/user/saveDraft";
 import deleteRankingDraft from "@/lib/action/user/deleteRankingDraft";
 import saveDraftResult from "@/lib/action/user/saveDraftResult";
-import useSorterContext from "@/lib/hooks/contexts/SorterContext";
 import ComfirmationModal from "../general/ComfirmationModal";
 import { debounce } from "chart.js/helpers";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setPercentage, setSaveStatus } from "@/features/sorter/sorterSlice";
 
 type HistoryState = {
 	cmp1: number;
@@ -42,11 +43,15 @@ type SorterFieldProps = {
 	draft: RankingDraftData | null;
 };
 
+const autoSaveCounter = 15;
+
 export default function SorterField({ data, draft }: SorterFieldProps) {
-	const { excluded, setPercentage, setSaving, isSaved, setSaved } =
-		useSorterContext();
+	const excluded = useAppSelector((state) => state.sorter.excluded);
+	const saveStatus = useAppSelector((state) => state.sorter.saveStatus);
+	const dispatch = useAppDispatch();
+
 	const [quitIsOpen, setQuitOpen] = useState<boolean>(false);
-	const autoSaveCounter = 15;
+
 	const tracks = excluded
 		? data.filter(
 				(data) =>
@@ -244,7 +249,7 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 				(finishSize.current * 100) / totalSize.current
 			);
 			percent.current = percentage;
-			setPercentage(percentage);
+			dispatch(setPercentage(percentage));
 			showResult();
 			finishFlag.current = 1;
 		} else {
@@ -270,7 +275,7 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 		setRightField(rightFieldData);
 
 		percent.current = percentage;
-		setPercentage(percentage);
+		dispatch(setPercentage(percentage));
 	}
 
 	//將排序數字轉換成歌名
@@ -346,14 +351,14 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 			totalSize.current = prevState.totalSize;
 			percent.current = prevState.percent;
 			showImage();
-			setPercentage(prevState.percent);
+			dispatch(setPercentage(prevState.percent));
 		}
 	}
 
 	//刪除草稿資料
 	function handleClear() {
 		deleteRankingDraft(artistId);
-		setPercentage(0);
+		dispatch(setPercentage(0));
 		router.replace(`/sorter/${artistId}/filter`);
 	}
 
@@ -415,11 +420,10 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 	const autoSave = useRef(
 		debounce(() => {
 			startTransition(async () => {
-				setSaving(true);
+				dispatch(setSaveStatus("pending"));
 				try {
 					await handleSave();
-					setSaving(false);
-					setSaved(true);
+					dispatch(setSaveStatus("saved"));
 				} catch (error) {
 					console.error("Failed to save draft:", error);
 				}
@@ -428,7 +432,7 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 	).current;
 
 	function handleAutoSave() {
-		if (isSaved) setSaved(false);
+		if (saveStatus === "saved") dispatch(setSaveStatus("idle"));
 		autoSave();
 	}
 
@@ -625,7 +629,7 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 							>
 								<p>Clear and Restart</p>
 							</div>
-							{!isSaved && history.current.length !== 0 ? (
+							{saveStatus === "idle" && history.current.length !== 0 ? (
 								<ComfirmationModal
 									onConfirm={async () => {
 										await handleSave();

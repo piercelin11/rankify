@@ -1,30 +1,31 @@
-"use client"; 
+"use client";
 
 import React from "react";
 import LogoDisplay from "../sidebar/LogoDisplay";
 import { ArtistData } from "@/types/data";
-import useSorterContext from "@/lib/hooks/contexts/SorterContext";
 import { CheckIcon } from "@radix-ui/react-icons";
 import LoadingAnimation from "../ui/LoadingAnimation";
+import { useAppSelector } from "@/store/hooks";
 
 type SorterHeaderProps = {
 	artist: ArtistData;
 };
 
 export default function SorterHeader({ artist }: SorterHeaderProps) {
-	const { percentage, isSaved, isSaving } = useSorterContext();
+	const percentage = useAppSelector((state) => state.sorter.percentage);
+	const saveStatus = useAppSelector((state) => state.sorter.saveStatus);
 
 	return (
 		<div className="grid grid-cols-3 items-center border-b border-zinc-750 p-6">
-			<div className="flex gap-4 items-center">
+			<div className="flex items-center gap-4">
 				<LogoDisplay />
 				<div className="flex h-5 justify-end text-zinc-500">
-					{isSaved ? (
+					{saveStatus === "saved" ? (
 						<div className="flex items-center gap-1">
 							<CheckIcon />
 							<p>Saved</p>
 						</div>
-					) : isSaving ? (
+					) : saveStatus === "pending" ? (
 						<div className="flex items-center gap-2">
 							<LoadingAnimation size="small" isFull={false} />
 							<p>Saving...</p>

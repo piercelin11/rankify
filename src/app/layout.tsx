@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Poppins, Lato } from "next/font/google";
 import "./globals.css";
+import { Provider } from "react-redux";
+import { store } from "@/store/store";
 import Scroll from "@/components/ui/Scroll";
+import StoreProvider from "@/components/general/StoreProvider";
 
 const geistSans = Geist({
 	variable: "--font-geist",
@@ -39,11 +42,13 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<Scroll />
-			<body
-				className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${lato.variable} antialiased`}
-			>
-				{children}
-			</body>
+			<StoreProvider>
+				<body
+					className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${lato.variable} antialiased`}
+				>
+					{children}
+				</body>
+			</StoreProvider>
 		</html>
 	);
 }
