@@ -36,7 +36,7 @@ export default async function ArtistOverViewPage({
 
 	return (
 		<div className="space-y-16">
-			<div className="flex flex-col md:items-center justify-between md:flex-row gap-6">
+			<div className="flex flex-col md:items-center justify-between sm:flex-row gap-6">
 				<DropdownMenu
 					defaultValue={dropdownDefaultValue}
 					menuData={dropdownMenuData}

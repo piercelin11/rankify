@@ -53,11 +53,11 @@ export function RankingRow<T extends RankingTableDataTypeExtend>({
 }: RankingRowProps<T>) {
 	return (
 		<Link href={`/artist/${data.artistId}/track/${data.id}`}>
-			<div className="grid cursor-pointer select-none grid-cols-[15px,_3fr,_auto] items-center gap-3 rounded border-b border-zinc-900 py-2 hover:bg-zinc-900 md:grid-cols-[45px,_3fr,_auto] md:py-3 md:pr-6">
+			<div className="grid cursor-pointer select-none grid-cols-[15px,_3fr] items-center gap-3 rounded border-b border-zinc-900 py-2 hover:bg-zinc-900 md:grid-cols-[45px,_3fr,_2fr] md:py-3 md:pr-6">
 				<p className="mr-1 justify-self-end font-numeric text-lg font-medium tabular-nums text-zinc-400">
 					{data.ranking}
 				</p>
-				<div className="flex items-center gap-3">
+				<div className="flex items-center gap-3 overflow-hidden">
 					{data.rankChange !== undefined && (
 						<RankChangeIconDisplay data={data} />
 					)}

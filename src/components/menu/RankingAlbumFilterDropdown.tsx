@@ -26,7 +26,7 @@ export default function RankingAlbumFilterDropdown({
 	}
 
 	return (
-		<div className="relative select-none">
+		<div className="relative select-none w-full sm:w-[300px]">
 			<DropdownSelect isOpen={isOpen} setOpen={setOpen}>
 				{menuData.find((data) => data.id === albumQuery)?.name ?? "Select..."}
 			</DropdownSelect>

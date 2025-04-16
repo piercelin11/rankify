@@ -42,7 +42,7 @@ export default async function ArtistHistoryPage({
 
 	return (
 		<div className="space-y-16">
-			<div className="flex flex-col md:items-center justify-between md:flex-row gap-6">
+			<div className="flex flex-col md:items-center justify-between sm:flex-row gap-6">
 				<DropdownMenu
 					menuData={dateMenuData}
 					defaultValue={

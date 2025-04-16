@@ -13,7 +13,7 @@ type RankChangeIconProps = {
 
 export default function RankChangeIconDisplay({ data }: RankChangeIconProps) {
 	let result: "debut" | "stable" | "up" | "down";
-	const iconSize = 16;
+	const iconSize = 14;
 
 	const { rankChange } = data;
 
@@ -33,16 +33,16 @@ export default function RankChangeIconDisplay({ data }: RankChangeIconProps) {
 		>
 			<div>
 				{result === "down" ? (
-					<RankDownIcon className="w-4" />
+					<RankDownIcon size={iconSize} />
 				) : result === "up" ? (
-					<RankUpIcon className="w-4" />
+					<RankUpIcon size={iconSize} />
 				) : result === "stable" ? (
-					<RankStableIcon className="w-4" />
+					<RankStableIcon size={iconSize} />
 				) : (
-					<RankDebutIcon className="w-4" />
+					<RankDebutIcon size={iconSize} />
 				)}
 			</div>
-			<p className="font-medium">
+			<p className="font-medium text-sm">
 				{typeof rankChange === "number" &&
 					rankChange !== 0 &&
 					Math.abs(rankChange)}

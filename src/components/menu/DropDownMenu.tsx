@@ -35,7 +35,7 @@ export default function DropdownMenu({
 	}
 
 	return (
-		<div className="relative select-none w-fit">
+		<div className="relative select-none w-[300px]">
 			<DropdownSelect isOpen={isOpen} setOpen={setOpen} variant={variant}>
 				{selected || defaultValue || "Select..."}
 			</DropdownSelect>
@@ -91,13 +91,13 @@ export function DropdownSelect({
 }: DropdownSelectProps) {
 	return (
 		<button
-			className={cn("flex justify-between rounded-md bg-zinc-900 px-4 py-3 text-zinc-400 hover:text-zinc-300 hover:outline hover:outline-1 hover:outline-zinc-700", {
+			className={cn("flex w-full justify-between rounded-md bg-zinc-900 px-4 py-3 text-zinc-400 hover:text-zinc-300 hover:outline hover:outline-1 hover:outline-zinc-700", {
 				"bg-zinc-950": variant === "dark"
 			})}
 			onClick={() => setOpen((prev) => !prev)}
 		>
 			<div
-				className={cn("min-w-52 text-left", {
+				className={cn("min-w-52 text-left text-nowrap overflow-hidden text-ellipsis", {
 					"text-zinc-100": isOpen,
 				})}
 			>

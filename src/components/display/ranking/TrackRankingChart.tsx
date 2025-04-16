@@ -70,7 +70,7 @@ export default function TrackRankingChart<
 		<div>
 			<div className="mb-10 flex items-center justify-between">
 				<RankingAlbumFilterDropdown menuData={albums} />
-				<p className="text-zinc-500">{title}</p>
+				<p className="text-zinc-500 hidden sm:block">{title}</p>
 			</div>
 			<RankingTable data={filteredDatas} columns={columns} />
 		</div>
