@@ -4,10 +4,8 @@ import {
 	ArrowDownRoundIcon,
 	ArrowUpRoundIcon,
 } from "@/components/icon/StatsIcons";
-import { ArrowUpIcon, TriangleUpIcon } from "@radix-ui/react-icons";
-import React, { ReactNode } from "react";
+import React from "react";
 import NoData from "@/components/general/NoData";
-import Link from "next/link";
 
 type TrackInfoBoxProps = {
 	type: "gainer" | "loser";
@@ -42,7 +40,6 @@ type AlbumInfoBoxProps = {
 };
 
 export function AlbumInfoBox({ type, data }: AlbumInfoBoxProps) {
-	//console.log(data)
 	function getInfo() {
 		if (data.filter((data) => data.pointsChange !== null).length === 0)
 			return null;
@@ -51,7 +48,7 @@ export function AlbumInfoBox({ type, data }: AlbumInfoBoxProps) {
 				const gainer = data
 					.filter((data) => data.pointsChange !== null && data.pointsChange > 0)
 					.sort((a, b) => b.pointsChange! - a.pointsChange!)[0];
-					
+
 				return gainer;
 			case "loser":
 				const loser = data
@@ -80,12 +77,12 @@ function InfoBox({
 		<>
 			{info ? (
 				<div
-					className="flex items-end rounded-xl bg-[length:100%] bg-center bg-no-repeat p-4 transition-all duration-500 ease-in-out hover:bg-[length:110%] 2xl:p-8"
+					className="flex aspect-square sm:aspect-video rounded-xl bg-[length:100%] bg-center bg-no-repeat p-4 transition-all duration-500 ease-in-out hover:bg-[length:110%] md:aspect-auto 2xl:p-8"
 					style={{
 						backgroundImage: `linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8)), url("${info.img || "/pic/placeholder.jpg"}")`,
 					}}
 				>
-					<div className="space-y-3">
+					<div className="space-y-3 mt-auto">
 						<div className="flex items-end gap-1">
 							{type === "gainer" ? (
 								<ArrowUpRoundIcon size={45} />

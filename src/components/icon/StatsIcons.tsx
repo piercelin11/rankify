@@ -9,7 +9,7 @@ export function ArrowUpRoundIcon({ size, className }: StatsIconsProps) {
 			width={`${size}px`}
 			viewBox="0 0 101 101"
 			xmlns="http://www.w3.org/2000/svg"
-			fill="currentColor"
+			fill="currentColor" 
 		>
 			<path d="M50.774.61c27.596 0 50.003 22.407 50.003 50.002 0 27.595-22.407 50.002-50.003 50.002C23.18 100.614.772 78.207.772 50.612.772 23.017 23.179.61 50.774.61zm4.305 78.697V38.394l18.289 18.304 6.086-6.086-28.68-28.679-28.694 28.68 6.086 6.085 18.303-18.304v40.913h8.61z" />
 		</svg>

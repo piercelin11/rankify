@@ -35,13 +35,14 @@ export default async function ArtistHistoryPage({
 	const navMenuData = getNavMenuData(artistId);
 
 	const dateMenuData = rankingSessions.map((rankingSession) => ({
+		id: rankingSession.id,
 		label: dateToDashFormat(rankingSession.date),
-		link: `?${new URLSearchParams({ date: rankingSession.id })}`,
+		href: `?${new URLSearchParams({ date: rankingSession.id })}`,
 	}));
 
 	return (
 		<div className="space-y-16">
-			<div className="flex justify-between">
+			<div className="flex flex-col md:items-center justify-between md:flex-row gap-6">
 				<DropdownMenu
 					menuData={dateMenuData}
 					defaultValue={
@@ -97,18 +98,18 @@ async function HistoryContents({
 
 	return (
 		<>
-			<div className="space-y-6">
+			<section className="space-y-6">
 				<h3>Track Rankings</h3>
 				<RankingTable data={trackRankings} hasHeader={false} columns={[]} />
 				<RankingNavButton link={`/artist/${artistId}/history/${dateId}`}>
 					View All Rankings
 					<ArrowTopRightIcon />
 				</RankingNavButton>
-			</div>
-			<div className="grid grid-flow-col grid-cols-2 grid-rows-2 gap-4 2xl:gap-8">
+			</section>
+			<div className="gap-4 space-y-4 md:grid md:grid-flow-col md:grid-cols-2 md:grid-rows-2 md:space-y-0 2xl:gap-8">
 				<AlbumInfoBox type="gainer" data={albumRankings} />
 				<AlbumInfoBox type="loser" data={albumRankings} />
-				<div className="row-span-2">
+				<div className="md:row-span-2">
 					<TopSongsCountChart data={albumRankings} />
 				</div>
 			</div>

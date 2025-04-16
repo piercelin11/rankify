@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { getUserSession } from "@/../auth";
+import { getUserSession } from "@/../auth"; 
 import getTracksStats, { TimeFilterType } from "@/lib/database/ranking/overview/getTracksStats";
 import { getAlbumsStats } from "@/lib/database/ranking/overview/getAlbumsStats";
 import DoubleBarChart from "@/components/chartjs/DoubleBarChart";
@@ -36,7 +36,7 @@ export default async function ArtistOverViewPage({
 
 	return (
 		<div className="space-y-16">
-			<div className="flex justify-between">
+			<div className="flex flex-col md:items-center justify-between md:flex-row gap-6">
 				<DropdownMenu
 					defaultValue={dropdownDefaultValue}
 					menuData={dropdownMenuData}

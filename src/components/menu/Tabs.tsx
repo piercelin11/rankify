@@ -62,7 +62,7 @@ function TabItem({
 			>
 				<button
 					className={cn(
-						"justify-self-center rounded-lg px-4 py-3 text-zinc-600 lg:text-lg",
+						"justify-self-center h-full rounded-lg px-3 py-2 text-zinc-600 xl:px-4 xl:py-3 xl:text-lg",
 						{
 							"text-zinc-950": isActive,
 						}
@@ -79,7 +79,7 @@ function TabItem({
 	return (
 		<button
 			className={cn(
-				"justify-self-center rounded-lg px-4 py-3 text-zinc-600 lg:text-lg",
+				"justify-self-center h-full rounded-lg px-3 py-2 xl:px-4 xl:py-3 text-zinc-600 xl:text-lg",
 				{
 					"text-zinc-950": isActive,
 				}

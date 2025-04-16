@@ -33,16 +33,12 @@ export default function RankingTable<T extends RankingTableDataTypeExtend>({
 	hasHeader = true,
 }: RankingTableProps<T>) {
 	return (
-		<div>
+		<>
 			{hasHeader && <RankingHeader columns={columns} />}
 			{data.map((row) => (
-				<RankingRow
-					key={row.id}
-					data={row}
-					columns={columns}
-				/>
+				<RankingRow key={row.id} data={row} columns={columns} />
 			))}
-		</div>
+		</>
 	);
 }
 
@@ -57,7 +53,7 @@ export function RankingRow<T extends RankingTableDataTypeExtend>({
 }: RankingRowProps<T>) {
 	return (
 		<Link href={`/artist/${data.artistId}/track/${data.id}`}>
-			<div className="grid cursor-pointer select-none grid-cols-[45px,_3fr,_2fr] items-center gap-3 rounded border-b border-zinc-900 py-3 pl-2 pr-6 hover:bg-zinc-900">
+			<div className="grid cursor-pointer select-none grid-cols-[15px,_3fr,_auto] items-center gap-3 rounded border-b border-zinc-900 py-2 hover:bg-zinc-900 md:grid-cols-[45px,_3fr,_auto] md:py-3 md:pr-6">
 				<p className="mr-1 justify-self-end font-numeric text-lg font-medium tabular-nums text-zinc-400">
 					{data.ranking}
 				</p>
@@ -66,33 +62,37 @@ export function RankingRow<T extends RankingTableDataTypeExtend>({
 						<RankChangeIconDisplay data={data} />
 					)}
 					<img
-						className="rounded"
+						className="w-16 rounded"
 						src={data.img || undefined}
 						alt={data.name}
-						width={65}
-						height={65}
 						loading="lazy"
 					/>
-					<div>
-						<p className="font-medium">{data.name}</p>
-						<p className="text-sm text-zinc-500">{data.album?.name}</p>
+					<div className="overflow-hidden">
+						<p className="overflow-hidden text-ellipsis text-nowrap font-medium">
+							{data.name}
+						</p>
+						<p className="overflow-hidden text-ellipsis text-nowrap text-sm text-zinc-500">
+							{data.album?.name}
+						</p>
 					</div>
 				</div>
-				<div
-					className="grid items-center justify-items-end font-numeric"
-					style={{
-						gridTemplateColumns: `repeat(${columns.length}, 1fr)`,
-					}}
-				>
-					{columns.map((column) => (
-						<RankingRowCell
-							key={String(column.key)}
-							columnKey={String(column.key)}
-							render={column.render}
-							value={data[column.key]}
-						/>
-					))}
-				</div>
+				{columns.length !== 0 && (
+					<div
+						className="hidden items-center justify-items-end font-numeric md:grid"
+						style={{
+							gridTemplateColumns: `repeat(${columns.length}, 1fr)`,
+						}}
+					>
+						{columns.map((column) => (
+							<RankingRowCell
+								key={String(column.key)}
+								columnKey={String(column.key)}
+								render={column.render}
+								value={data[column.key]}
+							/>
+						))}
+					</div>
+				)}
 			</div>
 		</Link>
 	);
@@ -138,13 +138,13 @@ export function RankingHeader<T extends RankingTableDataTypeExtend>({
 	const searchParams = useSearchParams();
 	const sortQuery = searchParams.get("sort");
 	return (
-		<div className="grid cursor-pointer select-none grid-cols-[45px,_3fr,_2fr] items-center gap-3 rounded border-b border-zinc-900 py-3 pl-2 pr-6 text-zinc-500">
+		<div className="hidden cursor-pointer select-none grid-cols-[45px,_3fr,_2fr] items-center gap-3 rounded border-b border-zinc-900 py-3 pl-2 pr-6 text-zinc-500 md:grid">
 			<p>#</p>
 			<p>info</p>
 			<div
 				className="grid items-center justify-items-end font-numeric"
 				style={{
-					gridTemplateColumns: `repeat(${columns.length }, 1fr)`,
+					gridTemplateColumns: `repeat(${columns.length}, 1fr)`,
 				}}
 			>
 				{columns.map((column) => (

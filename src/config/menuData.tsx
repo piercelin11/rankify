@@ -71,30 +71,34 @@ export const getNavMenuData = (artistId: string) => [
 	},
 ];
 
-export const dropdownMenuData = [
-	{
-		label: "past month",
-		query: { months: "1" },
-		link: `?${new URLSearchParams({ months: "1" })}`,
+export const dropdownMenuData =
+ [
+	{	id: "pastmonth",
+		label: "past month", 
+		query: { months: "1" },href: `?${new URLSearchParams({ months: "1" })}`,
 	},
 	{
+		id: "past6months",
 		label: "past 6 months",
 		query: { months: "6" },
-		link: `?${new URLSearchParams({ months: "6" })}`,
+		href: `?${new URLSearchParams({ months: "6" })}`,
 	},
 	{
+		id: "pastyear",
 		label: "past year",
 		query: { years: "1" },
-		link: `?${new URLSearchParams({ years: "1" })}`,
+		href: `?${new URLSearchParams({ years: "1" })}`,
 	},
 	{
+		id: "past2year",
 		label: "past 2 years",
 		query: { years: "2" },
-		link: `?${new URLSearchParams({ years: "2" })}`,
+		href: `?${new URLSearchParams({ years: "2" })}`,
 	},
 	{
+		id: "lifetime",
 		label: "lifetime",
 		query: {},
-		link: `?${new URLSearchParams()}`,
+		href: `?${new URLSearchParams()}`,
 	},
 ];

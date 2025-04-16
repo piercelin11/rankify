@@ -5,43 +5,72 @@ import Link from "next/link";
 import React, { Dispatch, ReactNode, SetStateAction, useState } from "react";
 
 export type MenuItemProps = {
+	id: string;
 	label: string;
-	link: string;
+	href?: string;
+	onClick?: () => void;
 };
 
 type DropDownMenuProps = {
 	menuData: MenuItemProps[];
 	defaultValue?: string;
+	variant?: "light" | "dark";
 };
 
 export default function DropdownMenu({
 	menuData,
 	defaultValue,
+	variant = "light",
 }: DropDownMenuProps) {
 	const [isOpen, setOpen] = useState(false);
 	const [selected, setSelected] = useState<string | null>(null);
 
+	function handleItemClick(item: MenuItemProps) {
+		setOpen(false);
+		setSelected(item.label);
+
+		if (item.onClick) {
+			item.onClick();
+		}
+	}
+
 	return (
-		<div className="relative select-none">
-			<DropdownSelect isOpen={isOpen} setOpen={setOpen}>
+		<div className="relative select-none w-fit">
+			<DropdownSelect isOpen={isOpen} setOpen={setOpen} variant={variant}>
 				{selected || defaultValue || "Select..."}
 			</DropdownSelect>
-			<DropdownList isOpen={isOpen}>
-				{menuData.map((menuItem) => (
-					<Link
-						key={menuItem.link}
-						href={menuItem.link}
-						onClick={() => {
-							setOpen(false);
-							setSelected(menuItem.label);
-						}}
-						replace
-					>
-						<div className="rounded-md px-4 py-3 text-zinc-500 hover:bg-zinc-850 hover:text-zinc-100">
-							{menuItem.label}
-						</div>
-					</Link>
-				))}
+			<DropdownList isOpen={isOpen} variant={variant}>
+				{menuData.map((menuItem) => {
+					const commonClass =
+						"rounded-md px-4 py-3 text-zinc-500 hover:bg-zinc-850 hover:text-zinc-100 block";
+
+					if (menuItem.href)
+						return (
+							<Link
+								key={menuItem.id}
+								href={menuItem.href}
+								onClick={() => {
+									handleItemClick(menuItem);
+								}}
+								className={commonClass}
+								replace
+							>
+								{menuItem.label}
+							</Link>
+						);
+					else
+						return (
+							<button
+								key={menuItem.id}
+								onClick={() => {
+									handleItemClick(menuItem);
+								}}
+								className={commonClass}
+							>
+								{menuItem.label}
+							</button>
+						);
+				})}
 			</DropdownList>
 		</div>
 	);
@@ -51,20 +80,24 @@ type DropdownSelectProps = {
 	children: ReactNode;
 	isOpen: boolean;
 	setOpen: Dispatch<SetStateAction<boolean>>;
+	variant?: "light" | "dark";
 };
 
 export function DropdownSelect({
 	children,
 	isOpen,
 	setOpen,
+	variant="light"
 }: DropdownSelectProps) {
 	return (
-		<div
-			className="flex justify-between rounded-md bg-zinc-900 px-4 py-3 text-zinc-400 hover:text-zinc-300 hover:outline hover:outline-1 hover:outline-zinc-700"
+		<button
+			className={cn("flex justify-between rounded-md bg-zinc-900 px-4 py-3 text-zinc-400 hover:text-zinc-300 hover:outline hover:outline-1 hover:outline-zinc-700", {
+				"bg-zinc-950": variant === "dark"
+			})}
 			onClick={() => setOpen((prev) => !prev)}
 		>
 			<div
-				className={cn("min-w-52", {
+				className={cn("min-w-52 text-left", {
 					"text-zinc-100": isOpen,
 				})}
 			>
@@ -77,16 +110,17 @@ export function DropdownSelect({
 				width={18}
 				height={18}
 			/>
-		</div>
+		</button>
 	);
 }
 
-type DropdownList = {
+type DropdownListProps = {
 	isOpen: boolean;
-	children: ReactNode[];
+	children: ReactNode;
+	variant?: "light" | "dark";
 };
 
-export function DropdownList({ isOpen, children }: DropdownList) {
+export function DropdownList({ isOpen, children, variant="light" }: DropdownListProps) {
 	return (
 		<div
 			className={cn(
@@ -94,6 +128,7 @@ export function DropdownList({ isOpen, children }: DropdownList) {
 				{
 					"translate-y-3 opacity-100": isOpen,
 					"pointer-events-none": !isOpen,
+					"bg-zinc-950": variant === "dark"
 				}
 			)}
 		>

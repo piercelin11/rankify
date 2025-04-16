@@ -1,6 +1,8 @@
 "use client";
 
 import PolarAreaChart from "@/components/chartjs/PolarAreaChart";
+import DropdownMenu from "@/components/menu/DropdownMenu";
+import Tabs from "@/components/menu/Tabs";
 import { cn } from "@/lib/cn";
 import { AlbumHistoryType } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
 import { AlbumStatsType } from "@/lib/database/ranking/overview/getAlbumsStats";
@@ -15,11 +17,13 @@ export default function TopSongsCountChart({ data }: TopSongsCountChartProps) {
 
 	const tabData = [
 		{
-			name: "25",
+			label: "Songs in top 25%",
+			id: "25",
 			onClick: () => setView("25"),
 		},
 		{
-			name: "50",
+			label: "Songs in top 50%",
+			id: "50",
 			onClick: () => setView("50"),
 		},
 	];
@@ -27,26 +31,14 @@ export default function TopSongsCountChart({ data }: TopSongsCountChartProps) {
 	const mainDataKey = view === "50" ? "top50PercentCount" : "top25PercentCount";
 
 	return (
-		<div className="space-y-6 rounded-xl bg-zinc-900 px-8 py-6">
-			<div className="flex justify-end">
-				<div className="flex cursor-pointer select-none rounded-lg border border-zinc-800">
-					{tabData.map((data) => (
-						<div
-							className={cn(
-								"justify-self-center rounded-lg px-6 py-3 text-zinc-600",
-								{
-									"bg-lime-500 text-zinc-950": view === data.name,
-								}
-							)}
-							key={data.name}
-							onClick={data.onClick}
-						>
-							Songs in top {data.name}%
-						</div>
-					))}
-				</div>
+		<div className="rounded-xl bg-zinc-900 p-3 xl:p-6">
+			<div className="md:hidden">
+				<DropdownMenu menuData={tabData} variant="dark" defaultValue="Songs in top 50%" />
 			</div>
-			<div className="2xl:py-18 py-14">
+			<div className="hidden md:block">
+				<Tabs menuData={tabData} activeId={view} />
+			</div>
+			<div className="2xl:py-18 mt-6 py-14">
 				<PolarAreaChart
 					data={{
 						labels: data.map((ranking) => ranking.name),

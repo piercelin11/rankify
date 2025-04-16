@@ -33,13 +33,13 @@ export default function RankChangeIconDisplay({ data }: RankChangeIconProps) {
 		>
 			<div>
 				{result === "down" ? (
-					<RankDownIcon size={iconSize} />
+					<RankDownIcon className="w-4" />
 				) : result === "up" ? (
-					<RankUpIcon size={iconSize} />
+					<RankUpIcon className="w-4" />
 				) : result === "stable" ? (
-					<RankStableIcon size={iconSize} />
+					<RankStableIcon className="w-4" />
 				) : (
-					<RankDebutIcon size={iconSize} />
+					<RankDebutIcon className="w-4" />
 				)}
 			</div>
 			<p className="font-medium">

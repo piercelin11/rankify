@@ -23,7 +23,7 @@ export default function SelectableItem({
 
 	return (
 		<div
-			className="grid select-none grid-cols-[50px,_1fr,_100px] items-center gap-2 rounded px-3 py-2 hover:bg-zinc-800"
+			className="grid select-none grid-cols-[50px,_1fr,_auto] items-center gap-2 rounded sm:px-3 py-2 hover:bg-zinc-800"
 			onClick={() => handleClick(data.id)}
 		>
 			<img
@@ -33,8 +33,8 @@ export default function SelectableItem({
 				width={45}
 				height={45}
 			/>
-			<div>
-				<p>{data.name}</p>
+			<div className="overflow-hidden">
+				<p className="text-nowrap overflow-hidden text-ellipsis">{data.name}</p>
 				<p className="text-sm text-zinc-400">{type}</p>
 			</div>
 			<CheckBox

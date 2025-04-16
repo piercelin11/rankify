@@ -12,8 +12,8 @@ export default function ModalWrapper({
 	setOpen,
 }: ModalWrapperProps) {
 	return (
-		<div className="fixed z-50 left-0 top-0 flex h-screen w-screen items-center justify-center">
-			<div className={`relative z-50 w-[680px] rounded-lg border border-zinc-700 bg-zinc-950 p-8`}>
+		<div className="fixed z-50 left-0 top-0 flex h-screen w-screen items-center justify-center p-4">
+			<div className={`relative z-50 w-[680px] rounded-lg border border-zinc-700 bg-zinc-950 p-4 sm:p-8`}>
 				<Cross2Icon
 					className="absolute right-4 top-4 cursor-pointer text-zinc-500"
 					onClick={() => setOpen(false)}
@@ -21,7 +21,6 @@ export default function ModalWrapper({
 					height={20}
 				/>
 				<div className="space-y-8">
-					
 					{children}
 				</div>
 			</div>

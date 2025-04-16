@@ -20,7 +20,7 @@ export default function SorterPage({ albums, tracks, draft }: SorterPageProps) {
 
 	useEffect(() => {
 		if (draft?.result) setCurrentStage("result");
-        else if (draft) setCurrentStage("sorting");
+		else if (draft) setCurrentStage("sorting");
 		else setCurrentStage("filter");
 	}, [draft]);
 
@@ -32,7 +32,7 @@ export default function SorterPage({ albums, tracks, draft }: SorterPageProps) {
 				setCurrentStage={setCurrentStage}
 			/>
 		);
-	if (currentStage === "sorting")
+	else if (currentStage === "sorting")
 		return (
 			<SortingStage
 				data={tracks}
@@ -40,7 +40,7 @@ export default function SorterPage({ albums, tracks, draft }: SorterPageProps) {
 				setCurrentStage={setCurrentStage}
 			/>
 		);
-	if (currentStage === "result" && draft)
+	else if (currentStage === "result" && draft)
 		return <ResultStage draft={draft} setCurrentStage={setCurrentStage} />;
 	else return <LoadingAnimation />;
 }

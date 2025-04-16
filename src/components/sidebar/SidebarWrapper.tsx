@@ -27,8 +27,8 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
 		<>
 			{isMobile && <MobileSidebarWrapper>{children[0]}</MobileSidebarWrapper>}
 
-			<aside className="fixed z-10 hidden h-screen border-r border-zinc-850 lg:block lg:w-[250px] xl:w-[300px]">
-				<div className="py-5">
+			<aside className="fixed z-10 hidden pt-6 h-screen border-r border-zinc-850 lg:block lg:w-[250px] xl:w-[300px]">
+				<div className="py-5 px-4">
 					<LogoDisplay />
 				</div>
 				{children[0]}
