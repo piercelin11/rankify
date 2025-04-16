@@ -2,7 +2,7 @@
 
 import { getUserSession } from "@/../auth";
 import { db } from "@/lib/prisma";
-import { RankingResultData } from "@/components/sorter/SorterField";
+import { RankingResultData } from "@/components/sorter/SortingStage";
 import { revalidatePath } from "next/cache";
 
 export default async function saveDraftResult(

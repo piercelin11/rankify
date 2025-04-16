@@ -3,7 +3,7 @@ import { PlusIcon } from "@radix-ui/react-icons";
 import React, { ButtonHTMLAttributes } from "react";
 
 export type ButtonProps = {
-	variant: "lime" | "gray" | "outline" | "transparent" | "menu";
+	variant: "lime" | "gray" | "darkGray" | "outline" | "transparent" | "menu";
 	rounded?: boolean;
 	children: React.ReactNode;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
@@ -16,6 +16,10 @@ const styles = {
 	gray: {
 		default: "bg-zinc-800/80 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100",
 		disabled: "bg-zinc-800/80 text-zinc-100",
+	},
+	darkGray: {
+		default: "bg-zinc-900 text-zinc-100 hover:bg-zinc-800",
+		disabled: "bg-zinc-900 text-zinc-100",
 	},
 	outline: {
 		default: "bg-transparent text-zinc-100 border border-zinc-500 hover:border-zinc-100",

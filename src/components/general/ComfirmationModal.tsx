@@ -7,7 +7,6 @@ import dynamic from "next/dynamic";
 const ModalWrapper = dynamic(() => import("./ModalWrapper"), { ssr: false });
 
 type ComfirmationModalProps = {
-	children: ReactNode;
 	onConfirm: () => void;
     onCancel: () => void;
     isOpen: boolean;
@@ -20,7 +19,6 @@ type ComfirmationModalProps = {
 };
 
 export default function ComfirmationModal({
-	children,
 	onConfirm,
     onCancel,
     isOpen,
@@ -33,8 +31,7 @@ export default function ComfirmationModal({
 }: ComfirmationModalProps) {
 
 	return (
-		<div>
-			{children}
+		<>
 			{isOpen && (
 				<ModalWrapper setOpen={setOpen}>
 					<div className="flex flex-col items-center p-8">
@@ -55,6 +52,6 @@ export default function ComfirmationModal({
 					</div>
 				</ModalWrapper>
 			)}
-		</div>
+		</>
 	);
 }

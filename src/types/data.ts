@@ -1,6 +1,6 @@
 import { $Enums } from "@prisma/client";
 import { RankingSettingsType } from "./schemas/settings";
-import { RankingResultData } from "@/components/sorter/SorterField";
+import { RankingResultData } from "@/components/sorter/SortingStage";
 
 export type AlbumData = {
 	name: string;

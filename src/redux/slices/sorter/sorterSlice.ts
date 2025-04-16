@@ -1,4 +1,4 @@
-import { RootState } from "@/store/store";
+import { RootState } from "@/redux/store/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export type FilterType = { albums: string[]; tracks: string[] };

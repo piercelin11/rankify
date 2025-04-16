@@ -10,7 +10,9 @@ import fetchSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
 import ComfirmationModal from "../general/ComfirmationModal";
 import dynamic from "next/dynamic";
 
-const ModalWrapper = dynamic(() => import("../general/ModalWrapper"), { ssr: false });
+const ModalWrapper = dynamic(() => import("../general/ModalWrapper"), {
+	ssr: false,
+});
 
 const svgAttributes = {
 	className: "text-zinc-400 hover:text-zinc-100",
@@ -49,6 +51,8 @@ export default function ActionIcons({
 		>
 			<UpdateIcon {...svgAttributes} onClick={handleUpdate} />
 			<Pencil1Icon {...svgAttributes} onClick={() => setOpen(true)} />
+			<TrashIcon onClick={() => setComfirmationOpen(true)} {...svgAttributes} />
+
 			<ComfirmationModal
 				onConfirm={() => deleteItem(type, id)}
 				onCancel={() => setComfirmationOpen(false)}
@@ -59,12 +63,7 @@ export default function ActionIcons({
 				title="Are You Sure?"
 				description="This action cannot be undone."
 				warning="Warning: All associated data will also be removed."
-			>
-				<TrashIcon
-					onClick={() => setComfirmationOpen(true)}
-					{...svgAttributes}
-				/>
-			</ComfirmationModal>
+			/>
 
 			{isOpen && (
 				<ModalWrapper setOpen={setOpen}>{children(setOpen)}</ModalWrapper>

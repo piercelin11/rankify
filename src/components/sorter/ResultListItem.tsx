@@ -1,19 +1,18 @@
-import { TrackData } from "@/types/data";
 import React, { HTMLAttributes } from "react";
-import { RankingResultData } from "./SorterField";
+import { RankingResultData } from "./SortingStage";
 import { cn } from "@/lib/cn";
 
-type SorterResultListItemProps = {
+type ResultListItemProps = {
 	data: RankingResultData;
 	ranking: number;
 } & HTMLAttributes<HTMLDivElement>;
 
-export default function SorterResultListItem({
+export default function ResultListItem({
 	data,
 	ranking,
 	className,
 	...props
-}: SorterResultListItemProps) {
+}: ResultListItemProps) {
 	return (
 		<div
 			className={cn("grid cursor-pointer select-none grid-cols-[25px,_70px,_1fr] items-center gap-3 rounded border-b border-zinc-850 px-6 py-3 hover:bg-zinc-900", className)}

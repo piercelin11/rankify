@@ -1,22 +1,12 @@
-"use client";
-import React, {
-	useState,
-	useEffect,
-	useRef,
-	startTransition,
-	useCallback,
-} from "react";
-import { useRouter } from "next/navigation";
-import { ChevronLeftIcon } from "@radix-ui/react-icons";
+import { setPercentage, setSaveStatus } from "@/redux/slices/sorter/sorterSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
 import { RankingDraftData, TrackData } from "@/types/data";
-import { cn } from "@/lib/cn";
-import saveDraft from "@/lib/action/user/saveDraft";
-import deleteRankingDraft from "@/lib/action/user/deleteRankingDraft";
-import saveDraftResult from "@/lib/action/user/saveDraftResult";
-import ComfirmationModal from "../general/ComfirmationModal";
+import React, { startTransition, useEffect, useRef, useState } from "react";
+import saveDraft from "../action/user/saveDraft";
+import { RankingResultData } from "@/components/sorter/SortingStage";
+import saveDraftResult from "../action/user/saveDraftResult";
 import { debounce } from "chart.js/helpers";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setPercentage, setSaveStatus } from "@/features/sorter/sorterSlice";
+import { CurrentStage } from "@/components/sorter/SorterPage";
 
 type HistoryState = {
 	cmp1: number;
@@ -34,34 +24,20 @@ type HistoryState = {
 	percent: number;
 };
 
-export type RankingResultData = TrackData & {
-	ranking: number;
-};
-
-type SorterFieldProps = {
-	data: TrackData[];
-	draft: RankingDraftData | null;
+type UseSorterProps = {
+    tracks: TrackData[];
+    draft: RankingDraftData | null;
+    setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>
 };
 
 const autoSaveCounter = 15;
 
-export default function SorterField({ data, draft }: SorterFieldProps) {
-	const excluded = useAppSelector((state) => state.sorter.excluded);
+export default function useSorter({tracks, draft, setCurrentStage}: UseSorterProps) {
 	const saveStatus = useAppSelector((state) => state.sorter.saveStatus);
 	const dispatch = useAppDispatch();
 
-	const [quitIsOpen, setQuitOpen] = useState<boolean>(false);
-
-	const tracks = excluded
-		? data.filter(
-				(data) =>
-					!excluded.albums.includes(data.albumId as string) &&
-					!excluded.tracks.includes(data.id)
-			)
-		: data;
-	const artistId = tracks[0]?.artistId;
-	const router = useRouter();
-
+    const artistId = tracks[0].artistId;
+    
 	const namMember = useRef<string[]>(tracks.map((item) => item.name));
 
 	const [leftField, setLeftField] = useState<TrackData | undefined>();
@@ -245,18 +221,14 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 		}
 
 		if (cmp1.current < 0) {
-			const percentage = Math.floor(
-				(finishSize.current * 100) / totalSize.current
-			);
-			percent.current = percentage;
-			dispatch(setPercentage(percentage));
+			percent.current = 100;
+			dispatch(setPercentage(100));
 			showResult();
 			finishFlag.current = 1;
 		} else {
 			showImage();
+			handleAutoSave();
 		}
-
-		handleAutoSave();
 	}
 
 	//將歌名顯示於比較兩首歌曲的表格中
@@ -325,11 +297,6 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 		await saveDraft(artistId, JSON.stringify(currentState));
 	}
 
-	//放棄或退出排名遊戲並回到歌手頁面
-	function handleQuit() {
-		router.replace(`/artist/${artistId}/overview`);
-	}
-
 	//將所有變數與陣列資料重回上一步驟的資料
 	function restorePreviousState() {
 		var prevState = history.current.pop();
@@ -355,13 +322,6 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 		}
 	}
 
-	//刪除草稿資料
-	function handleClear() {
-		deleteRankingDraft(artistId);
-		dispatch(setPercentage(0));
-		router.replace(`/sorter/${artistId}/filter`);
-	}
-
 	//顯示最終排序結果
 	async function showResult() {
 		var rankingNum = 1;
@@ -369,9 +329,11 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 		var i: number;
 		let resultArray: RankingResultData[] | null = [];
 
+		const trackMap = new Map(tracks.map((track) => [track.name, track]));
+
 		for (i = 0; i < namMember.current.length; i++) {
-			const foundTrack = tracks.find(
-				(item) => item.name === namMember.current[lstMember.current[0][i]]
+			const foundTrack = trackMap.get(
+				namMember.current[lstMember.current[0][i]]
 			)!;
 
 			resultArray.push({
@@ -412,8 +374,8 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 			percent: percent.current,
 		};
 
-		await saveDraftResult(artistId, resultArray, JSON.stringify(currentState));
-		router.replace(`/sorter/${artistId}/result`);
+		const result = await saveDraftResult(artistId, resultArray, JSON.stringify(currentState));
+		if(result) setCurrentStage("result");
 	}
 
 	//處理自動儲存的部分
@@ -437,9 +399,7 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 	}
 
 	useEffect(() => {
-		if (draft?.result) {
-			router.replace(`/sorter/${artistId}/result`);
-		} else if (draft?.draft) {
+		if (draft?.draft) {
 			const history = JSON.parse(draft.draft);
 			cmp1.current = history.cmp1;
 			cmp2.current = history.cmp2;
@@ -455,213 +415,11 @@ export default function SorterField({ data, draft }: SorterFieldProps) {
 			totalSize.current = history.totalSize;
 			namMember.current = history.namMember;
 			showImage();
-		} else if (!excluded) {
-			router.replace(`/sorter/${artistId}/filter`);
 		} else {
 			initList();
 			showImage();
 		}
 	}, [draft]);
 
-	//用鍵盤選擇歌曲
-	const [pressedBtn, setPressedBtn] = useState<string>("");
-
-	function handleKeyDown(e: KeyboardEvent): void {
-		const key = e.key;
-		if (key === "ArrowLeft") {
-			setPressedBtn("ArrowLeft");
-		}
-		if (key === "ArrowRight") {
-			setPressedBtn("ArrowRight");
-		}
-		if (key === "ArrowUp") {
-			setPressedBtn("ArrowUp");
-		}
-		if (key === "ArrowDown") {
-			setPressedBtn("ArrowDown");
-		}
-	}
-
-	const handleKeyUp = useCallback(
-		(e: KeyboardEvent): void => {
-			const key = e.key;
-			if (key === "ArrowLeft") {
-				if (finishFlag.current === 0) sortList(-1);
-				setPressedBtn("");
-			}
-			if (key === "ArrowRight") {
-				if (finishFlag.current === 0) sortList(1);
-				setPressedBtn("");
-			}
-			if (key === "ArrowUp" || key === "ArrowDown") {
-				if (finishFlag.current === 0) sortList(0);
-				setPressedBtn("");
-			}
-		},
-		[data]
-	);
-
-	useEffect(() => {
-		document.addEventListener("keydown", handleKeyDown);
-		document.addEventListener("keyup", handleKeyUp);
-
-		console.log("keyup");
-
-		return function cleanup() {
-			document.removeEventListener("keydown", handleKeyDown);
-			document.removeEventListener("keyup", handleKeyUp);
-		};
-	}, [handleKeyUp]);
-
-	return (
-		<div className="max-w-[1280px] select-none space-y-6 2xl:max-w-[1680px]">
-			{(excluded || draft) && (
-				<>
-					<div className="grid grid-flow-col grid-cols-3 grid-rows-2 gap-6">
-						<div
-							className={cn(
-								"col-span-1 row-span-2 flex cursor-pointer flex-col items-center justify-center rounded-xl bg-zinc-900 p-5 hover:bg-zinc-800",
-								{
-									"bg-zinc-750": pressedBtn === "ArrowLeft",
-								}
-							)}
-							onClick={() => {
-								if (finishFlag.current === 0) sortList(-1);
-							}}
-							onKeyDown={(e) => {
-								console.log(e.key);
-							}}
-						>
-							<iframe
-								className="mb-5"
-								src={`https://open.spotify.com/embed/track/${leftField?.id}`}
-								width="100%"
-								height="80"
-								allow="autoplay; encrypted-media"
-							></iframe>
-							<img
-								className="rounded-lg"
-								src={leftField?.img || "/pic/placeholder.jpg"}
-								alt="cover"
-							/>
-							<div className="space-y-1 pb-3 pt-8 text-center">
-								<p className="line-clamp-1 text-lg font-semibold">
-									{leftField?.name}
-								</p>
-								<p className="line-clamp-1 text-zinc-500">
-									{leftField?.album?.name || "Non-album track"}
-								</p>
-							</div>
-						</div>
-						<div
-							className={cn(
-								"col-span-1 row-span-1 flex cursor-pointer flex-col items-center justify-center rounded-xl bg-zinc-900 p-5 hover:bg-zinc-800",
-								{
-									"bg-zinc-750": pressedBtn === "ArrowUp",
-								}
-							)}
-							onClick={() => {
-								if (finishFlag.current === 0) sortList(0);
-							}}
-						>
-							i like both
-						</div>
-						<div
-							className={cn(
-								"col-span-1 row-span-1 flex cursor-pointer flex-col items-center justify-center rounded-xl bg-zinc-900 p-5 hover:bg-zinc-800",
-								{
-									"bg-zinc-750": pressedBtn === "ArrowDown",
-								}
-							)}
-							onClick={() => {
-								if (finishFlag.current === 0) sortList(0);
-							}}
-						>
-							no opinion
-						</div>
-						<div
-							className={cn(
-								"col-span-1 row-span-2 flex cursor-pointer flex-col items-center justify-center rounded-xl bg-zinc-900 p-5 hover:bg-zinc-800",
-								{
-									"bg-zinc-750": pressedBtn === "ArrowRight",
-								}
-							)}
-							onClick={() => {
-								if (finishFlag.current === 0) sortList(1);
-							}}
-						>
-							<iframe
-								className="mb-5"
-								src={`https://open.spotify.com/embed/track/${rightField?.id}`}
-								width="100%"
-								height="80"
-								allow="autoplay; encrypted-media"
-							></iframe>
-							<img
-								className="rounded-lg"
-								src={rightField?.img || "/pic/placeholder.jpg"}
-								alt="cover"
-							/>
-							<div className="space-y-1 pb-3 pt-8 text-center">
-								<p className="line-clamp-1 text-lg font-semibold">
-									{rightField?.name}
-								</p>
-								<p className="line-clamp-1 text-zinc-500">
-									{rightField?.album?.name || "Non-album track"}
-								</p>
-							</div>
-						</div>
-					</div>
-
-					<div className="flex justify-between">
-						<div
-							className="flex cursor-pointer items-center gap-5 rounded-lg bg-zinc-900 p-5 hover:bg-zinc-800"
-							onClick={restorePreviousState}
-						>
-							<ChevronLeftIcon />
-							<p>Previous Step</p>
-						</div>
-
-						<div className="flex gap-4">
-							<div
-								className="flex cursor-pointer items-center gap-5 rounded-lg bg-zinc-900 p-5 hover:bg-zinc-800"
-								onClick={handleClear}
-							>
-								<p>Clear and Restart</p>
-							</div>
-							{saveStatus === "idle" && history.current.length !== 0 ? (
-								<ComfirmationModal
-									onConfirm={async () => {
-										await handleSave();
-										handleQuit();
-									}}
-									onCancel={() => handleQuit()}
-									isOpen={quitIsOpen}
-									setOpen={setQuitOpen}
-									cancelLabel="Quit"
-									comfirmLabel="Save"
-									description="Your ranking record has not been saved."
-									warning="Are you sure you want to leave?"
-								>
-									<div
-										className="flex cursor-pointer items-center gap-5 rounded-lg bg-zinc-900 p-5 hover:bg-zinc-800"
-										onClick={() => setQuitOpen(true)}
-									>
-										<p>Quit</p>
-									</div>
-								</ComfirmationModal>
-							) : (
-								<div
-									className="flex cursor-pointer items-center gap-5 rounded-lg bg-zinc-900 p-5 hover:bg-zinc-800"
-									onClick={() => handleQuit()}
-								>
-									<p>Quit</p>
-								</div>
-							)}
-						</div>
-					</div>
-				</>
-			)}
-		</div>
-	);
+    return {leftField, rightField, finishFlag, handleSave, restorePreviousState, sortList}
 }

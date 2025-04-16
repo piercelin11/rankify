@@ -5,7 +5,7 @@ import LogoDisplay from "../sidebar/LogoDisplay";
 import { ArtistData } from "@/types/data";
 import { CheckIcon } from "@radix-ui/react-icons";
 import LoadingAnimation from "../ui/LoadingAnimation";
-import { useAppSelector } from "@/store/hooks";
+import { useAppSelector } from "@/redux/store/hooks";
 
 type SorterHeaderProps = {
 	artist: ArtistData;
@@ -16,10 +16,10 @@ export default function SorterHeader({ artist }: SorterHeaderProps) {
 	const saveStatus = useAppSelector((state) => state.sorter.saveStatus);
 
 	return (
-		<div className="grid grid-cols-3 items-center border-b border-zinc-750 p-6">
-			<div className="flex items-center gap-4">
+		<div className="grid items-center border-b border-zinc-750 p-6 sm:grid-cols-3">
+			<div className="flex gap-2 items-center justify-self-center sm:justify-self-auto">
 				<LogoDisplay />
-				<div className="flex h-5 justify-end text-zinc-500">
+				<div className="hidden h-5 justify-end text-zinc-500 lg:flex">
 					{saveStatus === "saved" ? (
 						<div className="flex items-center gap-1">
 							<CheckIcon />
@@ -36,11 +36,11 @@ export default function SorterHeader({ artist }: SorterHeaderProps) {
 				</div>
 			</div>
 
-			<div className="justify-self-center">
+			<div className="hidden justify-self-center sm:block">
 				<p className="text-zinc-300">{artist.name}'s Sorter</p>
 			</div>
-			<div className="mt-2 justify-self-end pr-6">
-				<div className="relative w-[300px]">
+			<div className="mt-2 w-full justify-self-end sm:w-fit xl:pr-6">
+				<div className="relative w-full sm:w-[150px] xl:w-[300px]">
 					<p
 						className="absolute -top-5 text-right text-sm text-zinc-500"
 						style={{ left: `${percentage}%` }}

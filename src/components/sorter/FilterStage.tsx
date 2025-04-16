@@ -1,27 +1,30 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CheckBox from "../ui/CheckBox";
 import { AlbumData, TrackData } from "@/types/data";
 import { cn } from "@/lib/cn";
 import Button from "../ui/Button";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FilterType, setExcluded } from "@/features/sorter/sorterSlice";
-import { useAppDispatch } from "@/store/hooks";
+import { FilterType, setExcluded, setPercentage } from "@/redux/slices/sorter/sorterSlice";
+import { useAppDispatch } from "@/redux/store/hooks";
+import { Description } from "../ui/Text";
+import { CurrentStage } from "./SorterPage";
 
-type FilterFieldProps = {
+type FilterStageProps = {
 	albums: AlbumData[];
-	singles?: TrackData[];
+	tracks?: TrackData[];
+	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>
 };
 
-export default function FilterField({ albums, singles }: FilterFieldProps) {
+export default function FilterStage({ albums, tracks, setCurrentStage }: FilterStageProps) {
 	const [excludedIds, setExcludedIds] = useState<FilterType>({
 		albums: [],
 		tracks: [],
 	});
 	const dispatch = useAppDispatch();
-	const router = useRouter();
+
+	const singles = tracks?.filter(track => !track.albumId);
 
 	function handleItemClick(id: string, type: "albums" | "tracks") {
 		setExcludedIds((prev) => {
@@ -40,13 +43,23 @@ export default function FilterField({ albums, singles }: FilterFieldProps) {
 		if (filteredAlbums.length < 2) {
 			alert("You need to at least select 2 albums.");
 		} else {
-			dispatch(setExcluded(excludedIds))
-			router.replace(`/sorter/${albums[0].artistId}`);
+			dispatch(setExcluded(excludedIds));
+			setCurrentStage("sorting");
 		}
 	}
 
+	useEffect(() => {
+		dispatch(setPercentage(0));
+	}, [])
+
 	return (
-		<>
+		<div className="space-y-6">
+			<div className="space-y-2">
+				<h3 className="text-center">Get Started</h3>
+				<Description className="text-center">
+					filter out the albums and singles you haven't listen to.
+				</Description>
+			</div>
 			<div className="flex justify-center gap-4">
 				<Button variant="lime" onClick={handleStart} rounded>
 					Start Sorter
@@ -57,7 +70,7 @@ export default function FilterField({ albums, singles }: FilterFieldProps) {
 					</Button>
 				</Link>
 			</div>
-			<div className="scrollbar-hidden overflow-auto">
+			<div className="overflow-auto scrollbar-hidden">
 				<div className="flex gap-3">
 					{albums.map((album) => (
 						<div
@@ -85,7 +98,7 @@ export default function FilterField({ albums, singles }: FilterFieldProps) {
 					))}
 				</div>
 			</div>
-		</>
+		</div>
 	);
 }
 

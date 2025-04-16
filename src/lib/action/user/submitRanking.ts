@@ -1,6 +1,6 @@
 "use server";
 
-import { RankingResultData } from "@/components/sorter/SorterField";
+import { RankingResultData } from "@/components/sorter/SortingStage";
 import { $Enums } from "@prisma/client";
 import { getUserSession } from "@/../auth";
 import { ActionResponse } from "@/types/action";

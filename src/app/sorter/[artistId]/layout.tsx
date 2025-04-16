@@ -17,8 +17,8 @@ export default async function layout({
 	return (
 		<div className="flex h-screen flex-col overflow-x-hidden">
 			<SorterHeader artist={artist} />
-			<div className="flex flex-grow items-center justify-center px-24">
-				<div className="w-[1280px] 2xl:w-[1680px]">{children}</div>
+			<div className="flex px-4 h-full">
+				<div className="container m-auto">{children}</div>
 			</div>
 		</div>
 	);
