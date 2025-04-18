@@ -10,7 +10,7 @@ type ArtistSearchingSectionProps = {
 	handleClick: (artistId: string) => void;
 };
 
-export default function ArtistSearchingSection({ handleClick }: ArtistSearchingSectionProps) {
+export default function ArtistSearchSection({ handleClick }: ArtistSearchingSectionProps) {
 
 	const { inputValue, handleInput, result, isSearcing } = useSearchInput("artist");
 

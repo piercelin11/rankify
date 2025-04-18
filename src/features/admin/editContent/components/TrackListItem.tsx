@@ -1,8 +1,7 @@
 "use client";
-import deleteItem from "@/lib/action/admin/deleteItem";
+import deleteItem from "@/features/admin/editContent/actions/deleteItem";
 import { AlbumData, TrackData } from "@/types/data";
 import {
-	ArrowTopRightIcon,
 	CheckIcon,
 	Pencil1Icon,
 	TrashIcon,
@@ -16,16 +15,15 @@ import React, {
 	useOptimistic,
 	useState,
 } from "react";
-import { InlineEditInput } from "../ui/Input";
-import Button from "../ui/Button";
+import { InlineEditInput } from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
 import { useForm } from "react-hook-form";
 import { updateTrackSchema, UpdateTrackType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FormMessage from "../form/FormMessage";
-import updateTrack from "@/lib/action/admin/updateTrack";
+import updateTrack from "@/features/admin/editContent/actions/updateTrack";
 import { cn } from "@/lib/cn";
-import RadioItem from "../form/RadioItem";
-import SelectorInput from "../form/SelectorInput";
+import RadioItem from "@/components/form/RadioItem";
+import SelectorInput from "@/components/form/SelectorInput";
 
 type TrackListItemProps = {
 	trackData: TrackData;

@@ -1,12 +1,12 @@
 import useDominantColor from "@/lib/hooks/useDominantColor";
 import { rgbToHex } from "@/lib/utils/adjustColor";
-import Button from "../ui/Button";
+import Button from "@/components/ui/Button";
 import { InputHTMLAttributes, useState } from "react";
 import { cn } from "@/lib/cn";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import { AlbumData } from "@/types/data";
-import FormMessage from "../form/FormMessage";
-import Input from "../ui/Input";
+import FormMessage from "@/components/form/FormMessage";
+import Input from "@/components/ui/Input";
 
 type AlbumColorSelectorProps = {
 	data: AlbumData;

@@ -4,9 +4,9 @@ import InfoHeader from "@/components/display/showcase/InfoHeader";
 import getAlbumById from "@/lib/database/data/getAlbumById";
 import getTracksByAlbum from "@/lib/database/data/getTracksByAlbum";
 import { dateToLong } from "@/lib/utils/helper";
-import TrackListItem from "@/components/admin/TrackListItem";
+import TrackListItem from "@/features/admin/editContent/components/TrackListItem";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
-import AlbumActionIcons from "@/components/admin/AlbumActionIcons";
+import AlbumActionIcons from "@/features/admin/editContent/components/AlbumActionIcons";
 import ContentWrapper from "@/components/general/ContentWrapper";
 
 export default async function AdminAlbumPage({

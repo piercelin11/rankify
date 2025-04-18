@@ -5,11 +5,13 @@ import GalleryWrapper from "@/components/display/showcase/GalleryWrapper";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import GalleryItem from "@/components/display/showcase/GalleryItem";
 import InfoHeader from "@/components/display/showcase/InfoHeader";
-import AddNewButton from "@/components/admin/AddNewButton";
 import getSinglesByArtist from "@/lib/database/data/getSinglesByArtist";
-import TrackListItem from "@/components/admin/TrackListItem";
-import ArtistActionIcons from "@/components/admin/ArtistActionIcons";
+import TrackListItem from "@/features/admin/editContent/components/TrackListItem";
+import ArtistActionIcons from "@/features/admin/editContent/components/ArtistActionIcons";
 import ContentWrapper from "@/components/general/ContentWrapper";
+import AddAlbumButton from "@/features/admin/addContent/components/AddAlbumButton";
+import AddEPButton from "@/features/admin/addContent/components/AddEPButton";
+import AddSingleButton from "@/features/admin/addContent/components/AddSingleButton";
 
 export default async function AdminArtistPage({
 	params,
@@ -53,7 +55,7 @@ export default async function AdminArtistPage({
 									subTitle="Album"
 								/>
 							))}
-							<AddNewButton artistId={artistId} type="Album" />
+							<AddAlbumButton artistId={artistId} />
 						</GalleryWrapper>
 					</div>
 					<div>
@@ -68,18 +70,14 @@ export default async function AdminArtistPage({
 									subTitle="EP"
 								/>
 							))}
-							<AddNewButton artistId={artistId} type="EP" />
+							<AddEPButton artistId={artistId} />
 						</GalleryWrapper>
 					</div>
 
 					<div>
 						<div className="mb-8 flex items-center justify-between">
 							<h2>Singles</h2>
-							<AddNewButton
-								artistId={artistId}
-								type="Single"
-								buttonLabel="Add Singles"
-							/>
+							<AddSingleButton artistId={artistId} />
 						</div>
 						{singles.map((single, index) => (
 							<TrackListItem

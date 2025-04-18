@@ -2,15 +2,15 @@
 
 import React, { ReactNode, useState } from "react";
 import { Pencil1Icon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
-import deleteItem from "@/lib/action/admin/deleteItem";
+import deleteItem from "@/features/admin/editContent/actions/deleteItem";
 import { AlbumData, ArtistData } from "@/types/data";
-import updateInfo from "@/lib/action/admin/updateInfo";
+import updateInfo from "@/features/admin/editContent/actions/updateInfo";
 import { cn } from "@/lib/cn";
 import fetchSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
-import ComfirmationModal from "../general/ComfirmationModal";
+import ComfirmationModal from "@/components/general/ComfirmationModal";
 import dynamic from "next/dynamic";
 
-const ModalWrapper = dynamic(() => import("../general/ModalWrapper"), {
+const ModalWrapper = dynamic(() => import("@/components/general/ModalWrapper"), {
 	ssr: false,
 });
 

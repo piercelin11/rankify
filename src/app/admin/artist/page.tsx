@@ -1,7 +1,8 @@
 import { db } from "@/lib/prisma";
 import GalleryWrapper from "@/components/display/showcase/GalleryWrapper";
 import GalleryItem from "@/components/display/showcase/GalleryItem";
-import { AddArtistButton } from "@/components/admin/AddNewButton";
+import { AddArtistButton } from "@/features/admin/addContent/components/AddAristButton";
+
 
 export default async function AdminArtistsPage() {
 	const artists = await db.artist.findMany();

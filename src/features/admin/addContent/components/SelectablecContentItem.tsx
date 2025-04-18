@@ -2,19 +2,19 @@ import React from "react";
 import { Album, SimplifiedAlbum, Track } from "spotify-types";
 import CheckBox from "@/components/ui/CheckBox";
 
-type SelectableItemProps = {
+type SelectablecContentItemProps = {
 	data: Album | SimplifiedAlbum | Track;
 	handleClick: (albumId: string) => void;
 	checked: boolean;
 	type: string;
 };
 
-export default function SelectableItem({
+export default function SelectablecContentItem({
 	data,
 	handleClick,
 	checked,
 	type,
-}: SelectableItemProps) {
+}: SelectablecContentItemProps) {
 	function isAlbum(
 		data: Album | SimplifiedAlbum | Track
 	): data is Album | SimplifiedAlbum {
@@ -23,7 +23,7 @@ export default function SelectableItem({
 
 	return (
 		<div
-			className="grid select-none grid-cols-[50px,_1fr,_auto] items-center gap-2 rounded sm:px-3 py-2 hover:bg-zinc-800"
+			className="flex select-none items-center gap-2 rounded sm:px-3 py-2 hover:bg-zinc-800"
 			onClick={() => handleClick(data.id)}
 		>
 			<img
@@ -38,7 +38,7 @@ export default function SelectableItem({
 				<p className="text-sm text-zinc-400">{type}</p>
 			</div>
 			<CheckBox
-				className="justify-self-end"
+				className="ml-auto"
 				checked={checked}
 			/>
 		</div>

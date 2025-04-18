@@ -1,27 +1,25 @@
 import React, { useState } from "react";
-import { Description } from "../ui/Text";
-import FormItem from "../form/FormItem";
-import Button from "../ui/Button";
-import AlbumColorSelector from "./AlbumColorSelector";
+import { Description } from "@/components/ui/Text";
+import FormItem from "@/components/form/FormItem";
+import Button from "@/components/ui/Button";
 import { useForm } from "react-hook-form";
-import { updateAlbumSchema, updateAlbumType } from "@/types/schemas/admin";
+import { updateArtistSchema, updateArtistType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlbumData } from "@/types/data";
-import updateAlbum from "@/lib/action/admin/updateAlbum";
-import FormMessage from "../form/FormMessage";
+import { ArtistData } from "@/types/data";
+import FormMessage from "@/components/form/FormMessage";
 import { ActionResponse } from "@/types/action";
-import LoadingAnimation from "../ui/LoadingAnimation";
+import LoadingAnimation from "@/components/ui/LoadingAnimation";
+import updateArtist from "@/features/admin/editContent/actions/updateArtist";
 
-type AlbumEditingFormProps = {
-	data: AlbumData;
+type ArtistEditingFormProps = {
+	data: ArtistData;
 	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function AlbumEditingForm({
+export default function ArtistEditingForm({
 	data,
 	setOpen,
-}: AlbumEditingFormProps) {
-	const [colorMode, setcolorMode] = useState<"radio" | "text">("radio");
+}: ArtistEditingFormProps) {
 	const [response, setResponse] = useState<ActionResponse | null>(null);
 	const [isPending, setPending] = useState<boolean>(false);
 
@@ -29,14 +27,14 @@ export default function AlbumEditingForm({
 		register,
 		handleSubmit,
 		formState: { errors },
-	} = useForm<updateAlbumType>({
-		resolver: zodResolver(updateAlbumSchema),
+	} = useForm<updateArtistType>({
+		resolver: zodResolver(updateArtistSchema),
 	});
 
-	async function onSubmit(formData: updateAlbumType) {
+	async function onSubmit(formData: updateArtistType) {
 		setPending(true);
 		try {
-			const updateAlbumResponse = await updateAlbum(data.id, formData);
+			const updateAlbumResponse = await updateArtist(data.id, formData);
 			setResponse(updateAlbumResponse);
 			if (updateAlbumResponse.success) setOpen(false);
 		} catch (error) {
@@ -53,26 +51,17 @@ export default function AlbumEditingForm({
 	return (
 		<div className="space-y-8 p-5">
 			<div>
-				<h2>Edit Album</h2>
-				<Description>edit album name and album color.</Description>
+				<h2>Edit Artist</h2>
+				<Description>edit artist name.</Description>
 			</div>
 			<hr />
 			<form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
 				<FormItem
 					{...register("name")}
-					label="Album name"
+					label="Artist name"
 					defaultValue={data.name}
 					message={errors.name?.message}
 				/>
-				<div className="space-y-4">
-					<AlbumColorSelector
-						{...register("color")}
-						data={data}
-						mode={colorMode}
-						setMode={setcolorMode}
-						message={errors.color?.message}
-					/>
-				</div>
 				<div className="flex items-center gap-6">
 					<Button
 						variant="outline"
