@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Description } from "@/components/ui/Text";
-import FormItem from "@/components/form/FormItem";
+import FormItem from "@/components/form/FormInput";
 import Button from "@/components/ui/Button";
 import AlbumColorSelector from "./AlbumColorSelector";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { updateAlbumSchema, updateAlbumType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlbumData } from "@/types/data";
@@ -21,16 +21,21 @@ export default function AlbumEditingForm({
 	data,
 	setOpen,
 }: AlbumEditingFormProps) {
-	const [colorMode, setcolorMode] = useState<"radio" | "text">("radio");
 	const [response, setResponse] = useState<ActionResponse | null>(null);
 	const [isPending, setPending] = useState<boolean>(false);
 
 	const {
+		control,
 		register,
 		handleSubmit,
+		setFocus,
 		formState: { errors },
 	} = useForm<updateAlbumType>({
 		resolver: zodResolver(updateAlbumSchema),
+		defaultValues: {
+			name: data.name,
+			color: data.color || "",
+		},
 	});
 
 	async function onSubmit(formData: updateAlbumType) {
@@ -45,10 +50,15 @@ export default function AlbumEditingForm({
 					setResponse({ success: false, message: "Something went wrong." });
 				}
 			}
+			console.error(`Error editing album ${data.name}`, error);
 		} finally {
 			setPending(false);
 		}
 	}
+
+	useEffect(() => {
+		setFocus("name");
+	}, []);
 
 	return (
 		<div className="space-y-8 p-5">
@@ -60,22 +70,27 @@ export default function AlbumEditingForm({
 			<form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
 				<FormItem
 					{...register("name")}
-					label="Album name"
-					defaultValue={data.name}
+					title="Album name"
 					message={errors.name?.message}
 				/>
-				<div className="space-y-4">
-					<AlbumColorSelector
-						{...register("color")}
-						data={data}
-						mode={colorMode}
-						setMode={setcolorMode}
-						message={errors.color?.message}
-					/>
-				</div>
+				<Controller
+					name="color"
+					control={control}
+					render={({ field }) => (
+						<AlbumColorSelector
+							data={data}
+							message={errors.color?.message}
+							onChange={field.onChange}
+							onBlur={field.onBlur}
+							value={field.value}
+							name={field.name}
+						/>
+					)}
+				/>
 				<div className="flex items-center gap-6">
 					<Button
 						variant="outline"
+						type="button"
 						onClick={() => setOpen(false)}
 						disabled={isPending}
 					>

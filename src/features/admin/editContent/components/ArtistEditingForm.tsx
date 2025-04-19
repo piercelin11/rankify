@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Description } from "@/components/ui/Text";
-import FormItem from "@/components/form/FormItem";
+import FormItem from "@/components/form/FormInput";
 import Button from "@/components/ui/Button";
 import { useForm } from "react-hook-form";
 import { updateArtistSchema, updateArtistType } from "@/types/schemas/admin";
@@ -26,6 +26,7 @@ export default function ArtistEditingForm({
 	const {
 		register,
 		handleSubmit,
+		setFocus,
 		formState: { errors },
 	} = useForm<updateArtistType>({
 		resolver: zodResolver(updateArtistSchema),
@@ -43,10 +44,15 @@ export default function ArtistEditingForm({
 					setResponse({ success: false, message: "Something went wrong." });
 				}
 			}
+			console.error(`Error editing artist ${data.name}`, error);
 		} finally {
 			setPending(false);
 		}
 	}
+
+	useEffect(() => {
+		setFocus("name");
+	}, []);
 
 	return (
 		<div className="space-y-8 p-5">
@@ -58,13 +64,14 @@ export default function ArtistEditingForm({
 			<form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
 				<FormItem
 					{...register("name")}
-					label="Artist name"
+					title="Artist name"
 					defaultValue={data.name}
 					message={errors.name?.message}
 				/>
 				<div className="flex items-center gap-6">
 					<Button
 						variant="outline"
+						type="button"
 						onClick={() => setOpen(false)}
 						disabled={isPending}
 					>

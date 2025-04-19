@@ -1,7 +1,6 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import fetchTracks from "@/lib/spotify/fetchTracks";
 import { ActionResponse } from "@/types/action";
 import { AlbumData, TrackData } from "@/types/data";
 import { UpdateTrackType } from "@/types/schemas/admin";

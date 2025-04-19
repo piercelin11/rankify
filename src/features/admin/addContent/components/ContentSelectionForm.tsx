@@ -4,9 +4,9 @@ import Button from "@/components/ui/Button";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
 import FormMessage from "@/components/form/FormMessage";
 import { ActionResponse } from "@/types/action";
-import { SearchInput } from "@/components/ui/Input";
 import useSearchInput from "@/lib/hooks/useSearchInput";
 import useAdminContentAddtion from "../hooks/useAdminContentAddtion";
+import SearchInput from "@/components/ui/SearchInput";
 
 export type ContentType = "Album" | "EP" | "Single";
 export type ContentSubmitActionType = (

@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { SearchInput } from "@/components/ui/Input";
+
 import ArtistSearchResultItem from "./ArtistSearchResultItem";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
 import useSearchInput from "@/lib/hooks/useSearchInput";
+import SearchInput from "@/components/ui/SearchInput";
 
 type ArtistSearchingSectionProps = {
 	handleClick: (artistId: string) => void;

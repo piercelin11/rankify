@@ -1,19 +1,23 @@
 import { cn } from "@/lib/cn";
-import React, { InputHTMLAttributes } from "react";
-
-type RadioData = {
-	id: string;
-	label: string;
-};
+import React from "react";
 
 type RadioItemProps = {
 	label: string;
-    isChecked: boolean;
-    defaultChecked: boolean;
-    value: string;
-} & InputHTMLAttributes<HTMLInputElement>;
+	isChecked: boolean;
+	value: string;
+	onChange: () => void;
+	name?: string;
+	onBlur?: () => void;
+};
 
-export default function RadioItem({ label, value, isChecked, defaultChecked, ...props }: RadioItemProps) {
+export default function RadioItem({
+	label,
+	value,
+	name,
+	onChange,
+	onBlur,
+	isChecked,
+}: RadioItemProps) {
 	return (
 		<label
 			className={cn("flex items-center gap-2 text-zinc-500", {
@@ -27,10 +31,12 @@ export default function RadioItem({ label, value, isChecked, defaultChecked, ...
 			/>
 			<input
 				type="radio"
-				{...props}
+				name={name}
 				value={value}
+				checked={isChecked}
+				onChange={onChange}
+				onBlur={onBlur}
 				hidden
-				defaultChecked={defaultChecked}
 			/>
 			{label}
 		</label>

@@ -6,8 +6,8 @@ import getTracksByAlbum from "@/lib/database/data/getTracksByAlbum";
 import { dateToLong } from "@/lib/utils/helper";
 import TrackListItem from "@/features/admin/editContent/components/TrackListItem";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
-import AlbumActionIcons from "@/features/admin/editContent/components/AlbumActionIcons";
 import ContentWrapper from "@/components/general/ContentWrapper";
+import AlbumActionSection from "@/features/admin/editContent/components/AlbumActionSection";
 
 export default async function AdminAlbumPage({
 	params,
@@ -28,7 +28,7 @@ export default async function AdminAlbumPage({
 			<InfoHeader data={album} subTitle={`${dateToLong(album.releaseDate)}`} />
 			<ContentWrapper>
 				<div className="mb-12">
-					<AlbumActionIcons data={album} />
+					<AlbumActionSection data={album} />
 				</div>
 				{tracks.map((track) => (
 					<TrackListItem

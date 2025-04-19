@@ -7,11 +7,11 @@ import GalleryItem from "@/components/display/showcase/GalleryItem";
 import InfoHeader from "@/components/display/showcase/InfoHeader";
 import getSinglesByArtist from "@/lib/database/data/getSinglesByArtist";
 import TrackListItem from "@/features/admin/editContent/components/TrackListItem";
-import ArtistActionIcons from "@/features/admin/editContent/components/ArtistActionIcons";
 import ContentWrapper from "@/components/general/ContentWrapper";
 import AddAlbumButton from "@/features/admin/addContent/components/AddAlbumButton";
 import AddEPButton from "@/features/admin/addContent/components/AddEPButton";
 import AddSingleButton from "@/features/admin/addContent/components/AddSingleButton";
+import ArtistActionSection from "@/features/admin/editContent/components/ArtistActionSection";
 
 export default async function AdminArtistPage({
 	params,
@@ -42,7 +42,7 @@ export default async function AdminArtistPage({
 			/>
 			<ContentWrapper>
 				<div className="mb-60 space-y-10">
-					<ArtistActionIcons data={artist} />
+					<ArtistActionSection data={artist} />
 					<div>
 						<h2>Albums</h2>
 						<GalleryWrapper>

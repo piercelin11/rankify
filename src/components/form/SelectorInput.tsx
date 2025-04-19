@@ -3,6 +3,7 @@ import React, { InputHTMLAttributes, useState } from "react";
 import { FieldValues, Path, PathValue, UseFormSetValue } from "react-hook-form";
 
 type MenuData<T> = {
+	id: string;
 	value: PathValue<T, Path<T>>;
 	label: string;
 };
@@ -44,7 +45,7 @@ export default function SelectorInput<T extends FieldValues>({
 			>
 				{menuData.map((menuItem) => (
 					<div
-						key={menuItem.value}
+						key={menuItem.id}
 						className="px-4 py-3 hover:bg-zinc-750"
 						onClick={() => handleMenuClick(menuItem.value)}
 					>
