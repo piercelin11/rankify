@@ -1,4 +1,4 @@
-import InfoHeader from "@/components/display/showcase/InfoHeader";
+import ContentHeader from "@/components/presentation/ContentHeader";
 import ContentWrapper from "@/components/general/ContentWrapper";
 import getArtistById from "@/lib/database/data/getArtistById";
 import { notFound } from "next/navigation";
@@ -12,7 +12,7 @@ type LayoutProps = {
 export default async function MainLayout({ params, children }: LayoutProps) {
 	return (
 		<>
-			<Suspense fallback={<InfoHeader />}>
+			<Suspense fallback={<ContentHeader />}>
 				<Header params={params} />
 			</Suspense>
 			<ContentWrapper className="space-y-10">{children}</ContentWrapper>
@@ -27,7 +27,7 @@ async function Header({ params }: Omit<LayoutProps, "children">) {
 	if (!artist) notFound();
 
 	return (
-		<InfoHeader
+		<ContentHeader
 			data={artist}
 			subTitle={`${artist.spotifyFollowers} followers`}
 			rounded

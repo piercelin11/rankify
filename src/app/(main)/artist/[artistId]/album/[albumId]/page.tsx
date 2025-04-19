@@ -2,21 +2,20 @@ import { notFound } from "next/navigation";
 import React from "react";
 import { getUserSession } from "@/../auth";
 import { getAlbumsStats } from "@/lib/database/ranking/overview/getAlbumsStats";
-import MultiTagDropdown from "@/components/menu/MultiTagDropdown";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
-import { NavButtons } from "../../track/[trackId]/page";
-import StatsBox from "@/components/display/showcase/StatsBox";
+import StatsBox from "@/features/ranking/stats/components/StatsCard";
 import {
 	DiscIcon,
 	HeartFilledIcon,
 	StarFilledIcon,
 } from "@radix-ui/react-icons";
 import { getPrevNextIndex } from "@/lib/utils/helper";
-import AlbumRankingLineChart from "@/components/display/graphicChart/AlbumRankingLineChart";
+import AlbumRankingLineChart from "@/features/ranking/display/charts/AlbumRankingLineChart";
 import HorizontalBarChart, {
 	BarData,
-} from "@/components/display/graphicChart/HorizontalBarChart";
+} from "@/features/ranking/stats/components/PercentileFrequencyBars";
 import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
+import ContentSiblingNavigator from "@/features/ranking/display/components/ContentSiblingNavigator";
 
 const iconSize = 22;
 
@@ -42,7 +41,7 @@ export default async function TrackPage({
 	const albumData = albumStats.find((album) => album.id === albumId);
 	if (!albumData) notFound();
 
-	const menuLists = await getLoggedAlbums({ artistId, userId });
+	const menuOptions = await getLoggedAlbums({ artistId, userId });
 
 	const statsBoxData = [
 		{
@@ -113,11 +112,12 @@ export default async function TrackPage({
 				<HorizontalBarChart bars={barData} color={albumData.color} />
 			</div>
 
-			<AlbumRankingLineChart defaultData={albumData} allStats={albumStats}>
-				<MultiTagDropdown defaultTag={albumData} menuLists={menuLists} />
-			</AlbumRankingLineChart>
-			<NavButtons
-				artistId={artistId}
+			<AlbumRankingLineChart
+				defaultAlbumData={albumData}
+				allAlbumData={albumStats}
+				menuOptions={menuOptions}
+			/>
+			<ContentSiblingNavigator
 				type="album"
 				prevData={albumStats[previousIndex]}
 				nextData={albumStats[nextIndex]}

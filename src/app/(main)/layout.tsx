@@ -1,4 +1,4 @@
-import SignOutButton from "@/components/auth/SignOutButton";
+import SignOutButton from "@/features/auth/components/SignOutButton";
 import SidebarWrapper from "@/components/sidebar/SidebarWrapper";
 import Button from "@/components/ui/Button";
 import { mainMenuData } from "@/config/menuData";

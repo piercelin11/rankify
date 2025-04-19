@@ -14,27 +14,27 @@ export type TabItemProps = {
 };
 
 type NavigationTabsProps = {
-	menuData: TabItemProps[];
+	options: TabItemProps[];
 	activeId?: string;
 	color?: string | null;
 };
 
 export default function Tabs({
-	menuData,
+	options,
 	activeId,
 	color,
 }: NavigationTabsProps) {
 	const pathname = usePathname();
 	return (
 		<div className="flex w-max select-none rounded-lg border border-zinc-800">
-			{menuData.map((menuItem) => (
+			{options.map((option) => (
 				<TabItem
-					key={menuItem.id}
-					itemData={menuItem}
+					key={option.id}
+					itemData={option}
 					isActive={
-						menuItem.link
-							? menuItem.link === pathname
-							: menuItem.id === activeId
+						option.link
+							? option.link === pathname
+							: option.id === activeId
 					}
 					color={color}
 				/>

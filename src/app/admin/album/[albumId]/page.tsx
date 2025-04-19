@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import React from "react";
-import InfoHeader from "@/components/display/showcase/InfoHeader";
+import ContentHeader from "@/components/display/showcase/ContentHeader";
 import getAlbumById from "@/lib/database/data/getAlbumById";
 import getTracksByAlbum from "@/lib/database/data/getTracksByAlbum";
 import { dateToLong } from "@/lib/utils/helper";
@@ -25,7 +25,7 @@ export default async function AdminAlbumPage({
 
 	return (
 		<>
-			<InfoHeader data={album} subTitle={`${dateToLong(album.releaseDate)}`} />
+			<ContentHeader data={album} subTitle={`${dateToLong(album.releaseDate)}`} />
 			<ContentWrapper>
 				<div className="mb-12">
 					<AlbumActionSection data={album} />

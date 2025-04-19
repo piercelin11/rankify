@@ -1,4 +1,4 @@
-import InfoHeader from "@/components/display/showcase/InfoHeader";
+import ContentHeader from "@/components/presentation/ContentHeader";
 import ContentWrapper from "@/components/general/ContentWrapper";
 import getAlbumById from "@/lib/database/data/getAlbumById";
 import { notFound } from "next/navigation";
@@ -15,7 +15,7 @@ export default async function AlbumPageLayout({
 }: LayoutProps) {
 	return (
 		<>
-			<Suspense fallback={<InfoHeader />}>
+			<Suspense fallback={<ContentHeader />}>
 				<Header params={params} />
 			</Suspense>
 			<ContentWrapper className="space-y-10 2xl:space-y-20">{children}</ContentWrapper>
@@ -30,7 +30,7 @@ async function Header({ params }: Omit<LayoutProps, "children">) {
 	if (!albumData) notFound();
 
 	return (
-		<InfoHeader
+		<ContentHeader
 			data={albumData}
 			subTitle={albumData.artist.name}
 			type="Album"

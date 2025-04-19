@@ -4,7 +4,7 @@ import Button from "@/components/ui/Button";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
 import FormMessage from "@/components/form/FormMessage";
 import { ActionResponse } from "@/types/action";
-import useSearchInput from "@/lib/hooks/useSearchInput";
+import useSearchInput from "@/features/admin/addContent/hooks/useSpotifySearch";
 import useAdminContentAddtion from "../hooks/useAdminContentAddtion";
 import SearchInput from "@/components/ui/SearchInput";
 

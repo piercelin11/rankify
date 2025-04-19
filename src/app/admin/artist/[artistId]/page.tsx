@@ -4,7 +4,7 @@ import React from "react";
 import GalleryWrapper from "@/components/display/showcase/GalleryWrapper";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import GalleryItem from "@/components/display/showcase/GalleryItem";
-import InfoHeader from "@/components/display/showcase/InfoHeader";
+import ContentHeader from "@/components/display/showcase/ContentHeader";
 import getSinglesByArtist from "@/lib/database/data/getSinglesByArtist";
 import TrackListItem from "@/features/admin/editContent/components/TrackListItem";
 import ContentWrapper from "@/components/general/ContentWrapper";
@@ -35,7 +35,7 @@ export default async function AdminArtistPage({
 
 	return (
 		<>
-			<InfoHeader
+			<ContentHeader
 				data={artist}
 				subTitle={`${artist.spotifyFollowers} followers`}
 				rounded

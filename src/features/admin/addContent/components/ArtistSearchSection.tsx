@@ -4,7 +4,7 @@ import React from "react";
 
 import ArtistSearchResultItem from "./ArtistSearchResultItem";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
-import useSearchInput from "@/lib/hooks/useSearchInput";
+import useSearchInput from "@/features/admin/addContent/hooks/useSpotifySearch";
 import SearchInput from "@/components/ui/SearchInput";
 
 type ArtistSearchingSectionProps = {

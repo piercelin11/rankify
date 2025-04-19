@@ -4,13 +4,13 @@ import getTracksStats, {
 	TimeFilterType,
 	TrackStatsType,
 } from "@/lib/database/ranking/overview/getTracksStats";
-import RankingNavButton from "@/components/display/ranking/RankingNavButton";
-import TrackRankingChart from "@/components/display/ranking/TrackRankingChart";
+import RankingNavButton from "@/features/ranking/display/components/RankingNavButton";
+import TrackRankingChart from "@/features/ranking/display/components/TrackRankingChart";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import { dropdownMenuData } from "@/config/menuData";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
-import { Column } from "@/components/display/ranking/RankingTable";
+import { Column } from "@/features/ranking/display/components/RankingTable";
 import { getPastDate } from "@/lib/utils/helper";
 
 export default async function ArtistRankingPage({

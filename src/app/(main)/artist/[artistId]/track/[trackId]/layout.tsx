@@ -1,4 +1,4 @@
-import InfoHeader from "@/components/display/showcase/InfoHeader";
+import ContentHeader from "@/components/presentation/ContentHeader";
 import ContentWrapper from "@/components/general/ContentWrapper";
 import getTrackById from "@/lib/database/data/getTrackById";
 import Link from "next/link";
@@ -16,7 +16,7 @@ export default async function TrackPageLayout({
 }: LayoutProps) {
 	return (
 		<>
-			<Suspense fallback={<InfoHeader />}>
+			<Suspense fallback={<ContentHeader />}>
 				<Header params={params} />
 			</Suspense>
 			<ContentWrapper className="space-y-10 2xl:space-y-20">{children}</ContentWrapper>
@@ -32,7 +32,7 @@ async function Header({ params }: Omit<LayoutProps, "children">) {
 	if (!trackData) notFound();
 
 	return (
-		<InfoHeader
+		<ContentHeader
 			data={trackData}
 			subTitle={
 				trackData.album?.name ? (

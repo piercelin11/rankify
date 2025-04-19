@@ -7,15 +7,15 @@ import getRankingSession from "@/lib/database/user/getRankingSession";
 import { dateToDashFormat } from "@/lib/utils/helper";
 import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import { getAlbumsRankingHistory } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
-import { AlbumInfoBox } from "@/components/display/showcase/InfoBox";
-import TopSongsCountChart from "@/components/display/graphicChart/TopSongsCountChart";
-import DoubleBarChart from "@/components/chartjs/DoubleBarChart";
+import { AlbumInfoBox } from "@/features/ranking/stats/components/InfoBox";
+import TopSongsCountChart from "@/features/ranking/stats/charts/TopSongsCountChart";
+import DoubleBarChart from "@/components/charts/DoubleBarChart";
 import NoData from "@/components/general/NoData";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
 import Link from "next/link";
 import { ArrowTopRightIcon, PlusIcon } from "@radix-ui/react-icons";
-import RankingTable from "@/components/display/ranking/RankingTable";
-import RankingNavButton from "@/components/display/ranking/RankingNavButton";
+import RankingTable from "@/features/ranking/display/components/RankingTable";
+import RankingNavButton from "@/features/ranking/display/components/RankingNavButton";
 
 export default async function ArtistHistoryPage({
 	params,
@@ -52,7 +52,7 @@ export default async function ArtistHistoryPage({
 					}
 				/>
 				<div className="flex gap-4">
-					<Tabs menuData={navMenuData} />
+					<Tabs options={navMenuData} />
 					<Link href={`/sorter/${artistId}`}>
 						<div className="aspect-square rounded-full bg-lime-500 p-4 text-zinc-950 hover:bg-zinc-100">
 							<PlusIcon width={16} height={16} />

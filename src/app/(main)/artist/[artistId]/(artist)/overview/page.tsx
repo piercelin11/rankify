@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth"; 
 import getTracksStats, { TimeFilterType } from "@/lib/database/ranking/overview/getTracksStats";
 import { getAlbumsStats } from "@/lib/database/ranking/overview/getAlbumsStats";
-import DoubleBarChart from "@/components/chartjs/DoubleBarChart";
+import DoubleBarChart from "@/components/charts/DoubleBarChart";
 import Tabs from "@/components/menu/Tabs";
 import DropdownMenu from "@/components/menu/DropdownMenu";
 import NoData from "@/components/general/NoData";
@@ -10,10 +10,10 @@ import { dropdownMenuData, getNavMenuData } from "@/config/menuData";
 import LoadingAnimation from "@/components/ui/LoadingAnimation";
 import Link from "next/link";
 import { ArrowTopRightIcon, PlusIcon } from "@radix-ui/react-icons";
-import RankingTable from "@/components/display/ranking/RankingTable";
-import RankingNavButton from "@/components/display/ranking/RankingNavButton";
 import getRankingSession from "@/lib/database/user/getRankingSession";
 import { getPastDate } from "@/lib/utils/helper";
+import RankingTable from "@/features/ranking/display/components/RankingTable";
+import RankingNavButton from "@/features/ranking/display/components/RankingNavButton";
 
 export default async function ArtistOverViewPage({
 	params,
@@ -42,7 +42,7 @@ export default async function ArtistOverViewPage({
 					menuData={dropdownMenuData}
 				/>
 				<div className="flex gap-4">
-					<Tabs menuData={navMenuData} />
+					<Tabs options={navMenuData} />
 					<Link href={`/sorter/${artistId}`}>
 						<div className="aspect-square rounded-full bg-lime-500 p-4 text-zinc-950 hover:bg-zinc-100">
 							<PlusIcon width={16} height={16} />
