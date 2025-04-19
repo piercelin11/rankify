@@ -5,30 +5,21 @@ import Button from "../ui/Button";
 import { Cross1Icon, HamburgerMenuIcon } from "@radix-ui/react-icons";
 import LogoDisplay from "./LogoDisplay";
 import { usePathname } from "next/navigation";
-import { throttle } from "@/lib/utils/helper";
+import useMediaQuery from "@/lib/hooks/useMediaQuery";
 
 type SidebarWrapperProps = {
 	children: [React.ReactNode, React.ReactNode];
 };
 
 export default function SidebarWrapper({ children }: SidebarWrapperProps) {
-	const [isMobile, setMobile] = useState(false);
-
-	useEffect(() => {
-		const updateSize = throttle(() => {
-			setMobile(window.innerWidth <= 1024);
-		}, 200);
-		updateSize();
-		window.addEventListener("resize", updateSize);
-		return () => window.removeEventListener("resize", updateSize);
-	}, []);
+	const isMobile = useMediaQuery("max", 1024);
 
 	return (
 		<>
 			{isMobile && <MobileSidebarWrapper>{children[0]}</MobileSidebarWrapper>}
 
-			<aside className="fixed z-10 hidden pt-6 h-screen border-r border-zinc-850 lg:block lg:w-[250px] xl:w-[300px]">
-				<div className="py-5 px-4">
+			<aside className="fixed z-10 hidden h-screen border-r border-zinc-850 pt-6 lg:block lg:w-[250px] xl:w-[300px]">
+				<div className="px-4 py-5">
 					<LogoDisplay />
 				</div>
 				{children[0]}
