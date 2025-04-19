@@ -2,7 +2,7 @@ import { AlbumData, TrackData } from "@/types/data";
 import { updateTrackSchema, UpdateTrackType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { startTransition, useEffect, useOptimistic } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import updateTrack from "../actions/updateTrack";
 import { AdminTrackListStyle } from "./TrackListItem";
 import FormInlineEditInput from "@/components/form/FormInlineEditInput";
@@ -15,7 +15,7 @@ type TrackInlineEditingFormProps = {
 	trackData: TrackData;
 	albums: AlbumData[];
 	isEditing: boolean;
-    onCancel: () => void;
+	onCancel: () => void;
 };
 
 const radioData = [
@@ -32,7 +32,7 @@ const radioData = [
 export default function TrackInlineEditingForm({
 	albums,
 	trackData,
-    onCancel,
+	onCancel,
 	isEditing,
 }: TrackInlineEditingFormProps) {
 	const menuData = albums.map((album) => ({
@@ -52,7 +52,7 @@ export default function TrackInlineEditingForm({
 		}
 	);
 
-	const { register, setFocus, handleSubmit, watch, setValue } =
+	const { register, setFocus, handleSubmit, watch, setValue, control } =
 		useForm<UpdateTrackType>({
 			resolver: zodResolver(updateTrackSchema),
 		});
@@ -87,7 +87,10 @@ export default function TrackInlineEditingForm({
 	}, [isEditing, handleKeyUp]);
 
 	return (
-		<form className={`${AdminTrackListStyle}`} onSubmit={handleSubmit(onSubmit)}>
+		<form
+			className={`${AdminTrackListStyle}`}
+			onSubmit={handleSubmit(onSubmit)}
+		>
 			<FormInlineEditInput
 				className="self-center text-base"
 				{...register("name")}
@@ -103,16 +106,23 @@ export default function TrackInlineEditingForm({
 				/>
 			</div>
 			<div className="space-y-2">
-				{/* {radioData.map((data) => (
-					<RadioItem
-						key={data.value}
-						label={data.label}
-						isChecked={trackType === data.value}
-						defaultChecked={optimisticTrackData.type === data.value}
-						value={data.value}
-						{...register("type")}
-					/>
-				))} */}
+				<Controller
+					name="type"
+					control={control}
+					render={({ field }) => (
+						<>
+							{radioData.map((data) => (
+								<RadioItem
+									key={data.value}
+									label={data.label}
+									isChecked={field.value === data.value}
+									value={data.value}
+									onChange={field.onChange}
+								/>
+							))}
+						</>
+					)}
+				/>
 			</div>
 			<div className="self-center justify-self-end">
 				<Button

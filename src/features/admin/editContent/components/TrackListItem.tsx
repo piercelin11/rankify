@@ -11,7 +11,7 @@ type TrackListItemProps = {
 } & HTMLAttributes<HTMLDivElement>;
 
 export const AdminTrackListStyle =
-	"grid grid-cols-[2fr,_2fr,_1fr,_60px] gap-10";
+	"grid grid-cols-[1fr,_60px] sm:grid-cols-[2fr,_2fr,_1fr,_60px] gap-10";
 
 export default function TrackListItem({
 	trackData,
@@ -24,7 +24,7 @@ export default function TrackListItem({
 	return (
 		<div
 			className={cn(
-				"grid cursor-pointer select-none grid-cols-[25px,_65px,_1fr] items-center gap-3 rounded bg-zinc-950 px-6 py-2 hover:bg-zinc-900",
+				"grid cursor-pointer select-none grid-cols-[25px,_65px,_1fr] items-center gap-3 rounded bg-zinc-950 sm:px-6 py-2 hover:bg-zinc-900",
 				className
 			)}
 			{...props}
@@ -33,18 +33,16 @@ export default function TrackListItem({
 				{number || trackData.trackNumber}
 			</p>
 			<img
-				className="rounded"
+				className="rounded w-15 sm:w-16"
 				src={trackData.img || undefined}
 				alt={trackData.name}
-				width={65}
-				height={65}
 			/>
 			<div className={`${AdminTrackListStyle}`}>
 				<p>{trackData.name}</p>
-				<p className="text-zinc-500">
+				<p className="text-zinc-500 hidden sm:block">
 					{trackData.album?.name || "Non-album track"}
 				</p>
-				<p className="text-zinc-500">{trackData.type}</p>
+				<p className="text-zinc-500 hidden sm:block">{trackData.type}</p>
 				<TrackActionSection
 					data={trackData}
 					albums={albums}
