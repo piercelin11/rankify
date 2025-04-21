@@ -10,6 +10,7 @@ type ContentHeaderProps = {
 	rounded?: boolean;
 	type?: string;
 	color?: string | null;
+	children?: ReactNode;
 };
 
 export default function ContentHeader({
@@ -18,12 +19,14 @@ export default function ContentHeader({
 	rounded = false,
 	type,
 	color,
+	children,
 }: ContentHeaderProps) {
 	return (
 		<>
 			<div
-				className={cn("p-8 2xl:p-14", {
+				className={cn("pt-20 2xl:pt-24", {
 					"bg-zinc-900": !color,
+					"pt-10 2xl:pt-12": children
 				})}
 				style={
 					color
@@ -33,28 +36,46 @@ export default function ContentHeader({
 						: undefined
 				}
 			>
-				<div className="flex items-center gap-6 pt-20 2xl:pt-24">
-					<img
-						className={cn("w-full sm:w-[220px] 2xl:w-[280px]", {
-							"rounded-full": rounded,
-							"rounded-md": !rounded,
-						})}
-						src={data?.img || "/pic/placeholder.jpg"}
-						alt={data?.name}
-					/>
-					{data && (
-						<ContentHeaderInfo data={data} subTitle={subTitle} type={type} color={color} />
-					)}
+				<div className="p-8 2xl:p-14">
+					{children}
+					<div className="flex items-center gap-6">
+						<img
+							className={cn("w-full sm:w-[220px] 2xl:w-[280px]", {
+								"rounded-full": rounded,
+								"rounded-md": !rounded,
+							})}
+							src={data?.img || "/pic/placeholder.jpg"}
+							alt={data?.name}
+						/>
+						{data && (
+							<ContentHeaderInfo
+								data={data}
+								subTitle={subTitle}
+								type={type}
+								color={color}
+							/>
+						)}
+					</div>
 				</div>
 			</div>
 			{data && (
-				<ContentHeaderInfoMobileInfo data={data} subTitle={subTitle} type={type} color={color} />
+				<ContentHeaderInfoMobileInfo
+					data={data}
+					subTitle={subTitle}
+					type={type}
+					color={color}
+				/>
 			)}
 		</>
 	);
 }
 
-function ContentHeaderInfo({ data, subTitle, type, color }: ContentHeaderProps) {
+function ContentHeaderInfo({
+	data,
+	subTitle,
+	type,
+	color,
+}: ContentHeaderProps) {
 	return (
 		<div className="hidden sm:block">
 			{type && <p>{type}</p>}
@@ -78,7 +99,12 @@ function ContentHeaderInfo({ data, subTitle, type, color }: ContentHeaderProps) 
 	);
 }
 
-function ContentHeaderInfoMobileInfo({ data, subTitle, type, color }: ContentHeaderProps) {
+function ContentHeaderInfoMobileInfo({
+	data,
+	subTitle,
+	type,
+	color,
+}: ContentHeaderProps) {
 	return (
 		<div className="mx-8 mt-8 border-b border-zinc-750 pb-6 sm:hidden">
 			{type && <p>{type}</p>}

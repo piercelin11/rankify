@@ -48,14 +48,12 @@ export default async function page({
 
 	return (
 		<div className="space-y-16">
-			<ArtistSectionControls
-				artistId={artistId}
-				dropdownOptions={dropdownOptions}
-				dropdownDefaultValue={dropdownDefaultValue}
-				tabOptions={tabOptions}
-				tabsActiveId={activePathname || ""}
-			/>
 			<Suspense fallback={<LoadingAnimation />}>
+				<DropdownMenu
+					options={dropdownOptions}
+					defaultValue={dropdownDefaultValue}
+				/>
+
 				{rankingSessions.length !== 0 ? (
 					<>
 						<TrackOverviewListSection

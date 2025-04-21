@@ -10,6 +10,7 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import AlbumHistoryStatsSection from "@/features/ranking/stats/components/AlbumHistoryStatsSection";
 import ArtistSectionControls from "@/features/ranking/components/ArtistSectionControls";
+import DropdownMenu from "@/components/menu/DropdownMenu";
 
 export default async function page({
 	params,
@@ -40,14 +41,12 @@ export default async function page({
 
 	return (
 		<div className="space-y-16">
-			<ArtistSectionControls
-				artistId={artistId}
-				dropdownOptions={dropdownOptions}
-				dropdownDefaultValue={dateToDashFormat(currentDate.date)}
-				tabOptions={tabOptions}
-				tabsActiveId={activePathname || ""}
-			/>
 			<Suspense fallback={<LoadingAnimation />}>
+				<DropdownMenu
+					options={dropdownOptions}
+					defaultValue={dateToDashFormat(currentDate.date)}
+				/>
+
 				{rankingSessions.length !== 0 ? (
 					<>
 						<TrackHistoryList
