@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import updateTrack from "../actions/updateTrack";
 import Button from "@/components/buttons/Button";
-import { Description } from "@/components/typography/Text";
+import Description from "@/components/typography/Description";
 import FormItem from "@/components/form/FormInput";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import FormMessage from "@/components/form/FormMessage";

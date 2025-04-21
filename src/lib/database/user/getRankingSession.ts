@@ -1,6 +1,5 @@
 import { db } from "@/lib/prisma";
 import { TimeFilterType } from "../ranking/overview/getTracksStats";
-//import { unstable_cacheTag as cacheTag } from "next/cache";
 
 type getAlbumRankingsProps = {
 	artistId: string;

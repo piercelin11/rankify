@@ -8,7 +8,7 @@ import Button from "@/components/buttons/Button";
 import Link from "next/link";
 import { FilterType, setExcluded, setPercentage } from "@/features/sorter/slices/sorterSlice";
 import { useAppDispatch } from "@/store/hooks";
-import { Description } from "@/components/typography/Text";
+import Description from "@/components/typography/Description";
 import { CurrentStage } from "./SorterPage";
 
 type FilterStageProps = {

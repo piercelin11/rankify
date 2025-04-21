@@ -4,8 +4,9 @@ import {
 	publicRoutes,
 	authRoutes,
 	apiAuthPrefix,
-	DEFAULT_LOGIN_REDIRECT
+	DEFAULT_LOGIN_REDIRECT,
 } from "./config/route";
+import { NextResponse } from "next/server";
 
 const { auth } = NextAuth(authConfig);
 
@@ -31,7 +32,10 @@ export default auth(async function middleware(req) {
 		return Response.redirect(new URL("/auth/signin", nextUrl.origin));
 	}
 
-	return;
+	const headers = new Headers(req.headers);
+	headers.set("x-current-path", req.nextUrl.pathname);
+
+	return NextResponse.next({ headers });
 });
 
 //設置啟用 Middleware 的路徑

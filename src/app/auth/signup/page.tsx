@@ -1,8 +1,8 @@
 
-import { Description } from "@/components/typography/Text";
+import Description from "@/components/typography/Description";
 import React from "react";
 import Link from "next/link";
-import SocialButton from "@/components/auth/SocialButton";
+import SocialButton from "@/features/auth/components/SocialButton";
 
 export default function SignupPage() {
 	return (

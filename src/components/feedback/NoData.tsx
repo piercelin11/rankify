@@ -1,5 +1,5 @@
 import React from "react";
-import { Description } from "../typography/Text";
+import Description from "../typography/Description";
 import { CubeIcon } from "@radix-ui/react-icons";
 
 export default function NoData() {

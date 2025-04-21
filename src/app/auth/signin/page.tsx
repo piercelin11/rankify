@@ -1,6 +1,5 @@
-import { Description } from '@/components/typography/Text'
+import Description from '@/components/typography/Description'
 import React from 'react'
-import { GoogleIcon, SpotifyIcon } from '../../../components/icons/LogoIcons'
 import Link from 'next/link'
 import SocialButton from '@/features/auth/components/SocialButton'
 

@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { UserPreferenceData } from "@/types/data";
 import saveRankingSettings from "@/lib/action/settings/saveRankingSettings";
 import { ActionResponse } from "@/types/action";
-import { Description } from "@/components/typography/Text";
+import Description from "@/components/typography/Description";
 import ToggleButton from "@/components/buttons/ToggleButton";
 import Button from "@/components/buttons/Button";
 import FormMessage from "@/components/form/FormMessage";

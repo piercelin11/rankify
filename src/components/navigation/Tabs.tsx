@@ -4,17 +4,17 @@ import { cn } from "@/lib/cn";
 import { ensureBrightness } from "@/lib/utils/adjustColor";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-export type TabItemProps = {
+export type TabOptionProps = {
 	label: string;
 	id: string;
-	link?: string;
+	href?: string;
 	onClick?: () => void;
 };
 
 type NavigationTabsProps = {
-	options: TabItemProps[];
+	options: TabOptionProps[];
 	activeId?: string;
 	color?: string | null;
 };
@@ -24,19 +24,29 @@ export default function Tabs({
 	activeId,
 	color,
 }: NavigationTabsProps) {
-	const pathname = usePathname();
+	const [pendingActiveId, setPendingActiveId] = useState<string | null>(null);
+
+	function handlePendingActiveId(option: TabOptionProps) {
+		setPendingActiveId(option.id);
+	}
+
+	useEffect(() => {
+		if (pendingActiveId === activeId) setPendingActiveId(null);
+	}, [activeId]);
+
 	return (
 		<div className="flex w-max select-none rounded-lg border border-zinc-800">
 			{options.map((option) => (
 				<TabItem
 					key={option.id}
-					itemData={option}
+					option={option}
 					isActive={
-						option.link
-							? option.link === pathname
+						pendingActiveId
+							? option.id === pendingActiveId
 							: option.id === activeId
 					}
 					color={color}
+					onActiveId={() => handlePendingActiveId(option)}
 				/>
 			))}
 		</div>
@@ -44,25 +54,27 @@ export default function Tabs({
 }
 
 function TabItem({
-	itemData,
+	option,
 	color,
 	isActive,
+	onActiveId,
 }: {
-	itemData: TabItemProps;
+	option: TabOptionProps;
 	color?: string | null;
 	isActive: boolean;
+	onActiveId: () => void;
 }) {
 	const activeColor = color ? ensureBrightness(color) : DEFAULT_COLOR;
 
-	if (itemData.link)
+	if (option.href)
 		return (
 			<Link
-				href={itemData.link}
+				href={option.href}
 				className={isActive ? "pointer-events-none" : ""}
 			>
 				<button
 					className={cn(
-						"justify-self-center h-full rounded-lg px-3 py-2 text-zinc-600 xl:px-4 xl:py-3 xl:text-lg",
+						"h-full justify-self-center rounded-lg px-3 py-2 text-zinc-600 xl:px-4 xl:py-3 xl:text-lg",
 						{
 							"text-zinc-950": isActive,
 						}
@@ -70,26 +82,30 @@ function TabItem({
 					style={{
 						backgroundColor: isActive ? activeColor : "#09090b",
 					}}
+					onClick={onActiveId}
 				>
-					{itemData.label}
+					{option.label}
 				</button>
 			</Link>
 		);
-
-	return (
-		<button
-			className={cn(
-				"justify-self-center h-full rounded-lg px-3 py-2 xl:px-4 xl:py-3 text-zinc-600 xl:text-lg",
-				{
-					"text-zinc-950": isActive,
-				}
-			)}
-			style={{
-				backgroundColor: isActive ? activeColor : "#09090b",
-			}}
-			onClick={itemData.onClick}
-		>
-			{itemData.label}
-		</button>
-	);
+	else
+		return (
+			<button
+				className={cn(
+					"h-full justify-self-center rounded-lg px-3 py-2 text-zinc-600 xl:px-4 xl:py-3 xl:text-lg",
+					{
+						"text-zinc-950": isActive,
+					}
+				)}
+				style={{
+					backgroundColor: isActive ? activeColor : "#09090b",
+				}}
+				onClick={() => {
+					onActiveId();
+					if (option.onClick) option.onClick();
+				}}
+			>
+				{option.label}
+			</button>
+		);
 }

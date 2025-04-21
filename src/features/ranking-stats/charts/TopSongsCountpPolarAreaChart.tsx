@@ -3,16 +3,17 @@
 import PolarAreaChart from "@/components/charts/PolarAreaChart";
 import DropdownMenu from "@/components/menu/DropdownMenu";
 import Tabs from "@/components/navigation/Tabs";
-import { cn } from "@/lib/cn";
 import { AlbumHistoryType } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
 import { AlbumStatsType } from "@/lib/database/ranking/overview/getAlbumsStats";
 import React, { useState } from "react";
 
-type TopSongsCountChartProps = {
+type TopSongsCountpPolarAreaChartProps = {
 	data: AlbumStatsType[] | AlbumHistoryType[];
 };
 
-export default function TopSongsCountChart({ data }: TopSongsCountChartProps) {
+export default function TopSongsCountpPolarAreaChart({
+	data,
+}: TopSongsCountpPolarAreaChartProps) {
 	const [view, setView] = useState<"25" | "50">("50");
 
 	const tabData = [
@@ -33,7 +34,11 @@ export default function TopSongsCountChart({ data }: TopSongsCountChartProps) {
 	return (
 		<div className="rounded-xl bg-zinc-900 p-3 xl:p-6">
 			<div className="md:hidden">
-				<DropdownMenu menuData={tabData} variant="dark" defaultValue="Songs in top 50%" />
+				<DropdownMenu
+					options={tabData}
+					variant="dark"
+					defaultValue="Songs in top 50%"
+				/>
 			</div>
 			<div className="hidden md:block">
 				<Tabs options={tabData} activeId={view} />

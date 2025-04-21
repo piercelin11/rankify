@@ -1,8 +1,9 @@
 import React from "react";
-import { Description } from "@/components/typography/Text";
-import RankingSettings from "@/components/settings/RankingSettings";
+import Description from "@/components/typography/Description";
+
 import { getUserSession } from "../../../../../auth";
 import getUserPreference from "@/lib/database/user/getUserPreference";
+import RankingSettings from "@/features/settings/RankingSettings";
 
 export default async function RankingSettingsPage() {
 	const {id: userId} = await getUserSession();

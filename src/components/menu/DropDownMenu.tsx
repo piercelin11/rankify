@@ -4,7 +4,7 @@ import { ChevronDownIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import React, { Dispatch, ReactNode, SetStateAction, useState } from "react";
 
-export type MenuItemProps = {
+export type MenuOptionProps = {
 	id: string;
 	label: string;
 	href?: string;
@@ -12,20 +12,20 @@ export type MenuItemProps = {
 };
 
 type DropDownMenuProps = {
-	menuData: MenuItemProps[];
+	options: MenuOptionProps[];
 	defaultValue?: string;
 	variant?: "light" | "dark";
 };
 
 export default function DropdownMenu({
-	menuData,
+	options,
 	defaultValue,
 	variant = "light",
 }: DropDownMenuProps) {
 	const [isOpen, setOpen] = useState(false);
 	const [selected, setSelected] = useState<string | null>(null);
 
-	function handleItemClick(item: MenuItemProps) {
+	function handleItemClick(item: MenuOptionProps) {
 		setOpen(false);
 		setSelected(item.label);
 
@@ -40,7 +40,7 @@ export default function DropdownMenu({
 				{selected || defaultValue || "Select..."}
 			</DropdownSelect>
 			<DropdownList isOpen={isOpen} variant={variant}>
-				{menuData.map((menuItem) => {
+				{options.map((menuItem) => {
 					const commonClass =
 						"rounded-md px-4 py-3 text-zinc-500 hover:bg-zinc-850 hover:text-zinc-100 block";
 

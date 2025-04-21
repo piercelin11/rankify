@@ -7,12 +7,12 @@ import {
 import React from "react";
 import NoData from "@/components/feedback/NoData";
 
-type TrackInfoBoxProps = {
+type TrackHighlightsCardProps = {
 	type: "gainer" | "loser";
 	data: TrackHistoryType[];
 };
 
-export function TrackInfoBox({ type, data }: TrackInfoBoxProps) {
+export function TrackHighlightsCard({ type, data }: TrackHighlightsCardProps) {
 	function getInfo() {
 		switch (type) {
 			case "gainer":
@@ -31,15 +31,15 @@ export function TrackInfoBox({ type, data }: TrackInfoBoxProps) {
 	const track = getInfo();
 	const info = { ...track, change: track.rankChange! };
 
-	return <InfoBox info={info} type={type} unit="ranking" />;
+	return <RankingHighlightsCard info={info} type={type} unit="ranking" />;
 }
 
-type AlbumInfoBoxProps = {
+type AlbumHighlightsCardProps = {
 	type: "gainer" | "loser";
 	data: AlbumHistoryType[];
 };
 
-export function AlbumInfoBox({ type, data }: AlbumInfoBoxProps) {
+export function AlbumHighlightsCard({ type, data }: AlbumHighlightsCardProps) {
 	function getInfo() {
 		if (data.filter((data) => data.pointsChange !== null).length === 0)
 			return null;
@@ -61,10 +61,10 @@ export function AlbumInfoBox({ type, data }: AlbumInfoBoxProps) {
 	const album = getInfo();
 	const info = album ? { ...album, change: album.pointsChange! } : null;
 
-	return <InfoBox info={info} type={type} unit="points" />;
+	return <RankingHighlightsCard info={info} type={type} unit="points" />;
 }
 
-function InfoBox({
+function RankingHighlightsCard({
 	info,
 	type,
 	unit,

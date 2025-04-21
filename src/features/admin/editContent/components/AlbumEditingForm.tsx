@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Description } from "@/components/typography/Text";
+import Description from "@/components/typography/Description";
 import FormItem from "@/components/form/FormInput";
 import Button from "@/components/buttons/Button";
 import AlbumColorSelector from "./AlbumColorSelector";

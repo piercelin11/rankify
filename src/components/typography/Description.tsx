@@ -5,7 +5,7 @@ type TextProps = {
 	children: React.ReactNode;
 } & React.HTMLAttributes<HTMLParagraphElement>;
 
-export function Description({ children, className, ...props }: TextProps) {
+export default function Description({ children, className, ...props }: TextProps) {
 	return (
 		<p className={cn("text-zinc-500", className)} {...props}>
 			{children}

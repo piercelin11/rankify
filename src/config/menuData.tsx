@@ -62,12 +62,12 @@ export const getNavMenuData = (artistId: string) => [
 	{
 		id:"overview",
 		label: "My Overview",
-		link: `/artist/${artistId}/overview`,
+		href: `/artist/${artistId}/overview`,
 	},
 	{
 		id:"history",
 		label: "Ranking History",
-		link: `/artist/${artistId}/history`,
+		href: `/artist/${artistId}/history`,
 	},
 ];
 

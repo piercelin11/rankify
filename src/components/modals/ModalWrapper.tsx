@@ -1,6 +1,6 @@
 import { Cross2Icon } from "@radix-ui/react-icons";
 import React from "react";
-import { Description } from "../typography/Text";
+import Description from "../typography/Description";
 
 export type ModalWrapperProps = {
 	children: React.ReactNode;
