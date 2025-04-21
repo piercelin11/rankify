@@ -10,12 +10,12 @@ import {
 	StarFilledIcon,
 } from "@radix-ui/react-icons";
 import { getPrevNextIndex } from "@/lib/utils/helper";
-import AlbumRankingLineChart from "@/features/ranking-display/charts/AlbumRankingLineChart";
+import AlbumRankingLineChart from "@/features/ranking/display/charts/AlbumRankingLineChart";
 import HorizontalBarChart, {
 	BarData,
 } from "@/features/ranking-stats/components/PercentileBars";
 import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
-import SiblingNavigator from "@/features/ranking-display/components/SiblingNavigator";
+import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";
 
 const iconSize = 22;
 

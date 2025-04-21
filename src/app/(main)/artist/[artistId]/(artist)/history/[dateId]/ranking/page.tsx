@@ -7,7 +7,7 @@ import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import Button from "@/components/buttons/Button";
 import Link from "next/link";
-import { HistoryTrackRankingChart } from "@/features/ranking-display/components/TrackRankingList";
+import AllTrackHistoryRankingList from "@/features/ranking/display/components/AllTrackHistoryRankingList";
 
 export default async function ArtistRankingPage({
 	params,
@@ -22,7 +22,7 @@ export default async function ArtistRankingPage({
 	return (
 		<>
 			<Suspense fallback={<LoadingAnimation />}>
-				<HistoryRankingChart
+				<TrackHistoryRankingList
 					artistId={artistId}
 					userId={userId}
 					dateId={dateId}
@@ -38,7 +38,7 @@ export default async function ArtistRankingPage({
 	);
 }
 
-async function HistoryRankingChart({
+async function TrackHistoryRankingList({
 	artistId,
 	userId,
 	dateId,
@@ -62,7 +62,7 @@ async function HistoryRankingChart({
 	});
 
 	return (
-		<HistoryTrackRankingChart
+		<AllTrackHistoryRankingList
 			data={tracksRankings}
 			albums={albums}
 			title={dateToLong(tracksRankings[0].date.date)}

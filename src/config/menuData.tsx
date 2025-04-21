@@ -58,7 +58,7 @@ export const settingsMenuData: Omit<MenuItem, "icon">[] = [
 	},
 ];
 
-export const getNavMenuData = (artistId: string) => [
+export const getArtistTabOptions = (artistId: string) => [
 	{
 		id:"overview",
 		label: "My Overview",
@@ -71,34 +71,30 @@ export const getNavMenuData = (artistId: string) => [
 	},
 ];
 
-export const dropdownMenuData =
+export const getOverviewDropdownData = (artistId: string) => 
  [
-	{	id: "pastmonth",
+	{	id: "past-month",
 		label: "past month", 
-		query: { months: "1" },href: `?${new URLSearchParams({ months: "1" })}`,
+		href: `/artist/${artistId}/overview/past-month`,
 	},
 	{
-		id: "past6months",
+		id: "past-6-months",
 		label: "past 6 months",
-		query: { months: "6" },
-		href: `?${new URLSearchParams({ months: "6" })}`,
+		href: `/artist/${artistId}/overview/past-6-months`,
 	},
 	{
-		id: "pastyear",
+		id: "past-year",
 		label: "past year",
-		query: { years: "1" },
-		href: `?${new URLSearchParams({ years: "1" })}`,
+		href: `/artist/${artistId}/overview/past-year`,
 	},
 	{
-		id: "past2year",
+		id: "past-2-years",
 		label: "past 2 years",
-		query: { years: "2" },
-		href: `?${new URLSearchParams({ years: "2" })}`,
+		href: `/artist/${artistId}/overview/past-2-years`,
 	},
 	{
-		id: "lifetime",
-		label: "lifetime",
-		query: {},
-		href: `?${new URLSearchParams()}`,
+		id: "all-time",
+		label: "all time",
+		href: `/artist/${artistId}/overview/all-time`,
 	},
 ];

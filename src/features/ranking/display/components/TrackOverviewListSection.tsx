@@ -6,23 +6,26 @@ import { ArrowTopRightIcon } from "@radix-ui/react-icons";
 import getTracksStats, {
 	TimeFilterType,
 } from "@/lib/database/ranking/overview/getTracksStats";
-import { getPastDate } from "@/lib/utils/helper";
+import { calculateDateRangeFromSlug } from "@/lib/utils/helper";
 
 type TrackOverviewListSectionProps = {
 	artistId: string;
 	userId: string;
-	query: { [key: string]: string };
+	rangeSlug: string;
 };
 
 export default async function TrackOverviewListSection({
 	artistId,
 	userId,
-	query,
+	rangeSlug,
 }: TrackOverviewListSectionProps) {
-	const time: TimeFilterType = {
-		threshold: getPastDate(query),
-		filter: "gte",
-	};
+	const { startDate } = calculateDateRangeFromSlug(rangeSlug);
+	const time: TimeFilterType | undefined = startDate
+		? {
+				threshold: startDate,
+				filter: "gte",
+			}
+		: undefined;
 
 	const trackRankings = await getTracksStats({
 		artistId,
@@ -36,7 +39,7 @@ export default async function TrackOverviewListSection({
 			<h3>Track Rankings</h3>
 			<RankingList data={trackRankings} hasHeader={false} columns={[]} />
 			<Link
-				href={`/artist/${artistId}/overview/ranking?${new URLSearchParams(query)}`}
+				href={`/artist/${artistId}/overview/${rangeSlug}/ranking`}
 			>
 				<Button variant="ghost" className="mx-auto">
 					View All Rankings

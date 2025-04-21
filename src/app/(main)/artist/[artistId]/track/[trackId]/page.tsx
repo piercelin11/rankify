@@ -17,8 +17,8 @@ import { getPrevNextIndex } from "@/lib/utils/helper";
 import PercentileBars, {
 	BarData,
 } from "@/features/ranking-stats/components/PercentileBars";
-import TrackRankingLineChart from "@/features/ranking-display/charts/TrackRankingLineChart";
-import SiblingNavigator from "@/features/ranking-display/components/SiblingNavigator";
+import TrackRankingLineChart from "@/features/ranking/display/charts/TrackRankingLineChart";
+import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";
 
 const iconSize = 22;
 

@@ -1,24 +1,27 @@
 import React from "react";
 import { TimeFilterType } from "@/lib/database/ranking/overview/getTracksStats";
-import { getPastDate } from "@/lib/utils/helper";
 import DoubleBarChart from "@/components/charts/DoubleBarChart";
 import { getAlbumsStats } from "@/lib/database/ranking/overview/getAlbumsStats";
+import { calculateDateRangeFromSlug } from "@/lib/utils/helper";
 
 type AlbumOverviewPointsSectionProps = {
 	artistId: string;
 	userId: string;
-	query: { [key: string]: string };
+	rangeSlug: string;
 };
 
 export default async function AlbumOverviewPointsSection({
 	artistId,
 	userId,
-	query,
+	rangeSlug,
 }: AlbumOverviewPointsSectionProps) {
-	const time: TimeFilterType = {
-		threshold: getPastDate(query),
-		filter: "gte",
-	};
+	const { startDate } = calculateDateRangeFromSlug(rangeSlug);
+	const time: TimeFilterType | undefined = startDate
+		? {
+				threshold: startDate,
+				filter: "gte",
+			}
+		: undefined;
 
 	const albumRankings = await getAlbumsStats({
 		artistId,

@@ -8,10 +8,6 @@ import RankingList, {
 	Column,
 	RankingListDataTypeExtend,
 } from "./RankingList";
-import {
-	TrackHistoryType,
-} from "@/lib/database/ranking/history/getTracksRankingHistory";
-import AchievementDisplay, { AchievementType } from "@/features/ranking-stats/components/AchievementDisplay";
 
 type TrackRankingListProps<T> = {
 	data: T[];
@@ -74,35 +70,5 @@ export default function TrackRankingList<
 			</div>
 			<RankingList data={filteredDatas} columns={columns} />
 		</div>
-	);
-}
-
-export function HistoryTrackRankingChart({
-	albums,
-	data,
-	title,
-}: Omit<TrackRankingListProps<TrackHistoryType>, "columns">) {
-	const columns: Column<TrackHistoryType>[] = [
-		{
-			key: "peak",
-			header: "peak",
-		},
-		{
-			key: "achievement",
-			header: "achievement",
-			render: (value) => (
-				<AchievementDisplay
-					achievement={value as AchievementType | undefined}
-				/>
-			),
-		},
-	];
-	return (
-		<TrackRankingList
-			columns={columns}
-			data={data}
-			albums={albums}
-			title={title}
-		/>
 	);
 }

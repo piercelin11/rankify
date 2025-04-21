@@ -32,7 +32,7 @@ export default function Tabs({
 
 	useEffect(() => {
 		if (pendingActiveId === activeId) setPendingActiveId(null);
-	}, [activeId]);
+	}, [activeId, pendingActiveId]);
 
 	return (
 		<div className="flex w-max select-none rounded-lg border border-zinc-800">
