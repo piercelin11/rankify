@@ -6,7 +6,7 @@ import getTracksByAlbum from "@/lib/database/data/getTracksByAlbum";
 import { dateToLong } from "@/lib/utils/helper";
 import TrackListItem from "@/features/admin/editContent/components/TrackListItem";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
-import ContentWrapper from "@/components/general/ContentWrapper";
+import ContentWrapper from "@/components/layout/ContentWrapper";
 import AlbumActionSection from "@/features/admin/editContent/components/AlbumActionSection";
 
 export default async function AdminAlbumPage({

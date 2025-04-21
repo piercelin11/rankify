@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn";
 import Link from "next/link";
 import React, { ReactNode } from "react";
-import { SpotifyIcon } from "../icon/LogoIcons";
+import { SpotifyIcon } from "../icons/LogoIcons";
 import { AlbumData, ArtistData, TrackData } from "@/types/data";
 
 type ContentHeaderProps = {

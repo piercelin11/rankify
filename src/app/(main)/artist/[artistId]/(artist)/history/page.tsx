@@ -1,21 +1,21 @@
 import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
-import Tabs from "@/components/menu/Tabs";
+import Tabs from "@/components/navigation/Tabs";
 import { getNavMenuData } from "@/config/menuData";
 import DropdownMenu from "@/components/menu/DropdownMenu";
 import getRankingSession from "@/lib/database/user/getRankingSession";
 import { dateToDashFormat } from "@/lib/utils/helper";
 import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import { getAlbumsRankingHistory } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
-import { AlbumInfoBox } from "@/features/ranking/stats/components/InfoBox";
-import TopSongsCountChart from "@/features/ranking/stats/charts/TopSongsCountChart";
+import { AlbumInfoBox } from "@/features/ranking-stats/components/InfoBox";
+import TopSongsCountChart from "@/features/ranking-stats/charts/TopSongsCountChart";
 import DoubleBarChart from "@/components/charts/DoubleBarChart";
-import NoData from "@/components/general/NoData";
-import LoadingAnimation from "@/components/ui/LoadingAnimation";
+import NoData from "@/components/feedback/NoData";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import Link from "next/link";
 import { ArrowTopRightIcon, PlusIcon } from "@radix-ui/react-icons";
-import RankingTable from "@/features/ranking/display/components/RankingTable";
-import RankingNavButton from "@/features/ranking/display/components/RankingNavButton";
+import RankingList from "@/features/ranking-display/components/RankingList";
+import Button from "@/components/buttons/Button";
 
 export default async function ArtistHistoryPage({
 	params,
@@ -42,7 +42,7 @@ export default async function ArtistHistoryPage({
 
 	return (
 		<div className="space-y-16">
-			<div className="flex flex-col md:items-center justify-between sm:flex-row gap-6">
+			<div className="flex flex-col justify-between gap-6 sm:flex-row md:items-center">
 				<DropdownMenu
 					menuData={dateMenuData}
 					defaultValue={
@@ -100,11 +100,13 @@ async function HistoryContents({
 		<>
 			<section className="space-y-6">
 				<h3>Track Rankings</h3>
-				<RankingTable data={trackRankings} hasHeader={false} columns={[]} />
-				<RankingNavButton link={`/artist/${artistId}/history/${dateId}`}>
-					View All Rankings
-					<ArrowTopRightIcon />
-				</RankingNavButton>
+				<RankingList data={trackRankings} hasHeader={false} columns={[]} />
+				<Link href={`/artist/${artistId}/history/${dateId}`}>
+					<Button variant="ghost" className="mx-auto">
+						View All Rankings
+						<ArrowTopRightIcon />
+					</Button>
+				</Link>
 			</section>
 			<div className="gap-4 space-y-4 md:grid md:grid-flow-col md:grid-cols-2 md:grid-rows-2 md:space-y-0 2xl:gap-8">
 				<AlbumInfoBox type="gainer" data={albumRankings} />

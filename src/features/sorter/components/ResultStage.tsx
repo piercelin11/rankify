@@ -8,7 +8,7 @@ import React, {
 	useState,
 } from "react";
 import SorterResultListItem from "./ResultListItem";
-import Button from "@/components/ui/Button";
+import Button from "@/components/buttons/Button";
 import submitRanking from "../actions/submitRanking";
 import { notFound } from "next/navigation";
 import deleteRankingDraft from "../actions/deleteRankingDraft";
@@ -16,7 +16,7 @@ import { cn } from "@/lib/cn";
 import saveDraftResult from "../actions/saveDraftResult";
 import { RankingResultData } from "./SortingStage";
 import { CurrentStage } from "./SorterPage";
-import ComfirmationModal from "@/components/general/ComfirmationModal";
+import ComfirmationModal from "@/components/modals/ComfirmationModal";
 import { setPercentage } from "@/features/sorter/slices/sorterSlice";
 import { useAppDispatch } from "@/store/hooks";
 
@@ -94,14 +94,14 @@ export default function ResultStage({ draft }: ResultStageProps) {
 					<h3>Your ranking result</h3>
 					<div className="flex gap-5">
 						<Button
-							variant="lime"
+							variant="primary"
 							onClick={() => {
 								submitRanking(result, "ARTIST");
 							}}
 						>
 							<p className="w-full">Submit</p>
 						</Button>
-						<Button variant="gray" onClick={() => setCancelOpen(true)}>
+						<Button variant="secondary" onClick={() => setCancelOpen(true)}>
 							<p className="w-full">Delete</p>
 						</Button>
 						<ComfirmationModal

@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import CheckBox from "@/components/ui/CheckBox";
+import CheckBox from "@/components/form/CheckBox";
 import { AlbumData, TrackData } from "@/types/data";
 import { cn } from "@/lib/cn";
-import Button from "@/components/ui/Button";
+import Button from "@/components/buttons/Button";
 import Link from "next/link";
 import { FilterType, setExcluded, setPercentage } from "@/features/sorter/slices/sorterSlice";
 import { useAppDispatch } from "@/store/hooks";
-import { Description } from "@/components/ui/Text";
+import { Description } from "@/components/typography/Text";
 import { CurrentStage } from "./SorterPage";
 
 type FilterStageProps = {
@@ -61,11 +61,11 @@ export default function FilterStage({ albums, tracks, setCurrentStage }: FilterS
 				</Description>
 			</div>
 			<div className="flex justify-center gap-4">
-				<Button variant="lime" onClick={handleStart} rounded>
+				<Button variant="primary" onClick={handleStart} rounded>
 					Start Sorter
 				</Button>
 				<Link href={`/artist/${albums[0].artistId}/overview`}>
-					<Button variant="gray" rounded>
+					<Button variant="secondary" rounded>
 						Quit Sorter
 					</Button>
 				</Link>

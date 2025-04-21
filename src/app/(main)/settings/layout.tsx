@@ -1,7 +1,7 @@
-import ContentWrapper from "@/components/general/ContentWrapper";
+import ContentWrapper from "@/components/layout/ContentWrapper";
 import {
-	SettingsSidebarWrapper,
-} from "@/components/sidebar/SidebarWrapper";
+	SettingsSidebarLayout,
+} from "@/components/layout/SidebarLayout";
 import { settingsMenuData } from "@/config/menuData";
 import Link from "next/link";
 
@@ -13,7 +13,7 @@ export default async function SettingsLayout({
 	children,
 }: SettingsLayoutProps) {
 	return (
-		<SettingsSidebarWrapper>
+		<SettingsSidebarLayout>
 			<ContentWrapper>
 				<div className="space-y-6">
 					{settingsMenuData.map((menuItem) => (
@@ -28,6 +28,6 @@ export default async function SettingsLayout({
 				</div>
 			</ContentWrapper>
 			<ContentWrapper className="w-[800px]">{children}</ContentWrapper>
-		</SettingsSidebarWrapper>
+		</SettingsSidebarLayout>
 	);
 }

@@ -1,9 +1,9 @@
 "use client"
 
-import ModalWrapper from "@/components/general/ModalWrapper";
+import ModalWrapper from "@/components/modals/ModalWrapper";
 import { useState } from "react";
 import ContentSelectionForm from "./ContentSelectionForm";
-import { AddButton } from "@/components/ui/Button";
+import { AddButton } from "@/components/buttons/Button";
 import addAlbum from "@/features/admin/addContent/actions/addAlbum";
 
 type AddEPButtonProps = {
@@ -30,7 +30,7 @@ export default function AddEPButton({ artistId }: AddEPButtonProps) {
                 </ModalWrapper>
             )}
 
-            <AddButton variant="gray" onClick={() => setOpen(true)} />
+            <AddButton variant="secondary" onClick={() => setOpen(true)} />
         </>
     );
 }

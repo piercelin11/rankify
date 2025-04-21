@@ -1,5 +1,5 @@
 
-import { Description } from "@/components/ui/Text";
+import { Description } from "@/components/typography/Text";
 import React from "react";
 import Link from "next/link";
 import SocialButton from "@/components/auth/SocialButton";

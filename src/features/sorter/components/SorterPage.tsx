@@ -5,7 +5,7 @@ import FilterStage from "./FilterStage";
 import SortingStage from "./SortingStage";
 import ResultStage from "./ResultStage";
 import { AlbumData, RankingDraftData, TrackData } from "@/types/data";
-import LoadingAnimation from "@/components/ui/LoadingAnimation";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 
 export type CurrentStage = "filter" | "sorting" | "result";
 

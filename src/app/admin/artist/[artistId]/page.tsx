@@ -7,7 +7,7 @@ import GalleryItem from "@/components/display/showcase/GalleryItem";
 import ContentHeader from "@/components/display/showcase/ContentHeader";
 import getSinglesByArtist from "@/lib/database/data/getSinglesByArtist";
 import TrackListItem from "@/features/admin/editContent/components/TrackListItem";
-import ContentWrapper from "@/components/general/ContentWrapper";
+import ContentWrapper from "@/components/layout/ContentWrapper";
 import AddAlbumButton from "@/features/admin/addContent/components/AddAlbumButton";
 import AddEPButton from "@/features/admin/addContent/components/AddEPButton";
 import AddSingleButton from "@/features/admin/addContent/components/AddSingleButton";

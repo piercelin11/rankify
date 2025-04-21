@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Description } from "@/components/ui/Text";
+import { Description } from "@/components/typography/Text";
 import FormItem from "@/components/form/FormInput";
-import Button from "@/components/ui/Button";
+import Button from "@/components/buttons/Button";
 import AlbumColorSelector from "./AlbumColorSelector";
 import { Controller, useForm } from "react-hook-form";
 import { updateAlbumSchema, updateAlbumType } from "@/types/schemas/admin";
@@ -10,7 +10,7 @@ import { AlbumData } from "@/types/data";
 import updateAlbum from "@/features/admin/editContent/actions/updateAlbum";
 import FormMessage from "@/components/form/FormMessage";
 import { ActionResponse } from "@/types/action";
-import LoadingAnimation from "@/components/ui/LoadingAnimation";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 
 type AlbumEditingFormProps = {
 	data: AlbumData;
@@ -96,7 +96,7 @@ export default function AlbumEditingForm({
 					>
 						Cancel
 					</Button>
-					<Button variant="lime" type="submit" disabled={isPending}>
+					<Button variant="primary" type="submit" disabled={isPending}>
 						Save
 					</Button>
 					{isPending && (

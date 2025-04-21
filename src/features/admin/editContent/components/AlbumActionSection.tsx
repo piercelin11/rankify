@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import ActionIconGroup from "./ActionIconGroup";
-import ComfirmationModal from "@/components/general/ComfirmationModal";
-import ModalWrapper from "@/components/general/ModalWrapper";
+import ComfirmationModal from "@/components/modals/ComfirmationModal";
+import ModalWrapper from "@/components/modals/ModalWrapper";
 import AlbumEditingForm from "./AlbumEditingForm";
 import { AlbumData } from "@/types/data";
 import deleteItem from "../actions/deleteItem";

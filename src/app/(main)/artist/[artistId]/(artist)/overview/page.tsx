@@ -1,19 +1,21 @@
 import React, { Suspense } from "react";
-import { getUserSession } from "@/../auth"; 
-import getTracksStats, { TimeFilterType } from "@/lib/database/ranking/overview/getTracksStats";
+import { getUserSession } from "@/../auth";
+import getTracksStats, {
+	TimeFilterType,
+} from "@/lib/database/ranking/overview/getTracksStats";
 import { getAlbumsStats } from "@/lib/database/ranking/overview/getAlbumsStats";
 import DoubleBarChart from "@/components/charts/DoubleBarChart";
-import Tabs from "@/components/menu/Tabs";
+import Tabs from "@/components/navigation/Tabs";
 import DropdownMenu from "@/components/menu/DropdownMenu";
-import NoData from "@/components/general/NoData";
+import NoData from "@/components/feedback/NoData";
 import { dropdownMenuData, getNavMenuData } from "@/config/menuData";
-import LoadingAnimation from "@/components/ui/LoadingAnimation";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import Link from "next/link";
 import { ArrowTopRightIcon, PlusIcon } from "@radix-ui/react-icons";
 import getRankingSession from "@/lib/database/user/getRankingSession";
 import { getPastDate } from "@/lib/utils/helper";
-import RankingTable from "@/features/ranking/display/components/RankingTable";
-import RankingNavButton from "@/features/ranking/display/components/RankingNavButton";
+import RankingList from "@/features/ranking-display/components/RankingList";
+import Button from "@/components/buttons/Button";
 
 export default async function ArtistOverViewPage({
 	params,
@@ -36,7 +38,7 @@ export default async function ArtistOverViewPage({
 
 	return (
 		<div className="space-y-16">
-			<div className="flex flex-col md:items-center justify-between sm:flex-row gap-6">
+			<div className="flex flex-col justify-between gap-6 sm:flex-row md:items-center">
 				<DropdownMenu
 					defaultValue={dropdownDefaultValue}
 					menuData={dropdownMenuData}
@@ -72,8 +74,8 @@ async function OverviewContents({
 }) {
 	const time: TimeFilterType = {
 		threshold: getPastDate(query),
-		filter: "gte"
-	}
+		filter: "gte",
+	};
 
 	const trackRankings = await getTracksStats({
 		artistId,
@@ -91,13 +93,15 @@ async function OverviewContents({
 		<>
 			<div className="space-y-6">
 				<h3>Track Rankings</h3>
-				<RankingTable data={trackRankings} hasHeader={false} columns={[]} />
-				<RankingNavButton
-					link={`/artist/${artistId}/overview/ranking?${new URLSearchParams(query)}`}
+				<RankingList data={trackRankings} hasHeader={false} columns={[]} />
+				<Link
+					href={`/artist/${artistId}/overview/ranking?${new URLSearchParams(query)}`}
 				>
-					View All Rankings
-					<ArrowTopRightIcon />
-				</RankingNavButton>
+					<Button variant="ghost" className="mx-auto">
+						View All Rankings
+						<ArrowTopRightIcon />
+					</Button>
+				</Link>
 			</div>
 			<div className="space-y-6">
 				<h3>Album Points</h3>

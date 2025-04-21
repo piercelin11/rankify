@@ -4,14 +4,15 @@ import getTracksStats, {
 	TimeFilterType,
 	TrackStatsType,
 } from "@/lib/database/ranking/overview/getTracksStats";
-import RankingNavButton from "@/features/ranking/display/components/RankingNavButton";
-import TrackRankingChart from "@/features/ranking/display/components/TrackRankingChart";
-import LoadingAnimation from "@/components/ui/LoadingAnimation";
+import TrackRankingChart from "@/features/ranking-display/components/TrackRankingList";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import { dropdownMenuData } from "@/config/menuData";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
-import { Column } from "@/features/ranking/display/components/RankingTable";
+import { Column } from "@/features/ranking-display/components/RankingList";
 import { getPastDate } from "@/lib/utils/helper";
+import Link from "next/link";
+import Button from "@/components/buttons/Button";
 
 export default async function ArtistRankingPage({
 	params,
@@ -33,12 +34,14 @@ export default async function ArtistRankingPage({
 					userId={userId}
 				/>
 
-				<RankingNavButton
-					link={`/artist/${artistId}/overview?${new URLSearchParams(query)}`}
+				<Link
+					href={`/artist/${artistId}/overview?${new URLSearchParams(query)}`}
 				>
-					<ArrowLeftIcon />
-					Back
-				</RankingNavButton>
+					<Button variant="ghost" className="mx-auto">
+						<ArrowLeftIcon />
+						Back
+					</Button>
+				</Link>
 			</Suspense>
 		</>
 	);

@@ -1,9 +1,8 @@
-import Button from '@/components/ui/Button'
-import { Description } from '@/components/ui/Text'
+import { Description } from '@/components/typography/Text'
 import React from 'react'
-import { GoogleIcon, SpotifyIcon } from '../../../components/icon/LogoIcons'
+import { GoogleIcon, SpotifyIcon } from '../../../components/icons/LogoIcons'
 import Link from 'next/link'
-import SocialButton from '@/components/auth/SocialButton'
+import SocialButton from '@/features/auth/components/SocialButton'
 
 export default function LoginPage() {
   return (

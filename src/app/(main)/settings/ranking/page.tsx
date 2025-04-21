@@ -1,5 +1,5 @@
 import React from "react";
-import { Description } from "@/components/ui/Text";
+import { Description } from "@/components/typography/Text";
 import RankingSettings from "@/components/settings/RankingSettings";
 import { getUserSession } from "../../../../../auth";
 import getUserPreference from "@/lib/database/user/getUserPreference";

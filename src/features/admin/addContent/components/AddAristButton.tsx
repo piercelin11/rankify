@@ -1,9 +1,9 @@
 "use client"
 
-import ModalWrapper from "@/components/general/ModalWrapper";
+import ModalWrapper from "@/components/modals/ModalWrapper";
 import ArtistAddWizard from "./ArtistAddWizard";
 import { useState } from "react";
-import Button from "@/components/ui/Button";
+import Button from "@/components/buttons/Button";
 import { PlusIcon } from "@radix-ui/react-icons";
 
 export function AddArtistButton() {
@@ -18,7 +18,7 @@ export function AddArtistButton() {
 			)}
 
 			<Button
-				variant="gray"
+				variant="secondary"
 				className="pl-4 pr-6"
 				onClick={() => setOpen(true)}
 			>

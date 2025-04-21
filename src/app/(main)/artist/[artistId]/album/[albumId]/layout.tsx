@@ -1,5 +1,5 @@
 import ContentHeader from "@/components/presentation/ContentHeader";
-import ContentWrapper from "@/components/general/ContentWrapper";
+import ContentWrapper from "@/components/layout/ContentWrapper";
 import getAlbumById from "@/lib/database/data/getAlbumById";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";

@@ -3,9 +3,9 @@
 import React from "react";
 
 import ArtistSearchResultItem from "./ArtistSearchResultItem";
-import LoadingAnimation from "@/components/ui/LoadingAnimation";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import useSearchInput from "@/features/admin/addContent/hooks/useSpotifySearch";
-import SearchInput from "@/components/ui/SearchInput";
+import SearchInput from "@/components/form/SearchInput";
 
 type ArtistSearchingSectionProps = {
 	handleClick: (artistId: string) => void;

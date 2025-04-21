@@ -1,12 +1,12 @@
 import React from "react";
 import SelectablecContentItem from "./SelectablecContentItem";
-import Button from "@/components/ui/Button";
-import LoadingAnimation from "@/components/ui/LoadingAnimation";
+import Button from "@/components/buttons/Button";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import FormMessage from "@/components/form/FormMessage";
 import { ActionResponse } from "@/types/action";
 import useSearchInput from "@/features/admin/addContent/hooks/useSpotifySearch";
 import useAdminContentAddtion from "../hooks/useAdminContentAddtion";
-import SearchInput from "@/components/ui/SearchInput";
+import SearchInput from "@/components/form/SearchInput";
 
 export type ContentType = "Album" | "EP" | "Single";
 export type ContentSubmitActionType = (
@@ -84,7 +84,7 @@ export default function ContentSelectionForm({
 				<Button variant="outline" onClick={onCancel} disabled={isPending}>
 					Cancel
 				</Button>
-				<Button variant="lime" onClick={handleSubmit} disabled={isPending}>
+				<Button variant="primary" onClick={handleSubmit} disabled={isPending}>
 					Add {type}
 				</Button>
 				{isPending && (

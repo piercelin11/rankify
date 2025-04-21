@@ -1,9 +1,9 @@
 "use client";
 
-import ModalWrapper from "@/components/general/ModalWrapper";
+import ModalWrapper from "@/components/modals/ModalWrapper";
 import { useState } from "react";
 import ContentSelectionForm from "./ContentSelectionForm";
-import Button, { AddButton } from "@/components/ui/Button";
+import Button, { AddButton } from "@/components/buttons/Button";
 import addAlbum from "@/features/admin/addContent/actions/addAlbum";
 import { PlusIcon } from "@radix-ui/react-icons";
 import addSingle from "@/features/admin/addContent/actions/addSingle";
@@ -33,7 +33,7 @@ export default function AddSingleButton({ artistId }: AddSingleButtonProps) {
 			)}
 
 			<Button
-				variant="gray"
+				variant="secondary"
 				className="pl-4 pr-6"
 				onClick={() => setOpen(true)}
 			>

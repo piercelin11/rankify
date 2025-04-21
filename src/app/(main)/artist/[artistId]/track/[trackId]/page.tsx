@@ -9,16 +9,16 @@ import {
 	RocketIcon,
 	StarFilledIcon,
 } from "@radix-ui/react-icons";
-import StatsBox from "@/features/ranking/stats/components/StatsCard";
+import StatsBox from "@/features/ranking-stats/components/StatsCard";
 import Link from "next/link";
 import getLoggedTracks from "@/lib/database/user/getLoggedTracks";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import { getPrevNextIndex } from "@/lib/utils/helper";
-import PercentileFrequencyBars, {
+import PercentileBars, {
 	BarData,
-} from "@/features/ranking/stats/components/PercentileFrequencyBars";
-import TrackRankingLineChart from "@/features/ranking/display/charts/TrackRankingLineChart";
-import ContentSiblingNavigator from "@/features/ranking/display/components/ContentSiblingNavigator";
+} from "@/features/ranking-stats/components/PercentileBars";
+import TrackRankingLineChart from "@/features/ranking-display/charts/TrackRankingLineChart";
+import SiblingNavigator from "@/features/ranking-display/components/SiblingNavigator";
 
 const iconSize = 22;
 
@@ -106,7 +106,7 @@ export default async function page({
 						{data.icon}
 					</StatsBox>
 				))}
-				<PercentileFrequencyBars
+				<PercentileBars
 					bars={barData}
 					color={trackData.album?.color}
 					className="hidden sm:flex"
@@ -114,7 +114,7 @@ export default async function page({
 			</div>
 			<div className="sm:hidden">
 				<h3>Track Ranking Record</h3>
-				<PercentileFrequencyBars
+				<PercentileBars
 					bars={barData}
 					color={trackData.album?.color}
 				/>
@@ -126,7 +126,7 @@ export default async function page({
 				menuOptions={menuOptions}
 				parentOptions={parentOptions}
 			/>
-			<ContentSiblingNavigator
+			<SiblingNavigator
 				type="track"
 				prevData={trackStats[previousIndex]}
 				nextData={trackStats[nextIndex]}

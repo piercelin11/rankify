@@ -1,6 +1,6 @@
 import SignOutButton from "@/features/auth/components/SignOutButton";
-import SidebarWrapper from "@/components/sidebar/SidebarWrapper";
-import Button from "@/components/ui/Button";
+import SidebarLayout from "@/components/layout/SidebarLayout";
+import Button from "@/components/buttons/Button";
 import { mainMenuData } from "@/config/menuData";
 import Link from "next/link";
 import { getUserSession } from "../../../auth";
@@ -16,7 +16,7 @@ export default async function MainLayout({ children }: AdminLayoutProps) {
 	const loggedArtists = await getLoggedArtists({ userId });
 
 	return (
-		<SidebarWrapper>
+		<SidebarLayout>
 			<div className="flex h-full flex-col p-4">
 				<div className="mb-6">
 					<div>
@@ -56,6 +56,6 @@ export default async function MainLayout({ children }: AdminLayoutProps) {
 				</div>
 			</div>
 			<div>{children}</div>
-		</SidebarWrapper>
+		</SidebarLayout>
 	);
 }

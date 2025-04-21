@@ -1,5 +1,5 @@
-import SidebarWrapper from "@/components/sidebar/SidebarWrapper";
-import Button from "@/components/ui/Button";
+import SidebarLayout from "@/components/layout/SidebarLayout";
+import Button from "@/components/buttons/Button";
 import { adminMenuData } from "@/config/menuData";
 import {
 	AvatarIcon,
@@ -15,7 +15,7 @@ type AdminLayoutProps = {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
 	return (
-		<SidebarWrapper>
+		<SidebarLayout>
 			<div>
 				{adminMenuData.map((item) => (
 					<Link href={item.link} key={item.name}>
@@ -28,6 +28,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 			</div>
 
 			<div>{children}</div>
-		</SidebarWrapper>
+		</SidebarLayout>
 	);
 }

@@ -4,10 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import updateTrack from "../actions/updateTrack";
-import Button from "@/components/ui/Button";
-import { Description } from "@/components/ui/Text";
+import Button from "@/components/buttons/Button";
+import { Description } from "@/components/typography/Text";
 import FormItem from "@/components/form/FormInput";
-import LoadingAnimation from "@/components/ui/LoadingAnimation";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import FormMessage from "@/components/form/FormMessage";
 import { ActionResponse } from "@/types/action";
 import FormRadioGroup from "@/components/form/FormRadioGroup";
@@ -123,7 +123,7 @@ export default function TrackEditingForm({
 					>
 						Cancel
 					</Button>
-					<Button variant="lime" type="submit" disabled={isPending}>
+					<Button variant="primary" type="submit" disabled={isPending}>
 						Save
 					</Button>
 					{isPending && (

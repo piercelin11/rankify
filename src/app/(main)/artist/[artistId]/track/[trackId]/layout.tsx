@@ -1,5 +1,5 @@
 import ContentHeader from "@/components/presentation/ContentHeader";
-import ContentWrapper from "@/components/general/ContentWrapper";
+import ContentWrapper from "@/components/layout/ContentWrapper";
 import getTrackById from "@/lib/database/data/getTrackById";
 import Link from "next/link";
 import { notFound } from "next/navigation";

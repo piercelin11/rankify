@@ -2,7 +2,7 @@ import { db } from "@/lib/prisma";
 import getTracksMetrics from "../overview/getTracksMetrics";
 import { RankingSessionData, TrackData } from "@/types/data";
 import getRankingSession from "../../user/getRankingSession";
-import { AchievementType } from "@/features/ranking/stats/components/AchievementDisplay";
+import { AchievementType } from "@/features/ranking-stats/components/AchievementDisplay";
 import { getUserRankingPreference } from "../../user/getUserPreference";
 
 export type TrackHistoryType = TrackData & {

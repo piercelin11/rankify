@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Description } from "@/components/ui/Text";
+import { Description } from "@/components/typography/Text";
 import FormItem from "@/components/form/FormInput";
-import Button from "@/components/ui/Button";
+import Button from "@/components/buttons/Button";
 import { useForm } from "react-hook-form";
 import { updateArtistSchema, updateArtistType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArtistData } from "@/types/data";
 import FormMessage from "@/components/form/FormMessage";
 import { ActionResponse } from "@/types/action";
-import LoadingAnimation from "@/components/ui/LoadingAnimation";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import updateArtist from "@/features/admin/editContent/actions/updateArtist";
 
 type ArtistEditingFormProps = {
@@ -77,7 +77,7 @@ export default function ArtistEditingForm({
 					>
 						Cancel
 					</Button>
-					<Button variant="lime" type="submit" disabled={isPending}>
+					<Button variant="primary" type="submit" disabled={isPending}>
 						Save
 					</Button>
 					{isPending && (

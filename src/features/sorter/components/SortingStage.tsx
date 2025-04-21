@@ -9,12 +9,12 @@ import { ChevronLeftIcon } from "@radix-ui/react-icons";
 import { RankingDraftData, TrackData } from "@/types/data";
 import { cn } from "@/lib/cn";
 import deleteRankingDraft from "../actions/deleteRankingDraft";
-import ComfirmationModal from "@/components/general/ComfirmationModal";
+import ComfirmationModal from "@/components/modals/ComfirmationModal";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
 	setPercentage
 } from "@/features/sorter/slices/sorterSlice";
-import Button from "@/components/ui/Button";
+import Button from "@/components/buttons/Button";
 import { CurrentStage } from "./SorterPage";
 import useSorter from "@/features/sorter/hooks/useSorter";
 
@@ -159,17 +159,17 @@ export default function SortingStage({
 					</div>
 
 					<div className="flex justify-between gap-3">
-						<Button variant="darkGray" onClick={restorePreviousState}>
+						<Button variant="neutral" onClick={restorePreviousState}>
 							<ChevronLeftIcon />
 							<p>Previous</p>
 						</Button>
 
 						<div className="flex gap-3 xl:gap-6">
-							<Button variant="darkGray" onClick={() => setRestartOpen(true)}>
+							<Button variant="neutral" onClick={() => setRestartOpen(true)}>
 								Restart
 							</Button>
 							<Button
-								variant="darkGray"
+								variant="neutral"
 								onClick={() => {
 									if (saveStatus === "idle") setQuitOpen(true);
 									else handleQuit();

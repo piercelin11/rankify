@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import Button from "@/components/ui/Button";
-import { GoogleIcon, SpotifyIcon } from "@/components/icon/LogoIcons";
+import Button from "@/components/buttons/Button";
+import { GoogleIcon, SpotifyIcon } from "@/components/icons/LogoIcons";
 import handleOath from "@/features/auth/actions/handleOath";
 
 export default function SocialButton() {

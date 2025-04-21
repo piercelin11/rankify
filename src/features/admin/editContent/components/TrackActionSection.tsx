@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import ActionIconGroup from "./ActionIconGroup";
 import deleteItem from "../actions/deleteItem";
 import { AlbumData, TrackData } from "@/types/data";
-import ModalWrapper from "@/components/general/ModalWrapper";
-import ComfirmationModal from "@/components/general/ComfirmationModal";
+import ModalWrapper from "@/components/modals/ModalWrapper";
+import ComfirmationModal from "@/components/modals/ComfirmationModal";
 import TrackEditingForm from "./TrackEditingForm";
 
 type TrackActionSectionProps = {

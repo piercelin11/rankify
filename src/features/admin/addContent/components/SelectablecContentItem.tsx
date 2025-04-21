@@ -1,6 +1,6 @@
 import React from "react";
 import { Album, SimplifiedAlbum, Track } from "spotify-types";
-import CheckBox from "@/components/ui/CheckBox";
+import CheckBox from "@/components/form/CheckBox";
 
 type SelectablecContentItemProps = {
 	data: Album | SimplifiedAlbum | Track;

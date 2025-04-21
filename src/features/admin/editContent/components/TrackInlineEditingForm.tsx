@@ -8,7 +8,7 @@ import { AdminTrackListStyle } from "./TrackListItem";
 import FormInlineEditInput from "@/components/form/FormInlineEditInput";
 import SelectorInput from "@/components/form/SelectorInput";
 import RadioItem from "@/components/form/RadioItem";
-import Button from "@/components/ui/Button";
+import Button from "@/components/buttons/Button";
 import { CheckIcon } from "@radix-ui/react-icons";
 
 type TrackInlineEditingFormProps = {
@@ -127,7 +127,7 @@ export default function TrackInlineEditingForm({
 			<div className="self-center justify-self-end">
 				<Button
 					className="aspect-square p-2"
-					variant="lime"
+					variant="primary"
 					type="submit"
 					rounded
 				>

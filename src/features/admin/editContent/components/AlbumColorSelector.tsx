@@ -1,6 +1,6 @@
 import useDominantColor from "@/lib/hooks/useDominantColor";
 import { rgbToHex } from "@/lib/utils/adjustColor";
-import Button from "@/components/ui/Button";
+import Button from "@/components/buttons/Button";
 import { InputHTMLAttributes, Ref, useState } from "react";
 import { cn } from "@/lib/cn";
 import { Pencil1Icon } from "@radix-ui/react-icons";
@@ -69,7 +69,7 @@ export default function AlbumColorSelector({
 				<Button
 					className="h-10 w-10 p-3"
 					type="button"
-					variant="gray"
+					variant="secondary"
 					onClick={() => setRadio((prev) => !prev)}
 					rounded
 				>

@@ -4,7 +4,7 @@ import React from "react";
 import LogoDisplay from "@/components/sidebar/LogoDisplay";
 import { ArtistData } from "@/types/data";
 import { CheckIcon } from "@radix-ui/react-icons";
-import LoadingAnimation from "@/components/ui/LoadingAnimation";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import { useAppSelector } from "@/store/hooks";
 
 type SorterHeaderProps = {

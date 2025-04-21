@@ -1,14 +1,13 @@
 import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
 import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTracksRankingHistory";
-import RankingNavButton from "@/components/display/ranking/RankingNavButton";
-import {
-	HistoryTrackRankingChart,
-} from "@/components/display/ranking/TrackRankingChart";
-import LoadingAnimation from "@/components/ui/LoadingAnimation";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import { dateToLong } from "@/lib/utils/helper";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
+import Button from "@/components/buttons/Button";
+import Link from "next/link";
+import { HistoryTrackRankingChart } from "@/features/ranking-display/components/TrackRankingList";
 
 export default async function ArtistRankingPage({
 	params,
@@ -28,10 +27,12 @@ export default async function ArtistRankingPage({
 					userId={userId}
 					dateId={dateId}
 				/>
-				<RankingNavButton link={`/artist/${artistId}/history?date=${dateId}`}>
-					<ArrowLeftIcon />
-					Back
-				</RankingNavButton>
+				<Link href={`/artist/${artistId}/history?date=${dateId}`}>
+					<Button variant="ghost" className="mx-auto">
+						<ArrowLeftIcon />
+						Back
+					</Button>
+				</Link>
 			</Suspense>
 		</>
 	);
@@ -51,10 +52,14 @@ async function HistoryRankingChart({
 		userId,
 		dateId,
 	});
-	const albums = await getLoggedAlbums({ artistId, userId, time: {
-		threshold: tracksRankings[0].date.date,
-		filter: "equals"
-	} });
+	const albums = await getLoggedAlbums({
+		artistId,
+		userId,
+		time: {
+			threshold: tracksRankings[0].date.date,
+			filter: "equals",
+		},
+	});
 
 	return (
 		<HistoryTrackRankingChart

@@ -1,4 +1,4 @@
-import { defaultRankingSettings } from "@/components/settings/RankingSettings";
+import { defaultRankingSettings } from "@/features/settings/RankingSettings";
 import { db } from "@/lib/prisma";
 import { UserPreferenceData } from "@/types/data";
 import { $Enums } from "@prisma/client";
