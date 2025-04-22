@@ -29,7 +29,7 @@ export default function AlbumColorSelector({
 
 	return (
 		<div className="space-y-3">
-			<p className="text-sm text-zinc-500">Album color</p>
+			<p className="text-sm text-neutral-500">Album color</p>
 			<div className="flex items-center justify-between gap-2">
 				{isRadio ? (
 					<div className="flex flex-wrap gap-2">
@@ -38,9 +38,9 @@ export default function AlbumColorSelector({
 								key={`${name}-${colorOption}`}
 								htmlFor={`${name}-${colorOption}`}
 								className={cn(
-									"aspect-square w-10 rounded-full border border-zinc-800 lg:w-12",
+									"aspect-square w-10 rounded-full border border-neutral-800 lg:w-12",
 									{
-										"border-2 border-zinc-200": value === colorOption,
+										"border-2 border-neutral-200": value === colorOption,
 									}
 								)}
 								style={{ backgroundColor: `${colorOption}` }}

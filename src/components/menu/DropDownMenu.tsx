@@ -35,14 +35,14 @@ export default function DropdownMenu({
 	}
 
 	return (
-		<div className="relative select-none w-[300px]">
+		<div className="relative w-[300px] select-none">
 			<DropdownSelect isOpen={isOpen} setOpen={setOpen} variant={variant}>
 				{selected || defaultValue || "Select..."}
 			</DropdownSelect>
 			<DropdownList isOpen={isOpen} variant={variant}>
 				{options.map((menuItem) => {
 					const commonClass =
-						"rounded-md px-4 py-3 text-zinc-500 hover:bg-zinc-850 hover:text-zinc-100 block";
+						"rounded-md px-4 py-3 text-neutral-500 hover:bg-neutral-850 hover:text-neutral-100 block";
 
 					if (menuItem.href)
 						return (
@@ -87,25 +87,31 @@ export function DropdownSelect({
 	children,
 	isOpen,
 	setOpen,
-	variant="light"
+	variant = "light",
 }: DropdownSelectProps) {
 	return (
 		<button
-			className={cn("flex w-full justify-between rounded-md bg-zinc-900 px-4 py-3 text-zinc-400 hover:text-zinc-300 hover:outline hover:outline-1 hover:outline-zinc-700", {
-				"bg-zinc-950": variant === "dark"
-			})}
+			className={cn(
+				"flex w-full justify-between rounded-md bg-neutral-900 px-4 py-3 text-neutral-400 hover:text-neutral-300 hover:outline hover:outline-1 hover:outline-neutral-700",
+				{
+					"bg-neutral-950": variant === "dark",
+				}
+			)}
 			onClick={() => setOpen((prev) => !prev)}
 		>
 			<div
-				className={cn("min-w-52 text-left text-nowrap overflow-hidden text-ellipsis", {
-					"text-zinc-100": isOpen,
-				})}
+				className={cn(
+					"min-w-52 overflow-hidden text-ellipsis text-nowrap text-left",
+					{
+						"text-neutral-100": isOpen,
+					}
+				)}
 			>
 				{children}
 			</div>
 			<ChevronDownIcon
-				className={cn("self-center text-zinc-400 transition ease-in-out", {
-					"rotate-180 transform text-zinc-600": isOpen,
+				className={cn("self-center text-neutral-400 transition ease-in-out", {
+					"rotate-180 transform text-neutral-600": isOpen,
 				})}
 				width={18}
 				height={18}
@@ -120,15 +126,19 @@ type DropdownListProps = {
 	variant?: "light" | "dark";
 };
 
-export function DropdownList({ isOpen, children, variant="light" }: DropdownListProps) {
+export function DropdownList({
+	isOpen,
+	children,
+	variant = "light",
+}: DropdownListProps) {
 	return (
 		<div
 			className={cn(
-				"absolute max-h-64 w-full overflow-auto rounded-md bg-zinc-900 opacity-0 transition ease-in-out",
+				"absolute z-50 max-h-64 w-full overflow-auto rounded-md bg-neutral-900 opacity-0 transition ease-in-out",
 				{
 					"translate-y-3 opacity-100": isOpen,
 					"pointer-events-none": !isOpen,
-					"bg-zinc-950": variant === "dark"
+					"bg-neutral-950": variant === "dark",
 				}
 			)}
 		>

@@ -219,9 +219,9 @@ function TrackBtn({ isPressed, onClick, data }: TrackBtnProps) {
 	return (
 		<button
 			className={cn(
-				"col-span-2 row-span-1 flex cursor-pointer gap-2 rounded-xl bg-zinc-900 p-2 hover:bg-zinc-800 sm:col-span-1 sm:row-span-2 sm:inline lg:p-5",
+				"col-span-2 row-span-1 flex cursor-pointer gap-2 rounded-xl bg-neutral-900 p-2 hover:bg-neutral-800 sm:col-span-1 sm:row-span-2 sm:inline lg:p-5",
 				{
-					"bg-zinc-750": isPressed,
+					"bg-neutral-750": isPressed,
 				}
 			)}
 			onClick={onClick}
@@ -243,7 +243,7 @@ function TrackBtn({ isPressed, onClick, data }: TrackBtnProps) {
 			/>
 			<div className="m-auto flex-1 space-y-1 sm:pb-6 sm:pt-8">
 				<p className="line-clamp-1 text-lg font-semibold">{data?.name}</p>
-				<p className="line-clamp-1 text-zinc-500">
+				<p className="line-clamp-1 text-neutral-500">
 					{data?.album?.name || "Non-album track"}
 				</p>
 			</div>
@@ -261,9 +261,9 @@ function EqualBtn({ isPressed, onClick, children }: EqualBtnProps) {
 	return (
 		<button
 			className={cn(
-				"col-span-1 row-span-1 flex cursor-pointer flex-col items-center justify-center rounded-xl bg-zinc-900 p-2 hover:bg-zinc-800 lg:p-5",
+				"col-span-1 row-span-1 flex cursor-pointer flex-col items-center justify-center rounded-xl bg-neutral-900 p-2 hover:bg-neutral-800 lg:p-5",
 				{
-					"bg-zinc-750": isPressed,
+					"bg-neutral-750": isPressed,
 				}
 			)}
 			onClick={onClick}

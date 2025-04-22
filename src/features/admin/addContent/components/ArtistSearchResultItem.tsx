@@ -15,7 +15,7 @@ export default function ArtistSearchResultItem({
 	return (
 		<div
 			className={cn(
-				"flex cursor-pointer select-none items-center gap-2 rounded py-2 hover:bg-zinc-800 sm:px-3",
+				"flex cursor-pointer select-none items-center gap-2 rounded py-2 hover:bg-neutral-800 sm:px-3",
 				className
 			)}
 			{...props}
@@ -29,10 +29,10 @@ export default function ArtistSearchResultItem({
 			/>
 			<div className="overflow-hidden">
 				<p className="overflow-hidden text-ellipsis text-nowrap">{data.name}</p>
-				<p className="text-sm text-zinc-400">Artist</p>
+				<p className="text-sm text-neutral-400">Artist</p>
 			</div>
 			<ChevronRightIcon
-				className="ml-auto justify-self-end text-zinc-500"
+				className="ml-auto justify-self-end text-neutral-500"
 				width={20}
 				height={20}
 			/>

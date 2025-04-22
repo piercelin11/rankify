@@ -17,7 +17,7 @@ export default function StatsCard({
 	return (
 		<div
 			className={cn("flex flex-1 flex-col items-start gap-10 rounded-2xl p-5 2xl:p-8 2xl:gap-20", {
-				"bg-zinc-900": !color,
+				"bg-neutral-900": !color,
 			})}
 			style={
 				color
@@ -28,16 +28,16 @@ export default function StatsCard({
 			}
 		>
 			<div
-				className={cn("rounded-full bg-zinc-750 p-4 hidden sm:block", {
-					"bg-zinc-100 text-zinc-800": color,
+				className={cn("rounded-full bg-neutral-800 p-4 hidden sm:block", {
+					"bg-neutral-100 text-neutral-800": color,
 				})}
 			>
 				{children}
 			</div>
 			<div className="space-y-2">
 				<p className="font-numeric text-3xl font-black">{stats ?? "no data"}</p>
-				<p className={cn("text-zinc-500", {
-					"text-zinc-300": color,
+				<p className={cn("text-neutral-500", {
+					"text-neutral-300": color,
 				})}>{subtitle}</p>
 			</div>
 		</div>

@@ -25,7 +25,7 @@ export default function ContentHeader({
 		<>
 			<div
 				className={cn("pt-20 2xl:pt-24", {
-					"bg-zinc-900": !color,
+					"bg-neutral-900": !color,
 					"pt-10 2xl:pt-12": children,
 				})}
 				style={
@@ -83,18 +83,18 @@ function ContentHeaderInfo({
 	return (
 		<div className="hidden sm:block">
 			{type && <p>{type}</p>}
-			<h1>{data?.name}</h1>
+			<h1 className="text-display">{data?.name}</h1>
 			<p
-				className={cn("mb-4 text-lg text-zinc-500", {
-					"text-zinc-100": color,
+				className={cn("mb-4 text-lg text-neutral-500", {
+					"text-neutral-100": color,
 				})}
 			>
 				{subTitle}
 			</p>
 			<Link href={data?.spotifyUrl || ""} className="inline-block">
 				<SpotifyIcon
-					className={cn("text-zinc-600 hover:text-spotify", {
-						"text-zinc-300": color,
+					className={cn("text-neutral-600 hover:text-spotify", {
+						"text-neutral-300": color,
 					})}
 					size={30}
 				/>
@@ -110,21 +110,21 @@ function ContentHeaderInfoMobileInfo({
 	color,
 }: ContentHeaderProps) {
 	return (
-		<div className="mx-8 mt-8 border-b border-zinc-750 pb-6 sm:hidden">
+		<div className="mx-8 mt-8 border-b border-neutral-750 pb-6 sm:hidden">
 			{type && <p>{type}</p>}
 			<h1>{data?.name}</h1>
 			<div className="flex items-center gap-2">
 				<Link href={data?.spotifyUrl || ""} className="inline-block">
 					<SpotifyIcon
-						className={cn("text-zinc-600 hover:text-spotify", {
-							"text-zinc-300": color,
+						className={cn("text-neutral-600 hover:text-spotify", {
+							"text-neutral-300": color,
 						})}
 						size={20}
 					/>
 				</Link>
 				<p
-					className={cn("text-lg text-zinc-500", {
-						"text-zinc-100": color,
+					className={cn("text-lg text-neutral-500", {
+						"text-neutral-100": color,
 					})}
 				>
 					{subTitle}

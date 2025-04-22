@@ -66,7 +66,7 @@ export default function TrackRankingList<
 		<div>
 			<div className="mb-10 flex items-center justify-between">
 				<RankingAlbumFilter menuData={albums} />
-				<p className="text-zinc-500 hidden sm:block">{title}</p>
+				<p className="text-neutral-500 hidden sm:block">{title}</p>
 			</div>
 			<RankingList data={filteredDatas} columns={columns} />
 		</div>

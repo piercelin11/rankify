@@ -24,7 +24,7 @@ export default function FormRadioGroup({
 }: FormRadioGroupProps) {
 	return (
 		<div className="space-y-4">
-			<p className="text-sm text-zinc-500">{title}</p>
+			<p className="text-sm text-neutral-500">{title}</p>
 			<div className="flex gap-6">
 				{options.map((option) => (
 					<RadioItem

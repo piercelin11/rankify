@@ -38,7 +38,7 @@ export default function ComfirmationModal({
 						<h2 className="mb-8">{title}</h2>
 						<div className="mb-14 space-y-2">
 							<p className="text-center">{description}</p>
-							<p className="font-semibold text-zinc-100 text-center">{warning}</p>
+							<p className="font-semibold text-neutral-100 text-center">{warning}</p>
 						</div>
 
 						<div className="flex gap-4">

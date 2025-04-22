@@ -74,7 +74,7 @@ export default function Tabs({ options, activeId, color }: TabsProps) {
 	}, [activeId]);
 
 	return (
-		<div className="relative flex w-max select-none rounded-lg border border-zinc-800">
+		<div className="relative flex w-max select-none rounded-lg border border-neutral-800">
 			{options.map((option) => (
 				<TabItem
 					key={option.id}
@@ -93,7 +93,7 @@ export default function Tabs({ options, activeId, color }: TabsProps) {
 			))}
 			{indicatorStyle && (
 				<div
-					className="absolute h-full w-full rounded-md bg-lime-500 transition-all duration-200 ease-in-out"
+					className="absolute h-full w-full rounded-md bg-primary-500 transition-all duration-200 ease-in-out"
 					style={{
 						...indicatorStyle,
 						backgroundColor: color ? ensureBrightness(color) : DEFAULT_COLOR,
@@ -120,9 +120,9 @@ const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(
 				>
 					<button
 						className={cn(
-							"z-10 h-full justify-self-center rounded-lg px-3 py-2 text-zinc-600 xl:px-4 xl:py-3 xl:text-lg",
+							"z-10 h-full justify-self-center rounded-lg px-3 py-2 text-neutral-600 xl:px-4 xl:py-3",
 							{
-								"text-zinc-950": isActive,
+								"text-neutral-950": isActive,
 							}
 						)}
 						ref={ref}
@@ -136,9 +136,9 @@ const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(
 			return (
 				<button
 					className={cn(
-						"z-10 h-full justify-self-center rounded-lg px-3 py-2 text-zinc-600 xl:px-4 xl:py-3 xl:text-lg",
+						"z-10 h-full justify-self-center rounded-lg px-3 py-2 text-neutral-600 xl:px-4 xl:py-3",
 						{
-							"text-zinc-950": isActive,
+							"text-neutral-950": isActive,
 						}
 					)}
 					ref={ref}

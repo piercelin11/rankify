@@ -32,7 +32,7 @@ export default function RankingAlbumFilter({
 			</DropdownSelect>
 			<DropdownList isOpen={isOpen}>
 				<div
-					className="rounded-md px-4 py-3 text-zinc-500 hover:bg-zinc-850 hover:text-zinc-100"
+					className="rounded-md px-4 py-3 text-neutral-500 hover:bg-neutral-850 hover:text-neutral-100"
 					onClick={() => handleMenuItemClick(null)}
 				>
 					Select All
@@ -40,7 +40,7 @@ export default function RankingAlbumFilter({
 				{menuData.map((album) => (
 					<div
 						key={album.id}
-						className="rounded-md px-4 py-3 text-zinc-500 hover:bg-zinc-850 hover:text-zinc-100"
+						className="rounded-md px-4 py-3 text-neutral-500 hover:bg-neutral-850 hover:text-neutral-100"
 						onClick={() => handleMenuItemClick(album.id)}
 					>
 						{album.name}

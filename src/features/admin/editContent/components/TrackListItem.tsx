@@ -24,12 +24,12 @@ export default function TrackListItem({
 	return (
 		<div
 			className={cn(
-				"grid cursor-pointer select-none grid-cols-[25px,_65px,_1fr] items-center gap-3 rounded bg-zinc-950 sm:px-6 py-2 hover:bg-zinc-900",
+				"grid cursor-pointer select-none grid-cols-[25px,_65px,_1fr] items-center gap-3 rounded bg-neutral-950 sm:px-6 py-2 hover:bg-neutral-900",
 				className
 			)}
 			{...props}
 		>
-			<p className="mr-2 justify-self-end font-serif text-lg font-medium text-zinc-500">
+			<p className="mr-2 justify-self-end font-serif text-lg font-medium text-neutral-500">
 				{number || trackData.trackNumber}
 			</p>
 			<img
@@ -39,10 +39,10 @@ export default function TrackListItem({
 			/>
 			<div className={`${AdminTrackListStyle}`}>
 				<p>{trackData.name}</p>
-				<p className="text-zinc-500 hidden sm:block">
+				<p className="text-neutral-500 hidden sm:block">
 					{trackData.album?.name || "Non-album track"}
 				</p>
-				<p className="text-zinc-500 hidden sm:block">{trackData.type}</p>
+				<p className="text-neutral-500 hidden sm:block">{trackData.type}</p>
 				<TrackActionSection
 					data={trackData}
 					albums={albums}

@@ -18,7 +18,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 		<>
 			{isMobile && <MobileSidebarLayout>{children[0]}</MobileSidebarLayout>}
 
-			<aside className="fixed z-10 hidden h-screen border-r border-zinc-850 pt-6 lg:block lg:w-[250px] xl:w-[300px]">
+			<aside className="fixed z-10 hidden h-screen border-r border-neutral-800 pt-6 lg:block lg:w-[250px] xl:w-[300px]">
 				<div className="px-4 py-5">
 					<LogoDisplay />
 				</div>
@@ -62,7 +62,7 @@ function MobileSidebarLayout({ children }: { children: ReactNode }) {
 				<HamburgerMenuIcon />
 			</Button>
 			{isOpen && (
-				<aside className="fixed z-50 h-screen w-screen bg-zinc-950 pt-10 lg:hidden">
+				<aside className="fixed z-50 h-screen w-screen bg-neutral-950 pt-10 lg:hidden">
 					<Button
 						variant="ghost"
 						className="fixed right-4 top-4"

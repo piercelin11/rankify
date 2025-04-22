@@ -16,10 +16,10 @@ export default function SorterHeader({ artist }: SorterHeaderProps) {
 	const saveStatus = useAppSelector((state) => state.sorter.saveStatus);
 
 	return (
-		<div className="grid items-center border-b border-zinc-750 p-6 sm:grid-cols-3">
+		<div className="grid items-center border-b border-neutral-750 p-6 sm:grid-cols-3">
 			<div className="flex gap-2 items-center justify-self-center sm:justify-self-auto">
 				<LogoDisplay />
-				<div className="hidden h-5 justify-end text-zinc-500 lg:flex">
+				<div className="hidden h-5 justify-end text-neutral-500 lg:flex">
 					{saveStatus === "saved" ? (
 						<div className="flex items-center gap-1">
 							<CheckIcon />
@@ -37,19 +37,19 @@ export default function SorterHeader({ artist }: SorterHeaderProps) {
 			</div>
 
 			<div className="hidden justify-self-center sm:block">
-				<p className="text-zinc-300">{artist.name}'s Sorter</p>
+				<p className="text-neutral-300">{artist.name}'s Sorter</p>
 			</div>
 			<div className="mt-2 w-full justify-self-end sm:w-fit xl:pr-6">
 				<div className="relative w-full sm:w-[150px] xl:w-[300px]">
 					<p
-						className="absolute -top-5 text-right text-sm text-zinc-500"
+						className="absolute -top-5 text-right text-sm text-neutral-500"
 						style={{ left: `${percentage}%` }}
 					>
 						{percentage}%
 					</p>
-					<div className="relative h-2 rounded-full bg-zinc-850">
+					<div className="relative h-2 rounded-full bg-neutral-850">
 						<div
-							className="h-2 rounded-full bg-lime-500"
+							className="h-2 rounded-full bg-primary-500"
 							style={{
 								width: percentage + "%",
 							}}

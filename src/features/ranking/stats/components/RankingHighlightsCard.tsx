@@ -89,7 +89,7 @@ function RankingHighlightsCard({
 							) : (
 								<ArrowDownRoundIcon size={45} />
 							)}
-							<p className="font-numeric text-4xl font-extrabold">
+							<p className="font-numeric text-highlight">
 								{Math.abs(info.change)}
 								<span className="font-sans text-base font-normal">
 									{" "}
@@ -98,7 +98,7 @@ function RankingHighlightsCard({
 							</p>
 						</div>
 						<div>
-							<p className="text-xl font-bold">{info.name}</p>
+							<p className="text-body-big">{info.name}</p>
 							<p>
 								is the biggest {type} in {unit}.
 							</p>
@@ -106,7 +106,7 @@ function RankingHighlightsCard({
 					</div>
 				</div>
 			) : (
-				<div className="bg-zinc-900">
+				<div className="bg-neutral-900">
 					<NoData />
 				</div>
 			)}

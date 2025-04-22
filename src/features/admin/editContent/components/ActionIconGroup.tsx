@@ -5,7 +5,7 @@ import { Pencil1Icon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/cn";
 
 const svgAttributes = {
-	className: "text-zinc-400 hover:text-zinc-100",
+	className: "text-neutral-400 hover:text-neutral-100",
 	width: 25,
 	height: 25,
 };

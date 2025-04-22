@@ -23,7 +23,7 @@ export default function SelectablecContentItem({
 
 	return (
 		<div
-			className="flex select-none items-center gap-2 rounded sm:px-3 py-2 hover:bg-zinc-800"
+			className="flex select-none items-center gap-2 rounded sm:px-3 py-2 hover:bg-neutral-800"
 			onClick={() => handleClick(data.id)}
 		>
 			<img
@@ -35,7 +35,7 @@ export default function SelectablecContentItem({
 			/>
 			<div className="overflow-hidden">
 				<p className="text-nowrap overflow-hidden text-ellipsis">{data.name}</p>
-				<p className="text-sm text-zinc-400">{type}</p>
+				<p className="text-sm text-neutral-400">{type}</p>
 			</div>
 			<CheckBox
 				className="ml-auto"

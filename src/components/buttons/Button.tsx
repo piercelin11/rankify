@@ -10,33 +10,33 @@ export type ButtonProps = {
 
 const styles: Record<string, Record<"default" | "disabled", string>> = {
 	primary: {
-		default: "bg-primary-500 text-zinc-950 hover:bg-zinc-100",
-		disabled: "bg-primary-500 text-zinc-950",
+		default: "bg-primary-500 text-neutral-950 hover:bg-neutral-100",
+		disabled: "bg-primary-500 text-neutral-950",
 	},
 	secondary: {
 		default:
-			"bg-zinc-800/80 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100",
-		disabled: "bg-zinc-800/80 text-zinc-100",
+			"bg-neutral-800/80 text-neutral-400 hover:bg-neutral-900 hover:text-neutral-100",
+		disabled: "bg-neutral-800/80 text-neutral-100",
 	},
 	neutral: {
-		default: "bg-zinc-900 text-zinc-100 hover:bg-zinc-800",
-		disabled: "bg-zinc-900 text-zinc-100",
+		default: "bg-neutral-900 text-neutral-100 hover:bg-neutral-800",
+		disabled: "bg-neutral-900 text-neutral-100",
 	},
 	outline: {
 		default:
-			"bg-transparent text-zinc-100 border border-zinc-500 hover:border-zinc-100",
-		disabled: "bg-transparent text-zinc-100 border border-zinc-500",
+			"bg-transparent text-neutral-100 border border-neutral-500 hover:border-neutral-100",
+		disabled: "bg-transparent text-neutral-100 border border-neutral-500",
 	},
 	ghost: {
 		default:
-			"bg-transparent text-zinc-500 hover:text-zinc-100",
-		disabled: "bg-transparent text-zinc-300",
+			"bg-transparent text-neutral-500 hover:text-neutral-100",
+		disabled: "bg-transparent text-neutral-300",
 	},
 	menu: {
 		default:
-			"w-full text-lg bg-transparent text-zinc-300 hover:text-zinc-100 hover:bg-zinc-900 justify-center lg:justify-normal",
+			"w-full text-lg bg-transparent text-neutral-300 hover:text-neutral-100 hover:bg-neutral-900 justify-center lg:justify-normal",
 		disabled:
-			"w-full text-lg bg-transparent text-zinc-300 justify-center lg:justify-normal",
+			"w-full text-lg bg-transparent text-neutral-300 justify-center lg:justify-normal",
 	},
 };
 

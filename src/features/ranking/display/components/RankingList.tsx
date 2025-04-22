@@ -54,8 +54,8 @@ export function RankingListItem<T extends RankingListDataTypeExtend>({
 }: RankingListItemProps<T>) {
 	return (
 		<Link href={`/artist/${data.artistId}/track/${data.id}`}>
-			<div className="grid cursor-pointer select-none grid-cols-[15px,_3fr] items-center gap-3 rounded border-b border-zinc-900 py-2 hover:bg-zinc-900 md:grid-cols-[45px,_3fr,_2fr] md:py-3 md:pr-6">
-				<p className="mr-1 justify-self-end font-numeric text-lg font-medium tabular-nums text-zinc-400">
+			<div className="grid cursor-pointer select-none grid-cols-[15px,_3fr] items-center gap-3 rounded border-b border-neutral-900 py-2 hover:bg-neutral-900 md:grid-cols-[45px,_3fr,_2fr] md:py-3 md:pr-6">
+				<p className="mr-1 justify-self-end font-numeric text-lg font-medium tabular-nums text-neutral-400">
 					{data.ranking}
 				</p>
 				<div className="flex items-center gap-3 overflow-hidden">
@@ -73,7 +73,7 @@ export function RankingListItem<T extends RankingListDataTypeExtend>({
 						<p className="overflow-hidden text-ellipsis text-nowrap font-medium">
 							{data.name}
 						</p>
-						<p className="overflow-hidden text-ellipsis text-nowrap text-sm text-zinc-500">
+						<p className="overflow-hidden text-ellipsis text-nowrap text-sm text-neutral-500">
 							{data.album?.name}
 						</p>
 					</div>
@@ -120,7 +120,7 @@ export function RankingListCell<T>({
 			) : (
 				<p
 					className={
-						sortQuery === columnKey ? "text-zinc-100" : "text-zinc-500"
+						sortQuery === columnKey ? "text-neutral-100" : "text-neutral-500"
 					}
 				>
 					{value !== null ? String(value) : ""}
@@ -140,7 +140,7 @@ export function RankingHeader<T extends RankingListDataTypeExtend>({
 	const searchParams = useSearchParams();
 	const sortQuery = searchParams.get("sort");
 	return (
-		<div className="hidden cursor-pointer select-none grid-cols-[45px,_3fr,_2fr] items-center gap-3 rounded border-b border-zinc-900 py-3 pl-2 pr-6 text-zinc-500 md:grid">
+		<div className="hidden cursor-pointer select-none grid-cols-[45px,_3fr,_2fr] items-center gap-3 rounded border-b border-neutral-900 py-3 pl-2 pr-6 text-neutral-500 md:grid">
 			<p>#</p>
 			<p>info</p>
 			<div
@@ -152,7 +152,7 @@ export function RankingHeader<T extends RankingListDataTypeExtend>({
 				{columns.map((column) => (
 					<div
 						className={cn({
-							"text-zinc-100": sortQuery === column.key,
+							"text-neutral-100": sortQuery === column.key,
 						})}
 						key={String(column.key)}
 					>
@@ -196,7 +196,7 @@ export function RankingHeaderCell<T extends RankingListDataTypeExtend>({
 	return (
 		<div
 			className={cn("flex items-center gap-1", {
-				"text-zinc-100": column.key === sortQuery,
+				"text-neutral-100": column.key === sortQuery,
 			})}
 			onClick={() => {
 				handleClick(column.key);

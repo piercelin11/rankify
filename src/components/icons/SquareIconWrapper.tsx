@@ -7,5 +7,5 @@ type SquareIconWrapperProps = {
 export default function SquareIconWrapper({
 	children,
 }: SquareIconWrapperProps) {
-	return <div className="rounded-md bg-lime-500 p-1">{children}</div>;
+	return <div className="rounded-md bg-primary-500 p-1">{children}</div>;
 }

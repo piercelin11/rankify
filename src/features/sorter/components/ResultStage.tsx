@@ -90,7 +90,7 @@ export default function ResultStage({ draft }: ResultStageProps) {
 	return (
 		<div className="flex items-center justify-center py-20 2xl:py-32">
 			<div className="flex-auto">
-				<div className="sticky top-0 flex items-center justify-between bg-zinc-950 py-10">
+				<div className="sticky top-0 flex items-center justify-between bg-neutral-950 py-10">
 					<h3>Your ranking result</h3>
 					<div className="flex gap-5">
 						<Button
@@ -125,9 +125,9 @@ export default function ResultStage({ draft }: ResultStageProps) {
 					{optimisticResult.map((data, index) => (
 						<SorterResultListItem
 							className={cn({
-								"border-b-0 border-t border-lime-500":
+								"border-b-0 border-t border-primary-500":
 									hoveredIndex === index && isAbove,
-								"border-b border-t-0 border-lime-500":
+								"border-b border-t-0 border-primary-500":
 									hoveredIndex === index && !isAbove,
 								"opacity-30": draggedIndex === index,
 							})}

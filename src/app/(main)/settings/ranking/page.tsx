@@ -1,6 +1,5 @@
 import React from "react";
 import Description from "@/components/typography/Description";
-
 import { getUserSession } from "../../../../../auth";
 import getUserPreference from "@/lib/database/user/getUserPreference";
 import RankingSettings from "@/features/settings/RankingSettings";

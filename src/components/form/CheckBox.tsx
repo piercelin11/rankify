@@ -14,10 +14,10 @@ export default function CheckBox({
 	return (
 		<div
 			className={cn(
-				"flex h-6 w-6 cursor-pointer items-center justify-center rounded border border-zinc-700 hover:border-zinc-400",
+				"flex h-6 w-6 cursor-pointer items-center justify-center rounded border border-neutral-700 hover:border-neutral-400",
 				className,
 				{
-					"border-zinc-400 bg-zinc-800": checked,
+					"border-neutral-400 bg-neutral-800": checked,
 				}
 			)}
 			{...props}

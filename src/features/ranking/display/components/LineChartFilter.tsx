@@ -47,7 +47,7 @@ export default function LineChartFilter({
 	return (
 		<div className="relative w-full select-none sm:w-[580px]">
 			<div
-				className="flex justify-between gap-3 rounded-md bg-zinc-900 p-3"
+				className="flex justify-between gap-3 rounded-md bg-neutral-900 p-3"
 				onClick={() => setOPen((prev) => !prev)}
 			>
 				<div className="flex gap-2 overflow-auto scrollbar-hidden">
@@ -65,8 +65,8 @@ export default function LineChartFilter({
 					})}
 				</div>
 				<ChevronDownIcon
-					className={cn("self-center text-zinc-400 transition ease-in-out", {
-						"rotate-180 transform text-zinc-600": isOpen,
+					className={cn("self-center text-neutral-400 transition ease-in-out", {
+						"rotate-180 transform text-neutral-600": isOpen,
 					})}
 					width={18}
 					height={18}
@@ -74,7 +74,7 @@ export default function LineChartFilter({
 			</div>
 			<div
 				className={cn(
-					"absolute max-h-96 w-full overflow-auto rounded-md bg-zinc-900 opacity-0 transition ease-in-out scrollbar-hidden",
+					"absolute max-h-96 w-full overflow-auto rounded-md bg-neutral-900 opacity-0 transition ease-in-out scrollbar-hidden",
 					{
 						"translate-y-3 opacity-100": isOpen,
 						"pointer-events-none": !isOpen,
@@ -82,7 +82,7 @@ export default function LineChartFilter({
 				)}
 			>
 				{parentOptions && (
-					<div className="sticky top-0 flex gap-2 overflow-auto bg-zinc-900/90 px-3 py-6 scrollbar-hidden">
+					<div className="sticky top-0 flex gap-2 overflow-auto bg-neutral-900/90 px-3 py-6 scrollbar-hidden">
 						{parentOptions.map((listItem) => (
 							<AlbumTag
 								key={listItem.id}
@@ -116,7 +116,7 @@ function TrackTag({
 }) {
 	return (
 		<div
-			className="flex flex-none flex-grow-0 items-center gap-1 rounded px-2 py-1 text-zinc-100 sm:px-3 sm:py-2"
+			className="flex flex-none flex-grow-0 items-center gap-1 rounded px-2 py-1 text-neutral-100 sm:px-3 sm:py-2"
 			style={{
 				backgroundColor: ensureBrightness(tag.color ?? DEFAULT_COLOR) + "90",
 			}}
@@ -149,9 +149,9 @@ function AlbumTag({
 	return (
 		<div
 			className={cn(
-				"flex flex-none flex-grow-0 items-center gap-2 rounded-full px-4 py-2 text-zinc-100",
+				"flex flex-none flex-grow-0 items-center gap-2 rounded-full px-4 py-2 text-neutral-100",
 				{
-					"bg-zinc-750": selectedAlbumId !== tag.id,
+					"bg-neutral-750": selectedAlbumId !== tag.id,
 				}
 			)}
 			style={
@@ -178,7 +178,7 @@ function MenuItem({
 	return (
 		<div
 			key={tag.id}
-			className="rounded-md px-4 py-3 text-zinc-500 hover:bg-zinc-850 hover:text-zinc-100"
+			className="rounded-md px-4 py-3 text-neutral-500 hover:bg-neutral-850 hover:text-neutral-100"
 			onClick={onClick}
 		>
 			{tag.name}

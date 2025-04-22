@@ -18,7 +18,7 @@ export default async function SettingsLayout({
 				<div className="space-y-6">
 					{settingsMenuData.map((menuItem) => (
 						<Link
-							className="block text-zinc-400 hover:text-zinc-100"
+							className="block text-neutral-400 hover:text-neutral-100"
 							key={menuItem.name}
 							href={menuItem.link}
 						>

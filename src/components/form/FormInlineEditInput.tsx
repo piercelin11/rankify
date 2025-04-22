@@ -6,7 +6,7 @@ export default function FormInlineEditInput({ className, ...props }: React.Input
 	return (
 		<input
 			className={cn(
-				"border-zinc-600 bg-transparent py-1 focus:border-b focus:outline-none focus:text-zinc-100",
+				"border-neutral-600 bg-transparent py-1 focus:border-b focus:outline-none focus:text-neutral-100",
 				className
 			)}
 			autoComplete="off"

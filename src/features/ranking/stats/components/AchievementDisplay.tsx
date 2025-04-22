@@ -17,7 +17,7 @@ export default function AchievementDisplay({
 	function getAchievement() {
 		if (achievement === "New Peak")
 			return (
-				<div className="flex items-center gap-2 rounded-md border border-lime-500 p-3 text-sm text-lime-500">
+				<div className="flex items-center gap-2 rounded-md border border-primary-500 p-3 text-sm text-primary-500">
 					<StarFilledIcon />
 					<p>New Peak</p>
 				</div>

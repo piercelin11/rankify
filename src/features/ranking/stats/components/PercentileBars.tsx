@@ -23,7 +23,7 @@ export default function PercentileBars({
 	return (
 		<div
 			className={cn(
-				"flex flex-1 flex-col justify-between rounded-2xl bg-zinc-900 gap-6 p-5 sm:gap-0 2xl:p-8",
+				"flex flex-1 flex-col justify-between rounded-2xl bg-neutral-900 gap-6 p-5 sm:gap-0 2xl:p-8",
 				className
 			)}
 		>
@@ -56,11 +56,11 @@ export function Bar({ bar, color }: BarProps) {
 	return (
 		<div className="space-y-2">
 			<div className="flex justify-between">
-				<p className="font-numeric text-zinc-300">{bar.label}</p>
+				<p className="font-numeric text-neutral-300">{bar.label}</p>
 				<p>{bar.stats}</p>
 			</div>
 
-			<div className="relative h-2 w-full rounded-full bg-zinc-750">
+			<div className="relative h-2 w-full rounded-full bg-neutral-750">
 				<div
 					className="h-full rounded-full transition-all duration-1000 ease-in-out"
 					style={{

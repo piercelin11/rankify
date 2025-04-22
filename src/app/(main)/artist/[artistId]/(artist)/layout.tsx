@@ -48,7 +48,7 @@ async function Header({ params }: { params: Promise<{ artistId: string }> }) {
 				<div className="flex gap-4 ml-auto">
 					<Tabs activeId={activePathname} options={tabOptions} />
 					<Link href={`/sorter/${artistId}`}>
-						<div className="aspect-square rounded-full bg-lime-500 p-4 text-zinc-950 hover:bg-zinc-100">
+						<div className="aspect-square rounded-full bg-primary-500 p-4 text-neutral-950 hover:bg-neutral-100">
 							<PlusIcon width={16} height={16} />
 						</div>
 					</Link>

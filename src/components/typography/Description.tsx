@@ -7,7 +7,7 @@ type TextProps = {
 
 export default function Description({ children, className, ...props }: TextProps) {
 	return (
-		<p className={cn("text-zinc-500", className)} {...props}>
+		<p className={cn("text-neutral-500", className)} {...props}>
 			{children}
 		</p>
 	);

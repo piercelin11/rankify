@@ -20,13 +20,13 @@ export default function RadioItem({
 }: RadioItemProps) {
 	return (
 		<label
-			className={cn("flex items-center gap-2 text-zinc-500", {
-				"text-zinc-100": isChecked,
+			className={cn("flex items-center gap-2 text-neutral-500", {
+				"text-neutral-100": isChecked,
 			})}
 		>
 			<span
 				className={cn("aspect-square w-3 rounded-full border", {
-					"bg-lime-500": isChecked,
+					"bg-primary-500": isChecked,
 				})}
 			/>
 			<input

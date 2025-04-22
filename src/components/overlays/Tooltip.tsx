@@ -26,7 +26,7 @@ export default function Tooltip({
 		>
 			{isHover && content && (
 				<div
-					className={cn("absolute bg-zinc-700 px-3 py-2 rounded-md font-numeric", {
+					className={cn("absolute bg-neutral-700 px-3 py-2 rounded-md font-numeric", {
 						"-translate-x-1/2 transform":
 							typeof position === "number" || position === "center",
 						"left-0": position === "left",

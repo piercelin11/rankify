@@ -15,10 +15,10 @@ export default function ResultListItem({
 }: ResultListItemProps) {
 	return (
 		<div
-			className={cn("grid cursor-pointer select-none grid-cols-[25px,_70px,_1fr] items-center gap-3 rounded border-b border-zinc-850 px-6 py-3 hover:bg-zinc-900", className)}
+			className={cn("grid cursor-pointer select-none grid-cols-[25px,_70px,_1fr] items-center gap-3 rounded border-b border-neutral-850 px-6 py-3 hover:bg-neutral-900", className)}
 			{...props}
 		>
-			<p className="mr-2 justify-self-end font-serif text-lg font-medium text-zinc-500">
+			<p className="mr-2 justify-self-end font-serif text-lg font-medium text-neutral-500">
 				{ranking}
 			</p>
 			<img
@@ -30,7 +30,7 @@ export default function ResultListItem({
 			/>
 			<div>
 				<p>{data.name}</p>
-				<p className="text-zinc-500">{data.album?.name}</p>
+				<p className="text-neutral-500">{data.album?.name}</p>
 			</div>
 		</div>
 	);

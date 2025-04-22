@@ -16,7 +16,7 @@ export default function LoadingAnimation({
 
 	return (
 		<div
-			className={`border-zinc-500 ${styles} ${isFull ? "mx-auto" : ""} animate-spin rounded-full border-t-zinc-800`}
+			className={`border-neutral-500 ${styles} ${isFull ? "mx-auto" : ""} animate-spin rounded-full border-t-neutral-800`}
 		></div>
 	);
 }

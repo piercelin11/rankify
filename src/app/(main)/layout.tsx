@@ -43,7 +43,7 @@ export default async function MainLayout({ children }: AdminLayoutProps) {
 				<div className="flex-1 overflow-auto scrollbar-hidden hidden lg:block">
 					{loggedArtists.map((artist) => (
 						<Link key={artist.id} href={`/artist/${artist.id}/overview`}>
-							<div className="flex items-center gap-2 rounded-md px-2 py-2 hover:bg-zinc-900">
+							<div className="flex items-center gap-2 rounded-md px-2 py-2 hover:bg-neutral-900">
 								<img
 									className="w-14 rounded-full"
 									src={artist.img || "/pic/placeholder.jpg"}
