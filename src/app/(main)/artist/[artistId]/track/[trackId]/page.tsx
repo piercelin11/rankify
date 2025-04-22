@@ -3,22 +3,17 @@ import { notFound } from "next/navigation";
 import React from "react";
 import { getUserSession } from "@/../auth";
 import {
-	ChevronLeftIcon,
-	ChevronRightIcon,
 	HeartFilledIcon,
 	RocketIcon,
 	StarFilledIcon,
 } from "@radix-ui/react-icons";
-import StatsBox from "@/features/ranking-stats/components/StatsCard";
-import Link from "next/link";
 import getLoggedTracks from "@/lib/database/user/getLoggedTracks";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import { getPrevNextIndex } from "@/lib/utils/helper";
-import PercentileBars, {
-	BarData,
-} from "@/features/ranking-stats/components/PercentileBars";
 import TrackRankingLineChart from "@/features/ranking/display/charts/TrackRankingLineChart";
 import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";
+import PercentileBars, { BarData } from "@/features/ranking/stats/components/PercentileBars";
+import StatsCard from "@/features/ranking/stats/components/StatsCard";
 
 const iconSize = 22;
 
@@ -97,14 +92,14 @@ export default async function page({
 		<>
 			<div className="grid grid-cols-2 gap-2 lg:grid-cols-2 lg:gap-6 xl:grid-cols-4">
 				{statsCardData.map((data) => (
-					<StatsBox
+					<StatsCard
 						key={data.subtitle}
 						stats={data.stats}
 						subtitle={data.subtitle}
 						color={data.color}
 					>
 						{data.icon}
-					</StatsBox>
+					</StatsCard>
 				))}
 				<PercentileBars
 					bars={barData}

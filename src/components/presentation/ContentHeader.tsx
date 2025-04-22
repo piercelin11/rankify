@@ -26,7 +26,7 @@ export default function ContentHeader({
 			<div
 				className={cn("pt-20 2xl:pt-24", {
 					"bg-zinc-900": !color,
-					"pt-10 2xl:pt-12": children
+					"pt-10 2xl:pt-12": children,
 				})}
 				style={
 					color
@@ -36,7 +36,11 @@ export default function ContentHeader({
 						: undefined
 				}
 			>
-				<div className="p-8 2xl:p-14">
+				<div
+					className={cn("p-8 2xl:p-14", {
+						"space-y-4": children,
+					})}
+				>
 					{children}
 					<div className="flex items-center gap-6">
 						<img

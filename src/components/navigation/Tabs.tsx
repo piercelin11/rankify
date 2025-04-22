@@ -2,9 +2,9 @@
 import { DEFAULT_COLOR } from "@/config/variables";
 import { cn } from "@/lib/cn";
 import { ensureBrightness } from "@/lib/utils/adjustColor";
+import { throttle } from "@/lib/utils/helper";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useRef, useState } from "react";
 
 export type TabOptionProps = {
 	label: string;
@@ -13,18 +13,23 @@ export type TabOptionProps = {
 	onClick?: () => void;
 };
 
-type NavigationTabsProps = {
+type TabsProps = {
 	options: TabOptionProps[];
 	activeId?: string;
 	color?: string | null;
 };
 
-export default function Tabs({
-	options,
-	activeId,
-	color,
-}: NavigationTabsProps) {
+type IndicatorStyleType = {
+	left: number;
+	width: number;
+	opacity: number;
+};
+
+export default function Tabs({ options, activeId, color }: TabsProps) {
 	const [pendingActiveId, setPendingActiveId] = useState<string | null>(null);
+	const [indicatorStyle, setIndicatorStyle] =
+		useState<IndicatorStyleType | null>(null);
+	const tabRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
 
 	function handlePendingActiveId(option: TabOptionProps) {
 		setPendingActiveId(option.id);
@@ -32,10 +37,44 @@ export default function Tabs({
 
 	useEffect(() => {
 		if (pendingActiveId === activeId) setPendingActiveId(null);
+
+		let activeTabRef: HTMLButtonElement | null | undefined;
+
+		if (pendingActiveId) activeTabRef = tabRefs.current.get(pendingActiveId);
+		else activeTabRef = tabRefs.current.get(activeId || "");
+
+		if (activeTabRef) {
+			setIndicatorStyle({
+				left: activeTabRef.offsetLeft,
+				width: activeTabRef.offsetWidth,
+				opacity: 1,
+			});
+		} else {
+			setIndicatorStyle(null);
+		}
 	}, [activeId, pendingActiveId]);
 
+	//讓 indicator 寬度隨螢幕 resize 改變
+	useEffect(() => {
+		const recalculateIndicator = throttle(() => {
+			const activeTabRef = tabRefs.current.get(activeId || "");
+			console.log("recalculateIndicator")
+			if (activeTabRef) {
+				setIndicatorStyle({
+					left: activeTabRef.offsetLeft,
+					width: activeTabRef.offsetWidth,
+					opacity: 1,
+				});
+			}
+		});
+
+		window.addEventListener("resize", recalculateIndicator);
+
+		return () => window.removeEventListener("resize", recalculateIndicator);
+	}, [activeId]);
+
 	return (
-		<div className="flex w-max select-none rounded-lg border border-zinc-800">
+		<div className="relative flex w-max select-none rounded-lg border border-zinc-800">
 			{options.map((option) => (
 				<TabItem
 					key={option.id}
@@ -45,67 +84,71 @@ export default function Tabs({
 							? option.id === pendingActiveId
 							: option.id === activeId
 					}
-					color={color}
+					ref={(el) => {
+						if (el) tabRefs.current.set(option.id, el);
+						else tabRefs.current.delete(option.id);
+					}}
 					onActiveId={() => handlePendingActiveId(option)}
 				/>
 			))}
+			{indicatorStyle && (
+				<div
+					className="absolute h-full w-full rounded-md bg-lime-500 transition-all duration-200 ease-in-out"
+					style={{
+						...indicatorStyle,
+						backgroundColor: color ? ensureBrightness(color) : DEFAULT_COLOR,
+					}}
+				/>
+			)}
 		</div>
 	);
 }
 
-function TabItem({
-	option,
-	color,
-	isActive,
-	onActiveId,
-}: {
+type TabItemProps = {
 	option: TabOptionProps;
-	color?: string | null;
 	isActive: boolean;
 	onActiveId: () => void;
-}) {
-	const activeColor = color ? ensureBrightness(color) : DEFAULT_COLOR;
+};
 
-	if (option.href)
-		return (
-			<Link
-				href={option.href}
-				className={isActive ? "pointer-events-none" : ""}
-			>
+const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(
+	({ option, isActive, onActiveId }, ref) => {
+		if (option.href)
+			return (
+				<Link
+					href={option.href}
+					className={cn("z-10", { "pointer-events-none": isActive })}
+				>
+					<button
+						className={cn(
+							"z-10 h-full justify-self-center rounded-lg px-3 py-2 text-zinc-600 xl:px-4 xl:py-3 xl:text-lg",
+							{
+								"text-zinc-950": isActive,
+							}
+						)}
+						ref={ref}
+						onClick={onActiveId}
+					>
+						{option.label}
+					</button>
+				</Link>
+			);
+		else
+			return (
 				<button
 					className={cn(
-						"h-full justify-self-center rounded-lg px-3 py-2 text-zinc-600 xl:px-4 xl:py-3 xl:text-lg",
+						"z-10 h-full justify-self-center rounded-lg px-3 py-2 text-zinc-600 xl:px-4 xl:py-3 xl:text-lg",
 						{
 							"text-zinc-950": isActive,
 						}
 					)}
-					style={{
-						backgroundColor: isActive ? activeColor : "#09090b",
+					ref={ref}
+					onClick={() => {
+						onActiveId();
+						if (option.onClick) option.onClick();
 					}}
-					onClick={onActiveId}
 				>
 					{option.label}
 				</button>
-			</Link>
-		);
-	else
-		return (
-			<button
-				className={cn(
-					"h-full justify-self-center rounded-lg px-3 py-2 text-zinc-600 xl:px-4 xl:py-3 xl:text-lg",
-					{
-						"text-zinc-950": isActive,
-					}
-				)}
-				style={{
-					backgroundColor: isActive ? activeColor : "#09090b",
-				}}
-				onClick={() => {
-					onActiveId();
-					if (option.onClick) option.onClick();
-				}}
-			>
-				{option.label}
-			</button>
-		);
-}
+			);
+	}
+);

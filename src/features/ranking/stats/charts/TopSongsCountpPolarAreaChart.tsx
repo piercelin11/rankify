@@ -14,7 +14,7 @@ type TopSongsCountpPolarAreaChartProps = {
 export default function TopSongsCountpPolarAreaChart({
 	data,
 }: TopSongsCountpPolarAreaChartProps) {
-	const [view, setView] = useState<"25" | "50">("50");
+	const [view, setView] = useState<"25" | "50">("25");
 
 	const tabData = [
 		{

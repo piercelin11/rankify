@@ -3,6 +3,7 @@
 import React, { ReactNode } from "react";
 import RankChangeIcon from "./RankChangeIcon";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 import {
 	ArrowDownIcon,
 	ArrowUpIcon,
@@ -58,15 +59,16 @@ export function RankingListItem<T extends RankingListDataTypeExtend>({
 					{data.ranking}
 				</p>
 				<div className="flex items-center gap-3 overflow-hidden">
-					{data.rankChange !== undefined && (
-						<RankChangeIcon data={data} />
-					)}
-					<img
-						className="w-16 rounded"
-						src={data.img || undefined}
-						alt={data.name}
-						loading="lazy"
-					/>
+					{data.rankChange !== undefined && <RankChangeIcon data={data} />}
+					<div className="relative h-16 w-16">
+						<Image
+							className="rounded"
+							fill
+							sizes="(max-width: 768px) 56px, 64px"
+							src={data.img || ""}
+							alt={data.name}
+						/>
+					</div>
 					<div className="overflow-hidden">
 						<p className="overflow-hidden text-ellipsis text-nowrap font-medium">
 							{data.name}

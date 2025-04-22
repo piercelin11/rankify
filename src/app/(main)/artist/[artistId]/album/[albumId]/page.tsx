@@ -3,7 +3,6 @@ import React from "react";
 import { getUserSession } from "@/../auth";
 import { getAlbumsStats } from "@/lib/database/ranking/overview/getAlbumsStats";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
-import StatsBox from "@/features/ranking-stats/components/StatsCard";
 import {
 	DiscIcon,
 	HeartFilledIcon,
@@ -11,11 +10,10 @@ import {
 } from "@radix-ui/react-icons";
 import { getPrevNextIndex } from "@/lib/utils/helper";
 import AlbumRankingLineChart from "@/features/ranking/display/charts/AlbumRankingLineChart";
-import HorizontalBarChart, {
-	BarData,
-} from "@/features/ranking-stats/components/PercentileBars";
 import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
 import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";
+import PercentileBars, { BarData } from "@/features/ranking/stats/components/PercentileBars";
+import StatsCard from "@/features/ranking/stats/components/StatsCard";
 
 const iconSize = 22;
 
@@ -92,16 +90,16 @@ export default async function TrackPage({
 		<>
 			<div className="grid grid-cols-2 gap-2 lg:grid-cols-2 lg:gap-6 xl:grid-cols-4">
 				{statsBoxData.map((data) => (
-					<StatsBox
+					<StatsCard
 						key={data.subtitle}
 						stats={data.stats}
 						subtitle={data.subtitle}
 						color={data.color}
 					>
 						{data.icon}
-					</StatsBox>
+					</StatsCard>
 				))}
-				<HorizontalBarChart
+				<PercentileBars
 					bars={barData}
 					color={albumData.color}
 					className="hidden sm:flex"
@@ -109,7 +107,7 @@ export default async function TrackPage({
 			</div>
 			<div className="sm:hidden">
 				<h3>Track Ranking Record</h3>
-				<HorizontalBarChart bars={barData} color={albumData.color} />
+				<PercentileBars bars={barData} color={albumData.color} />
 			</div>
 
 			<AlbumRankingLineChart
