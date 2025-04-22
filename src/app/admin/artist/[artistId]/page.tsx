@@ -1,10 +1,7 @@
 import getArtistById from "@/lib/database/data/getArtistById";
 import { notFound } from "next/navigation";
 import React from "react";
-import GalleryWrapper from "@/components/display/showcase/GalleryWrapper";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
-import GalleryItem from "@/components/display/showcase/GalleryItem";
-import ContentHeader from "@/components/display/showcase/ContentHeader";
 import getSinglesByArtist from "@/lib/database/data/getSinglesByArtist";
 import TrackListItem from "@/features/admin/editContent/components/TrackListItem";
 import ContentWrapper from "@/components/layout/ContentWrapper";
@@ -12,6 +9,9 @@ import AddAlbumButton from "@/features/admin/addContent/components/AddAlbumButto
 import AddEPButton from "@/features/admin/addContent/components/AddEPButton";
 import AddSingleButton from "@/features/admin/addContent/components/AddSingleButton";
 import ArtistActionSection from "@/features/admin/editContent/components/ArtistActionSection";
+import ContentHeader from "@/components/presentation/ContentHeader";
+import GalleryWrapper from "@/components/presentation/GalleryWrapper";
+import GalleryItem from "@/components/presentation/GalleryItem";
 
 export default async function AdminArtistPage({
 	params,
@@ -37,7 +37,7 @@ export default async function AdminArtistPage({
 		<>
 			<ContentHeader
 				data={artist}
-				subTitle={`${artist.spotifyFollowers} followers`}
+				subTitleContent={<p>`${artist.spotifyFollowers} followers`</p>}
 				rounded
 			/>
 			<ContentWrapper>

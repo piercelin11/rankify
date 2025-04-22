@@ -18,7 +18,9 @@ export default async function AlbumPageLayout({
 			<Suspense fallback={<ContentHeader />}>
 				<Header params={params} />
 			</Suspense>
-			<ContentWrapper className="space-y-10 2xl:space-y-20">{children}</ContentWrapper>
+			<ContentWrapper className="space-y-10 2xl:space-y-20">
+				{children}
+			</ContentWrapper>
 		</>
 	);
 }
@@ -32,7 +34,7 @@ async function Header({ params }: Omit<LayoutProps, "children">) {
 	return (
 		<ContentHeader
 			data={albumData}
-			subTitle={albumData.artist.name}
+			subTitleContent={<p>{albumData.artist.name}</p>}
 			type="Album"
 			color={albumData.color}
 		/>

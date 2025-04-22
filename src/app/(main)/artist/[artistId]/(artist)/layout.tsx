@@ -40,19 +40,23 @@ async function Header({ params }: { params: Promise<{ artistId: string }> }) {
 		<>
 			<ContentHeader
 				data={artist}
-				subTitle={`${artist.spotifyFollowers} followers`}
+				subTitleContent={
+					<p className="text-description">
+						`${artist.spotifyFollowers} followers`
+					</p>
+				}
 				rounded
 				type="Artist"
 			>
 				<div className="flex">
-				<div className="flex gap-4 ml-auto">
-					<Tabs activeId={activePathname} options={tabOptions} />
-					<Link href={`/sorter/${artistId}`}>
-						<div className="aspect-square rounded-full bg-primary-500 p-4 text-neutral-950 hover:bg-neutral-100">
-							<PlusIcon width={16} height={16} />
-						</div>
-					</Link>
-				</div>
+					<div className="ml-auto flex gap-4">
+						<Tabs activeId={activePathname} options={tabOptions} />
+						<Link href={`/sorter/${artistId}`}>
+							<div className="aspect-square rounded-full bg-primary-500 p-4 text-neutral-950 hover:bg-neutral-100">
+								<PlusIcon width={16} height={16} />
+							</div>
+						</Link>
+					</div>
 				</div>
 			</ContentHeader>
 		</>

@@ -10,7 +10,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { UserPreferenceData } from "@/types/data";
 import saveRankingSettings from "@/lib/action/settings/saveRankingSettings";
 import { ActionResponse } from "@/types/action";
-import Description from "@/components/typography/Description";
 import ToggleButton from "@/components/buttons/ToggleButton";
 import Button from "@/components/buttons/Button";
 import FormMessage from "@/components/form/FormMessage";
@@ -73,9 +72,9 @@ export default function RankingSettings({ settings }: RankingSettingsProps) {
 			<div className="space-y-4">
 				<div>
 					<h3>Album Stats</h3>
-					<Description>
+					<p className="text-description">
 						Configure how album stats are calculated and displayed.
-					</Description>
+					</p>
 				</div>
 				<div className="flex items-center gap-10">
 					<h4>Include interlude</h4>

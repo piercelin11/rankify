@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Description from "@/components/typography/Description";
 import FormItem from "@/components/form/FormInput";
 import Button from "@/components/buttons/Button";
 import AlbumColorSelector from "./AlbumColorSelector";
@@ -64,7 +63,7 @@ export default function AlbumEditingForm({
 		<div className="space-y-8 p-5">
 			<div>
 				<h2>Edit Album</h2>
-				<Description>edit album name and album color.</Description>
+				<p className="text-description">edit album name and album color.</p>
 			</div>
 			<hr />
 			<form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>

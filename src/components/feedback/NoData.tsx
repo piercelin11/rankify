@@ -1,5 +1,4 @@
 import React from "react";
-import Description from "../typography/Description";
 import { CubeIcon } from "@radix-ui/react-icons";
 
 export default function NoData() {
@@ -8,7 +7,7 @@ export default function NoData() {
 			<CubeIcon width={25} height={25} />
 			<div>
 				<p className="text-center font-medium">No Data</p>
-				<Description className="text-center">No data available</Description>
+				<p className="text-description text-center">No data available</p>
 			</div>
 		</div>
 	);

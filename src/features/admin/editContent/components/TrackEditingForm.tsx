@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import updateTrack from "../actions/updateTrack";
 import Button from "@/components/buttons/Button";
-import Description from "@/components/typography/Description";
 import FormItem from "@/components/form/FormInput";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import FormMessage from "@/components/form/FormMessage";
@@ -87,7 +86,7 @@ export default function TrackEditingForm({
 		<div className="space-y-8 p-5">
 			<div>
 				<h2>Edit Track</h2>
-				<Description>edit track info.</Description>
+				<p className="text-description">edit track info.</p>
 			</div>
 			<hr />
 			<form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>

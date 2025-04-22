@@ -39,6 +39,13 @@ export default {
 				danger: colors.red,
 				spotify: "#1ed760",
 			},
+			boxShadow: {
+				card: "inset -1px 1.5px 0.5px 0 rgba(100, 100, 100, 0.8), 0px 1px 1px 0 rgba(100, 100, 100, 0.3)",
+			},
+			borderRadius: {
+				"4xl": "2rem",
+				"5xl": "2.5rem",
+			}
 		},
 	},
 	plugins: [
@@ -46,10 +53,10 @@ export default {
 			addUtilities({
 				".scrollbar-hidden": {
 					"-ms-overflow-style": "none",
-					"scrollbar-width": "none", 
+					"scrollbar-width": "none",
 				},
 				".scrollbar-hidden::-webkit-scrollbar": {
-					display: "none", 
+					display: "none",
 				},
 				".scrollbar-visible": {
 					"-ms-overflow-style": "auto",

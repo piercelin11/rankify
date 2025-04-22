@@ -3,10 +3,11 @@ import Link from "next/link";
 import React, { ReactNode } from "react";
 import { SpotifyIcon } from "../icons/LogoIcons";
 import { AlbumData, ArtistData, TrackData } from "@/types/data";
+import Image from "next/image";
 
 type ContentHeaderProps = {
 	data?: AlbumData | ArtistData | TrackData;
-	subTitle?: string | ReactNode;
+	subTitleContent?: ReactNode;
 	rounded?: boolean;
 	type?: string;
 	color?: string | null;
@@ -15,7 +16,7 @@ type ContentHeaderProps = {
 
 export default function ContentHeader({
 	data,
-	subTitle,
+	subTitleContent,
 	rounded = false,
 	type,
 	color,
@@ -25,16 +26,8 @@ export default function ContentHeader({
 		<>
 			<div
 				className={cn("pt-20 2xl:pt-24", {
-					"bg-neutral-900": !color,
 					"pt-10 2xl:pt-12": children,
 				})}
-				style={
-					color
-						? {
-								background: `linear-gradient(120deg, #00000000 0%, ${color}35 50%, ${color}BF 120%), linear-gradient(160deg, #00000000 0%, ${color}30 60%, ${color}BF 120%)`,
-							}
-						: undefined
-				}
 			>
 				<div
 					className={cn("p-8 2xl:p-14", {
@@ -43,18 +36,21 @@ export default function ContentHeader({
 				>
 					{children}
 					<div className="flex items-center gap-6">
-						<img
-							className={cn("w-full sm:w-[220px] 2xl:w-[280px]", {
-								"rounded-full": rounded,
-								"rounded-md": !rounded,
-							})}
-							src={data?.img || "/pic/placeholder.jpg"}
-							alt={data?.name}
-						/>
+						<div className="relative h-[220px] w-[220px] drop-shadow-xl 2xl:h-[280px] 2xl:w-[280px]">
+							<Image
+								className={cn({
+									"rounded-full": rounded,
+									"rounded-3xl": !rounded,
+								})}
+								fill
+								src={data?.img || "/pic/placeholder.jpg"}
+								alt={`${data?.name} profile`}
+							/>
+						</div>
 						{data && (
 							<ContentHeaderInfo
 								data={data}
-								subTitle={subTitle}
+								subTitleContent={subTitleContent}
 								type={type}
 								color={color}
 							/>
@@ -65,7 +61,7 @@ export default function ContentHeader({
 			{data && (
 				<ContentHeaderInfoMobileInfo
 					data={data}
-					subTitle={subTitle}
+					subTitleContent={subTitleContent}
 					type={type}
 					color={color}
 				/>
@@ -76,41 +72,41 @@ export default function ContentHeader({
 
 function ContentHeaderInfo({
 	data,
-	subTitle,
+	subTitleContent,
 	type,
 	color,
 }: ContentHeaderProps) {
 	return (
 		<div className="hidden sm:block">
-			{type && <p>{type}</p>}
-			<h1 className="text-display">{data?.name}</h1>
-			<p
-				className={cn("mb-4 text-lg text-neutral-500", {
+			{type && <p className="mb-2">{type}</p>}
+			<h1 className="text-display mb-6">{data?.name}</h1>
+			<div
+				className={cn("text-description mb-4 flex items-center gap-2", {
 					"text-neutral-100": color,
 				})}
 			>
-				{subTitle}
-			</p>
-			<Link href={data?.spotifyUrl || ""} className="inline-block">
-				<SpotifyIcon
-					className={cn("text-neutral-600 hover:text-spotify", {
-						"text-neutral-300": color,
-					})}
-					size={30}
-				/>
-			</Link>
+				<Link href={data?.spotifyUrl || ""} className="inline-block">
+					<SpotifyIcon
+						className={cn("text-neutral-600 hover:text-spotify", {
+							"text-neutral-300": color,
+						})}
+						size={30}
+					/>
+				</Link>
+				{subTitleContent}
+			</div>
 		</div>
 	);
 }
 
 function ContentHeaderInfoMobileInfo({
 	data,
-	subTitle,
+	subTitleContent,
 	type,
 	color,
 }: ContentHeaderProps) {
 	return (
-		<div className="mx-8 mt-8 border-b border-neutral-750 pb-6 sm:hidden">
+		<div className="border-neutral-750 mx-8 mt-8 border-b pb-6 sm:hidden">
 			{type && <p>{type}</p>}
 			<h1>{data?.name}</h1>
 			<div className="flex items-center gap-2">
@@ -122,13 +118,13 @@ function ContentHeaderInfoMobileInfo({
 						size={20}
 					/>
 				</Link>
-				<p
-					className={cn("text-lg text-neutral-500", {
+				<div
+					className={cn("text-description mb-4", {
 						"text-neutral-100": color,
 					})}
 				>
-					{subTitle}
-				</p>
+					{subTitleContent}
+				</div>
 			</div>
 		</div>
 	);

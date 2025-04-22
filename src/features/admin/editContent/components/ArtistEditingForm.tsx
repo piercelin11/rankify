@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Description from "@/components/typography/Description";
 import FormItem from "@/components/form/FormInput";
 import Button from "@/components/buttons/Button";
 import { useForm } from "react-hook-form";
@@ -58,7 +57,7 @@ export default function ArtistEditingForm({
 		<div className="space-y-8 p-5">
 			<div>
 				<h2>Edit Artist</h2>
-				<Description>edit artist name.</Description>
+				<p className="text-description">edit artist name.</p>
 			</div>
 			<hr />
 			<form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>

@@ -2,16 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-	font-size: 14px;
-}
-
-@media (min-width: 768px) {
-	:root {
-		font-size: 16px;
-	}
-}
-
 @layer components {
 	.text-display {
 		@apply text-4xl font-extrabold leading-loose 2xl:text-6xl;
@@ -31,6 +21,25 @@
 
 	.text-caption {
 		@apply text-sm leading-relaxed text-neutral-500 font-normal;
+	}
+
+	.stats-card {
+		@apply shadow-card bg-gradient-to-b from-neutral-950/35 to-neutral-950 rounded-5xl p-6 2xl:p-10;
+	}
+
+	.bg-gradient-transparent-to-solid {
+		@apply bg-gradient-to-b from-neutral-950/35 to-neutral-950;
+	}
+}
+
+
+:root {
+	font-size: 14px;
+}
+
+@media (min-width: 768px) {
+	:root {
+		font-size: 16px;
 	}
 }
 

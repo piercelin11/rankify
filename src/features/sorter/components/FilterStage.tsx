@@ -8,7 +8,6 @@ import Button from "@/components/buttons/Button";
 import Link from "next/link";
 import { FilterType, setExcluded, setPercentage } from "@/features/sorter/slices/sorterSlice";
 import { useAppDispatch } from "@/store/hooks";
-import Description from "@/components/typography/Description";
 import { CurrentStage } from "./SorterPage";
 
 type FilterStageProps = {
@@ -56,9 +55,9 @@ export default function FilterStage({ albums, tracks, setCurrentStage }: FilterS
 		<div className="space-y-6">
 			<div className="space-y-2">
 				<h3 className="text-center">Get Started</h3>
-				<Description className="text-center">
+				<p className="text-description text-center">
 					filter out the albums and singles you haven't listen to.
-				</Description>
+				</p>
 			</div>
 			<div className="flex justify-center gap-4">
 				<Button variant="primary" onClick={handleStart} rounded>
