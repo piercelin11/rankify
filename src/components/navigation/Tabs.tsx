@@ -1,7 +1,7 @@
 "use client";
 import { DEFAULT_COLOR } from "@/config/variables";
 import { cn } from "@/lib/cn";
-import { ensureBrightness } from "@/lib/utils/adjustColor";
+import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
 import { throttle } from "@/lib/utils/helper";
 import Link from "next/link";
 import React, { forwardRef, useEffect, useRef, useState } from "react";
@@ -96,7 +96,7 @@ export default function Tabs({ options, activeId, color }: TabsProps) {
 					className="absolute h-full w-full rounded-md bg-primary-500 transition-all duration-200 ease-in-out"
 					style={{
 						...indicatorStyle,
-						backgroundColor: color ? ensureBrightness(color) : DEFAULT_COLOR,
+						backgroundColor: color ? adjustColorLightness(color, 0.5) : DEFAULT_COLOR,
 					}}
 				/>
 			)}

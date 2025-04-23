@@ -1,7 +1,7 @@
 import { db } from "@/lib/prisma";
-import GalleryWrapper from "@/components/display/showcase/GalleryWrapper";
-import GalleryItem from "@/components/display/showcase/GalleryItem";
 import { AddArtistButton } from "@/features/admin/addContent/components/AddAristButton";
+import GalleryWrapper from "@/components/presentation/GalleryWrapper";
+import GalleryItem from "@/components/presentation/GalleryItem";
 
 
 export default async function AdminArtistsPage() {

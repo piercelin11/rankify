@@ -40,7 +40,7 @@ export default {
 				spotify: "#1ed760",
 			},
 			boxShadow: {
-				card: "inset -1px 1.5px 0.5px 0 rgba(100, 100, 100, 0.8), 0px 1px 1px 0 rgba(100, 100, 100, 0.3)",
+				card: "inset -1px 1.5px 0.5px 0 rgba(100, 100, 100, 0.8), 0px 1px 1px 0 rgba(100, 100, 100, 0.2)",
 			},
 			borderRadius: {
 				"4xl": "2rem",

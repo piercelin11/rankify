@@ -11,7 +11,7 @@ import {
 	Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
-import { adjustSaturation, ensureBrightness } from "@/lib/utils/adjustColor";
+import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
 import { toAcronym } from "@/lib/utils/helper";
 
 ChartJS.register(
@@ -82,10 +82,10 @@ export default function DoubleBarChart({
 				borderColor: "#FEF27ABF",
 				backgroundColor: "#FEF27ABF",
 				hoverBackgroundColor: color.map(
-					(item) => adjustSaturation(ensureBrightness(item), 0.15) + "99"
+					(item) => adjustColorLightness(item!, 0.5) + "99"
 				),
 				hoverBorderColor: color.map(
-					(item) => adjustSaturation(ensureBrightness(item), 0.15) + "CC"
+					(item) => adjustColorLightness(item!, 0.5) + "CC"
 				),
 			},
 			{
@@ -95,10 +95,10 @@ export default function DoubleBarChart({
 				borderColor: "#464748BF",
 				backgroundColor: "#464748BF",
 				hoverBackgroundColor: color.map(
-					(item) => adjustSaturation(ensureBrightness(item), 0.15) + "1A"
+					(item) => adjustColorLightness(item!, 0.5) + "1A"
 				),
 				hoverBorderColor: color.map(
-					(item) => adjustSaturation(ensureBrightness(item), 0.15) + "CC"
+					(item) => adjustColorLightness(item!, 0.5) + "CC"
 				),
 			},
 		],

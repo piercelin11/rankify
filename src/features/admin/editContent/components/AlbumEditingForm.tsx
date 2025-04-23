@@ -35,7 +35,7 @@ export default function AlbumEditingForm({
 			name: data.name,
 			color: data.color || "",
 		},
-	});
+	}); 
 
 	async function onSubmit(formData: updateAlbumType) {
 		setPending(true);
@@ -44,6 +44,7 @@ export default function AlbumEditingForm({
 			setResponse(updateAlbumResponse);
 			if (updateAlbumResponse.success) setOpen(false);
 		} catch (error) {
+			console.log(error)
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT") {
 					setResponse({ success: false, message: "Something went wrong." });

@@ -36,11 +36,11 @@ export default function ContentHeader({
 				>
 					{children}
 					<div className="flex items-center gap-6">
-						<div className="relative h-[220px] w-[220px] drop-shadow-xl 2xl:h-[280px] 2xl:w-[280px]">
+						<div className="relative h-[220px] w-[220px] drop-shadow-2xl 2xl:h-[300px] 2xl:w-[300px]">
 							<Image
 								className={cn({
 									"rounded-full": rounded,
-									"rounded-3xl": !rounded,
+									"rounded-4xl": !rounded,
 								})}
 								fill
 								src={data?.img || "/pic/placeholder.jpg"}
@@ -58,14 +58,6 @@ export default function ContentHeader({
 					</div>
 				</div>
 			</div>
-			{data && (
-				<ContentHeaderInfoMobileInfo
-					data={data}
-					subTitleContent={subTitleContent}
-					type={type}
-					color={color}
-				/>
-			)}
 		</>
 	);
 }
@@ -77,7 +69,7 @@ function ContentHeaderInfo({
 	color,
 }: ContentHeaderProps) {
 	return (
-		<div className="hidden sm:block">
+		<div>
 			{type && <p className="mb-2">{type}</p>}
 			<h1 className="text-display mb-6">{data?.name}</h1>
 			<div
@@ -99,33 +91,3 @@ function ContentHeaderInfo({
 	);
 }
 
-function ContentHeaderInfoMobileInfo({
-	data,
-	subTitleContent,
-	type,
-	color,
-}: ContentHeaderProps) {
-	return (
-		<div className="border-neutral-750 mx-8 mt-8 border-b pb-6 sm:hidden">
-			{type && <p>{type}</p>}
-			<h1>{data?.name}</h1>
-			<div className="flex items-center gap-2">
-				<Link href={data?.spotifyUrl || ""} className="inline-block">
-					<SpotifyIcon
-						className={cn("text-neutral-600 hover:text-spotify", {
-							"text-neutral-300": color,
-						})}
-						size={20}
-					/>
-				</Link>
-				<div
-					className={cn("text-description mb-4", {
-						"text-neutral-100": color,
-					})}
-				>
-					{subTitleContent}
-				</div>
-			</div>
-		</div>
-	);
-}

@@ -13,7 +13,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { Filler } from "chart.js";
-import { ensureBrightness } from "@/lib/utils/adjustColor";
+import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
 
 ChartJS.register(
 	CategoryScale,
@@ -104,10 +104,10 @@ export function LineChart({ data: { date, dataset }, isReverse = true }: { data:
 			data: item.datas,
 			borderWidth: 1.5,
 			borderColor: item.color
-				? ensureBrightness(item.color)
+				? adjustColorLightness(item.color, 0.5)
 				: "#FEF27A",
 			backgroundColor: item.color
-				? `${ensureBrightness(item.color)}25`
+				? `${adjustColorLightness(item.color, 0.5)}25`
 				: "#FEF27A1A",
 			fill: "start",
 		})),

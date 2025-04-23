@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
-import { ensureBrightness } from "@/lib/utils/adjustColor";
+import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
 import React, { useEffect, useState } from "react";
 
 export type BarData = {
@@ -65,7 +65,7 @@ export function Bar({ bar, color }: BarProps) {
 					className="h-full rounded-full transition-all duration-1000 ease-in-out"
 					style={{
 						width: animatedWidth,
-						backgroundColor: color ? ensureBrightness(color) : "#fef27a",
+						backgroundColor: color ? adjustColorLightness(color, 0.5) : "#fef27a",
 					}}
 				></div>
 			</div>

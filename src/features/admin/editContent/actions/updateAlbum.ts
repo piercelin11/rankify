@@ -31,15 +31,13 @@ export default async function updateAlbum(
 			},
 		});
 
-		isSuccess = true;
 	} catch (error) {
 		console.error("Failed to update album.", error);
 		return { success: false, message: "Failed to update album." };
-	}
+	} 
 
-	if (isSuccess) {
-		revalidatePath(`/admin/album/${albumId}`);
-		revalidateTag("admin-data");
-	}
-	return { success: true, message: "Successfully updated album." };
+	revalidatePath(`/admin/album/${albumId}`);
+	revalidateTag("admin-data");
+	return ({ success: true, message: "Successfully updated album." });
+	
 }

@@ -2,7 +2,7 @@
 
 import { DEFAULT_COLOR } from "@/config/variables";
 import { cn } from "@/lib/cn";
-import { ensureBrightness } from "@/lib/utils/adjustColor";
+import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
 import { ChevronDownIcon, Cross2Icon } from "@radix-ui/react-icons";
 import useLineChartFilter from "../hooks/useLineChartFilter";
 
@@ -118,7 +118,7 @@ function TrackTag({
 		<div
 			className="flex flex-none flex-grow-0 items-center gap-1 rounded px-2 py-1 text-neutral-100 sm:px-3 sm:py-2"
 			style={{
-				backgroundColor: ensureBrightness(tag.color ?? DEFAULT_COLOR) + "90",
+				backgroundColor: adjustColorLightness(tag.color ?? DEFAULT_COLOR, 0.5) + "90",
 			}}
 		>
 			{!isDefault && (

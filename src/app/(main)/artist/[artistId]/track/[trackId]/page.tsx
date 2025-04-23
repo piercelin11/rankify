@@ -12,8 +12,11 @@ import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import { getPrevNextIndex } from "@/lib/utils/helper";
 import TrackRankingLineChart from "@/features/ranking/display/charts/TrackRankingLineChart";
 import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";
-import PercentileBars, { BarData } from "@/features/ranking/stats/components/PercentileBars";
+import PercentileBars, {
+	BarData,
+} from "@/features/ranking/stats/components/PercentileBars";
 import StatsCard from "@/features/ranking/stats/components/StatsCard";
+import Scroll from "@/components/layout/Scroll";
 
 const iconSize = 22;
 
@@ -109,10 +112,7 @@ export default async function page({
 			</div>
 			<div className="sm:hidden">
 				<h3>Track Ranking Record</h3>
-				<PercentileBars
-					bars={barData}
-					color={trackData.album?.color}
-				/>
+				<PercentileBars bars={barData} color={trackData.album?.color} />
 			</div>
 
 			<TrackRankingLineChart

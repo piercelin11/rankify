@@ -44,10 +44,10 @@ async function Header({ params }: Omit<LayoutProps, "children">) {
 				color={trackData.album?.color}
 			/>
 
-			<div className="absolute top-0 -z-10 h-[800px] w-full bg-gradient-to-b from-transparent to-neutral-950" />
-			<div className="absolute top-0 -z-20 h-[800px] w-full overflow-hidden">
+			<div className="absolute top-0 -z-10 h-[840px] w-full bg-gradient-to-b from-transparent to-neutral-950" />
+			<div className="absolute top-0 -z-20 h-[840px] w-full overflow-hidden">
 				<Image
-					className="object-cover opacity-40 blur-lg"
+					className="object-cover opacity-90 blur-3xl"
 					fill
 					src={trackData.img ?? ""}
 					alt={`${trackData.artist.name}'s background picture`}
