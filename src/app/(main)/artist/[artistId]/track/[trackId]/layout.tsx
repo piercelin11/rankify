@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import Image from "next/image";
 import { ArtistData, TrackData } from "@/types/data";
+import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
 
 type LayoutProps = {
 	params: Promise<{ trackId: string; artistId: string }>;
@@ -44,16 +45,7 @@ async function Header({ params }: Omit<LayoutProps, "children">) {
 				color={trackData.album?.color}
 			/>
 
-			<div className="absolute top-0 -z-10 h-[840px] w-full bg-gradient-to-b from-transparent to-neutral-950" />
-			<div className="absolute top-0 -z-20 h-[840px] w-full overflow-hidden">
-				<Image
-					className="object-cover opacity-90 blur-3xl"
-					fill
-					src={trackData.img ?? ""}
-					alt={`${trackData.artist.name}'s background picture`}
-					sizes="(max-width: 768px) 20px, 50px"
-				/>
-			</div>
+			<BlurredImageBackground src={trackData.img ?? ""} />
 		</>
 	);
 }
@@ -72,7 +64,6 @@ function TrackPageSubtitleContent({
 					height={30}
 					src={trackData.artist.img ?? ""}
 					alt={trackData.artist.name}
-					sizes="30px"
 				/>
 				<Link
 					className="font-bold hover:underline"

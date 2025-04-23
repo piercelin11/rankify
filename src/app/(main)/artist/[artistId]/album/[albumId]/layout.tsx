@@ -3,6 +3,10 @@ import ContentWrapper from "@/components/layout/ContentWrapper";
 import getAlbumById from "@/lib/database/data/getAlbumById";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import Image from "next/image"
+import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
+import { AlbumData, ArtistData } from "@/types/data";
+import Link from "next/link";
 
 type LayoutProps = {
 	params: Promise<{ albumId: string }>;
@@ -32,11 +36,41 @@ async function Header({ params }: Omit<LayoutProps, "children">) {
 	if (!albumData) notFound();
 
 	return (
-		<ContentHeader
-			data={albumData}
-			subTitleContent={<p>{albumData.artist.name}</p>}
-			type="Album"
-			color={albumData.color}
-		/>
+		<>
+			<ContentHeader
+				data={albumData}
+				subTitleContent={<AlbumPageSubtitleContent albumData={albumData} />}
+				type="Album"
+				color={albumData.color}
+			/>
+			<BlurredImageBackground src={albumData.img ?? ""} />
+		</>
+	);
+}
+
+function AlbumPageSubtitleContent({
+	albumData,
+}: {
+	albumData: AlbumData & { artist: ArtistData };
+}) {
+	return (
+		<>
+			<div className="flex items-center gap-1">
+				<Image
+					className="rounded-full"
+					width={30}
+					height={30}
+					src={albumData.artist.img ?? ""}
+					alt={albumData.artist.name}
+					sizes="30px"
+				/>
+				<Link
+					className="font-bold hover:underline"
+					href={`/artist/${albumData.artist.id}`}
+				>
+					{albumData.artist.name}
+				</Link>
+			</div>
+		</>
 	);
 }

@@ -41,7 +41,6 @@ export function LineChart({ data: { date, dataset }, isReverse = true }: { data:
 		plugins: {
 			legend: {
 				display: false,
-				// position: 'bottom',
 				labels: {
 					display: false,
 					padding: 30,
@@ -58,8 +57,6 @@ export function LineChart({ data: { date, dataset }, isReverse = true }: { data:
 				padding: 18,
 				titleMarginBottom: 15,
 				displayColors: false,
-				//mode: 'index',
-				// intersect: false,
 				titleFont: {
 					size: 16,
 					weight: 600,
@@ -77,10 +74,10 @@ export function LineChart({ data: { date, dataset }, isReverse = true }: { data:
 				
 				reverse: isReverse,
 				grid: {
-					color: "#181818",
+					color: "#27272a",
 				},
 				border: {
-					color: "#181818",
+					color: "#27272a",
 				},
 				ticks: {
 					precision: 0
@@ -88,10 +85,10 @@ export function LineChart({ data: { date, dataset }, isReverse = true }: { data:
 			},
 			x: {
 				border: {
-					color: "#181818",
+					color: "#27272a",
 				},
 				grid: {
-					color: "#18181800",
+					color: "#27272a00",
 				},
 			},
 		},
@@ -104,10 +101,10 @@ export function LineChart({ data: { date, dataset }, isReverse = true }: { data:
 			data: item.datas,
 			borderWidth: 1.5,
 			borderColor: item.color
-				? adjustColorLightness(item.color, 0.5)
+				? adjustColorLightness(item.color, 0.5, 2)
 				: "#FEF27A",
 			backgroundColor: item.color
-				? `${adjustColorLightness(item.color, 0.5)}25`
+				? `${adjustColorLightness(item.color, 0.5, 2)}25`
 				: "#FEF27A1A",
 			fill: "start",
 		})),

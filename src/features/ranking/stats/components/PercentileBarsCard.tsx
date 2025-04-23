@@ -15,7 +15,7 @@ type PercentileBarsProps = {
 	color?: string | null;
 } & Omit<React.DelHTMLAttributes<HTMLDivElement>, "color">;
 
-export default function PercentileBars({
+export default function PercentileBarsCard({
 	bars,
 	color,
 	className,
@@ -23,7 +23,7 @@ export default function PercentileBars({
 	return (
 		<div
 			className={cn(
-				"flex flex-1 flex-col justify-between gap-6 stats-card sm:gap-0",
+				"flex flex-1 flex-col justify-between gap-6 stats-card bg-gradient-dark sm:gap-0",
 				className
 			)}
 		>
@@ -56,16 +56,16 @@ export function Bar({ bar, color }: BarProps) {
 	return (
 		<div className="space-y-2">
 			<div className="flex justify-between">
-				<p className="font-numeric text-neutral-300">{bar.label}</p>
+				<p className="font-numeric text-neutral-500">{bar.label}</p>
 				<p>{bar.stats}</p>
 			</div>
 
-			<div className="bg-neutral-750 relative h-2 w-full rounded-full">
+			<div className="bg-neutral-800 relative h-2 w-full rounded-full">
 				<div
 					className="h-full rounded-full transition-all duration-1000 ease-in-out"
 					style={{
 						width: animatedWidth,
-						backgroundColor: color ? adjustColorLightness(color, 0.5) : "#fef27a",
+						backgroundColor: color ? adjustColorLightness(color, 0.6, 1.8) : "#fef27a",
 					}}
 				></div>
 			</div>

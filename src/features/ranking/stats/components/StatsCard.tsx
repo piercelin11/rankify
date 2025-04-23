@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/cn";
 import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
 import React, { ReactNode } from "react";
@@ -19,11 +18,11 @@ export default function StatsCard({
 	return (
 		<div
 			className={cn(
-				"stats-card flex flex-1 flex-col items-start gap-10 2xl:gap-20 duration-100"
+				"stats-card bg-gradient-dark flex h-60 flex-col items-start justify-between duration-100 sm:h-72"
 			)}
 			style={{
 				backgroundImage: color
-					? `radial-gradient(ellipse farthest-corner at top left, rgb(9 9 11 / 0.7) 30%, ${adjustColorLightness(color, 0.2)} 70%, ${adjustColorLightness(color, 0.5)} 110%), linear-gradient(to bottom, rgb(9 9 11 / 0.35), rgb(9 9 11 / 1))`
+					? `radial-gradient(ellipse farthest-corner at top left, transparent 30%,${adjustColorLightness(color, 0.1)}80 45%, ${adjustColorLightness(color, 0.2)}E6 70%, ${adjustColorLightness(color, 0.55)} 125%), linear-gradient(to bottom, rgb(9 9 11 / 1), rgb(9 9 11 / 1))`
 					: "",
 			}}
 		>
@@ -34,7 +33,7 @@ export default function StatsCard({
 			>
 				{children}
 			</div>
-			<div className="space-y-2">
+			<div className="mt-auto space-y-2 overflow-hidden">
 				<p className="text-highlight font-numeric">{stats ?? "no data"}</p>
 				<p className="text-description">{subtitle}</p>
 			</div>

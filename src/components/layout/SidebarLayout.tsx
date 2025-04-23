@@ -24,7 +24,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 				</div>
 				{children[0]}
 			</aside>
-			<main className="main-content h-screen overflow-auto scrollbar-hidden lg:pl-[250px] xl:pl-[300px]">
+			<main className="main-content relative h-screen overflow-auto scrollbar-hidden lg:pl-[250px] xl:pl-[300px]">
 				{children[1]}
 			</main>
 		</>

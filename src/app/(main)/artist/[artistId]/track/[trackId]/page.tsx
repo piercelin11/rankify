@@ -12,9 +12,9 @@ import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import { getPrevNextIndex } from "@/lib/utils/helper";
 import TrackRankingLineChart from "@/features/ranking/display/charts/TrackRankingLineChart";
 import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";
-import PercentileBars, {
+import PercentileBarsCard, {
 	BarData,
-} from "@/features/ranking/stats/components/PercentileBars";
+} from "@/features/ranking/stats/components/PercentileBarsCard";
 import StatsCard from "@/features/ranking/stats/components/StatsCard";
 import Scroll from "@/components/layout/Scroll";
 
@@ -104,7 +104,7 @@ export default async function page({
 						{data.icon}
 					</StatsCard>
 				))}
-				<PercentileBars
+				<PercentileBarsCard
 					bars={barData}
 					color={trackData.album?.color}
 					className="hidden sm:flex"
@@ -112,7 +112,7 @@ export default async function page({
 			</div>
 			<div className="sm:hidden">
 				<h3>Track Ranking Record</h3>
-				<PercentileBars bars={barData} color={trackData.album?.color} />
+				<PercentileBarsCard bars={barData} color={trackData.album?.color} />
 			</div>
 
 			<TrackRankingLineChart

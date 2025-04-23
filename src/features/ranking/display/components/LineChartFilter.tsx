@@ -5,6 +5,7 @@ import { cn } from "@/lib/cn";
 import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
 import { ChevronDownIcon, Cross2Icon } from "@radix-ui/react-icons";
 import useLineChartFilter from "../hooks/useLineChartFilter";
+import { useState } from "react";
 
 export type ParentOptionType = {
 	id: string;
@@ -47,7 +48,12 @@ export default function LineChartFilter({
 	return (
 		<div className="relative w-full select-none sm:w-[580px]">
 			<div
-				className="flex justify-between gap-3 rounded-md bg-neutral-900 p-3"
+				className={cn(
+					"group flex justify-between gap-3 rounded-xl border border-neutral-700 bg-neutral-950 p-3 hover:border-neutral-600",
+					{
+						"border-neutral-600": isOpen,
+					}
+				)}
 				onClick={() => setOPen((prev) => !prev)}
 			>
 				<div className="flex gap-2 overflow-auto scrollbar-hidden">
@@ -65,16 +71,19 @@ export default function LineChartFilter({
 					})}
 				</div>
 				<ChevronDownIcon
-					className={cn("self-center text-neutral-400 transition ease-in-out", {
-						"rotate-180 transform text-neutral-600": isOpen,
-					})}
+					className={cn(
+						"self-center text-neutral-500 transition ease-in-out group-hover:text-neutral-400",
+						{
+							"rotate-180 transform text-neutral-400": isOpen,
+						}
+					)}
 					width={18}
 					height={18}
 				/>
 			</div>
 			<div
 				className={cn(
-					"absolute max-h-96 w-full overflow-auto rounded-md bg-neutral-900 opacity-0 transition ease-in-out scrollbar-hidden",
+					"absolute max-h-96 w-full overflow-auto overscroll-contain rounded-md border border-neutral-700 bg-neutral-950 opacity-0 transition ease-in-out scrollbar-hidden",
 					{
 						"translate-y-3 opacity-100": isOpen,
 						"pointer-events-none": !isOpen,
@@ -82,24 +91,30 @@ export default function LineChartFilter({
 				)}
 			>
 				{parentOptions && (
-					<div className="sticky top-0 flex gap-2 overflow-auto bg-neutral-900/90 px-3 py-6 scrollbar-hidden">
-						{parentOptions.map((listItem) => (
-							<AlbumTag
-								key={listItem.id}
-								tag={listItem}
-								onClick={() => handleAlbumFilter(listItem.id)}
-								selectedAlbumId={filteredParentId}
-							/>
-						))}
+					<div className="sticky top-0 space-y-2 border-b border-neutral-900 bg-neutral-950 py-6">
+						<p className="text-caption px-4">Album</p>
+
+						<div className="flex gap-2 overflow-auto px-4 scrollbar-hidden">
+							{parentOptions.map((listItem) => (
+								<AlbumTag
+									key={listItem.id}
+									tag={listItem}
+									onClick={() => handleAlbumFilter(listItem.id)}
+									selectedAlbumId={filteredParentId}
+								/>
+							))}
+						</div>
 					</div>
 				)}
-				{filteredMenuOptions.map((listItem) => (
+				<div className="p-2">
+					{filteredMenuOptions.map((listItem) => (
 						<MenuItem
 							key={listItem.id}
 							tag={listItem}
 							onClick={() => handleMenuItemClick(listItem.id)}
 						/>
 					))}
+				</div>
 			</div>
 		</div>
 	);
@@ -114,23 +129,31 @@ function TrackTag({
 	isDefault?: boolean;
 	onClick?: () => void;
 }) {
+	const [isCrossHover, setCrossHover] = useState(false);
 	return (
 		<div
-			className="flex flex-none flex-grow-0 items-center gap-1 rounded px-2 py-1 text-neutral-100 sm:px-3 sm:py-2"
+			className="text-label flex flex-none flex-grow-0 items-center gap-1 rounded-lg px-2 py-1 sm:px-3 sm:py-2"
 			style={{
-				backgroundColor: adjustColorLightness(tag.color ?? DEFAULT_COLOR, 0.5) + "90",
+				backgroundColor: adjustColorLightness(
+					tag.color ?? DEFAULT_COLOR,
+					isCrossHover ? 0.1 : 0.05
+				),
+				border: `solid 1px ${adjustColorLightness(tag.color ?? DEFAULT_COLOR, 0.7, 2)}`,
+				color: adjustColorLightness(tag.color ?? DEFAULT_COLOR, 0.8, 2),
 			}}
 		>
 			{!isDefault && (
-				<div
+				<button
 					onClick={(e) => {
 						e.stopPropagation();
 						if (onClick) onClick();
 					}}
 					className="-ml-1"
+					onMouseEnter={() => setCrossHover(true)}
+					onMouseLeave={() => setCrossHover(false)}
 				>
 					<Cross2Icon />
-				</div>
+				</button>
 			)}
 			{tag.name}
 		</div>
@@ -146,25 +169,34 @@ function AlbumTag({
 	selectedAlbumId: string | null;
 	onClick: () => void;
 }) {
+	const [isCrossHover, setCrossHover] = useState(false);
+	const isHighlight = selectedAlbumId === tag.id || isCrossHover;
 	return (
-		<div
+		<button
 			className={cn(
-				"flex flex-none flex-grow-0 items-center gap-2 rounded-full px-4 py-2 text-neutral-100",
+				"text-label text-nowrap items-center gap-2 rounded-full px-4 py-2 text-neutral-100",
 				{
-					"bg-neutral-750": selectedAlbumId !== tag.id,
+					"bg-neutral-800": selectedAlbumId !== tag.id,
 				}
 			)}
-			style={
-				selectedAlbumId === tag.id
-					? {
-							backgroundColor: (tag.color ?? DEFAULT_COLOR) + "90",
-						}
-					: undefined
-			}
+			style={{
+				backgroundColor: adjustColorLightness(
+					tag.color ?? DEFAULT_COLOR,
+					isHighlight ? 0.1 : 0
+				),
+				border: `solid 1px ${adjustColorLightness(tag.color ?? DEFAULT_COLOR, isHighlight ? 0.7 : 0.4, 2)}`,
+				color: adjustColorLightness(
+					tag.color ?? DEFAULT_COLOR,
+					isHighlight ? 0.8 : 0.5,
+					2
+				),
+			}}
+			onMouseEnter={() => setCrossHover(true)}
+			onMouseLeave={() => setCrossHover(false)}
 			onClick={onClick}
 		>
 			{tag.name}
-		</div>
+		</button>
 	);
 }
 
@@ -176,12 +208,12 @@ function MenuItem({
 	onClick: () => void;
 }) {
 	return (
-		<div
+		<button
 			key={tag.id}
-			className="rounded-md px-4 py-3 text-neutral-500 hover:bg-neutral-850 hover:text-neutral-100"
+			className="text-label w-full text-left rounded-md px-4 py-2 text-neutral-400 hover:bg-neutral-900 hover:text-neutral-100"
 			onClick={onClick}
 		>
 			{tag.name}
-		</div>
+		</button>
 	);
 }

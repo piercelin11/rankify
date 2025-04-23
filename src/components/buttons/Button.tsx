@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn";
 import { PlusIcon } from "@radix-ui/react-icons";
-import React, { ButtonHTMLAttributes } from "react";
+import React from "react";
 
 export type ButtonProps = {
 	variant: "primary" | "secondary" | "neutral" | "outline" | "ghost" | "menu";
@@ -19,17 +19,17 @@ const styles: Record<string, Record<"default" | "disabled", string>> = {
 		disabled: "bg-neutral-800/80 text-neutral-100",
 	},
 	neutral: {
-		default: "bg-neutral-900 text-neutral-100 hover:bg-neutral-800",
-		disabled: "bg-neutral-900 text-neutral-100",
+		default:
+			"bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100 border border-neutral-800",
+		disabled: "bg-neutral-900 text-neutral-100 border border-neutral-800",
 	},
 	outline: {
 		default:
-			"bg-transparent text-neutral-100 border border-neutral-500 hover:border-neutral-100",
-		disabled: "bg-transparent text-neutral-100 border border-neutral-500",
+			"bg-transparent text-neutral-400 hover:text-neutral-100 border border-neutral-500 hover:border-neutral-100",
+		disabled: "bg-transparent text-neutral-400 border border-neutral-500",
 	},
 	ghost: {
-		default:
-			"bg-transparent text-neutral-500 hover:text-neutral-100",
+		default: "bg-transparent text-neutral-500 hover:text-neutral-100",
 		disabled: "bg-transparent text-neutral-300",
 	},
 	menu: {
@@ -51,12 +51,12 @@ export default function Button({
 	return (
 		<button
 			className={cn(
-				`flex select-none items-center gap-2 px-5 py-3 ${disabled ? styles[variant].disabled : styles[variant].default}`,
+				`text-label flex items-center gap-1 px-6 py-4 ${disabled ? styles[variant].disabled : styles[variant].default}`,
 				className,
 				{
 					"opacity-70": disabled,
 					"rounded-full": rounded,
-					"rounded-md": !rounded,
+					"rounded-xl": !rounded,
 				}
 			)}
 			{...props}

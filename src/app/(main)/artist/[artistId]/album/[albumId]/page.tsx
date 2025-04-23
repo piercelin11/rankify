@@ -12,7 +12,7 @@ import { getPrevNextIndex } from "@/lib/utils/helper";
 import AlbumRankingLineChart from "@/features/ranking/display/charts/AlbumRankingLineChart";
 import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
 import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";
-import PercentileBars, { BarData } from "@/features/ranking/stats/components/PercentileBars";
+import PercentileBarsCard, { BarData } from "@/features/ranking/stats/components/PercentileBarsCard";
 import StatsCard from "@/features/ranking/stats/components/StatsCard";
 
 const iconSize = 22;
@@ -99,7 +99,7 @@ export default async function TrackPage({
 						{data.icon}
 					</StatsCard>
 				))}
-				<PercentileBars
+				<PercentileBarsCard
 					bars={barData}
 					color={albumData.color}
 					className="hidden sm:flex"
@@ -107,7 +107,7 @@ export default async function TrackPage({
 			</div>
 			<div className="sm:hidden">
 				<h3>Track Ranking Record</h3>
-				<PercentileBars bars={barData} color={albumData.color} />
+				<PercentileBarsCard bars={barData} color={albumData.color} />
 			</div>
 
 			<AlbumRankingLineChart

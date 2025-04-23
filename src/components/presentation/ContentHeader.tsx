@@ -36,15 +36,17 @@ export default function ContentHeader({
 				>
 					{children}
 					<div className="flex items-center gap-6">
-						<div className="relative h-[220px] w-[220px] drop-shadow-2xl 2xl:h-[300px] 2xl:w-[300px]">
+						<div className="relative h-[220px] w-[220px] drop-shadow-2xl lg:h-[260px] lg:w-[260px] 2xl:h-[300px] 2xl:w-[300px]">
 							<Image
 								className={cn({
 									"rounded-full": rounded,
 									"rounded-4xl": !rounded,
 								})}
 								fill
+								priority
 								src={data?.img || "/pic/placeholder.jpg"}
 								alt={`${data?.name} profile`}
+								sizes="(min-width: 1536px) 300px, 220px"
 							/>
 						</div>
 						{data && (
@@ -71,7 +73,7 @@ function ContentHeaderInfo({
 	return (
 		<div>
 			{type && <p className="mb-2">{type}</p>}
-			<h1 className="text-display mb-6">{data?.name}</h1>
+			<h1 className="text-display">{data?.name}</h1>
 			<div
 				className={cn("text-description mb-4 flex items-center gap-2", {
 					"text-neutral-100": color,
@@ -90,4 +92,3 @@ function ContentHeaderInfo({
 		</div>
 	);
 }
-

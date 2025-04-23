@@ -4,7 +4,7 @@
 
 @layer components {
 	.text-display {
-		@apply text-4xl font-extrabold leading-loose 2xl:text-6xl;
+		@apply text-4xl font-extrabold leading-snug 2xl:text-6xl 2xl:leading-loose;
 	}
 
 	.text-highlight {
@@ -16,22 +16,25 @@
 	}
 
 	.text-description {
-		@apply text-base leading-relaxed text-neutral-500 font-normal;
+		@apply text-base font-normal leading-relaxed text-neutral-500;
 	}
 
 	.text-caption {
-		@apply text-sm leading-relaxed text-neutral-500 font-normal;
+		@apply text-sm font-normal leading-relaxed text-neutral-600;
+	}
+
+	.text-label {
+		@apply text-sm font-normal leading-relaxed xl:text-base;
 	}
 
 	.stats-card {
-		@apply shadow-card bg-gradient-to-b from-neutral-900/35 to-neutral-950 rounded-5xl p-6 2xl:p-10;
+		@apply rounded-5xl p-6 shadow-card 2xl:p-10;
 	}
 
-	.bg-gradient-transparent-to-solid {
-		@apply bg-gradient-to-b from-neutral-950/35 to-neutral-950;
+	.bg-gradient-dark {
+		@apply bg-gradient-to-b from-transparent to-neutral-950;
 	}
 }
-
 
 :root {
 	font-size: 14px;
@@ -50,19 +53,19 @@ body {
 }
 
 h1 {
-	@apply text-3xl font-bold leading-relaxed mb-4;
+	@apply text-3xl font-bold leading-relaxed;
 }
 
 h2 {
-	@apply text-2xl font-semibold leading-relaxed mb-4;
+	@apply text-2xl font-semibold leading-relaxed;
 }
 
 h3 {
-	@apply text-xl font-semibold leading-relaxed mb-4;
+	@apply text-xl font-semibold leading-relaxed;
 }
 
 h4 {
-	@apply font-medium leading-relaxed mb-4;
+	@apply font-medium leading-relaxed;
 }
 
 p {
@@ -71,6 +74,10 @@ p {
 
 hr {
 	@apply border-neutral-800;
+}
+
+button {
+	@apply select-none;
 }
 
 ::-webkit-scrollbar {

@@ -10,7 +10,8 @@ export function rgbToHex(
 // 調整顏色亮度
 export function adjustColorLightness(
 	hexColor: string,
-	targetLightness: number // 0.0 - 1.0
+	targetLightness: number,
+	saturationFactor: number = 1.0
 ): string {
 	if (
 		typeof hexColor !== "string" ||
@@ -41,12 +42,18 @@ export function adjustColorLightness(
 
 	const lch = colorConvert.lab.lch(lab);
 
+	const originalL = lch[0];
 	const originalC = lch[1];
 	const originalH = lch[2];
 
 	const newL = targetLightness * 100;
 
-	const newC = originalC === 0 ? 0 : originalC;
+	let newC;
+	if (originalC === 0) {
+		newC = 0;
+	} else {
+		newC = originalC * saturationFactor;
+	}
 	const newH = originalH;
 
 	const newLch: [number, number, number] = [newL, newC, newH];

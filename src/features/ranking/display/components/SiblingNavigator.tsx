@@ -16,13 +16,13 @@ export default function SiblingNavigator({
 	return (
 		<div className="mb-30 flex items-center justify-between gap-3">
 			<Link href={`/artist/${artistId}/${type}/${prevData.id}`}>
-				<Button variant="neutral" type="button">
+				<Button variant="outline" type="button">
 					<ChevronLeftIcon className="self-center" width={25} height={25} />
 					<p className="text-left">{prevData.name}</p>
 				</Button>
 			</Link>
 			<Link href={`/artist/${artistId}/${type}/${nextData.id}`}>
-				<Button variant="neutral" type="button">
+				<Button variant="outline" type="button">
 					<p className="text-right">{nextData.name}</p>
 					<ChevronRightIcon className="self-center" width={25} height={25} />
 				</Button>
