@@ -18,7 +18,7 @@ export default function StatsCard({
 	return (
 		<div
 			className={cn(
-				"stats-card bg-gradient-dark flex h-60 flex-col items-start justify-between duration-100 sm:h-72"
+				"stats-card bg-gradient-dark flex h-60 flex-col items-start justify-between duration-100 2xl:h-72"
 			)}
 			style={{
 				backgroundImage: color

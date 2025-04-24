@@ -8,6 +8,7 @@ import Link from "next/link";
 import { PlusIcon } from "@radix-ui/react-icons";
 import { headers } from "next/headers";
 import { getArtistTabOptions } from "@/config/menuData";
+import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
 
 type LayoutProps = {
 	params: Promise<{ artistId: string }>;
@@ -42,7 +43,7 @@ async function Header({ params }: { params: Promise<{ artistId: string }> }) {
 				data={artist}
 				subTitleContent={
 					<p className="text-description">
-						`${artist.spotifyFollowers} followers`
+						{artist.spotifyFollowers} followers
 					</p>
 				}
 				rounded
@@ -59,6 +60,7 @@ async function Header({ params }: { params: Promise<{ artistId: string }> }) {
 					</div>
 				</div>
 			</ContentHeader>
+			<BlurredImageBackground src={artist.img || ""} />
 		</>
 	);
 }

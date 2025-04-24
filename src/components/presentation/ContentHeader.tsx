@@ -36,7 +36,7 @@ export default function ContentHeader({
 				>
 					{children}
 					<div className="flex items-center gap-6">
-						<div className="relative h-[220px] w-[220px] drop-shadow-2xl lg:h-[260px] lg:w-[260px] 2xl:h-[300px] 2xl:w-[300px]">
+						<div className="relative min-h-[220px] min-w-[220px] drop-shadow-2xl lg:min-h-[260px] lg:min-w-[260px] 2xl:min-h-[300px] 2xl:min-w-[300px]">
 							<Image
 								className={cn({
 									"rounded-full": rounded,

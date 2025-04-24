@@ -22,9 +22,9 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
 			<aside
 				className={cn(
-					"w-[260px] fixed z-10 hidden h-screen border-r border-neutral-800 lg:block transition-all ease-in-out duration-200",
+					"sm:w-sidebar-lg fixed z-10 hidden h-screen border-r border-neutral-800 sm:block transition-all ease-in-out duration-200",
 					{
-						"w-[84px]": !isSidebarOpen,
+						"sm:w-sidebar-sm": !isSidebarOpen,
 					}
 				)}
 			>
@@ -32,9 +32,9 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 			</aside>
 			<main
 				className={cn(
-					"main-content pl-[260px] relative h-screen overflow-auto scrollbar-hidden transition-all ease-in-out duration-200",
+					"main-content sm:pl-sidebar-lg pl-0 relative h-screen overflow-auto scrollbar-hidden transition-all ease-in-out duration-200",
 					{
-						"pl-[84px]": !isSidebarOpen,
+						"sm:pl-sidebar-sm": !isSidebarOpen,
 					}
 				)}
 			>
@@ -69,13 +69,13 @@ function MobileSidebarLayout({ children }: { children: ReactNode }) {
 		<>
 			<Button
 				variant="ghost"
-				className="fixed right-4 top-4 lg:hidden"
+				className="fixed z-10 right-4 top-4 sm:hidden"
 				onClick={() => setOpen(true)}
 			>
 				<HamburgerMenuIcon />
 			</Button>
 			{isOpen && (
-				<aside className="fixed z-50 h-screen w-screen bg-neutral-950 pt-10 lg:hidden">
+				<aside className="fixed z-50 h-screen w-screen bg-neutral-950 pt-10 sm:hidden">
 					<Button
 						variant="ghost"
 						className="fixed right-4 top-4"

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { MenuOptionType } from "../components/LineChartFilter";
 
 export default function useLinechartFilter(defaultTag: MenuOptionType) {
-	const [isOpen, setOPen] = useState(false);
+	const [isOpen, setOpen] = useState(false);
 	const [filteredParentId, setFilterParentId] = useState<string | null>(null);
 	const searchParams = useSearchParams();
 	const comparisonQuery = searchParams.getAll("comparison");
@@ -20,7 +20,7 @@ export default function useLinechartFilter(defaultTag: MenuOptionType) {
 		if (comparisonQuery.includes(menuId)) return null;
 		if (menuId === defaultTag.id) return null;
 		params.append("comparison", menuId);
-		setOPen(false);
+		setOpen(false);
 		window.history.replaceState(null, "", `?${params.toString()}`);
 	}
 
@@ -35,7 +35,7 @@ export default function useLinechartFilter(defaultTag: MenuOptionType) {
 	}
 
 	return {
-		setOPen,
+		setOpen,
 		isOpen,
 		comparisonQuery,
 		filteredParentId,

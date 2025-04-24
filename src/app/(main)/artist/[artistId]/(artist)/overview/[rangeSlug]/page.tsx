@@ -33,7 +33,7 @@ export default async function page({
 	const dropdownOptions = getOverviewDropdownData(artistId);
 	const rankingSessions = await getRankingSession({ artistId, userId });
 
-	const dropdownDefaultValue = rangeSlug.replace("-", " ");
+	const dropdownDefaultValue = rangeSlug.replaceAll("-", " ");
 
 	return (
 		<div className="space-y-16">

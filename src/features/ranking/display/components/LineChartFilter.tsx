@@ -3,9 +3,13 @@
 import { DEFAULT_COLOR } from "@/config/variables";
 import { cn } from "@/lib/cn";
 import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
-import { ChevronDownIcon, Cross2Icon } from "@radix-ui/react-icons";
+import { Cross2Icon } from "@radix-ui/react-icons";
 import useLineChartFilter from "../hooks/useLineChartFilter";
 import { useState } from "react";
+import DropdownContainer from "@/components/menu/DropdownContainer";
+import DropdownTrigger from "@/components/menu/DropdownTrigger";
+import DropdownContent from "@/components/menu/DropdownContent";
+import DropdownItem from "@/components/menu/DropdownItem";
 
 export type ParentOptionType = {
 	id: string;
@@ -29,7 +33,7 @@ export default function LineChartFilter({
 	parentOptions,
 }: LineChartFilterProps) {
 	const {
-		setOPen,
+		setOpen,
 		isOpen,
 		comparisonQuery,
 		filteredParentId,
@@ -46,15 +50,10 @@ export default function LineChartFilter({
 		: menuOptions;
 
 	return (
-		<div className="relative w-full select-none sm:w-[580px]">
-			<div
-				className={cn(
-					"group flex justify-between gap-3 rounded-xl border border-neutral-700 bg-neutral-950 p-3 hover:border-neutral-600",
-					{
-						"border-neutral-600": isOpen,
-					}
-				)}
-				onClick={() => setOPen((prev) => !prev)}
+		<DropdownContainer width={580}>
+			<DropdownTrigger
+				toggleDropdown={() => setOpen((prev) => !prev)}
+				isDropdownOpen={isOpen}
 			>
 				<div className="flex gap-2 overflow-auto scrollbar-hidden">
 					<TrackTag tag={defaultTag} isDefault={true} />
@@ -70,26 +69,8 @@ export default function LineChartFilter({
 						);
 					})}
 				</div>
-				<ChevronDownIcon
-					className={cn(
-						"self-center text-neutral-500 transition ease-in-out group-hover:text-neutral-400",
-						{
-							"rotate-180 transform text-neutral-400": isOpen,
-						}
-					)}
-					width={18}
-					height={18}
-				/>
-			</div>
-			<div
-				className={cn(
-					"absolute max-h-96 w-full overflow-auto overscroll-contain rounded-xl border border-neutral-700 bg-neutral-950 opacity-0 transition ease-in-out scrollbar-hidden",
-					{
-						"translate-y-3 opacity-100": isOpen,
-						"pointer-events-none": !isOpen,
-					}
-				)}
-			>
+			</DropdownTrigger>
+			<DropdownContent isDropdownOpen={isOpen}>
 				{parentOptions && (
 					<div className="sticky top-0 space-y-2 border-b border-neutral-900 bg-neutral-950 py-6">
 						<p className="text-caption px-4">Album</p>
@@ -108,15 +89,16 @@ export default function LineChartFilter({
 				)}
 				<div className="p-2">
 					{filteredMenuOptions.map((listItem) => (
-						<MenuItem
+						<DropdownItem
 							key={listItem.id}
-							tag={listItem}
 							onClick={() => handleMenuItemClick(listItem.id)}
-						/>
+						>
+							{listItem.name}
+						</DropdownItem>
 					))}
 				</div>
-			</div>
-		</div>
+			</DropdownContent>
+		</DropdownContainer>
 	);
 }
 
@@ -174,7 +156,7 @@ function AlbumTag({
 	return (
 		<button
 			className={cn(
-				"text-label text-nowrap items-center gap-2 rounded-full px-4 py-2 text-neutral-100",
+				"items-center gap-2 text-nowrap rounded-full px-4 py-2 text-neutral-100",
 				{
 					"bg-neutral-800": selectedAlbumId !== tag.id,
 				}
@@ -195,25 +177,7 @@ function AlbumTag({
 			onMouseLeave={() => setCrossHover(false)}
 			onClick={onClick}
 		>
-			{tag.name}
-		</button>
-	);
-}
-
-function MenuItem({
-	tag,
-	onClick,
-}: {
-	tag: MenuOptionType;
-	onClick: () => void;
-}) {
-	return (
-		<button
-			key={tag.id}
-			className="text-label w-full text-left rounded-md px-4 py-2 text-neutral-400 hover:bg-neutral-900 hover:text-neutral-100"
-			onClick={onClick}
-		>
-			{tag.name}
+			<p className="text-label">{tag.name}</p>
 		</button>
 	);
 }

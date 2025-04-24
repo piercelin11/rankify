@@ -60,7 +60,7 @@ export function RankingListItem<T extends RankingListDataTypeExtend>({
 				</p>
 				<div className="flex items-center gap-3 overflow-hidden">
 					{data.rankChange !== undefined && <RankChangeIcon data={data} />}
-					<div className="relative h-16 w-16">
+					<div className="relative min-h-16 min-w-16">
 						<Image
 							className="rounded"
 							fill
