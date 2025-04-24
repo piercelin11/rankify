@@ -12,7 +12,7 @@ type TrackRankingLineChartProps = {
 
 export default function TrackRankingLineChart({defaultTrackData, allTrackData, menuOptions, parentOptions}: TrackRankingLineChartProps) {
 	return (
-		<div className="stats-card bg-gradient-to-b from-neutral-900/70 to-transparent space-y-8">
+		<div className="stats-card bg-glow space-y-8">
 			<div className="flex flex-col justify-between sm:flex-row sm:items-center">
 				<h3>Track Ranking Trends</h3>
 				<LineChartFilter

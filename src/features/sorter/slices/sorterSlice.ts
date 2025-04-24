@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { RankingResultData } from "../components/SortingStage";
 
 export type FilterType = { albums: string[]; tracks: string[] };
 

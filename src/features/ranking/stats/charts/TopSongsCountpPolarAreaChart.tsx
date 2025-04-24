@@ -32,7 +32,7 @@ export default function TopSongsCountpPolarAreaChart({
 	const mainDataKey = view === "50" ? "top50PercentCount" : "top25PercentCount";
 
 	return (
-		<div className="stats-card border border-neutral-800 bg-gradient-to-b from-neutral-900/45 to-neutral-950">
+		<div className="stats-card bg-glow">
 			<div className="md:hidden">
 				<DropdownMenu
 					options={tabData}

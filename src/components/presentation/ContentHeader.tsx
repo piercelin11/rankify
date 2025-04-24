@@ -37,17 +37,19 @@ export default function ContentHeader({
 					{children}
 					<div className="flex items-center gap-6">
 						<div className="relative min-h-[220px] min-w-[220px] drop-shadow-2xl lg:min-h-[260px] lg:min-w-[260px] 2xl:min-h-[300px] 2xl:min-w-[300px]">
-							<Image
-								className={cn({
-									"rounded-full": rounded,
-									"rounded-4xl": !rounded,
-								})}
-								fill
-								priority
-								src={data?.img || "/pic/placeholder.jpg"}
-								alt={`${data?.name} profile`}
-								sizes="(min-width: 1536px) 300px, 220px"
-							/>
+							{data?.img && (
+								<Image
+									className={cn({
+										"rounded-full": rounded,
+										"rounded-4xl": !rounded,
+									})}
+									fill
+									priority
+									src={data?.img}
+									alt={`${data?.name} profile`}
+									sizes="(min-width: 1536px) 300px, 220px"
+								/>
+							)}
 						</div>
 						{data && (
 							<ContentHeaderInfo

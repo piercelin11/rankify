@@ -52,7 +52,7 @@ export default {
 				spotify: "#1ed760",
 			},
 			boxShadow: {
-				card: `inset -1px 1px 0 0 ${colors.neutral[600]},inset 0px -1px 0 0 ${colors.neutral[800]}`,
+				card: `inset -1px 1px 0 0 ${colors.neutral[600]},inset 1px -1px 0 0 ${colors.neutral[600]}40`,
 				button: `inset -1px 1px 2px 0 ${colors.neutral[500]},inset 1.5px -1.5px 2px 0 ${colors.neutral[800]}`,
 			},
 			borderRadius: {
@@ -64,6 +64,9 @@ export default {
 				"sidebar-lg": "260px",
 				"sidebar-xl": "300px",
 			},
+			backgroundImage: {
+				"glow": `radial-gradient(ellipse farthest-side at top, ${colors.neutral[800]}40, ${colors.neutral[950]}CC)`
+			}
 		},
 	},
 	plugins: [

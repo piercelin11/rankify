@@ -1,9 +1,5 @@
 "use client";
-import React, {
-	useState,
-	useEffect,
-	useCallback,
-} from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeftIcon } from "@radix-ui/react-icons";
 import { RankingDraftData, TrackData } from "@/types/data";
@@ -11,9 +7,7 @@ import { cn } from "@/lib/cn";
 import deleteRankingDraft from "../actions/deleteRankingDraft";
 import ComfirmationModal from "@/components/modals/ComfirmationModal";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import {
-	setPercentage
-} from "@/features/sorter/slices/sorterSlice";
+import { setPercentage } from "@/features/sorter/slices/sorterSlice";
 import Button from "@/components/buttons/Button";
 import { CurrentStage } from "./SorterPage";
 import useSorter from "@/features/sorter/hooks/useSorter";
@@ -219,9 +213,9 @@ function TrackBtn({ isPressed, onClick, data }: TrackBtnProps) {
 	return (
 		<button
 			className={cn(
-				"col-span-2 row-span-1 flex cursor-pointer gap-2 rounded-xl bg-neutral-900 p-2 hover:bg-neutral-800 sm:col-span-1 sm:row-span-2 sm:inline lg:p-5",
+				"col-span-2 row-span-1 flex cursor-pointer gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-2 hover:bg-neutral-800 sm:col-span-1 sm:row-span-2 sm:inline lg:p-5",
 				{
-					"bg-neutral-750": isPressed,
+					"bg-neutral-800": isPressed,
 				}
 			)}
 			onClick={onClick}
@@ -261,9 +255,9 @@ function EqualBtn({ isPressed, onClick, children }: EqualBtnProps) {
 	return (
 		<button
 			className={cn(
-				"col-span-1 row-span-1 flex cursor-pointer flex-col items-center justify-center rounded-xl bg-neutral-900 p-2 hover:bg-neutral-800 lg:p-5",
+				"col-span-1 row-span-1 flex cursor-pointer flex-col items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900 p-2 hover:bg-neutral-800 lg:p-5",
 				{
-					"bg-neutral-750": isPressed,
+					"bg-neutral-800": isPressed,
 				}
 			)}
 			onClick={onClick}

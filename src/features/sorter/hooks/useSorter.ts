@@ -1,4 +1,7 @@
-import { setPercentage, setSaveStatus } from "@/features/sorter/slices/sorterSlice";
+import {
+	setPercentage,
+	setSaveStatus,
+} from "@/features/sorter/slices/sorterSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { RankingDraftData, TrackData } from "@/types/data";
 import React, { startTransition, useEffect, useRef, useState } from "react";
@@ -25,19 +28,23 @@ type HistoryState = {
 };
 
 type UseSorterProps = {
-    tracks: TrackData[];
-    draft: RankingDraftData | null;
-    setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>
+	tracks: TrackData[];
+	draft: RankingDraftData | null;
+	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>;
 };
 
 const autoSaveCounter = 15;
 
-export default function useSorter({tracks, draft, setCurrentStage}: UseSorterProps) {
+export default function useSorter({
+	tracks,
+	draft,
+	setCurrentStage,
+}: UseSorterProps) {
 	const saveStatus = useAppSelector((state) => state.sorter.saveStatus);
 	const dispatch = useAppDispatch();
 
-    const artistId = tracks[0].artistId;
-    
+	const artistId = tracks[0].artistId;
+
 	const namMember = useRef<string[]>(tracks.map((item) => item.name));
 
 	const [leftField, setLeftField] = useState<TrackData | undefined>();
@@ -223,6 +230,7 @@ export default function useSorter({tracks, draft, setCurrentStage}: UseSorterPro
 		if (cmp1.current < 0) {
 			percent.current = 100;
 			dispatch(setPercentage(100));
+			dispatch(setSaveStatus("idle"));
 			showResult();
 			finishFlag.current = 1;
 		} else {
@@ -233,21 +241,25 @@ export default function useSorter({tracks, draft, setCurrentStage}: UseSorterPro
 
 	//將歌名顯示於比較兩首歌曲的表格中
 	function showImage() {
-		const percentage = Math.floor(
-			(finishSize.current * 100) / totalSize.current
-		);
-		const leftField =
-			"" + toNameFace(lstMember.current[cmp1.current][head1.current]);
-		const rightField =
-			"" + toNameFace(lstMember.current[cmp2.current][head2.current]);
+		try {
+			const percentage = Math.floor(
+				(finishSize.current * 100) / totalSize.current
+			);
+			const leftField =
+				"" + toNameFace(lstMember.current[cmp1.current][head1.current]);
+			const rightField =
+				"" + toNameFace(lstMember.current[cmp2.current][head2.current]);
 
-		const leftFieldData = tracks.find((item) => item.name === leftField);
-		const rightFieldData = tracks.find((item) => item.name === rightField);
-		setLeftField(leftFieldData);
-		setRightField(rightFieldData);
+			const leftFieldData = tracks.find((item) => item.name === leftField);
+			const rightFieldData = tracks.find((item) => item.name === rightField);
+			setLeftField(leftFieldData);
+			setRightField(rightFieldData);
 
-		percent.current = percentage;
-		dispatch(setPercentage(percentage));
+			percent.current = percentage;
+			dispatch(setPercentage(percentage));
+		} catch (error) {
+			console.error("Error showing image in sorting stage:", error);
+		}
 	}
 
 	//將排序數字轉換成歌名
@@ -374,8 +386,17 @@ export default function useSorter({tracks, draft, setCurrentStage}: UseSorterPro
 			percent: percent.current,
 		};
 
-		const result = await saveDraftResult(artistId, resultArray, JSON.stringify(currentState));
-		if(result) setCurrentStage("result");
+		try {
+			await saveDraftResult(
+				artistId,
+				resultArray,
+				JSON.stringify(currentState)
+			);
+		} catch (err) {
+			console.error("Error saving sorter result:", err);
+		} finally {
+			setCurrentStage("result");
+		}
 	}
 
 	//處理自動儲存的部分
@@ -421,5 +442,12 @@ export default function useSorter({tracks, draft, setCurrentStage}: UseSorterPro
 		}
 	}, [draft]);
 
-    return {leftField, rightField, finishFlag, handleSave, restorePreviousState, sortList}
+	return {
+		leftField,
+		rightField,
+		finishFlag,
+		handleSave,
+		restorePreviousState,
+		sortList,
+	};
 }

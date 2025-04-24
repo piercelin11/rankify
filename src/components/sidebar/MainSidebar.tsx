@@ -52,9 +52,6 @@ export default function MainSidebar({
 				{artistData.map((artist) => (
 					<SidebarArtistItem key={artist.id} artistData={artist} />
 				))}
-                {artistData.map((artist) => (
-					<SidebarArtistItem key={artist.id} artistData={artist} />
-				))}
 			</div>
             <UserProfile userSession={userSession} />
 		</div>

@@ -25,9 +25,11 @@ type ResultStageProps = {
 	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>;
 };
 
-export default function ResultStage({ draft }: ResultStageProps) {
+export default function ResultStage({
+	draft,
+}: ResultStageProps) {
 	if (!draft.result) notFound();
-	const result = draft.result;
+	const result = draft.result!;
 	const dispatch = useAppDispatch();
 
 	const [isCancelOpen, setCancelOpen] = useState(false);

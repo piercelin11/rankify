@@ -2,9 +2,8 @@ import getTracksByArtist from "@/lib/database/data/getTracksByArtist";
 import getRankingDraft from "@/lib/database/user/getRankingDraft";
 import React from "react";
 import { getUserSession } from "@/../auth";
-import SorterStage from "@/components/sorter/SortingStage";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
-import SorterPage from "@/components/sorter/SorterPage";
+import SorterPage from "@/features/sorter/components/SorterPage";
 
 export default async function page({
 	params,

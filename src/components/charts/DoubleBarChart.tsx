@@ -29,18 +29,18 @@ const options = {
 	scales: {
 		y: {
 			grid: {
-				color: "#111111",
+				color: "#27272a80",
 			},
 			border: {
-				color: "#111111",
+				color: "#27272a80",
 			},
 		},
 		x: {
 			border: {
-				color: "#111111",
+				color: "#27272a80",
 			},
 			grid: {
-				color: "#111111",
+				color: "#27272a80",
 			},
 		},
 	},
@@ -83,10 +83,10 @@ export default function DoubleBarChart({
 				borderColor: DEFAULT_COLOR + "BF",
 				backgroundColor: DEFAULT_COLOR + "BF",
 				hoverBackgroundColor: color.map(
-					(item) => adjustColorLightness(item!, 0.5) + "99"
+					(item) => adjustColorLightness(item!, 0.5, 1.5) + "99"
 				),
 				hoverBorderColor: color.map(
-					(item) => adjustColorLightness(item!, 0.5) + "CC"
+					(item) => adjustColorLightness(item!, 0.5, 1.5)
 				),
 			},
 			{
@@ -96,10 +96,10 @@ export default function DoubleBarChart({
 				borderColor: "#464748BF",
 				backgroundColor: "#464748BF",
 				hoverBackgroundColor: color.map(
-					(item) => adjustColorLightness(item!, 0.5) + "1A"
+					(item) => adjustColorLightness(item!, 0.5, 1.5) + "1A"
 				),
 				hoverBorderColor: color.map(
-					(item) => adjustColorLightness(item!, 0.5) + "CC"
+					(item) => adjustColorLightness(item!, 0.5, 1.5)
 				),
 			},
 		],

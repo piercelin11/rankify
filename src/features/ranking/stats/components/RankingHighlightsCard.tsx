@@ -77,7 +77,7 @@ function RankingHighlightsCard({
 		<>
 			{info ? (
 				<div
-					className="flex aspect-square rounded-xl border border-neutral-700 bg-[length:100%] bg-center bg-no-repeat p-4 transition-all duration-500 ease-in-out hover:bg-[length:110%] sm:aspect-video md:aspect-auto 2xl:p-8"
+					className="flex aspect-square rounded-2xl border border-neutral-700 bg-[length:100%] bg-center bg-no-repeat p-4 transition-all duration-500 ease-in-out hover:bg-[length:110%] sm:aspect-video md:aspect-auto 2xl:p-8"
 					style={{
 						backgroundImage: `linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8)), url("${info.img || "/pic/placeholder.jpg"}")`,
 					}}
@@ -106,7 +106,7 @@ function RankingHighlightsCard({
 					</div>
 				</div>
 			) : (
-				<div className="bg-neutral-900">
+				<div className="bg-neutral-900 rounded-2xl">
 					<NoData />
 				</div>
 			)}

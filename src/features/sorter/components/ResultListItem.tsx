@@ -15,7 +15,7 @@ export default function ResultListItem({
 }: ResultListItemProps) {
 	return (
 		<div
-			className={cn("grid cursor-pointer select-none grid-cols-[25px,_70px,_1fr] items-center gap-3 rounded border-b border-neutral-850 px-6 py-3 hover:bg-neutral-900", className)}
+			className={cn("grid cursor-pointer select-none grid-cols-[25px,_70px,_1fr] items-center gap-3 rounded border-b border-neutral-800 px-6 py-3 hover:bg-neutral-900", className)}
 			{...props}
 		>
 			<p className="mr-2 justify-self-end font-serif text-lg font-medium text-neutral-500">

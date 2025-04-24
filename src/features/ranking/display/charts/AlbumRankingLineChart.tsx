@@ -29,7 +29,7 @@ export default function AlbumRankingLineChart({
 	];
 
 	return (
-		<div className="stats-card bg-gradient-to-b from-neutral-900/50 to-transparent space-y-8">
+		<div className="stats-card bg-glow space-y-8">
 			<div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
 				<Tabs
 					options={tabOptions}

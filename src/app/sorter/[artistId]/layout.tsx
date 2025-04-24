@@ -1,4 +1,5 @@
-import SorterHeader from "@/components/sorter/SorterHeader";
+
+import SorterHeader from "@/features/sorter/components/SorterHeader";
 import getArtistById from "@/lib/database/data/getArtistById";
 import { notFound } from "next/navigation";
 import React, { ReactNode } from "react";

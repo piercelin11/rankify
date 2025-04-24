@@ -23,26 +23,31 @@ export default function PercentileBarsCard({
 	return (
 		<div
 			className={cn(
-				"flex flex-1 flex-col justify-between gap-6 stats-card bg-gradient-dark sm:gap-0",
+				"stats-card bg-gradient-dark flex flex-1 flex-col justify-between gap-6 sm:gap-0",
 				`${className} py-10`
 			)}
 		>
 			{bars.map((bar) => (
-				<Bar key={bar.label} bar={bar} color={color} />
+				<div key={bar.label} className="space-y-2">
+					<div className="flex justify-between">
+						<p className="font-numeric text-neutral-400">{bar.label}</p>
+						<p className="font-numeric font-bold">{bar.stats}</p>
+					</div>
+					<PercentileBar width={bar.width} color={color} />
+				</div>
 			))}
 		</div>
 	);
 }
 
-type BarProps = {
-	bar: BarData;
+type PercentileBarProps = {
+	width: number;
 	color?: string | null;
 };
 
-export function Bar({ bar, color }: BarProps) {
+export function PercentileBar({ width, color }: PercentileBarProps) {
 	const [animatedWidth, setAnimatedWidth] = useState("0%");
-	const targetWidth =
-		bar.width <= 1 ? bar.width * 100 : bar.width <= 100 ? bar.width : 100;
+	const targetWidth = width <= 1 ? width * 100 : width <= 100 ? width : 100;
 
 	useEffect(() => {
 		const widthPercentage = `${targetWidth}%`;
@@ -54,21 +59,16 @@ export function Bar({ bar, color }: BarProps) {
 	}, [targetWidth]);
 
 	return (
-		<div className="space-y-2">
-			<div className="flex justify-between">
-				<p className="font-numeric text-neutral-400">{bar.label}</p>
-				<p className="font-numeric font-bold">{bar.stats}</p>
-			</div>
-
-			<div className="bg-neutral-800 relative h-2 w-full rounded-full">
-				<div
-					className="h-full rounded-full transition-all duration-1000 ease-in-out"
-					style={{
-						width: animatedWidth,
-						background: color ? `linear-gradient(to right, ${adjustColorLightness(color, 0.45, 1.8)}, ${adjustColorLightness(color, 0.7, 1.8)})` : "#fef27a",
-					}}
-				></div>
-			</div>
+		<div className="relative h-2 w-full rounded-full bg-neutral-800">
+			<div
+				className="h-full rounded-full transition-all duration-1000 ease-in-out"
+				style={{
+					width: animatedWidth,
+					background: color
+						? `linear-gradient(to right, ${adjustColorLightness(color, 0.45, 1.8)}, ${adjustColorLightness(color, 0.7, 1.8)})`
+						: "#fef27a",
+				}}
+			></div>
 		</div>
 	);
 }
