@@ -4,8 +4,6 @@ import getArtistById from "@/lib/database/data/getArtistById";
 import { notFound } from "next/navigation";
 import { ReactNode, Suspense } from "react";
 import Tabs from "@/components/navigation/Tabs";
-import Link from "next/link";
-import { PlusIcon } from "@radix-ui/react-icons";
 import { headers } from "next/headers";
 import { getArtistTabOptions } from "@/config/menuData";
 import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
@@ -35,6 +33,8 @@ async function Header({ params }: { params: Promise<{ artistId: string }> }) {
 	const pathname = (await headerList).get("x-current-path");
 	const activePathname = pathname?.split("/")[3];
 
+	const isRankingPage = pathname?.includes("ranking");
+
 	if (!artist) notFound();
 
 	return (
@@ -50,13 +50,8 @@ async function Header({ params }: { params: Promise<{ artistId: string }> }) {
 				type="Artist"
 			>
 				<div className="flex">
-					<div className="ml-auto flex gap-4">
+					<div className="ml-auto">
 						<Tabs activeId={activePathname} options={tabOptions} />
-						<Link href={`/sorter/${artistId}`}>
-							<div className="aspect-square rounded-full bg-primary-500 p-4 text-neutral-950 hover:bg-neutral-100">
-								<PlusIcon width={16} height={16} />
-							</div>
-						</Link>
 					</div>
 				</div>
 			</ContentHeader>

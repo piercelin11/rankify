@@ -58,7 +58,7 @@ export default function Tabs({ options, activeId, color }: TabsProps) {
 	useEffect(() => {
 		const recalculateIndicator = throttle(() => {
 			const activeTabRef = tabRefs.current.get(activeId || "");
-			console.log("recalculateIndicator")
+			console.log("recalculateIndicator");
 			if (activeTabRef) {
 				setIndicatorStyle({
 					left: activeTabRef.offsetLeft,
@@ -74,32 +74,36 @@ export default function Tabs({ options, activeId, color }: TabsProps) {
 	}, [activeId]);
 
 	return (
-		<div className="relative flex w-max select-none rounded-lg border border-neutral-800">
-			{options.map((option) => (
-				<TabItem
-					key={option.id}
-					option={option}
-					isActive={
-						pendingActiveId
-							? option.id === pendingActiveId
-							: option.id === activeId
-					}
-					ref={(el) => {
-						if (el) tabRefs.current.set(option.id, el);
-						else tabRefs.current.delete(option.id);
-					}}
-					onActiveId={() => handlePendingActiveId(option)}
-				/>
-			))}
-			{indicatorStyle && (
-				<div
-					className="absolute h-full w-full rounded-md bg-primary-500 transition-all duration-200 ease-in-out"
-					style={{
-						...indicatorStyle,
-						backgroundColor: color ? adjustColorLightness(color, 0.5) : DEFAULT_COLOR,
-					}}
-				/>
-			)}
+		<div className="w-max select-none rounded-lg border border-neutral-600/60 bg-neutral-900/30 p-1">
+			<div className="relative flex">
+				{options.map((option) => (
+					<TabItem
+						key={option.id}
+						option={option}
+						isActive={
+							pendingActiveId
+								? option.id === pendingActiveId
+								: option.id === activeId
+						}
+						ref={(el) => {
+							if (el) tabRefs.current.set(option.id, el);
+							else tabRefs.current.delete(option.id);
+						}}
+						onActiveId={() => handlePendingActiveId(option)}
+					/>
+				))}
+				{indicatorStyle && (
+					<div
+						className="absolute h-full w-full rounded-md bg-primary-500 transition-all duration-200 ease-in-out"
+						style={{
+							...indicatorStyle,
+							backgroundColor: color
+								? adjustColorLightness(color, 0.5)
+								: DEFAULT_COLOR,
+						}}
+					/>
+				)}
+			</div>
 		</div>
 	);
 }
@@ -120,7 +124,7 @@ const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(
 				>
 					<button
 						className={cn(
-							"z-10 h-full justify-self-center rounded-lg px-3 py-2 text-neutral-600 xl:px-4 xl:py-3",
+							"z-10 h-full justify-self-center rounded-lg px-3 py-2 text-neutral-400 xl:px-4 xl:py-3",
 							{
 								"text-neutral-950": isActive,
 							}
@@ -136,7 +140,7 @@ const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(
 			return (
 				<button
 					className={cn(
-						"z-10 h-full justify-self-center rounded-lg px-3 py-2 text-neutral-600 xl:px-4 xl:py-3",
+						"z-10 h-full justify-self-center rounded-lg px-3 py-2 text-neutral-400 xl:px-4 xl:py-3",
 						{
 							"text-neutral-950": isActive,
 						}

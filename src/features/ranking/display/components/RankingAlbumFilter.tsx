@@ -2,7 +2,10 @@
 import React, { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AlbumData } from "@/types/data";
-import { DropdownList, DropdownSelect } from "@/components/menu/DropdownMenu";
+import DropdownContainer from "@/components/menu/DropdownContainer";
+import DropdownTrigger from "@/components/menu/DropdownTrigger";
+import DropdownContent from "@/components/menu/DropdownContent";
+import DropdownItem from "@/components/menu/DropdownItem";
 
 type RankingAlbumFilterProps = {
 	menuData: AlbumData[];
@@ -26,27 +29,26 @@ export default function RankingAlbumFilter({
 	}
 
 	return (
-		<div className="relative select-none w-full sm:w-[300px]">
-			<DropdownSelect isOpen={isOpen} setOpen={setOpen}>
+		<DropdownContainer width={300}>
+			<DropdownTrigger
+				toggleDropdown={() => setOpen((prev) => !prev)}
+				isDropdownOpen={isOpen}
+			>
 				{menuData.find((data) => data.id === albumQuery)?.name ?? "Select..."}
-			</DropdownSelect>
-			<DropdownList isOpen={isOpen}>
-				<div
-					className="rounded-md px-4 py-3 text-neutral-500 hover:bg-neutral-850 hover:text-neutral-100"
-					onClick={() => handleMenuItemClick(null)}
-				>
+			</DropdownTrigger>
+			<DropdownContent isDropdownOpen={isOpen}>
+				<DropdownItem onClick={() => handleMenuItemClick(null)}>
 					Select All
-				</div>
+				</DropdownItem>
 				{menuData.map((album) => (
-					<div
+					<DropdownItem
 						key={album.id}
-						className="rounded-md px-4 py-3 text-neutral-500 hover:bg-neutral-850 hover:text-neutral-100"
 						onClick={() => handleMenuItemClick(album.id)}
 					>
 						{album.name}
-					</div>
+					</DropdownItem>
 				))}
-			</DropdownList>
-		</div>
+			</DropdownContent>
+		</DropdownContainer>
 	);
 }

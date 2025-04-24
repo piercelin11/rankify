@@ -30,7 +30,7 @@ export default async function AlbumOverviewPointsSection({
 	});
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6 stats-card bg-gradient-to-b from-neutral-950/40 to-neutral-950">
 			<h3>Album Points</h3>
 			<div className="p-5">
 				<DoubleBarChart

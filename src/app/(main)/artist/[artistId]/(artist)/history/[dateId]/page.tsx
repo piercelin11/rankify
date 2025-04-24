@@ -9,6 +9,8 @@ import { notFound } from "next/navigation";
 import AlbumHistoryStatsSection from "@/features/ranking/stats/components/AlbumHistoryStatsSection";
 import DropdownMenu from "@/components/menu/DropdownMenu";
 import AlbumHistoryPointsSection from "@/features/ranking/stats/components/AlbumHistoryPointsSection";
+import Link from "next/link";
+import { PlusIcon } from "@radix-ui/react-icons";
 
 export default async function page({
 	params,
@@ -34,10 +36,17 @@ export default async function page({
 	return (
 		<div className="space-y-16">
 			<Suspense fallback={<LoadingAnimation />}>
-				<DropdownMenu
-					options={dropdownOptions}
-					defaultValue={dateToDashFormat(currentDate.date)}
-				/>
+				<div className="flex gap-4">
+					<DropdownMenu
+						options={dropdownOptions}
+						defaultValue={dateToDashFormat(currentDate.date)}
+					/>
+					<Link href={`/sorter/${artistId}`}>
+						<div className="aspect-square rounded-full bg-primary-500 p-4 text-neutral-950 hover:bg-neutral-100">
+							<PlusIcon width={20} height={20} />
+						</div>
+					</Link>
+				</div>
 
 				{rankingSessions.length !== 0 ? (
 					<>

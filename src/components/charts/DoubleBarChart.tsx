@@ -13,6 +13,7 @@ import {
 import { Bar } from "react-chartjs-2";
 import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
 import { toAcronym } from "@/lib/utils/helper";
+import { DEFAULT_COLOR } from "@/config/variables";
 
 ChartJS.register(
 	CategoryScale,
@@ -24,6 +25,7 @@ ChartJS.register(
 );
 
 const options = {
+	responsive: true,
 	scales: {
 		y: {
 			grid: {
@@ -44,7 +46,6 @@ const options = {
 	},
 	barPercentage: 0.7,
 	categoryPercentage: 0.6,
-	responsive: true,
 	plugins: {
 		tooltip: {
 			padding: 18,
@@ -79,8 +80,8 @@ export default function DoubleBarChart({
 				label: "points",
 				data: mainData,
 				borderWidth: 1.5,
-				borderColor: "#FEF27ABF",
-				backgroundColor: "#FEF27ABF",
+				borderColor: DEFAULT_COLOR + "BF",
+				backgroundColor: DEFAULT_COLOR + "BF",
 				hoverBackgroundColor: color.map(
 					(item) => adjustColorLightness(item!, 0.5) + "99"
 				),

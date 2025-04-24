@@ -20,7 +20,7 @@ export default {
 		},
 		extend: {
 			colors: {
-				primary: {
+				/* primary: {
 					50: "#FFFAE0",
 					100: "#FFF5C1",
 					200: "#FFF3AA",
@@ -32,6 +32,18 @@ export default {
 					800: "#B3A13D",
 					900: "#998629",
 					950: "#7F7320",
+				} */
+				primary: {
+					50: "#F2FFE1",
+					100: "#E0FFBF",
+					200: "#C9FF94",
+					300: "#A9F56C",
+					400: "#83E845",
+					500: "#C3F75F",
+					600: "#9FC040",
+					700: "#7C972E",
+					800: "#5E7022",
+					900: "#3B4511",
 				},
 				neutral: colors.zinc,
 				success: colors.green,
@@ -50,8 +62,8 @@ export default {
 			spacing: {
 				"sidebar-sm": "88px",
 				"sidebar-lg": "260px",
-				"sidebar-xl": "300px"
-			}
+				"sidebar-xl": "300px",
+			},
 		},
 	},
 	plugins: [

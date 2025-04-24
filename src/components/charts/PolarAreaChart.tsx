@@ -62,16 +62,16 @@ function PolarAreaChart({
 				label: "label",
 				data: mainData,
 				backgroundColor: color.map(
-					(item) => adjustColorLightness(item!, 0.5) + "11"
+					(item) => adjustColorLightness(item!, 0.5, 1.5) + "11"
 				),
 				borderColor: color.map(
-					(item) => adjustColorLightness(item!, 0.5) + "CC"
+					(item) => adjustColorLightness(item!, 0.5, 1.5) + "CC"
 				),
 				hoverBackgroundColor: color.map(
-					(item) => adjustColorLightness(item!, 0.5) + "66"
+					(item) => adjustColorLightness(item!, 0.5, 1.5) + "66"
 				),
 				hoverBorderColor: color.map(
-					(item) => adjustColorLightness(item!, 0.5) + "99"
+					(item) => adjustColorLightness(item!, 0.5, 1.5) + "99"
 				),
 				borderWidth: 1.5,
 			},

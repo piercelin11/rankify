@@ -2,14 +2,14 @@ import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
 import DropdownMenu from "@/components/menu/DropdownMenu";
 import NoData from "@/components/feedback/NoData";
-import {
-	getOverviewDropdownData,
-} from "@/config/menuData";
+import { getOverviewDropdownData } from "@/config/menuData";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import getRankingSession from "@/lib/database/user/getRankingSession";
 import TrackOverviewListSection from "@/features/ranking/display/components/TrackOverviewListSection";
 import AlbumOverviewPointsSection from "@/features/ranking/stats/components/AlbumOverviewPointsSection";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { PlusIcon } from "@radix-ui/react-icons";
 
 export const ALLOWED_RANGE_SLUGS = [
 	"past-month",
@@ -38,10 +38,17 @@ export default async function page({
 	return (
 		<div className="space-y-16">
 			<Suspense fallback={<LoadingAnimation />}>
-				<DropdownMenu
-					options={dropdownOptions}
-					defaultValue={dropdownDefaultValue}
-				/>
+				<div className="flex gap-4">
+					<DropdownMenu
+						options={dropdownOptions}
+						defaultValue={dropdownDefaultValue}
+					/>
+					<Link href={`/sorter/${artistId}`}>
+						<div className="aspect-square rounded-full bg-primary-500 p-4 text-neutral-950 hover:bg-neutral-100">
+							<PlusIcon width={20} height={20} />
+						</div>
+					</Link>
+				</div>
 
 				{rankingSessions.length !== 0 ? (
 					<>

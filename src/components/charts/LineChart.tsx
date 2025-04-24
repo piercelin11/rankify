@@ -14,6 +14,7 @@ import {
 import { Line } from "react-chartjs-2";
 import { Filler } from "chart.js";
 import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
+import { DEFAULT_COLOR } from "@/config/variables";
 
 ChartJS.register(
 	CategoryScale,
@@ -102,10 +103,10 @@ export function LineChart({ data: { date, dataset }, isReverse = true }: { data:
 			borderWidth: 1.5,
 			borderColor: item.color
 				? adjustColorLightness(item.color, 0.5, 2)
-				: "#FEF27A",
+				: DEFAULT_COLOR,
 			backgroundColor: item.color
 				? `${adjustColorLightness(item.color, 0.5, 2)}25`
-				: "#FEF27A1A",
+				: DEFAULT_COLOR + "1A",
 			fill: "start",
 		})),
 	};

@@ -65,7 +65,7 @@ export function Bar({ bar, color }: BarProps) {
 					className="h-full rounded-full transition-all duration-1000 ease-in-out"
 					style={{
 						width: animatedWidth,
-						background: color ? `linear-gradient(to right, ${adjustColorLightness(color, 0.5, 1.8)}, ${adjustColorLightness(color, 0.7, 1.5)})` : "#fef27a",
+						background: color ? `linear-gradient(to right, ${adjustColorLightness(color, 0.45, 1.8)}, ${adjustColorLightness(color, 0.7, 1.8)})` : "#fef27a",
 					}}
 				></div>
 			</div>
