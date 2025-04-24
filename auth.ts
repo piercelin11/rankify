@@ -24,6 +24,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 			if (token.sub && session) {
 				session.user.id = token.sub;
 				session.user.role = token.role as $Enums.Role;
+				session.user.image = token.image as string | null;
+				session.user.name = token.name as string;
 			}
 
 			return session;
@@ -38,6 +40,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 			if (!existingUser) return token;
 
 			token.role = existingUser.role;
+			token.image = existingUser.image;
+			token.name = existingUser.username || existingUser.name;
 
 			return token;
 		},
@@ -53,9 +57,9 @@ export async function getUserSession() {
 		);
 	}
 
-	const { id, role } = session.user;
+	const { id, role, name } = session.user;
 
-	if (!id || !role) {
+	if (!id || !role || !name) {
 		throw new Error("User session is missing required attributes.");
 	}
 

@@ -3,9 +3,10 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import Button from "../buttons/Button";
 import { Cross1Icon, HamburgerMenuIcon } from "@radix-ui/react-icons";
-import LogoDisplay from "../sidebar/LogoDisplay";
 import { usePathname } from "next/navigation";
 import useMediaQuery from "@/lib/hooks/useMediaQuery";
+import { cn } from "@/lib/cn";
+import { useAppSelector } from "@/store/hooks";
 
 type SidebarLayoutProps = {
 	children: [React.ReactNode, React.ReactNode];
@@ -13,18 +14,30 @@ type SidebarLayoutProps = {
 
 export default function SidebarLayout({ children }: SidebarLayoutProps) {
 	const isMobile = useMediaQuery("max", 1024);
+	const isSidebarOpen = useAppSelector((state) => state.sidebar.isSidebarOpen);
 
 	return (
 		<>
 			{isMobile && <MobileSidebarLayout>{children[0]}</MobileSidebarLayout>}
 
-			<aside className="fixed z-10 hidden h-screen border-r border-neutral-800 pt-6 lg:block lg:w-[250px] xl:w-[300px]">
-				<div className="px-4 py-5">
-					<LogoDisplay />
-				</div>
+			<aside
+				className={cn(
+					"w-[260px] fixed z-10 hidden h-screen border-r border-neutral-800 lg:block transition-all ease-in-out duration-200",
+					{
+						"w-[84px]": !isSidebarOpen,
+					}
+				)}
+			>
 				{children[0]}
 			</aside>
-			<main className="main-content relative h-screen overflow-auto scrollbar-hidden lg:pl-[250px] xl:pl-[300px]">
+			<main
+				className={cn(
+					"main-content pl-[260px] relative h-screen overflow-auto scrollbar-hidden transition-all ease-in-out duration-200",
+					{
+						"pl-[84px]": !isSidebarOpen,
+					}
+				)}
+			>
 				{children[1]}
 			</main>
 		</>

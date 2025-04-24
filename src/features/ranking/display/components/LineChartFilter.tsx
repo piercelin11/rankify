@@ -83,7 +83,7 @@ export default function LineChartFilter({
 			</div>
 			<div
 				className={cn(
-					"absolute max-h-96 w-full overflow-auto overscroll-contain rounded-md border border-neutral-700 bg-neutral-950 opacity-0 transition ease-in-out scrollbar-hidden",
+					"absolute max-h-96 w-full overflow-auto overscroll-contain rounded-xl border border-neutral-700 bg-neutral-950 opacity-0 transition ease-in-out scrollbar-hidden",
 					{
 						"translate-y-3 opacity-100": isOpen,
 						"pointer-events-none": !isOpen,
@@ -138,8 +138,8 @@ function TrackTag({
 					tag.color ?? DEFAULT_COLOR,
 					isCrossHover ? 0.1 : 0.05
 				),
-				border: `solid 1px ${adjustColorLightness(tag.color ?? DEFAULT_COLOR, 0.7, 2)}`,
-				color: adjustColorLightness(tag.color ?? DEFAULT_COLOR, 0.8, 2),
+				border: `solid 1px ${adjustColorLightness(tag.color ?? DEFAULT_COLOR, 0.7, 1.5)}`,
+				color: adjustColorLightness(tag.color ?? DEFAULT_COLOR, 0.8, 1.5),
 			}}
 		>
 			{!isDefault && (
@@ -184,11 +184,11 @@ function AlbumTag({
 					tag.color ?? DEFAULT_COLOR,
 					isHighlight ? 0.1 : 0
 				),
-				border: `solid 1px ${adjustColorLightness(tag.color ?? DEFAULT_COLOR, isHighlight ? 0.7 : 0.4, 2)}`,
+				border: `solid 1px ${adjustColorLightness(tag.color ?? DEFAULT_COLOR, isHighlight ? 0.7 : 0.4, 1.5)}`,
 				color: adjustColorLightness(
 					tag.color ?? DEFAULT_COLOR,
 					isHighlight ? 0.8 : 0.5,
-					2
+					1.5
 				),
 			}}
 			onMouseEnter={() => setCrossHover(true)}

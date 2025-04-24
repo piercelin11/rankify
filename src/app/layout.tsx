@@ -26,7 +26,7 @@ const poppins = Poppins({
 	subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
+export const metadata: Metadata = { 
 	title: "Rankify",
 	description:
 		"Rankify - Discover, rank, and share your favorite songs effortlessly. Join a vibrant music-loving community to create personalized song rankings and explore trending tunes worldwide!",

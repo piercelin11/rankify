@@ -2,7 +2,6 @@ import { ReactNode } from "react";
 import {
 	AvatarIcon,
 	GearIcon,
-	HomeIcon,
 	StarIcon,
 } from "@radix-ui/react-icons";
 
@@ -27,19 +26,6 @@ export const adminMenuData: MenuItem[] = [
 		name: "Settings",
 		icon: () => <GearIcon />,
 		link: "/admin/setting",
-	},
-];
-
-export const mainMenuData: MenuItem[] = [
-	{
-		name: "Home",
-		icon: () => <HomeIcon />,
-		link: "/",
-	},
-	{
-		name: "Settings",
-		icon: () => <GearIcon />,
-		link: "/settings",
 	},
 ];
 

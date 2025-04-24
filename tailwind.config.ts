@@ -46,6 +46,11 @@ export default {
 			borderRadius: {
 				"4xl": "2rem",
 				"5xl": "2.5rem",
+			},
+			spacing: {
+				"sidebar-sm": "88px",
+				"sidebar-lg": "260px",
+				"sidebar-xl": "300px"
 			}
 		},
 	},
