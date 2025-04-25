@@ -85,8 +85,8 @@ export default function DoubleBarChart({
 				hoverBackgroundColor: color.map(
 					(item) => adjustColorLightness(item!, 0.5, 1.5) + "99"
 				),
-				hoverBorderColor: color.map(
-					(item) => adjustColorLightness(item!, 0.5, 1.5)
+				hoverBorderColor: color.map((item) =>
+					adjustColorLightness(item!, 0.5, 1.5)
 				),
 			},
 			{
@@ -98,12 +98,16 @@ export default function DoubleBarChart({
 				hoverBackgroundColor: color.map(
 					(item) => adjustColorLightness(item!, 0.5, 1.5) + "1A"
 				),
-				hoverBorderColor: color.map(
-					(item) => adjustColorLightness(item!, 0.5, 1.5)
+				hoverBorderColor: color.map((item) =>
+					adjustColorLightness(item!, 0.5, 1.5)
 				),
 			},
 		],
 	};
 
-	return <Bar options={options} data={data} />;
+	return (
+		<div className="aspect-video">
+			<Bar options={options} data={data} />
+		</div>
+	);
 }

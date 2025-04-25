@@ -50,7 +50,7 @@ type DataType = {
 	color: (string | null)[];
 };
 
-function PolarAreaChart({
+export default function PolarAreaChart({
 	data: { labels, mainData, color },
 }: {
 	data: DataType;
@@ -78,7 +78,5 @@ function PolarAreaChart({
 		],
 	};
 
-	return <PolarArea data={data} options={options} />;
+	return <div className="aspect-square"><PolarArea data={data} options={options} /></div>;
 }
-
-export default PolarAreaChart;
