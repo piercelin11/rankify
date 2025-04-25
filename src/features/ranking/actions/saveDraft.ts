@@ -1,6 +1,5 @@
 "use server"; 
 
-import { redirect } from "next/navigation";
 import { getUserSession } from "@/../auth";
 import { db } from "@/lib/prisma";
 

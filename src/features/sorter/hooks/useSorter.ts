@@ -5,9 +5,9 @@ import {
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { RankingDraftData, TrackData } from "@/types/data";
 import React, { startTransition, useEffect, useRef, useState } from "react";
-import saveDraft from "../actions/saveDraft";
+import saveDraft from "../../ranking/actions/saveDraft";
 import { RankingResultData } from "../components/SortingStage";
-import saveDraftResult from "../actions/saveDraftResult";
+import saveDraftResult from "../../ranking/actions/saveDraftResult";
 import { debounce } from "chart.js/helpers";
 import { CurrentStage } from "../components/SorterPage";
 

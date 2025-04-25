@@ -9,9 +9,6 @@ import {
 
 export type AlbumStatsType = AlbumData & {
 	ranking: number;
-	top3Count: number;
-	top10Count: number;
-	top1Count: number;
 	top5PercentCount: number;
 	top10PercentCount: number;
 	top25PercentCount: number;
@@ -76,9 +73,6 @@ export async function getAlbumsStats({
 			);
 
 			if (existingAlbum) {
-				existingAlbum.top3Count += cur.top3Count;
-				existingAlbum.top10Count += cur.top10Count;
-				existingAlbum.top1Count += cur.top1Count;
 				existingAlbum.rawTotalPoints += rawScore;
 				existingAlbum.totalPoints += adjustedScore;
 
@@ -93,9 +87,6 @@ export async function getAlbumsStats({
 					top10PercentCount: cur.ranking <= countSongs / 10 ? 1 : 0,
 					top25PercentCount: cur.ranking <= countSongs / 4 ? 1 : 0,
 					top50PercentCount: cur.ranking <= countSongs / 2 ? 1 : 0,
-					top3Count: cur.top3Count,
-					top10Count: cur.top10Count,
-					top1Count: cur.top1Count,
 					totalPoints: adjustedScore,
 					rawTotalPoints: rawScore,
 					rankings: rankingsByAlbum[albumId],

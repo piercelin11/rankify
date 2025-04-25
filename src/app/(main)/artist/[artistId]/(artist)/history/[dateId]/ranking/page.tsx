@@ -8,7 +8,6 @@ import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import Button from "@/components/buttons/Button";
 import Link from "next/link";
 import AllTrackHistoryRankingList from "@/features/ranking/display/components/AllTrackHistoryRankingList";
-import { notFound } from "next/navigation";
 
 export default async function ArtistRankingPage({
 	params,
@@ -52,12 +51,15 @@ async function TrackHistoryRankingList({
 		artistId,
 		userId,
 		dateId,
+		options: {
+			includeAchievement: true,
+		},
 	});
 	const albums = await getLoggedAlbums({
 		artistId,
 		userId,
 		time: {
-			threshold: tracksRankings[0].date.date,
+			threshold: tracksRankings[0].date,
 			filter: "equals",
 		},
 	});
@@ -66,7 +68,7 @@ async function TrackHistoryRankingList({
 		<AllTrackHistoryRankingList
 			data={tracksRankings}
 			albums={albums}
-			title={dateToLong(tracksRankings[0].date.date)}
+			title={dateToLong(tracksRankings[0].date)}
 		/>
 	);
 }

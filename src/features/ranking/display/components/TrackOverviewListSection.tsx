@@ -32,6 +32,9 @@ export default async function TrackOverviewListSection({
 		userId,
 		take: 5,
 		time,
+		options: {
+			includeRankChange: true
+		}
 	});
 
 	return (

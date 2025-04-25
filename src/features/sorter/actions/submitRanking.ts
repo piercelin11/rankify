@@ -7,8 +7,8 @@ import { ActionResponse } from "@/types/action";
 import { db } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { revalidateTag } from "next/cache";
-import deleteRankingDraft from "./deleteRankingDraft";
-import createAlbumRanking from "@/features/sorter/actions/createAlbumRanking";
+import createAlbumRanking from "@/features/ranking/actions/createAlbumRanking";
+import createRankingSession from "../../ranking/actions/createRankingSession";
 
 export default async function submitRanking(
 	trackRankings: RankingResultData[],
@@ -16,56 +16,11 @@ export default async function submitRanking(
 	type: $Enums.RankingType
 ): Promise<ActionResponse> {
 	const { id: userId } = await getUserSession();
-	const countTrack = trackRankings.length;
 	let isSuccess = false;
 
 	try {
-		const trackIds = trackRankings.map((track) => track.id);
-
-		const previousRankings = await db.ranking.findMany({
-			where: {
-				userId,
-				trackId: { in: trackIds },
-			},
-			distinct: ["trackId"],
-			orderBy: {
-				date: { date: "desc" },
-			},
-			select: { trackId: true, ranking: true, artistId: true },
-		});
-
-		const prevRankingMap = new Map(
-			previousRankings.map((r) => [r.trackId, r.ranking])
-		);
-
-		const sessionCreateData = trackRankings.map((data) => {
-			const previousRank = prevRankingMap.get(data.id);
-			const rankChange =
-				previousRank !== undefined && previousRank !== null
-					? previousRank - data.ranking
-					: null;
-			const rankPercentile = data.ranking / countTrack;
-
-			return {
-				ranking: data.ranking,
-				trackId: data.id,
-				albumId: data.albumId,
-				artistId,
-				userId,
-				rankPercentile,
-				rankChange,
-			};
-		});
-
 		await db.$transaction(async (tx) => {
-			const session = await tx.rankingSession.create({
-				data: {
-					userId,
-					artistId: artistId,
-					type,
-					rankings: { createMany: { data: sessionCreateData } },
-				},
-			});
+			const session = await createRankingSession({trackRankings, userId, type}, tx);
 
 			await createAlbumRanking(
 				{

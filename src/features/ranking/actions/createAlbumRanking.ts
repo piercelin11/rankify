@@ -1,5 +1,4 @@
-import { db } from "@/lib/prisma";
-import { calculateAlbumPoints } from "../../ranking/utils/calculateAlbumPoints";
+import { calculateAlbumPoints } from "../utils/calculateAlbumPoints";
 import { AlbumRanking, Prisma } from "@prisma/client";
 import { RankingResultData } from "@/features/sorter/components/SortingStage";
 import { PrismaClient } from "@prisma/client/extension";
@@ -30,12 +29,7 @@ export default async function createAlbumRanking({
         averageTrackRanking: stats.averageTrackRanking,
     }));
 
-	try {
-		await prisma.albumRanking.createMany({
-			data: result,
-		});
-		console.log(`Success creating data of ${dateId}`);
-	} catch (err) {
-		console.error("Error creating album ranking:", err);
-	}
+	await prisma.albumRanking.createMany({
+		data: result,
+	});
 }

@@ -1,24 +1,25 @@
 import { db } from "@/lib/prisma";
-import { RankingData, TrackData } from "@/types/data";
+import { TrackData } from "@/types/data";
 import getTracksMetrics from "./getTracksMetrics";
-import getRankingSession from "../../user/getRankingSession";
 import { getUserRankingPreference } from "../../user/getUserPreference";
+import getLatestRankingSession from "../../user/getLatestRankingSession";
 
-export type TrackStatsType = TrackData & {
+export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
 	ranking: number;
 	averageRanking: number;
 	peak: number;
 	worst: number;
 	gap: number | null;
+	album: {
+		name: string | null;
+		color: string | null;
+	};
 	top50PercentCount: number;
 	top25PercentCount: number;
 	top5PercentCount: number;
-	top10Count: number;
-	top3Count: number;
-	top1Count: number;
-	totalChartRun: number | null;
-	rankings: (RankingData & { date: Date })[];
-	loggedCount: number;
+
+	overallRankChange: number | null;
+	rankings: { ranking: number; date: { date: Date } }[];
 	rankChange?: number | null;
 };
 
@@ -30,13 +31,23 @@ export type TimeFilterType = {
 export type getTracksStatsProps = {
 	artistId: string;
 	userId: string;
+	options?: getTracksStatsOptions;
 	take?: number;
 	time?: TimeFilterType;
+};
+
+type getTracksStatsOptions = {
+	includeRankChange: boolean;
+};
+
+const defaultOptions = {
+	includeRankChange: false,
 };
 
 export default async function getTracksStats({
 	artistId,
 	userId,
+	options = defaultOptions,
 	take,
 	time,
 }: getTracksStatsProps): Promise<TrackStatsType[]> {
@@ -46,123 +57,169 @@ export default async function getTracksStats({
 				[time.filter]: time.threshold,
 			}
 		: undefined;
-	const latestSession = (
-		await getRankingSession({
-			artistId,
-			userId,
-			time: {
-				threshold: new Date(),
-				filter: "lte",
-			},
-		})
-	)?.[0];
-	const trackMetrics = await getTracksMetrics({ artistId, userId, take, time });
-	const prevTrackMetrics = await getTracksMetrics({
-		artistId,
-		userId,
-		time: {
-			threshold: latestSession?.date,
-			filter: "lt",
-		},
-	});
-	const tookTrackIds = take ? trackMetrics.map((track) => track.id) : undefined;
 
-	const tracks = await db.track.findMany({
+	const trackMetrics = await getTracksMetrics({ artistId, userId, take, time });
+	const trackIds = trackMetrics.map((track) => track.id);
+
+	const top50PercentCounts = await db.ranking.groupBy({
+		by: ["trackId"],
 		where: {
+			userId,
+			artistId,
+			date: { date },
+			rankPercentile: { lte: 0.5 },
+			trackId: { in: trackIds },
+			track: trackConditions,
+		},
+		_count: { _all: true },
+	});
+	const top50PercentMap = new Map(
+		top50PercentCounts.map((track) => [track.trackId, track._count._all])
+	);
+
+	const top25PercentCounts = await db.ranking.groupBy({
+		by: ["trackId"],
+		where: {
+			userId,
+			artistId,
+			date: { date },
+			rankPercentile: { lte: 0.25 },
+			trackId: { in: trackIds },
+			track: trackConditions,
+		},
+		_count: { _all: true },
+	});
+	const top25PercentMap = new Map(
+		top25PercentCounts.map((track) => [track.trackId, track._count._all])
+	);
+
+	const top5PercentCounts = await db.ranking.groupBy({
+		by: ["trackId"],
+		where: {
+			userId,
+			artistId,
+			date: { date },
+			rankPercentile: { lte: 0.05 },
+			trackId: { in: trackIds },
+			track: trackConditions,
+		},
+		_count: { _all: true },
+	});
+	const top5PercentMap = new Map(
+		top5PercentCounts.map((track) => [track.trackId, track._count._all])
+	);
+
+	const overallRankChange = await db.ranking.groupBy({
+		by: ["trackId"],
+		where: {
+			userId,
+			artistId,
+			date: { date },
+			trackId: { in: trackIds },
+			track: trackConditions,
+		},
+		_sum: { rankChange: true },
+	});
+	const overallRankChangeMap = new Map(
+		overallRankChange.map((track) => [track.trackId, track._sum.rankChange])
+	);
+
+	const allTracks = await db.track.findMany({
+		where: {
+			id: {
+				in: trackIds,
+			},
 			artistId,
 			rankings: {
 				some: {
 					userId,
-					date: {
-						date,
-					},
 				},
 			},
-			id: { in: tookTrackIds },
-			...trackConditions,
 		},
 		include: {
-			album: true,
-			artist: true,
-			rankings: {
-				where: {
-					userId,
-					date: {
-						date,
-					},
+			album: {
+				select: {
+					name: true,
+					color: true,
 				},
-				include: {
+			},
+			rankings: {
+				select: {
+					ranking: true,
 					date: {
 						select: {
 							date: true,
-							rankings: true,
 						},
-					},
-				},
-				orderBy: {
-					date: {
-						date: "asc",
 					},
 				},
 			},
 		},
 	});
+	const allTracksMap = new Map(allTracks.map((track) => [track.id, track]));
 
-	const trackMetricsMap = new Map(trackMetrics.map(track => [track.id, track]));
-	const prevTrackMetricsMap = new Map(prevTrackMetrics.map(track => [track.id, track]));
+	//依據 options 判斷是否獲取前次紀錄以及所以排名
+	let prevTrackRankingMap: Map<string, number> | undefined;
+	if (options.includeRankChange && !time) {
+		const latestSession = await getLatestRankingSession({ userId, artistId });
+		const prevTrackRanking = await db.ranking.groupBy({
+			by: ["trackId"],
+			where: {
+				userId,
+				artistId,
+				date: {
+					date: {
+						lt: latestSession?.date,
+					},
+				},
+			},
+			orderBy: [
+				{
+					_avg: {
+						ranking: "asc",
+					},
+				},
+				{
+					_min: {
+						ranking: "asc",
+					},
+				},
+				{
+					_max: {
+						ranking: "asc",
+					},
+				},
+				{
+					trackId: "desc",
+				},
+			],
+		});
+		prevTrackRankingMap = new Map(
+			prevTrackRanking.map((track, index) => [track.trackId, index + 1])
+		);
+	}
 
-	const result = tracks.map((track) => {
-		const trackMetric = trackMetricsMap.get(track.id)!;
-		const prevTrackMetric = prevTrackMetricsMap.get(track.id);
+	const result = trackMetrics.map((data) => ({
+		...allTracksMap.get(data.id)!,
+		album: {
+			name: allTracksMap.get(data.id)?.album?.name ?? null,
+			color: allTracksMap.get(data.id)?.album?.color ?? null,
+		},
+		ranking: data.ranking,
+		averageRanking: data.averageRanking,
+		peak: data.peak,
+		worst: data.worst,
+		gap: data.worst - data.peak,
+		top50PercentCount: top50PercentMap.get(data.id) ?? 0,
+		top25PercentCount: top25PercentMap.get(data.id) ?? 0,
+		top5PercentCount: top5PercentMap.get(data.id) ?? 0,
+		overallRankChange: overallRankChangeMap.get(data.id) ?? null,
+		rankings: allTracksMap.get(data.id)?.rankings ?? [],
+		rankChange: options.includeRankChange
+			? prevTrackRankingMap?.get(data.id)
+				? prevTrackRankingMap!.get(data.id)! - data.ranking
+				: null
+			: undefined,
+	}));
 
-		const rankings = track.rankings.map((ranking) => ({
-			...ranking,
-			date: ranking.date.date,
-			percentage: ranking.ranking / ranking.date.rankings.length,
-		}));
-
-		let totalChartRun: number | null = null;
-		const stats = {
-			top10Count: 0,
-			top3Count: 0,
-			top1Count: 0,
-			top50PercentCount: 0,
-			top25PercentCount: 0,
-			top5PercentCount: 0,
-		};
-		for (const ranking of rankings) {
-			if (ranking.rankChange !== null) {
-				totalChartRun = (totalChartRun || 0) + Math.abs(ranking.rankChange);
-			}
-
-			if (ranking.ranking <= 10) stats.top10Count++;
-			if (ranking.ranking <= 3) stats.top3Count++;
-			if (ranking.ranking <= 1) stats.top1Count++;
-			if (ranking.percentage <= 0.5) stats.top50PercentCount++;
-			if (ranking.percentage <= 0.25) stats.top25PercentCount++;
-			if (ranking.percentage <= 0.05) stats.top5PercentCount++;
-		}
-
-		return {
-			...track,
-			ranking: trackMetric.ranking,
-			averageRanking: trackMetric.averageRanking,
-			peak: trackMetric.peak,
-			worst: trackMetric.worst,
-			gap:
-				track.rankings.length > 1
-					? Math.abs(trackMetric.worst - trackMetric.peak)
-					: null,
-			...stats,
-			totalChartRun: track.rankings.length > 1 ? totalChartRun : null,
-			rankings,
-			loggedCount: track.rankings.length,
-			rankChange: time?.threshold
-				? undefined
-				: prevTrackMetric
-					? prevTrackMetric.ranking - trackMetric.ranking
-					: null,
-		};
-	});
-	return result.sort((a, b) => a.ranking - b.ranking);
+	return result;
 }

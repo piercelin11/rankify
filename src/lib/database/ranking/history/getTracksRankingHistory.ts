@@ -1,87 +1,121 @@
 import { db } from "@/lib/prisma";
-import getTracksMetrics from "../overview/getTracksMetrics";
-import { RankingSessionData, TrackData } from "@/types/data";
-import getRankingSession from "../../user/getRankingSession";
+import { TrackData } from "@/types/data";
 import { getUserRankingPreference } from "../../user/getUserPreference";
 import { AchievementType } from "@/features/ranking/stats/components/AchievementDisplay";
 import { notFound } from "next/navigation";
+import { RankingSession } from "@prisma/client";
+import getLatestRankingSession from "../../user/getLatestRankingSession";
 
-export type TrackHistoryType = TrackData & {
+export type TrackHistoryType = Omit<TrackData, "artist" | "album"> & {
 	dateId: string;
-	date: RankingSessionData;
+	date: Date;
 	ranking: number;
 	peak: number;
 	rankChange: number | null;
+	rankPercentile: number;
 	achievement: AchievementType;
 };
- 
+
+type getTracksRankingHistoryOptions = {
+	includeAchievement: boolean;
+};
+
 type getTracksRankingHistoryProps = {
 	artistId: string;
 	userId: string;
 	dateId: string;
+	options?: getTracksRankingHistoryOptions;
 	take?: number;
+};
+
+const defaultOptions = {
+	includeAchievement: false,
 };
 
 export async function getTracksRankingHistory({
 	artistId,
 	userId,
-	dateId, 
+	dateId,
+	options = defaultOptions,
 	take,
 }: getTracksRankingHistoryProps): Promise<TrackHistoryType[]> {
-	const trackConditions = await getUserRankingPreference({userId});
+	const trackConditions = await getUserRankingPreference({ userId });
 	const rankings = await db.ranking.findMany({
 		where: {
 			artistId,
 			userId,
 			dateId,
-			track: trackConditions
+			track: trackConditions,
 		},
 		orderBy: {
 			ranking: "asc",
 		},
-		include: {
+		select: {
+			id: true,
+			ranking: true,
+			rankChange: true,
+			rankPercentile: true,
+			trackId: true,
 			track: true,
-			album: true,
-			artist: true,
-			date: true,
+			date: {
+				select: {
+					date: true,
+				},
+			},
 		},
 		take,
 	});
 
 	if (rankings.length === 0) notFound();
 
-	const sessions = await getRankingSession({ artistId, userId });
-	const latestSession = sessions[0];
-	const currentSession = rankings[0].date;
-	const prevTrackMetrics = await getTracksMetrics({
-		artistId,
-		userId,
-		time: { threshold: currentSession.date, filter: "lt" },
+	let latestSession: RankingSession | null = null;
+	if (options.includeAchievement)
+		latestSession = await getLatestRankingSession({ artistId, userId });
+
+	const currentDate = rankings[0].date.date;
+	const trackIds = rankings.map((track) => track.id);
+
+	const historicalPeak = await db.ranking.groupBy({
+		by: ["trackId"],
+		where: {
+			trackId: { in: trackIds },
+			userId,
+			artistId,
+			date: { date: { lt: currentDate } },
+		},
+		_min: {
+			ranking: true,
+		},
 	});
 
-	const prevTrackMetricsMap = new Map(prevTrackMetrics.map(track => [track.id, track]))
+	const historicalPeakMap = new Map(
+		historicalPeak.map((data) => [data.trackId, data._min.ranking])
+	);
 
-	const result = rankings.map((ranking) => {
-		const findPrevPeak = prevTrackMetricsMap.get(ranking.trackId);
-		const dataIsLatest = latestSession.id === ranking.dateId;
+	const result = rankings.map((data) => {
+		const prevPeak = historicalPeakMap.get(data.trackId);
 
 		function getAchievement(): AchievementType {
-			if (ranking.ranking < Number(findPrevPeak?.peak) && dataIsLatest)
+			if (!latestSession) return null;
+			if (data.ranking < Number(prevPeak) && latestSession.id === dateId)
 				return "New Peak";
-			else if (Number(ranking.rankChange) > rankings.length / 5)
-				return "Big Jump";
-			else if (Number(ranking.rankChange) < -(rankings.length / 5))
+			else if (Number(data.rankChange) > rankings.length / 5) return "Big Jump";
+			else if (Number(data.rankChange) < -(rankings.length / 5))
 				return "Big Drop";
 			else return null;
-		} 
+		}
 
 		return {
-			...ranking,
-			...ranking.track,
+			...data.track,
+			ranking: data.ranking,
+			rankPercentile: data.rankPercentile,
+			rankChange: data.rankChange,
+			dateId,
+			date: currentDate,
 			peak:
-				!findPrevPeak?.peak || ranking.ranking < Number(findPrevPeak?.peak)
-					? ranking.ranking
-					: Number(findPrevPeak?.peak),
+				!prevPeak || data.ranking < Number(prevPeak)
+					? data.ranking
+					: Number(prevPeak),
 			countSongs: rankings.length,
 			achievement: getAchievement(),
 		};

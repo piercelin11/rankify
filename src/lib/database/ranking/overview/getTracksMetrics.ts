@@ -2,6 +2,27 @@ import { db } from "@/lib/prisma";
 import { getTracksStatsProps } from "./getTracksStats";
 import { getUserRankingPreference } from "../../user/getUserPreference";
 
+export const TrackStatsOrder = [
+	{
+		_avg: {
+			ranking: "asc",
+		},
+	},
+	{
+		_min: {
+			ranking: "asc",
+		},
+	},
+	{
+		_max: {
+			ranking: "asc",
+		},
+	},
+	{
+		trackId: "desc",
+	},
+]
+
 export default async function getTracksMetrics({
 	artistId,
 	userId,
@@ -37,6 +58,9 @@ export default async function getTracksMetrics({
 		_avg: {
 			ranking: true,
 		},
+		_count: {
+			_all: true,
+		},
 		orderBy: [
 			{
 				_avg: {
@@ -65,6 +89,7 @@ export default async function getTracksMetrics({
 		ranking: index + 1,
 		peak: item._min.ranking ?? 0,
 		worst: item._max.ranking ?? 0,
+		count: item._count._all,
 		averageRanking: item._avg.ranking ?? 0,
 	}));
 }

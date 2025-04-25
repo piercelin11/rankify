@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeftIcon } from "@radix-ui/react-icons";
 import { RankingDraftData, TrackData } from "@/types/data";
 import { cn } from "@/lib/cn";
-import deleteRankingDraft from "../actions/deleteRankingDraft";
+import deleteRankingDraft from "../../ranking/actions/deleteRankingDraft";
 import ComfirmationModal from "@/components/modals/ComfirmationModal";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setPercentage } from "@/features/sorter/slices/sorterSlice";

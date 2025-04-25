@@ -24,10 +24,10 @@ export default async function getRankingSession({
 			userId,
 			date,
 		},
-		include: {
+		/* include: {
 			artist: true,
 			rankings: true,
-		},
+		}, */
 		orderBy: {
 			date: "desc",
 		},
@@ -44,14 +44,14 @@ export async function getRankingSessionById({
 	dateId
 }: getRankingSessionByIdProps) {
 
-	const rankingSessions = await db.rankingSession.findMany({
+	const rankingSessions = await db.rankingSession.findFirst({
 		where: {
 			id: dateId,
 		},
-		include: {
+		/* include: {
 			artist: true,
 			rankings: true,
-		},
+		}, */
 		orderBy: {
 			date: "desc",
 		},

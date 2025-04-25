@@ -1,4 +1,4 @@
-import { AlbumData, ArtistData, TrackData } from "@/types/data";
+import { AlbumData } from "@/types/data";
 import {
 	getTracksRankingHistory,
 	TrackHistoryType,
@@ -46,7 +46,7 @@ export async function getAlbumsRankingHistory({
 			artistId,
 			userId,
 			time: {
-				threshold: trackRankings[0].date.date,
+				threshold: trackRankings[0].date,
 				filter: "lt",
 			},
 		})
@@ -65,7 +65,7 @@ export async function getAlbumsRankingHistory({
 		artistId,
 		userId,
 		time: {
-			threshold: trackRankings[0].date.date,
+			threshold: trackRankings[0].date,
 			filter: "equals",
 		},
 	});
@@ -120,7 +120,7 @@ export async function getAlbumsRankingHistory({
 					acc.push({
 						...albumData,
 						dateId,
-						date: trackRankings[0].date.date,
+						date: trackRankings[0].date,
 						top25PercentCount: cur.ranking <= countSongs / 4 ? 1 : 0,
 						top50PercentCount: cur.ranking <= countSongs / 2 ? 1 : 0,
 						totalPoints: adjustedScore,

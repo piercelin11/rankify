@@ -16,7 +16,6 @@ import PercentileBarsCard, {
 	BarData,
 } from "@/features/ranking/stats/components/PercentileBarsCard";
 import StatsCard from "@/features/ranking/stats/components/StatsCard";
-import Scroll from "@/components/layout/Scroll";
 
 const iconSize = 22;
 
@@ -55,7 +54,7 @@ export default async function page({
 			icon: <StarFilledIcon width={iconSize} height={iconSize} />,
 		},
 		{
-			stats: trackData.totalChartRun,
+			stats: trackData.overallRankChange,
 			subtitle: "total chartrun",
 			icon: <RocketIcon width={iconSize} height={iconSize} />,
 		},
@@ -65,22 +64,22 @@ export default async function page({
 		top50PercentCount,
 		top25PercentCount,
 		top5PercentCount,
-		loggedCount,
+		rankings,
 	} = trackData;
 
 	const barData: BarData[] = [
 		{
-			width: top5PercentCount / loggedCount,
+			width: top5PercentCount / rankings.length,
 			label: "Times in top 5%",
 			stats: top5PercentCount,
 		},
 		{
-			width: top25PercentCount / loggedCount,
+			width: top25PercentCount / rankings.length,
 			label: "Times in top 25%",
 			stats: top25PercentCount,
 		},
 		{
-			width: top50PercentCount / loggedCount,
+			width: top50PercentCount / rankings.length,
 			label: "Times in top 50%",
 			stats: top50PercentCount,
 		},
