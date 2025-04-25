@@ -36,7 +36,13 @@ type Data = {
 	}[];
 };
 
-export function LineChart({ data: { date, dataset }, isReverse = true }: { data: Data, isReverse?:boolean }) {
+export function LineChart({
+	data: { date, dataset },
+	isReverse = true,
+}: {
+	data: Data;
+	isReverse?: boolean;
+}) {
 	const options = {
 		responsive: true,
 		plugins: {
@@ -72,7 +78,7 @@ export function LineChart({ data: { date, dataset }, isReverse = true }: { data:
 			y: {
 				beginAtZero: false,
 				min: isReverse ? 1 : undefined,
-				
+
 				reverse: isReverse,
 				grid: {
 					color: "#27272a",
@@ -81,8 +87,8 @@ export function LineChart({ data: { date, dataset }, isReverse = true }: { data:
 					color: "#27272a",
 				},
 				ticks: {
-					precision: 0
-				}
+					precision: 0,
+				},
 			},
 			x: {
 				border: {
@@ -111,5 +117,9 @@ export function LineChart({ data: { date, dataset }, isReverse = true }: { data:
 		})),
 	};
 
-	return <Line options={options} data={data} />;
+	return (
+		<div className="aspect-[2/1]">
+			<Line options={options} data={data} />
+		</div>
+	);
 }

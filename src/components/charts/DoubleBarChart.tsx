@@ -106,7 +106,7 @@ export default function DoubleBarChart({
 	};
 
 	return (
-		<div className="aspect-video">
+		<div className="aspect-[2/1]">
 			<Bar options={options} data={data} />
 		</div>
 	);
