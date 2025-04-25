@@ -8,6 +8,7 @@ import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import Button from "@/components/buttons/Button";
 import Link from "next/link";
 import AllTrackHistoryRankingList from "@/features/ranking/display/components/AllTrackHistoryRankingList";
+import { notFound } from "next/navigation";
 
 export default async function ArtistRankingPage({
 	params,

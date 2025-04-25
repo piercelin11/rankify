@@ -11,6 +11,7 @@ import DropdownMenu from "@/components/menu/DropdownMenu";
 import AlbumHistoryPointsSection from "@/features/ranking/stats/components/AlbumHistoryPointsSection";
 import Link from "next/link";
 import { PlusIcon } from "@radix-ui/react-icons";
+import createAlbumRanking from "@/features/sorter/actions/createAlbumRanking";
 
 export default async function page({
 	params,

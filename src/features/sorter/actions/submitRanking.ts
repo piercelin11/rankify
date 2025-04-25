@@ -8,53 +8,83 @@ import { db } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { revalidateTag } from "next/cache";
 import deleteRankingDraft from "./deleteRankingDraft";
+import createAlbumRanking from "@/features/sorter/actions/createAlbumRanking";
 
 export default async function submitRanking(
-	data: RankingResultData[],
+	trackRankings: RankingResultData[],
+	artistId: string,
 	type: $Enums.RankingType
 ): Promise<ActionResponse> {
 	const { id: userId } = await getUserSession();
-
+	const countTrack = trackRankings.length;
 	let isSuccess = false;
 
 	try {
-		await db.rankingSession.create({
-			data: {
+		const trackIds = trackRankings.map((track) => track.id);
+
+		const previousRankings = await db.ranking.findMany({
+			where: {
 				userId,
-				artistId: data[0].artistId,
-				type,
-				rankings: {
-					createMany: {
-						data: await Promise.all(
-							data.map(async (data) => {
-								const trackLatestRanking = await db.ranking.findFirst({
-									where: {
-										userId,
-										trackId: data.id,
-									},
-									orderBy: {
-										date: {
-											date: "desc",
-										},
-									},
-								});
-								return {
-									ranking: data.ranking,
-									trackId: data.id,
-									albumId: data.albumId,
-									artistId: data.artistId,
-									userId,
-									rankChange: trackLatestRanking
-										? trackLatestRanking.ranking - data.ranking
-										: null,
-								};
-							})
-						),
-					},
-				},
+				trackId: { in: trackIds },
 			},
+			distinct: ["trackId"],
+			orderBy: {
+				date: { date: "desc" },
+			},
+			select: { trackId: true, ranking: true, artistId: true },
 		});
-		await deleteRankingDraft(data[0].artistId);
+
+		const prevRankingMap = new Map(
+			previousRankings.map((r) => [r.trackId, r.ranking])
+		);
+
+		const sessionCreateData = trackRankings.map((data) => {
+			const previousRank = prevRankingMap.get(data.id);
+			const rankChange =
+				previousRank !== undefined && previousRank !== null
+					? previousRank - data.ranking
+					: null;
+			const rankPercentile = data.ranking / countTrack;
+
+			return {
+				ranking: data.ranking,
+				trackId: data.id,
+				albumId: data.albumId,
+				artistId,
+				userId,
+				rankPercentile,
+				rankChange,
+			};
+		});
+
+		await db.$transaction(async (tx) => {
+			const session = await tx.rankingSession.create({
+				data: {
+					userId,
+					artistId: artistId,
+					type,
+					rankings: { createMany: { data: sessionCreateData } },
+				},
+			});
+
+			await createAlbumRanking(
+				{
+					dateId: session.id,
+					artistId: artistId,
+					userId,
+					trackRankings,
+				},
+				tx
+			);
+
+			await tx.rankingDraft.deleteMany({
+				where: {
+					artistId,
+					userId,
+				},
+			});
+		});
+
 		isSuccess = true;
 	} catch (error) {
 		console.error("Failed to submit the rankings:", error);
@@ -63,7 +93,7 @@ export default async function submitRanking(
 
 	if (isSuccess) {
 		revalidateTag("user-data");
-		redirect(`/artist/${data[0].artistId}/history`);
+		redirect(`/artist/${trackRankings[0].artistId}/history`);
 	}
 
 	return { success: true, message: "You successfully submitted the rankings." };

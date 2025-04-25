@@ -40,7 +40,7 @@ export default function SorterPage({ albums, tracks, draft }: SorterPageProps) {
 				setCurrentStage={setCurrentStage}
 			/>
 		);
-	else if (currentStage === "result" && draft)
-		return <ResultStage draft={draft} setCurrentStage={setCurrentStage} />;
+	else if (currentStage === "result" && draft?.result)
+		return <ResultStage draft={draft} />;
 	else return <LoadingAnimation />;
 }

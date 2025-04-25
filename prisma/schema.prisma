@@ -112,7 +112,7 @@ model Track {
 model Ranking {
   id             String         @id @default(uuid())
   ranking        Int
-  rankPercentile Float?
+  rankPercentile Float
   dateId         String
   trackId        String
   albumId        String?
@@ -132,17 +132,19 @@ model Ranking {
 }
 
 model AlbumRanking {
-  id       String         @id @default(uuid())
-  ranking  Int
-  points   Int
-  dateId   String
-  albumId  String
-  artistId String
-  userId   String
-  album    Album          @relation(fields: [albumId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  artist   Artist         @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  date     RankingSession @relation(fields: [dateId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  user     User           @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  id                  String         @id @default(uuid())
+  ranking             Int
+  points              Int
+  basePoints          Int
+  averageTrackRanking Float
+  dateId              String
+  albumId             String
+  artistId            String
+  userId              String
+  album               Album          @relation(fields: [albumId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  artist              Artist         @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  date                RankingSession @relation(fields: [dateId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  user                User           @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@unique([userId, dateId, albumId])
 }
@@ -151,10 +153,10 @@ model RankingSession {
   id           String         @id @default(uuid())
   date         DateTime       @default(now())
   userId       String
-  artistId     String?
+  artistId     String
   type         RankingType?
   rankings     Ranking[]
-  artist       Artist?        @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  artist       Artist         @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
   user         User           @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   AlbumRanking AlbumRanking[]
 

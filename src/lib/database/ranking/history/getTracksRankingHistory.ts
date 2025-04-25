@@ -4,6 +4,7 @@ import { RankingSessionData, TrackData } from "@/types/data";
 import getRankingSession from "../../user/getRankingSession";
 import { getUserRankingPreference } from "../../user/getUserPreference";
 import { AchievementType } from "@/features/ranking/stats/components/AchievementDisplay";
+import { notFound } from "next/navigation";
 
 export type TrackHistoryType = TrackData & {
 	dateId: string;
@@ -46,6 +47,8 @@ export async function getTracksRankingHistory({
 		},
 		take,
 	});
+
+	if (rankings.length === 0) notFound();
 
 	const sessions = await getRankingSession({ artistId, userId });
 	const latestSession = sessions[0];

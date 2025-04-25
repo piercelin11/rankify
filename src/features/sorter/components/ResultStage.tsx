@@ -15,19 +15,15 @@ import deleteRankingDraft from "../actions/deleteRankingDraft";
 import { cn } from "@/lib/cn";
 import saveDraftResult from "../actions/saveDraftResult";
 import { RankingResultData } from "./SortingStage";
-import { CurrentStage } from "./SorterPage";
 import ComfirmationModal from "@/components/modals/ComfirmationModal";
 import { setPercentage } from "@/features/sorter/slices/sorterSlice";
 import { useAppDispatch } from "@/store/hooks";
 
 type ResultStageProps = {
 	draft: RankingDraftData;
-	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>;
 };
 
-export default function ResultStage({
-	draft,
-}: ResultStageProps) {
+export default function ResultStage({ draft }: ResultStageProps) {
 	if (!draft.result) notFound();
 	const result = draft.result!;
 	const dispatch = useAppDispatch();
@@ -98,7 +94,7 @@ export default function ResultStage({
 						<Button
 							variant="primary"
 							onClick={() => {
-								submitRanking(result, "ARTIST");
+								submitRanking(result, draft.artistId, "ARTIST");
 							}}
 						>
 							<p className="w-full">Submit</p>

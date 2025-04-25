@@ -19,8 +19,8 @@ export default async function getTracksMetrics({
 		by: ["trackId"],
 		where: {
 			userId,
+			artistId,
 			track: {
-				artistId,
 				...trackConditions,
 			},
 			date: {
