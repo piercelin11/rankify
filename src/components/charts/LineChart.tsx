@@ -108,10 +108,10 @@ export function LineChart({
 			data: item.datas,
 			borderWidth: 2,
 			borderColor: item.color
-				? adjustColorLightness(item.color, 0.5, 2)
+				? adjustColorLightness(item.color, 0.6, 2)
 				: DEFAULT_COLOR,
 			backgroundColor: item.color
-				? `${adjustColorLightness(item.color, 0.5, 2)}44`
+				? `${adjustColorLightness(item.color, 0.2, 1.5)}30`
 				: DEFAULT_COLOR + "1A",
 			fill: "start",
 		})),

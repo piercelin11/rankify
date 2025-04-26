@@ -14,7 +14,6 @@ import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
 import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";
 import PercentileBarsCard, { BarData } from "@/features/ranking/stats/components/PercentileBarsCard";
 import StatsCard from "@/features/ranking/stats/components/StatsCard";
-import getAlbumRankingSeries from "@/lib/database/ranking/overview/getAlbumRankingSeries";
 
 const iconSize = 22;
 
@@ -34,10 +33,6 @@ export default async function TrackPage({
 			includeAllRankings: true
 		}
 	});
-	const albumRankingSeries = await getAlbumRankingSeries({
-		artistId,
-		userId,
-	});
 	const topTrack = (
 		await getTracksStats({
 			artistId,
@@ -45,7 +40,6 @@ export default async function TrackPage({
 		})
 	).find((track) => track.albumId === albumId);
 	const albumData = albumStats.find((album) => album.id === albumId);
-	//const defaultAlbumRankings = albumRankingSeries.find((album) => album.id === albumId);
 	if (!albumData) notFound();
 
 	const menuOptions = await getLoggedAlbums({ artistId, userId });
@@ -69,24 +63,24 @@ export default async function TrackPage({
 		},
 	];
 
-	const { top10PercentCount, top25PercentCount, top50PercentCount, tracks } =
+	const { top10PercentCount, top25PercentCount, top50PercentCount, tracks, rankings } =
 		albumData;
 
 	const barData: BarData[] = [
 		{
-			width: top10PercentCount / Number(tracks?.length),
+			width: (top10PercentCount / Number(rankings?.length)) / Number(tracks?.length),
 			label: "Tracks in top 10%",
-			stats: top10PercentCount,
+			stats: Math.ceil(top10PercentCount / Number(rankings?.length)),
 		},
 		{
-			width: top25PercentCount / Number(tracks?.length),
+			width: (top25PercentCount / Number(rankings?.length)) / Number(tracks?.length),
 			label: "Tracks in top 25%",
-			stats: top25PercentCount,
+			stats: Math.ceil(top25PercentCount / Number(rankings?.length)),
 		},
 		{
-			width: top50PercentCount / Number(tracks?.length),
+			width: (top50PercentCount / Number(rankings?.length)) / Number(tracks?.length),
 			label: "Tracks in top 50%",
-			stats: top50PercentCount,
+			stats: Math.ceil(top50PercentCount / Number(rankings?.length)),
 		},
 	];
 

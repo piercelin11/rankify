@@ -17,6 +17,8 @@ type SidebarMenuItemType = {
 	label: string;
 };
 
+const iconSize = 20;
+
 export const getMainSidebarMenuItems = (
 	role: $Enums.Role
 ): SidebarMenuItemType[] => {
@@ -24,13 +26,13 @@ export const getMainSidebarMenuItems = (
 		{
 			id: "home",
 			label: "Home",
-			icon: () => <HomeIcon width={20} height={20} />,
+			icon: () => <HomeIcon width={iconSize} height={iconSize} />,
 			href: "/",
 		},
 		{
 			id: "settings",
 			label: "Settings",
-			icon: () => <GearIcon width={20} height={20} />,
+			icon: () => <GearIcon width={iconSize} height={iconSize} />,
 			href: "/settings",
 		},
 	];
@@ -38,15 +40,15 @@ export const getMainSidebarMenuItems = (
 		sidebarItems.push({
 			id: "admin",
 			label: "Admin",
-			icon: () => <LockClosedIcon width={20} height={20} />,
-			href: "/admin",
+			icon: () => <LockClosedIcon width={iconSize} height={iconSize} />,
+			href: "/admin/artist",
 		});
 	return [
 		...sidebarItems,
 		{
 			id: "signout",
 			label: "Sign Out",
-			icon: () => <ExitIcon width={20} height={20} />,
+			icon: () => <ExitIcon width={iconSize} height={iconSize} />,
 			onClick: () => signOut(),
 		},
 	];
@@ -54,21 +56,27 @@ export const getMainSidebarMenuItems = (
 
 export const adminSidebarMenuItem: SidebarMenuItemType[] = [
 	{
+		id: "home",
+		label: "Home",
+		icon: () => <HomeIcon width={iconSize} height={iconSize} />,
+		href: "/",
+	},
+	{
 		id: "artists",
 		label: "Artists",
-		icon: () => <StarIcon />,
+		icon: () => <StarIcon width={iconSize} height={iconSize} />,
 		href: "/admin/artist",
 	},
 	{
 		id: "users",
 		label: "Users",
-		icon: () => <AvatarIcon />,
+		icon: () => <AvatarIcon width={iconSize} height={iconSize} />,
 		href: "/admin/user",
 	},
 	{
 		id: "settings",
 		label: "Settings",
-		icon: () => <GearIcon />,
+		icon: () => <GearIcon width={iconSize} height={iconSize} />,
 		href: "/admin/setting",
 	},
 ];

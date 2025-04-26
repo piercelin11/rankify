@@ -37,7 +37,7 @@ export default async function AdminArtistPage({
 		<>
 			<ContentHeader
 				data={artist}
-				subTitleContent={<p>`${artist.spotifyFollowers} followers`</p>}
+				subTitleContent={<p>{artist.spotifyFollowers} followers</p>}
 				rounded
 			/>
 			<ContentWrapper>

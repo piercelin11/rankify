@@ -7,7 +7,10 @@ import { cn } from "@/lib/cn";
 import deleteRankingDraft from "../../ranking/actions/deleteRankingDraft";
 import ComfirmationModal from "@/components/modals/ComfirmationModal";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setPercentage } from "@/features/sorter/slices/sorterSlice";
+import {
+	setPercentage,
+	setSaveStatus,
+} from "@/features/sorter/slices/sorterSlice";
 import Button from "@/components/buttons/Button";
 import { CurrentStage } from "./SorterPage";
 import useSorter from "@/features/sorter/hooks/useSorter";
@@ -59,12 +62,15 @@ export default function SortingStage({
 	function handleClear() {
 		deleteRankingDraft(artistId);
 		dispatch(setPercentage(0));
+		dispatch(setSaveStatus("idle"));
 		setCurrentStage("filter");
 	}
 
 	//離開排名介面
 	function handleQuit() {
+		dispatch(setSaveStatus("idle"));
 		router.replace(`/artist/${artistId}/overview`);
+		
 	}
 
 	//用鍵盤選擇歌曲
@@ -213,7 +219,7 @@ function TrackBtn({ isPressed, onClick, data }: TrackBtnProps) {
 	return (
 		<button
 			className={cn(
-				"col-span-2 outline-none row-span-1 flex cursor-pointer select-none gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-2 hover:bg-neutral-800 sm:col-span-1 sm:row-span-2 sm:inline lg:p-5",
+				"col-span-2 row-span-1 flex cursor-pointer select-none gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-2 outline-none hover:bg-neutral-800 sm:col-span-1 sm:row-span-2 sm:inline lg:p-5",
 				{
 					"bg-neutral-800": isPressed,
 				}

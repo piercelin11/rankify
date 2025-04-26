@@ -83,10 +83,10 @@ export default function DoubleBarChart({
 				borderColor: DEFAULT_COLOR + "BF",
 				backgroundColor: DEFAULT_COLOR + "BF",
 				hoverBackgroundColor: color.map(
-					(item) => adjustColorLightness(item!, 0.5, 1.5) + "99"
+					(item) => adjustColorLightness(item!, 0.4, 1.5) + "80"
 				),
 				hoverBorderColor: color.map((item) =>
-					adjustColorLightness(item!, 0.5, 1.5)
+					adjustColorLightness(item!, 0.6, 2)
 				),
 			},
 			{
@@ -96,10 +96,10 @@ export default function DoubleBarChart({
 				borderColor: "#464748BF",
 				backgroundColor: "#464748BF",
 				hoverBackgroundColor: color.map(
-					(item) => adjustColorLightness(item!, 0.5, 1.5) + "1A"
+					(item) => adjustColorLightness(item!, 0.2, 1.5) + "66"
 				),
 				hoverBorderColor: color.map((item) =>
-					adjustColorLightness(item!, 0.5, 1.5)
+					adjustColorLightness(item!, 0.6, 2)
 				),
 			},
 		],

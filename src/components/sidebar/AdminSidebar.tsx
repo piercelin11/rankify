@@ -2,18 +2,14 @@
 
 import {
 	adminSidebarMenuItem,
-	getMainSidebarMenuItems,
 } from "@/config/sidebarMenu";
 import React from "react";
 import SidebarMenuItem from "./SidebarMenuItem";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
-import { ArtistData } from "@/types/data";
-import SidebarArtistItem from "./SidebarArtistItem";
 import { useAppDispatch } from "@/store/hooks";
 import { toggleSidebar } from "@/store/slices/sidebarSlice";
 import { ExtendedUser } from "@/types/auth";
 import UserProfile from "./UserProfile";
-import { cn } from "@/lib/cn";
 
 type MainSidebarProps = {
 	userSession: ExtendedUser;

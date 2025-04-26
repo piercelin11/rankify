@@ -12,7 +12,7 @@ import getAlbumRankingSeries, {
 	AlbumRankingSeriesType,
 } from "./getAlbumRankingSeries";
 
-export type AlbumStatsType = AlbumData & {
+export type AlbumStatsType = Omit<AlbumData, "tracks"> & {
 	ranking: number;
 	top5PercentCount: number;
 	top10PercentCount: number;
@@ -20,6 +20,10 @@ export type AlbumStatsType = AlbumData & {
 	top50PercentCount: number;
 	avgPoints: number;
 	avgBasePoints: number;
+	tracks: {
+		name: string;
+		id: string;
+	}[];
 	rankings?: {
 		ranking: number;
 		points: number;
@@ -61,6 +65,14 @@ export async function getAlbumsStats({
 			rankings: {
 				some: {
 					userId,
+				},
+			},
+		},
+		include: {
+			tracks: {
+				select: {
+					id: true,
+					name: true,
 				},
 			},
 		},
