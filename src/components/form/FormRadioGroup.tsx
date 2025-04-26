@@ -4,7 +4,7 @@ import RadioItem from "./RadioItem";
 export type FormOptionType = {
 	id: string;
 	label: string;
-	value: string;
+	value?: string;
 };
 
 type FormRadioGroupProps = {

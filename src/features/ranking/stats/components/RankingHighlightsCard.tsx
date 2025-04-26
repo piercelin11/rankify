@@ -6,6 +6,8 @@ import {
 } from "@/components/icons/StatsIcons";
 import React from "react";
 import NoData from "@/components/feedback/NoData";
+import Link from "next/link";
+import { ArrowTopRightIcon } from "@radix-ui/react-icons";
 
 type TrackHighlightsCardProps = {
 	type: "gainer" | "loser";
@@ -31,7 +33,7 @@ export function TrackHighlightsCard({ type, data }: TrackHighlightsCardProps) {
 	const track = getInfo();
 	const info = { ...track, change: track.rankChange! };
 
-	return <RankingHighlightsCard info={info} type={type} unit="ranking" />;
+	return <RankingHighlightsCard info={info} type={type} unit="ranking" href={`/artist/${track?.artistId}/track/${track?.id}`} />;
 }
 
 type AlbumHighlightsCardProps = {
@@ -46,13 +48,13 @@ export function AlbumHighlightsCard({ type, data }: AlbumHighlightsCardProps) {
 		switch (type) {
 			case "gainer":
 				const gainer = data
-					.filter((data) => data.pointsChange !== null && data.pointsChange > 0)
+					.filter((data) => data.pointsChange != null && data.pointsChange > 0)
 					.sort((a, b) => b.pointsChange! - a.pointsChange!)[0];
 
 				return gainer;
 			case "loser":
 				const loser = data
-					.filter((data) => data.pointsChange !== null && data.pointsChange < 0)
+					.filter((data) => data.pointsChange != null && data.pointsChange < 0)
 					.sort((a, b) => a.pointsChange! - b.pointsChange!)[0];
 				return loser;
 		}
@@ -61,35 +63,42 @@ export function AlbumHighlightsCard({ type, data }: AlbumHighlightsCardProps) {
 	const album = getInfo();
 	const info = album ? { ...album, change: album.pointsChange! } : null;
 
-	return <RankingHighlightsCard info={info} type={type} unit="points" />;
+	return <RankingHighlightsCard info={info} type={type} unit="points" href={`/artist/${album?.artistId}/album/${album?.id}`} />;
 }
 
 function RankingHighlightsCard({
 	info,
 	type,
 	unit,
+	href,
 }: {
 	info: { name: string; change: number; img: string | null } | null;
 	type: "gainer" | "loser";
 	unit: "ranking" | "points";
+	href: string,
 }) {
 	return (
 		<>
 			{info ? (
 				<div
-					className="flex aspect-square rounded-2xl border border-neutral-700 bg-[length:100%] bg-center bg-no-repeat p-4 transition-all duration-500 ease-in-out hover:bg-[length:110%] sm:aspect-video md:aspect-auto 2xl:p-8"
+					className="relative flex aspect-square flex-col overflow-hidden rounded-4xl border border-neutral-700 bg-[length:100%] bg-center bg-no-repeat p-4 transition-all duration-500 ease-in-out hover:bg-[length:110%] sm:aspect-video md:aspect-auto 2xl:p-8"
 					style={{
-						backgroundImage: `linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8)), url("${info.img || "/pic/placeholder.jpg"}")`,
+						backgroundImage: `linear-gradient(to bottom ,rgba(0, 0, 0, 0) 35%, rgba(0, 0, 0, 0.8) 95%), url("${info.img || "/pic/placeholder.jpg"}")`,
 					}}
 				>
-					<div className="mt-auto space-y-3">
-						<div className="flex items-end gap-1">
+					<Link href={href} className="ml-auto">
+						<button className="rounded-full bg-neutral-900 p-4 hover:bg-neutral-100 hover:text-neutral-950">
+							<ArrowTopRightIcon className="h-6 w-6" />
+						</button>
+					</Link>
+					<div className="z-10 mt-auto space-y-3">
+						<div className="flex items-start gap-2">
 							{type === "gainer" ? (
-								<ArrowUpRoundIcon size={45} />
+								<ArrowUpRoundIcon size={35} />
 							) : (
-								<ArrowDownRoundIcon size={45} />
+								<ArrowDownRoundIcon size={35} />
 							)}
-							<p className="text-highlight font-numeric">
+							<p className="text-highlight font-numeric font-bold">
 								{Math.abs(info.change)}
 								<span className="font-sans text-base font-normal">
 									{" "}
@@ -97,16 +106,16 @@ function RankingHighlightsCard({
 								</span>
 							</p>
 						</div>
-						<div>
+						<div className="space-y-1">
 							<p className="text-body-big">{info.name}</p>
-							<p>
+							<p className="text-neutral-400">
 								is the biggest {type} in {unit}.
 							</p>
 						</div>
 					</div>
 				</div>
 			) : (
-				<div className="bg-neutral-900 rounded-2xl">
+				<div className="rounded-4xl bg-neutral-900">
 					<NoData />
 				</div>
 			)}

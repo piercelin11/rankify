@@ -213,15 +213,12 @@ function TrackBtn({ isPressed, onClick, data }: TrackBtnProps) {
 	return (
 		<button
 			className={cn(
-				"col-span-2 row-span-1 flex cursor-pointer gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-2 hover:bg-neutral-800 sm:col-span-1 sm:row-span-2 sm:inline lg:p-5",
+				"col-span-2 outline-none row-span-1 flex cursor-pointer select-none gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-2 hover:bg-neutral-800 sm:col-span-1 sm:row-span-2 sm:inline lg:p-5",
 				{
 					"bg-neutral-800": isPressed,
 				}
 			)}
 			onClick={onClick}
-			onKeyDown={(e) => {
-				console.log(e.key);
-			}}
 		>
 			<iframe
 				className="mb-5 hidden lg:block"
@@ -255,7 +252,7 @@ function EqualBtn({ isPressed, onClick, children }: EqualBtnProps) {
 	return (
 		<button
 			className={cn(
-				"col-span-1 row-span-1 flex cursor-pointer flex-col items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900 p-2 hover:bg-neutral-800 lg:p-5",
+				"col-span-1 row-span-1 flex cursor-pointer select-none flex-col items-center justify-center rounded-xl border border-neutral-800 bg-neutral-900 p-2 hover:bg-neutral-800 lg:p-5",
 				{
 					"bg-neutral-800": isPressed,
 				}

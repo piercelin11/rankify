@@ -11,6 +11,7 @@ import FormMessage from "@/components/form/FormMessage";
 import { ActionResponse } from "@/types/action";
 import FormRadioGroup from "@/components/form/FormRadioGroup";
 import FormSelect from "@/components/form/FormSelect";
+import ColorSelector from "./ColorSelector";
 
 type TrackEditingFormProps = {
 	trackData: TrackData;
@@ -39,11 +40,14 @@ export default function TrackEditingForm({
 	const [response, setResponse] = useState<ActionResponse | null>(null);
 	const [isPending, setPending] = useState<boolean>(false);
 
-	const selectOptions = albums.map((album) => ({
-		id: album.id,
-		value: album.name,
-		label: album.name,
-	}));
+	const selectOptions = [
+		{ id: "non-album-track", value: "", label: "Non-album track" },
+		...albums.map((album) => ({
+			id: album.id,
+			value: album.name,
+			label: album.name,
+		})),
+	];
 
 	const {
 		register,
@@ -100,6 +104,22 @@ export default function TrackEditingForm({
 					options={selectOptions}
 					{...register("album")}
 				/>
+				{!trackData.albumId && (
+					<Controller
+						name="color"
+						control={control}
+						render={({ field }) => (
+							<ColorSelector
+								data={trackData}
+								message={errors.color?.message}
+								onChange={field.onChange}
+								onBlur={field.onBlur}
+								value={field.value}
+								name={field.name}
+							/>
+						)}
+					/>
+				)}
 				<Controller
 					name="type"
 					control={control}

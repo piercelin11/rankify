@@ -15,7 +15,7 @@ export type MenuOptionProps = {
 
 type DropDownMenuProps = {
 	options: MenuOptionProps[];
-	defaultValue?: string;
+	defaultValue?: string | React.ReactNode;
 };
 
 export default function DropdownMenu({

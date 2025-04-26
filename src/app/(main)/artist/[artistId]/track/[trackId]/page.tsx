@@ -39,6 +39,8 @@ export default async function page({
 	const trackData = trackStats.find((trackStats) => trackStats.id === trackId);
 	if (!trackData) notFound();
 
+	const trackColor = trackData.album.color || trackData.color;
+
 	const menuOptions = (await getLoggedTracks({ artistId, userId })).map(
 		(track) => ({
 			...track,
@@ -52,7 +54,7 @@ export default async function page({
 		{
 			stats: "#" + trackData.ranking,
 			subtitle: "overall ranking",
-			color: trackData.album?.color,
+			color: trackColor,
 			icon: <HeartFilledIcon width={iconSize} height={iconSize} />,
 		},
 		{
@@ -108,13 +110,13 @@ export default async function page({
 				))}
 				<PercentileBarsCard
 					bars={barData}
-					color={trackData.album?.color}
+					color={trackColor}
 					className="hidden sm:flex"
 				/>
 			</div>
 			<div className="sm:hidden">
 				<h3>Track Ranking Record</h3>
-				<PercentileBarsCard bars={barData} color={trackData.album?.color} />
+				<PercentileBarsCard bars={barData} color={trackColor} />
 			</div>
 
 			<TrackRankingLineChart

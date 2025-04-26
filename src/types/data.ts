@@ -35,6 +35,7 @@ export type TrackData = {
 	artist?: ArtistData;
     album?: AlbumData | null
     type: $Enums.TrackType;
+    color?: string | null; 
 }
 
 export type RankingData = {

@@ -21,7 +21,7 @@ export default function AchievementDisplay({
 				<AchievementItem
 					icon={<StarFilledIcon width={12} height={12} />}
 					label={"Hit Peak"}
-					className={"border-primary-500 bg-primary-500/5 text-primary-500"}
+					className={"border-primary-400 bg-primary-950/40 text-primary-400"}
 				/>
 			);
 		else if (achievement === "Big Jump")
@@ -29,7 +29,7 @@ export default function AchievementDisplay({
 				<AchievementItem
 					icon={<ArrowUpIcon width={12} height={12} />}
 					label={"Big Jump"}
-					className={"border-success-500 bg-success-500/5 text-success-500"}
+					className={"border-success-400 bg-success-950/40 text-success-400"}
 				/>
 			);
 		if (achievement === "Big Drop")
@@ -37,7 +37,7 @@ export default function AchievementDisplay({
 				<AchievementItem
 					icon={<ArrowDownIcon width={12} height={12} />}
 					label={"Big Drop"}
-					className={"border-danger-500 bg-danger-500/5 text-danger-500"}
+					className={"border-danger-400 bg-danger-950/40 text-danger-400"}
 				/>
 			);
 	}

@@ -34,14 +34,14 @@ type RankingLineChartProps<T> = {
 export default function RankingLineChart<
 	T extends { date: Date; dateId: string },
 >({ defaultData, allRankings, dataKey, isReverse }: RankingLineChartProps<T>) {
+	if (!defaultData.rankings) return;
+
 	const searchParams = useSearchParams();
 	const selectedIds = searchParams.getAll("comparison");
 	const selectedIdSet = new Set(selectedIds);
 
-	const dates = defaultData.rankings?.map((item) =>
-		dateToDashFormat(item.date)
-	);
-	const dateIds = defaultData.rankings?.map((item) => item.dateId) ?? [];
+	const dates = defaultData.rankings.map((item) => dateToDashFormat(item.date));
+	const dateIds = defaultData.rankings.map((item) => item.dateId) ?? [];
 
 	const selectedContents = allRankings.filter((data) =>
 		selectedIdSet.has(data.id)
@@ -50,7 +50,7 @@ export default function RankingLineChart<
 	const selectedDataset = selectedContents.map((data) => {
 		const stats: (number | null)[] = [];
 		const rankingsMap = new Map(
-			data.rankings?.map((ranking) => [ranking.dateId, ranking])
+			data.rankings!.map((ranking) => [ranking.dateId, ranking])
 		);
 
 		for (const dateId of dateIds) {
@@ -69,15 +69,13 @@ export default function RankingLineChart<
 	return (
 		<LineChart
 			data={{
-				date: dates ?? [],
+				date: dates,
 				dataset: [
 					{
 						name: defaultData.name,
-						color: defaultData.album
-							? defaultData.album.color
-							: defaultData.color,
+						color: defaultData.album?.color || defaultData.color,
 						datas:
-							defaultData.rankings?.map((item) =>
+							defaultData.rankings.map((item) =>
 								item[dataKey] ? Number(item[dataKey]) : null
 							) ?? [],
 					},

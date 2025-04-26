@@ -94,7 +94,7 @@ export default function ResultStage({ draft }: ResultStageProps) {
 						<Button
 							variant="primary"
 							onClick={() => {
-								submitRanking(result, draft.artistId, "ARTIST");
+								submitRanking(optimisticResult, draft.artistId, "ARTIST");
 							}}
 						>
 							<p className="w-full">Submit</p>

@@ -4,7 +4,7 @@ import React from "react";
 type RadioItemProps = {
 	label: string;
 	isChecked: boolean;
-	value: string;
+	value?: string;
 	onChange: () => void;
 	name?: string;
 	onBlur?: () => void;

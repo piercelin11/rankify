@@ -39,7 +39,7 @@ export default function ContentHeader({
 						<div className="relative min-h-[220px] min-w-[220px] drop-shadow-2xl lg:min-h-[260px] lg:min-w-[260px] 2xl:min-h-[300px] 2xl:min-w-[300px]">
 							{data?.img && (
 								<Image
-									className={cn({
+									className={cn("border border-neutral-500/20",{
 										"rounded-full": rounded,
 										"rounded-4xl": !rounded,
 									})}

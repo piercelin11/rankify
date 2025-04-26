@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import FormItem from "@/components/form/FormInput";
 import Button from "@/components/buttons/Button";
-import AlbumColorSelector from "./AlbumColorSelector";
+import ColorSelector from "./ColorSelector";
 import { Controller, useForm } from "react-hook-form";
 import { updateAlbumSchema, updateAlbumType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -77,7 +77,7 @@ export default function AlbumEditingForm({
 					name="color"
 					control={control}
 					render={({ field }) => (
-						<AlbumColorSelector
+						<ColorSelector
 							data={data}
 							message={errors.color?.message}
 							onChange={field.onChange}

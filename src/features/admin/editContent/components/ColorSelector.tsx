@@ -1,32 +1,32 @@
 import useDominantColor from "@/lib/hooks/useDominantColor";
-import { rgbToHex } from "@/lib/utils/colorAdjustment";
 import Button from "@/components/buttons/Button";
 import { InputHTMLAttributes, useState } from "react";
 import { cn } from "@/lib/cn";
 import { Pencil1Icon } from "@radix-ui/react-icons";
-import { AlbumData } from "@/types/data";
 import FormMessage from "@/components/form/FormMessage";
 import { Input } from "@/components/form/FormInput";
 import colorConvert from "color-convert";
 
-type AlbumColorSelectorProps = {
-	data: AlbumData;
+type ColorSelectorProps = {
+	data: { img: string | null };
 	message?: string;
 } & InputHTMLAttributes<HTMLInputElement>;
 
-export default function AlbumColorSelector({
+export default function ColorSelector({
 	data,
 	message,
 	onChange,
 	onBlur,
 	value,
 	name,
-}: AlbumColorSelectorProps) {
+}: ColorSelectorProps) {
 	const [isRadio, setRadio] = useState(true);
 	const [color] = useDominantColor(data.img!);
 	const colorPalette = color?.colorPalette;
 
-	const hexArray = [...new Set(colorPalette?.map((color) => `#${colorConvert.rgb.hex(color)}`))];
+	const hexArray = [
+		...new Set(colorPalette?.map((color) => `#${colorConvert.rgb.hex(color)}`)),
+	];
 
 	return (
 		<div className="space-y-3">

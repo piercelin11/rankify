@@ -11,12 +11,14 @@ type TrackRankingLineChartProps = {
 };
 
 export default function TrackRankingLineChart({defaultTrackData, allTrackData, menuOptions, parentOptions}: TrackRankingLineChartProps) {
+	const trackColor = defaultTrackData.album.color || defaultTrackData.color;
+
 	return (
 		<div className="stats-card bg-glow space-y-8">
 			<div className="flex flex-col justify-between sm:flex-row sm:items-center">
 				<h3>Track Ranking Trends</h3>
 				<LineChartFilter
-					defaultTag={{ ...defaultTrackData, color: defaultTrackData.album?.color || null }}
+					defaultTag={{ ...defaultTrackData, color: trackColor || null }}
 					menuOptions={menuOptions}
 					parentOptions={parentOptions}
 				/>

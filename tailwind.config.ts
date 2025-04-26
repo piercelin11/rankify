@@ -13,7 +13,7 @@ export default {
 		fontFamily: {
 			sans: "var(--font-poppins)",
 			serif: "var(--font-geist-mono)",
-			numeric: "var(--font-lato)",
+			numeric: "var(--font-archivo)",
 		},
 		container: {
 			center: true,

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Poppins, Lato } from "next/font/google";
+import { Geist, Geist_Mono, Poppins, Lato, Archivo } from "next/font/google";
 import "./globals.css";
 import Scroll from "@/components/layout/Scroll";
 import StoreProvider from "@/providers/StoreProvider";
@@ -22,6 +22,12 @@ const lato = Lato({
 
 const poppins = Poppins({
 	variable: "--font-poppins",
+	weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+	subsets: ["latin"],
+});
+
+const archivo = Archivo({
+	variable: "--font-archivo",
 	weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 	subsets: ["latin"],
 });

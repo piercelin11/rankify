@@ -8,7 +8,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function updateTrack(
 	originalData: TrackData,
-	formData: UpdateTrackType
+	formData: UpdateTrackType 
 ): Promise<ActionResponse> {
 	let isSuccess = false;
 
@@ -37,6 +37,7 @@ export default async function updateTrack(
 					name: formData.name,
 					albumId: newAlbum.id,
 					img: newAlbum.img,
+					color: newAlbum.color,
 					type: formData.type,
 				},
 			});
@@ -51,6 +52,7 @@ export default async function updateTrack(
 						disconnect: true,
 					},
 					type: formData.type,
+					color: formData.color
 				},
 			});
 		}

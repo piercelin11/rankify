@@ -20,15 +20,18 @@ export type UpdateTrackType = {
 
 export const updateTrackSchema = z.object({
 	name: z.string(),
-	album: z.string(),
+	album: z.string().or(z.literal("")),
 	type: z.nativeEnum($Enums.TrackType),
+	color: z
+		.string()
+		.refine(
+			(value) => /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(value),
+			"Must be a valid HEX color, e.g., #FFF or #FFFFFF"
+		)
+		.optional(),
 });
 
-export type UpdateTrackType = {
-	name: string;
-	album: string,
-	type: $Enums.TrackType;
-};
+export type UpdateTrackType = z.infer<typeof updateTrackSchema>;
 
 export const updateAlbumSchema = z.object({
 	name: z.string().min(1, "Album name is required."),

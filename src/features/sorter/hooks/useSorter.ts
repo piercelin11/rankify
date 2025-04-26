@@ -241,25 +241,21 @@ export default function useSorter({
 
 	//將歌名顯示於比較兩首歌曲的表格中
 	function showImage() {
-		try {
-			const percentage = Math.floor(
-				(finishSize.current * 100) / totalSize.current
-			);
-			const leftField =
-				"" + toNameFace(lstMember.current[cmp1.current][head1.current]);
-			const rightField =
-				"" + toNameFace(lstMember.current[cmp2.current][head2.current]);
+		const percentage = Math.floor(
+			(finishSize.current * 100) / totalSize.current
+		);
+		const leftField =
+			"" + toNameFace(lstMember.current[cmp1.current][head1.current]);
+		const rightField =
+			"" + toNameFace(lstMember.current[cmp2.current][head2.current]);
 
-			const leftFieldData = tracks.find((item) => item.name === leftField);
-			const rightFieldData = tracks.find((item) => item.name === rightField);
-			setLeftField(leftFieldData);
-			setRightField(rightFieldData);
+		const leftFieldData = tracks.find((item) => item.name === leftField);
+		const rightFieldData = tracks.find((item) => item.name === rightField);
+		setLeftField(leftFieldData);
+		setRightField(rightFieldData);
 
-			percent.current = percentage;
-			dispatch(setPercentage(percentage));
-		} catch (error) {
-			console.error("Error showing image in sorting stage:", error);
-		}
+		percent.current = percentage;
+		dispatch(setPercentage(percentage));
 	}
 
 	//將排序數字轉換成歌名

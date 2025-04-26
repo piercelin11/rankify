@@ -37,7 +37,7 @@ export default async function page({
 
 	return (
 		<div className="space-y-16">
-			{/* <Suspense fallback={<LoadingAnimation />}> */}
+			<Suspense fallback={<LoadingAnimation />}>
 				<div className="flex gap-4">
 					<DropdownMenu
 						options={dropdownOptions}
@@ -66,7 +66,7 @@ export default async function page({
 				) : (
 					<NoData />
 				)}
-			{/* </Suspense> */}
+			</Suspense>
 		</div>
 	);
 }

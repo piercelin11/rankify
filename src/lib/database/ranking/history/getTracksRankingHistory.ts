@@ -9,6 +9,10 @@ import getLatestRankingSession from "../../user/getLatestRankingSession";
 export type TrackHistoryType = Omit<TrackData, "artist" | "album"> & {
 	dateId: string;
 	date: Date;
+	album: {
+		name: string;
+		color: string | null;
+	} | null;
 	ranking: number;
 	peak: number;
 	rankChange: number | null;
@@ -60,6 +64,12 @@ export async function getTracksRankingHistory({
 			date: {
 				select: {
 					date: true,
+				},
+			},
+			album: {
+				select: {
+					name: true,
+					color: true,
 				},
 			},
 		},
@@ -118,6 +128,7 @@ export async function getTracksRankingHistory({
 					: Number(prevPeak),
 			countSongs: rankings.length,
 			achievement: getAchievement(),
+			album: data.album,
 		};
 	});
 

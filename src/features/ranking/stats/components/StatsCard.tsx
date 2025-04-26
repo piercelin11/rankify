@@ -34,7 +34,7 @@ export default function StatsCard({
 				{children}
 			</div>
 			<div className="mt-auto space-y-2 overflow-hidden">
-				<p className="text-highlight font-numeric">{stats ?? "no data"}</p>
+				<p className="text-highlight font-numeric font-bold">{stats ?? "no data"}</p>
 				<p className="text-description">{subtitle}</p>
 			</div>
 		</div>
