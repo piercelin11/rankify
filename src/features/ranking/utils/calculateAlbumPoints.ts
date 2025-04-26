@@ -1,5 +1,4 @@
 import { RankingResultData } from "@/features/sorter/components/SortingStage";
-import { Ranking } from "@prisma/client";
 
 export function calculateAlbumPoints(trackRankings: RankingResultData[]) {
 	const result = [];

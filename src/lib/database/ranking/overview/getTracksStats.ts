@@ -3,6 +3,9 @@ import { TrackData } from "@/types/data";
 import getTracksMetrics from "./getTracksMetrics";
 import { getUserRankingPreference } from "../../user/getUserPreference";
 import getLatestRankingSession from "../../user/getLatestRankingSession";
+import getTrackRankingSeries, {
+	TrackRankingSeriesType,
+} from "./getTrackRankingSeries";
 
 export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
 	ranking: number;
@@ -19,7 +22,7 @@ export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
 	top5PercentCount: number;
 
 	overallRankChange: number | null;
-	rankings: { ranking: number; date: { date: Date } }[];
+	rankings?: { ranking: number; date: Date; dateId: string }[];
 	rankChange?: number | null;
 };
 
@@ -38,10 +41,12 @@ export type getTracksStatsProps = {
 
 type getTracksStatsOptions = {
 	includeRankChange: boolean;
+	includeAllRankings: boolean;
 };
 
 const defaultOptions = {
 	includeRankChange: false,
+	includeAllRankings: false,
 };
 
 export default async function getTracksStats({
@@ -143,16 +148,6 @@ export default async function getTracksStats({
 					color: true,
 				},
 			},
-			rankings: {
-				select: {
-					ranking: true,
-					date: {
-						select: {
-							date: true,
-						},
-					},
-				},
-			},
 		},
 	});
 	const allTracksMap = new Map(allTracks.map((track) => [track.id, track]));
@@ -198,6 +193,12 @@ export default async function getTracksStats({
 		);
 	}
 
+	let trackRankingsMap: TrackRankingSeriesType | undefined;
+
+	if (options.includeAllRankings && !time) {
+		trackRankingsMap = await getTrackRankingSeries({ artistId, userId });
+	}
+
 	const result = trackMetrics.map((data) => ({
 		...allTracksMap.get(data.id)!,
 		album: {
@@ -213,7 +214,7 @@ export default async function getTracksStats({
 		top25PercentCount: top25PercentMap.get(data.id) ?? 0,
 		top5PercentCount: top5PercentMap.get(data.id) ?? 0,
 		overallRankChange: overallRankChangeMap.get(data.id) ?? null,
-		rankings: allTracksMap.get(data.id)?.rankings ?? [],
+		rankings: trackRankingsMap?.get(data.id),
 		rankChange: options.includeRankChange
 			? prevTrackRankingMap?.get(data.id)
 				? prevTrackRankingMap!.get(data.id)! - data.ranking

@@ -17,6 +17,7 @@ export default async function AlbumHistoryPointsSection({
 		userId,
 		dateId,
 	});
+
 	return (
 		<section className="space-y-6 stats-card bg-glow">
 			<h3>Album Points</h3>
@@ -25,7 +26,7 @@ export default async function AlbumHistoryPointsSection({
 					data={{
 						labels: albumRankings.map((album) => album.name),
 						mainData: albumRankings.map((album) => album.totalPoints),
-						subData: albumRankings.map((album) => album.rawTotalPoints),
+						subData: albumRankings.map((album) => album.totalBasePoints),
 						color: albumRankings.map((album) => album.color),
 					}}
 				/>

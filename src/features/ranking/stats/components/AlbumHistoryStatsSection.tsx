@@ -18,6 +18,9 @@ export default async function AlbumHistoryStatsSection({
 		artistId,
 		userId,
 		dateId,
+		options: {
+			includeChange: true
+		}
 	});
 
 	return (

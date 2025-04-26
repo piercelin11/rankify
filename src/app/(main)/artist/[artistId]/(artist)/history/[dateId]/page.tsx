@@ -34,6 +34,8 @@ export default async function page({
 		href: rankingSession.id,
 	}));
 
+	
+
 	return (
 		<div className="space-y-16">
 			<Suspense fallback={<LoadingAnimation />}>

@@ -7,6 +7,13 @@ import LineChartFilter, {
 	MenuOptionType,
 } from "../components/LineChartFilter";
 
+type AlbumRankingLineChartData = {
+	ranking: number;
+	points: number;
+	date: Date;
+	dateId: string;
+}
+
 type AlbumRankingLineChart = {
 	defaultAlbumData: AlbumStatsType;
 	allAlbumData: AlbumStatsType[];
@@ -45,7 +52,7 @@ export default function AlbumRankingLineChart({
 				<RankingLineChart
 					defaultData={defaultAlbumData}
 					allRankings={allAlbumData}
-					dataKey={"totalPoints"}
+					dataKey={"points"}
 					isReverse={false}
 				/>
 			) : (

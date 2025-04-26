@@ -36,8 +36,8 @@ export default async function AlbumOverviewPointsSection({
 				<DoubleBarChart
 					data={{
 						labels: albumRankings.map((album) => album.name),
-						mainData: albumRankings.map((album) => album.totalPoints),
-						subData: albumRankings.map((album) => album.rawTotalPoints),
+						mainData: albumRankings.map((album) => album.avgPoints),
+						subData: albumRankings.map((album) => album.avgBasePoints),
 						color: albumRankings.map((album) => album.color),
 					}}
 				/>

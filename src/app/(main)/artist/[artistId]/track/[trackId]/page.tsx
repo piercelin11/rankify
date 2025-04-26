@@ -28,7 +28,14 @@ export default async function page({
 	const artistId = (await params).artistId;
 	const { id: userId } = await getUserSession();
 
-	const trackStats = await getTracksStats({ artistId, userId });
+	const trackStats = await getTracksStats({
+		artistId,
+		userId,
+		options: {
+			includeAllRankings: true,
+			includeRankChange: false
+		},
+	});
 	const trackData = trackStats.find((trackStats) => trackStats.id === trackId);
 	if (!trackData) notFound();
 
@@ -60,26 +67,22 @@ export default async function page({
 		},
 	];
 
-	const {
-		top50PercentCount,
-		top25PercentCount,
-		top5PercentCount,
-		rankings,
-	} = trackData;
+	const { top50PercentCount, top25PercentCount, top5PercentCount, rankings } =
+		trackData;
 
 	const barData: BarData[] = [
 		{
-			width: top5PercentCount / rankings.length,
+			width: top5PercentCount / rankings!.length,
 			label: "Times in top 5%",
 			stats: top5PercentCount,
 		},
 		{
-			width: top25PercentCount / rankings.length,
+			width: top25PercentCount / rankings!.length,
 			label: "Times in top 25%",
 			stats: top25PercentCount,
 		},
 		{
-			width: top50PercentCount / rankings.length,
+			width: top50PercentCount / rankings!.length,
 			label: "Times in top 50%",
 			stats: top50PercentCount,
 		},

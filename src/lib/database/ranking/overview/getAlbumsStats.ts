@@ -6,6 +6,11 @@ import {
 	AlbumHistoryType,
 	getAlbumsRankingHistory,
 } from "../history/getAlbumsRankingHistory";
+import { db } from "@/lib/prisma";
+import getAlbumsByArtist from "../../data/getAlbumsByArtist";
+import getAlbumRankingSeries, {
+	AlbumRankingSeriesType,
+} from "./getAlbumRankingSeries";
 
 export type AlbumStatsType = AlbumData & {
 	ranking: number;
@@ -13,122 +18,178 @@ export type AlbumStatsType = AlbumData & {
 	top10PercentCount: number;
 	top25PercentCount: number;
 	top50PercentCount: number;
-	totalPoints: number;
-	rawTotalPoints: number;
-	rankings: AlbumHistoryType[];
+	avgPoints: number;
+	avgBasePoints: number;
+	rankings?: {
+		ranking: number;
+		points: number;
+		date: Date;
+		dateId: string;
+	}[];
+};
+
+type getAlbumsStatsOptions = {
+	includeAllRankings: boolean;
 };
 
 type getAlbumsStatsProps = {
 	artistId: string;
 	userId: string;
+	options?: getAlbumsStatsOptions;
 	time?: TimeFilterType;
+};
+
+const defaultOptions = {
+	includeAllRankings: false,
 };
 
 export async function getAlbumsStats({
 	artistId,
 	userId,
+	options = defaultOptions,
 	time,
 }: getAlbumsStatsProps): Promise<AlbumStatsType[]> {
-	const trackRankings = await getTracksStats({
-		artistId,
-		userId,
-		time,
-	});
-	const albums = await getLoggedAlbum({ artistId, userId, time });
-	const albumsMap = new Map(albums.map((album) => [album.id, album]));
-	const sessions = await getRankingSession({ artistId, userId });
-	const allAlbumsRankingHistory = (
-		await Promise.all(
-			sessions
-				.sort((a, b) => a.date.getTime() - b.date.getTime())
-				.map((session) =>
-					getAlbumsRankingHistory({ artistId, userId, dateId: session.id })
-				)
-		)
-	).flat();
-
-	const rankingsByAlbum = allAlbumsRankingHistory.reduce(
-		(acc, album) => {
-			if (!acc[album.id]) acc[album.id] = [];
-			acc[album.id].push(album);
-			return acc;
-		},
-		{} as Record<string, AlbumHistoryType[]>
-	);
-	const countSongs = trackRankings.length;
-
-	// 計算專輯的平均排名
-	const albumRankings = trackRankings
-		.filter((item) => item.albumId)
-		.reduce((acc: Omit<AlbumStatsType, "ranking">[], cur) => {
-			const albumId = cur.albumId!;
-			const existingAlbum = acc.find((item) => item.id === albumId);
-			const albumData = albumsMap.get(albumId)!;
-
-			const { adjustedScore, rawScore } = calculateAlbumPoints(
-				cur.ranking,
-				countSongs,
-				albumData!.tracks!.length,
-				albums.length
-			);
-
-			if (existingAlbum) {
-				existingAlbum.rawTotalPoints += rawScore;
-				existingAlbum.totalPoints += adjustedScore;
-
-				if (cur.ranking <= countSongs / 20) existingAlbum.top5PercentCount++;
-				if (cur.ranking <= countSongs / 10) existingAlbum.top10PercentCount++;
-				if (cur.ranking <= countSongs / 4) existingAlbum.top25PercentCount++;
-				if (cur.ranking <= countSongs / 2) existingAlbum.top50PercentCount++;
-			} else {
-				acc.push({
-					...albumData,
-					top5PercentCount: cur.ranking <= countSongs / 20 ? 1 : 0,
-					top10PercentCount: cur.ranking <= countSongs / 10 ? 1 : 0,
-					top25PercentCount: cur.ranking <= countSongs / 4 ? 1 : 0,
-					top50PercentCount: cur.ranking <= countSongs / 2 ? 1 : 0,
-					totalPoints: adjustedScore,
-					rawTotalPoints: rawScore,
-					rankings: rankingsByAlbum[albumId],
-				});
+	const date = time
+		? {
+				[time.filter]: time.threshold,
 			}
+		: undefined;
 
-			return acc;
-		}, []);
+	const albumData = await db.album.findMany({
+		where: {
+			artistId,
+			rankings: {
+				some: {
+					userId,
+				},
+			},
+		},
+	});
+	const albumDataMap = new Map(albumData.map((album) => [album.id, album]));
 
-	return albumRankings
-		.sort((a, b) => b.totalPoints - a.totalPoints)
-		.map((ranking, index) => ({ ...ranking, ranking: index + 1 }));
-}
-
-export function calculateAlbumPoints(
-	ranking: number,
-	countSongs: number,
-	countAlbumsSongs: number,
-	countAlbums: number
-) {
-	// 計算百分比排名
-	const percentileRank = (countSongs - ranking + 1) / countSongs;
-	// 計算分數
-	let score =
-		percentileRank > 0.75
-			? percentileRank * 1000
-			: percentileRank > 0.5
-				? percentileRank * 950
-				: percentileRank > 0.25
-					? percentileRank * 650
-					: percentileRank * 500;
-	// 引入平滑係數：若專輯數小於5首且歌曲排名在前百分之五十，則引入平滑係數
-	const smoothingFactor =
-		percentileRank > 0.5 && countAlbumsSongs < 5
-			? countAlbumsSongs * 0.15 + 0.25
-			: 1;
-	// 調整分數
-	const adjustedScore = Math.floor(
-		(score / countAlbumsSongs) * smoothingFactor
+	const top5PercentCount = await db.ranking.groupBy({
+		by: ["albumId"],
+		where: {
+			albumId: { not: null },
+			artistId,
+			userId,
+			date: {
+				date,
+			},
+			rankPercentile: {
+				lte: 0.05,
+			},
+		},
+		_count: {
+			_all: true,
+		},
+	});
+	const top5PercentMap = new Map(
+		top5PercentCount.map((data) => [data.albumId, data._count._all])
 	);
 
-	const rawScore = Math.floor(score / (countSongs / countAlbums));
+	const top10PercentCount = await db.ranking.groupBy({
+		by: ["albumId"],
+		where: {
+			albumId: { not: null },
+			artistId,
+			userId,
+			date: {
+				date,
+			},
+			rankPercentile: {
+				lte: 0.1,
+			},
+		},
+		_count: {
+			_all: true,
+		},
+	});
+	const top10PercentMap = new Map(
+		top10PercentCount.map((data) => [data.albumId, data._count._all])
+	);
 
-	return { adjustedScore, rawScore };
+	const top25PercentCount = await db.ranking.groupBy({
+		by: ["albumId"],
+		where: {
+			albumId: { not: null },
+			artistId,
+			userId,
+			date: {
+				date,
+			},
+			rankPercentile: {
+				lte: 0.25,
+			},
+		},
+		_count: {
+			_all: true,
+		},
+	});
+	const top25PercentMap = new Map(
+		top25PercentCount.map((data) => [data.albumId, data._count._all])
+	);
+
+	const top50PercentCount = await db.ranking.groupBy({
+		by: ["albumId"],
+		where: {
+			albumId: { not: null },
+			artistId,
+			userId,
+			date: {
+				date,
+			},
+			rankPercentile: {
+				lte: 0.5,
+			},
+		},
+		_count: {
+			_all: true,
+		},
+	});
+	const top50PercentMap = new Map(
+		top50PercentCount.map((data) => [data.albumId, data._count._all])
+	);
+
+	const albumPoints = await db.albumRanking.groupBy({
+		by: ["albumId"],
+		where: {
+			artistId,
+			userId,
+			date: {
+				date,
+			},
+		},
+		_avg: {
+			points: true,
+			basePoints: true,
+		},
+		orderBy: {
+			_avg: {
+				points: "desc",
+			},
+		},
+	});
+
+	let albumRankingsMap: AlbumRankingSeriesType | undefined;
+
+	if (options.includeAllRankings && !time) {
+		albumRankingsMap = await getAlbumRankingSeries({ artistId, userId });
+	}
+
+	const result = albumPoints.map((data, index) => ({
+		...albumDataMap.get(data.albumId)!,
+		ranking: index + 1,
+		top5PercentCount: top5PercentMap.get(data.albumId) ?? 0,
+		top10PercentCount: top10PercentMap.get(data.albumId) ?? 0,
+		top25PercentCount: top25PercentMap.get(data.albumId) ?? 0,
+		top50PercentCount: top50PercentMap.get(data.albumId) ?? 0,
+		avgPoints: data._avg.points ? Math.round(data._avg.points) : 0,
+		avgBasePoints: data._avg.basePoints ? Math.round(data._avg.basePoints) : 0,
+		rankings: options.includeAllRankings
+			? albumRankingsMap?.get(data.albumId)
+			: undefined,
+	}));
+
+	return result;
 }

@@ -14,6 +14,7 @@ import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
 import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";
 import PercentileBarsCard, { BarData } from "@/features/ranking/stats/components/PercentileBarsCard";
 import StatsCard from "@/features/ranking/stats/components/StatsCard";
+import getAlbumRankingSeries from "@/lib/database/ranking/overview/getAlbumRankingSeries";
 
 const iconSize = 22;
 
@@ -29,6 +30,13 @@ export default async function TrackPage({
 	const albumStats = await getAlbumsStats({
 		artistId,
 		userId,
+		options: {
+			includeAllRankings: true
+		}
+	});
+	const albumRankingSeries = await getAlbumRankingSeries({
+		artistId,
+		userId,
 	});
 	const topTrack = (
 		await getTracksStats({
@@ -37,6 +45,7 @@ export default async function TrackPage({
 		})
 	).find((track) => track.albumId === albumId);
 	const albumData = albumStats.find((album) => album.id === albumId);
+	//const defaultAlbumRankings = albumRankingSeries.find((album) => album.id === albumId);
 	if (!albumData) notFound();
 
 	const menuOptions = await getLoggedAlbums({ artistId, userId });
@@ -49,7 +58,7 @@ export default async function TrackPage({
 			icon: <HeartFilledIcon width={iconSize} height={iconSize} />,
 		},
 		{
-			stats: albumData.totalPoints,
+			stats: albumData.avgPoints,
 			subtitle: "average album points",
 			icon: <StarFilledIcon width={iconSize} height={iconSize} />,
 		},
