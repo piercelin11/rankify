@@ -13,7 +13,7 @@ export default {
 		fontFamily: {
 			sans: "var(--font-poppins)",
 			serif: "var(--font-geist-mono)",
-			numeric: "var(--font-archivo)",
+			numeric: "var(--font-raleway)",
 		},
 		container: {
 			center: true,
@@ -52,6 +52,7 @@ export default {
 				spotify: "#1ed760",
 			},
 			boxShadow: {
+				dent: `inset -2px 2px 8px 0 ${colors.neutral[950]}AA`,
 				card: `inset -1px 1px 0 0 ${colors.neutral[600]},inset 1px -1px 0 0 ${colors.neutral[600]}40`,
 				button: `inset -1px 1px 2px 0 ${colors.neutral[500]},inset 1.5px -1.5px 2px 0 ${colors.neutral[800]}`,
 			},

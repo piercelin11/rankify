@@ -83,7 +83,7 @@ export async function getTracksRankingHistory({
 		latestSession = await getLatestRankingSession({ artistId, userId });
 
 	const currentDate = rankings[0].date.date;
-	const trackIds = rankings.map((track) => track.id);
+	const trackIds = rankings.map((ranking) => ranking.trackId);
 
 	const historicalPeak = await db.ranking.groupBy({
 		by: ["trackId"],
@@ -95,12 +95,14 @@ export async function getTracksRankingHistory({
 		},
 		_min: {
 			ranking: true,
-		},
+		}
 	});
 
 	const historicalPeakMap = new Map(
 		historicalPeak.map((data) => [data.trackId, data._min.ranking])
 	);
+
+	console.log(historicalPeak)
 
 	const result = rankings.map((data) => {
 		const prevPeak = historicalPeakMap.get(data.trackId);

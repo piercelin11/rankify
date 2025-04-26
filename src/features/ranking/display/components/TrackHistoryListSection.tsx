@@ -24,8 +24,8 @@ export default async function TrackHistoryListSection({
 	});
 
 	return (
-		<section className="space-y-6">
-			<h3>Track Rankings</h3>
+		<section>
+			<h3 className="mb-6">Track Rankings</h3>
 			<RankingList data={trackRankings} hasHeader={false} columns={[]} />
 			<Link href={`/artist/${artistId}/history/${dateId}/ranking`}>
 				<Button variant="ghost" className="mx-auto">

@@ -33,13 +33,14 @@ export default async function TrackOverviewListSection({
 		take: 5,
 		time,
 		options: {
-			includeRankChange: true
+			includeRankChange: true,
+			includeAllRankings: false
 		}
 	});
 
 	return (
-		<div className="space-y-6">
-			<h3>Track Rankings</h3>
+		<section>
+			<h3 className="mb-6">Track Rankings</h3>
 			<RankingList data={trackRankings} hasHeader={false} columns={[]} />
 			<Link
 				href={`/artist/${artistId}/overview/${rangeSlug}/ranking`}
@@ -49,6 +50,6 @@ export default async function TrackOverviewListSection({
 					<ArrowTopRightIcon />
 				</Button>
 			</Link>
-		</div>
+		</section>
 	);
 }

@@ -30,7 +30,7 @@ export default function PercentileBarsCard({
 			{bars.map((bar) => (
 				<div key={bar.label} className="space-y-2">
 					<div className="flex justify-between">
-						<p className="font-numeric text-neutral-400">{bar.label}</p>
+						<p className="font-numeric text-neutral-300">{bar.label}</p>
 						<p className="font-numeric font-bold">{bar.stats}</p>
 					</div>
 					<PercentileBar width={bar.width} color={color} />

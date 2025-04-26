@@ -1,9 +1,11 @@
 import { $Enums } from "@prisma/client";
 import {
+	AvatarIcon,
 	ExitIcon,
 	GearIcon,
 	HomeIcon,
 	LockClosedIcon,
+	StarIcon,
 } from "@radix-ui/react-icons";
 import { signOut } from "next-auth/react";
 
@@ -49,3 +51,24 @@ export const getMainSidebarMenuItems = (
 		},
 	];
 };
+
+export const adminSidebarMenuItem: SidebarMenuItemType[] = [
+	{
+		id: "artists",
+		label: "Artists",
+		icon: () => <StarIcon />,
+		href: "/admin/artist",
+	},
+	{
+		id: "users",
+		label: "Users",
+		icon: () => <AvatarIcon />,
+		href: "/admin/user",
+	},
+	{
+		id: "settings",
+		label: "Settings",
+		icon: () => <GearIcon />,
+		href: "/admin/setting",
+	},
+];

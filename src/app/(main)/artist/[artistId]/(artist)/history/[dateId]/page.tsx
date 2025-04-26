@@ -42,10 +42,10 @@ export default async function page({
 				<div className="flex gap-4">
 					<DropdownMenu
 						options={dropdownOptions}
-						defaultValue={dateToDashFormat(currentDate.date)}
+						defaultValue={<p className="font-numeric tabular-nums">{dateToDashFormat(currentDate.date)}</p>}
 					/>
 					<Link href={`/sorter/${artistId}`}>
-						<div className="aspect-square rounded-full bg-primary-500 p-4 text-neutral-950 hover:bg-neutral-100">
+						<div className="aspect-square rounded-full bg-primary-500 p-3 text-neutral-950 hover:bg-neutral-100">
 							<PlusIcon width={20} height={20} />
 						</div>
 					</Link>

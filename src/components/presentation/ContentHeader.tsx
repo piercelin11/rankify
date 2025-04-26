@@ -73,8 +73,8 @@ function ContentHeaderInfo({
 	color,
 }: ContentHeaderProps) {
 	return (
-		<div>
-			{type && <p className="mb-2">{type}</p>}
+		<div className="space-y-2">
+			{type && <p>{type}</p>}
 			<h1 className="text-display">{data?.name}</h1>
 			<div
 				className={cn("text-description mb-4 flex items-center gap-2", {

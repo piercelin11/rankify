@@ -3,10 +3,11 @@ import ContentWrapper from "@/components/layout/ContentWrapper";
 import getAlbumById from "@/lib/database/data/getAlbumById";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import Image from "next/image"
+import Image from "next/image";
 import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
 import { AlbumData, ArtistData } from "@/types/data";
 import Link from "next/link";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 
 type LayoutProps = {
 	params: Promise<{ albumId: string }>;
@@ -19,12 +20,12 @@ export default async function AlbumPageLayout({
 }: LayoutProps) {
 	return (
 		<>
-			<Suspense fallback={<ContentHeader />}>
-				<Header params={params} />
+			<Header params={params} />
+			<Suspense fallback={<LoadingAnimation />}>
+				<ContentWrapper className="space-y-10 2xl:space-y-20">
+					{children}
+				</ContentWrapper>
 			</Suspense>
-			<ContentWrapper className="space-y-10 2xl:space-y-20">
-				{children}
-			</ContentWrapper>
 		</>
 	);
 }

@@ -4,7 +4,7 @@ import React from "react";
 import { getUserSession } from "@/../auth";
 import {
 	HeartFilledIcon,
-	RocketIcon,
+	MoveIcon,
 	StarFilledIcon,
 } from "@radix-ui/react-icons";
 import getLoggedTracks from "@/lib/database/user/getLoggedTracks";
@@ -33,7 +33,7 @@ export default async function page({
 		userId,
 		options: {
 			includeAllRankings: true,
-			includeRankChange: false
+			includeRankChange: false,
 		},
 	});
 	const trackData = trackStats.find((trackStats) => trackStats.id === trackId);
@@ -63,9 +63,11 @@ export default async function page({
 			icon: <StarFilledIcon width={iconSize} height={iconSize} />,
 		},
 		{
-			stats: trackData.overallRankChange,
-			subtitle: "total chartrun",
-			icon: <RocketIcon width={iconSize} height={iconSize} />,
+			stats: trackData.overallRankChange && trackData.overallRankChange > 0
+				? `+${trackData.overallRankChange}`
+				: trackData.overallRankChange,
+			subtitle: !trackData.overallRankChange ? "rank unchanged" : trackData.overallRankChange > 0 ? "overall rank up" : "overall rank down",
+			icon: <MoveIcon width={iconSize} height={iconSize} />,
 		},
 	];
 

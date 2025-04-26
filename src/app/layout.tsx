@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Poppins, Lato, Archivo } from "next/font/google";
+import { Geist, Geist_Mono, Poppins, /* Lato, Archivo, */ Raleway} from "next/font/google";
 import "./globals.css";
 import Scroll from "@/components/layout/Scroll";
 import StoreProvider from "@/providers/StoreProvider";
@@ -14,11 +14,17 @@ const geistMono = Geist_Mono({
 	subsets: ["latin"],
 });
 
-const lato = Lato({
+/* const lato = Lato({
 	variable: "--font-lato",
 	weight: ["100", "300", "400", "700", "900"],
 	subsets: ["latin"],
 });
+
+const archivo = Archivo({
+	variable: "--font-archivo",
+	weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+	subsets: ["latin"],
+}); */
 
 const poppins = Poppins({
 	variable: "--font-poppins",
@@ -26,8 +32,8 @@ const poppins = Poppins({
 	subsets: ["latin"],
 });
 
-const archivo = Archivo({
-	variable: "--font-archivo",
+const raleway = Raleway({
+	variable: "--font-raleway",
 	weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 	subsets: ["latin"],
 });
@@ -48,7 +54,7 @@ export default function RootLayout({
 			<Scroll />
 			<StoreProvider>
 				<body
-					className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${lato.variable} antialiased`}
+					className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${raleway.variable} antialiased`}
 				>
 					{children}
 				</body>

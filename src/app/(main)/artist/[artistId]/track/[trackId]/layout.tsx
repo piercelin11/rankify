@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import Image from "next/image";
 import { ArtistData, TrackData } from "@/types/data";
 import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 
 type LayoutProps = {
 	params: Promise<{ trackId: string; artistId: string }>;
@@ -19,12 +20,12 @@ export default async function TrackPageLayout({
 }: LayoutProps) {
 	return (
 		<>
-			<Suspense fallback={<ContentHeader />}>
-				<Header params={params} />
+			<Header params={params} />
+			<Suspense fallback={<LoadingAnimation />}>
+				<ContentWrapper className="space-y-10 2xl:space-y-20">
+					{children}
+				</ContentWrapper>
 			</Suspense>
-			<ContentWrapper className="space-y-10 2xl:space-y-20">
-				{children}
-			</ContentWrapper>
 		</>
 	);
 }

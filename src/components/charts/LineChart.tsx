@@ -106,12 +106,12 @@ export function LineChart({
 		datasets: dataset.map((item) => ({
 			label: item.name,
 			data: item.datas,
-			borderWidth: 1.5,
+			borderWidth: 2,
 			borderColor: item.color
 				? adjustColorLightness(item.color, 0.5, 2)
 				: DEFAULT_COLOR,
 			backgroundColor: item.color
-				? `${adjustColorLightness(item.color, 0.5, 2)}25`
+				? `${adjustColorLightness(item.color, 0.5, 2)}44`
 				: DEFAULT_COLOR + "1A",
 			fill: "start",
 		})),
