@@ -26,9 +26,10 @@ export default async function AllTrackOverviewRankingList({
 	const tracksRankings = await getTracksStats({
 		artistId,
 		userId,
-		time,
+		time, 
 		options: {
 			includeRankChange: true,
+			includeAllRankings: false,
 		},
 	});
 
@@ -44,8 +45,8 @@ export default async function AllTrackOverviewRankingList({
 			header: "gap",
 		},
 		{
-			key: "overallRankChange",
-			header: "chartrun",
+			key: "averageRanking",
+			header: "avg",
 		},
 	];
 

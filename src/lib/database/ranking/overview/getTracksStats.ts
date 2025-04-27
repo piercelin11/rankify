@@ -9,7 +9,7 @@ import getTrackRankingSeries, {
 
 export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
 	ranking: number;
-	averageRanking: number;
+	averageRanking: number | string;
 	peak: number;
 	worst: number;
 	gap: number | null;
@@ -20,8 +20,6 @@ export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
 	top50PercentCount: number;
 	top25PercentCount: number;
 	top5PercentCount: number;
-
-	overallRankChange: number | null;
 	rankings?: { ranking: number; date: Date; dateId: string }[];
 	rankChange?: number | null;
 };
@@ -114,21 +112,6 @@ export default async function getTracksStats({
 		top5PercentCounts.map((track) => [track.trackId, track._count._all])
 	);
 
-	const overallRankChange = await db.ranking.groupBy({
-		by: ["trackId"],
-		where: {
-			userId,
-			artistId,
-			date: { date },
-			trackId: { in: trackIds },
-			track: trackConditions,
-		},
-		_sum: { rankChange: true },
-	});
-	const overallRankChangeMap = new Map(
-		overallRankChange.map((track) => [track.trackId, track._sum.rankChange])
-	);
-
 	const allTracks = await db.track.findMany({
 		where: {
 			id: {
@@ -206,14 +189,13 @@ export default async function getTracksStats({
 			color: allTracksMap.get(data.id)?.album?.color ?? null,
 		},
 		ranking: data.ranking,
-		averageRanking: data.averageRanking,
+		averageRanking: data.averageRanking.toFixed(1),
 		peak: data.peak,
 		worst: data.worst,
 		gap: data.worst - data.peak,
 		top50PercentCount: top50PercentMap.get(data.id) ?? 0,
 		top25PercentCount: top25PercentMap.get(data.id) ?? 0,
 		top5PercentCount: top5PercentMap.get(data.id) ?? 0,
-		overallRankChange: overallRankChangeMap.get(data.id) ?? null,
 		rankings: trackRankingsMap?.get(data.id),
 		rankChange: options.includeRankChange
 			? prevTrackRankingMap?.get(data.id)

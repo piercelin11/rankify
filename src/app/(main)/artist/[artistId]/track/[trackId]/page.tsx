@@ -16,6 +16,7 @@ import PercentileBarsCard, {
 	BarData,
 } from "@/features/ranking/stats/components/PercentileBarsCard";
 import StatsCard from "@/features/ranking/stats/components/StatsCard";
+import calculateTotalChartRun from "@/lib/database/ranking/overview/calculateTotalChartRun";
 
 const iconSize = 22;
 
@@ -38,6 +39,8 @@ export default async function page({
 	});
 	const trackData = trackStats.find((trackStats) => trackStats.id === trackId);
 	if (!trackData) notFound();
+
+	const totalChartRun = await calculateTotalChartRun({artistId,userId, trackId});
 
 	const trackColor = trackData.album.color || trackData.color;
 
@@ -63,10 +66,8 @@ export default async function page({
 			icon: <StarFilledIcon width={iconSize} height={iconSize} />,
 		},
 		{
-			stats: trackData.overallRankChange && trackData.overallRankChange > 0
-				? `+${trackData.overallRankChange}`
-				: trackData.overallRankChange,
-			subtitle: !trackData.overallRankChange ? "rank unchanged" : trackData.overallRankChange > 0 ? "overall rank up" : "overall rank down",
+			stats: totalChartRun,
+			subtitle: "total chart run",
 			icon: <MoveIcon width={iconSize} height={iconSize} />,
 		},
 	];

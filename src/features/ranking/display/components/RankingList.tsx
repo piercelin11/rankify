@@ -121,6 +121,7 @@ export function RankingListCell<T>({
 }: RankingListCellProps<T>) {
 	const searchParams = useSearchParams();
 	const sortQuery = searchParams.get("sort");
+
 	return (
 		<div>
 			{render ? (
@@ -128,10 +129,10 @@ export function RankingListCell<T>({
 			) : (
 				<p
 					className={cn("text-neutral-500 group-hover:text-neutral-100", {
-						"text-neutral-100": sortQuery === columnKey
+						"text-neutral-100": sortQuery === columnKey,
 					})}
 				>
-					{value !== null ? String(value) : ""}
+					{value != null ? String(value) : ""}
 				</p>
 			)}
 		</div>

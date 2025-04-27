@@ -14,6 +14,7 @@ import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
 import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";
 import PercentileBarsCard, { BarData } from "@/features/ranking/stats/components/PercentileBarsCard";
 import StatsCard from "@/features/ranking/stats/components/StatsCard";
+import { db } from "@/lib/prisma";
 
 const iconSize = 22;
 
@@ -42,6 +43,21 @@ export default async function TrackPage({
 	const albumData = albumStats.find((album) => album.id === albumId);
 	if (!albumData) notFound();
 
+	const trackLength = (await db.track.findMany({
+		where: {
+			albumId,
+			artistId,
+			rankings: {
+				some: {
+					userId
+				}
+			}
+		},
+		select: {
+			id: true
+		}
+	})).length;
+
 	const menuOptions = await getLoggedAlbums({ artistId, userId });
 
 	const statsBoxData = [
@@ -63,22 +79,22 @@ export default async function TrackPage({
 		},
 	];
 
-	const { top10PercentCount, top25PercentCount, top50PercentCount, tracks, rankings } =
+	const { top10PercentCount, top25PercentCount, top50PercentCount, rankings } =
 		albumData;
 
 	const barData: BarData[] = [
 		{
-			width: (top10PercentCount / Number(rankings?.length)) / Number(tracks?.length),
+			width: (top10PercentCount / Number(rankings?.length)) / trackLength,
 			label: "Tracks in top 10%",
 			stats: Math.ceil(top10PercentCount / Number(rankings?.length)),
 		},
 		{
-			width: (top25PercentCount / Number(rankings?.length)) / Number(tracks?.length),
+			width: (top25PercentCount / Number(rankings?.length)) / trackLength,
 			label: "Tracks in top 25%",
 			stats: Math.ceil(top25PercentCount / Number(rankings?.length)),
 		},
 		{
-			width: (top50PercentCount / Number(rankings?.length)) / Number(tracks?.length),
+			width: (top50PercentCount / Number(rankings?.length)) / trackLength,
 			label: "Tracks in top 50%",
 			stats: Math.ceil(top50PercentCount / Number(rankings?.length)),
 		},

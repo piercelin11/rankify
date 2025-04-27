@@ -1,13 +1,6 @@
-import getTracksStats, { TimeFilterType } from "./getTracksStats";
+import { TimeFilterType } from "./getTracksStats";
 import { AlbumData } from "@/types/data";
-import getLoggedAlbum from "../../user/getLoggedAlbums";
-import getRankingSession from "../../user/getRankingSession";
-import {
-	AlbumHistoryType,
-	getAlbumsRankingHistory,
-} from "../history/getAlbumsRankingHistory";
 import { db } from "@/lib/prisma";
-import getAlbumsByArtist from "../../data/getAlbumsByArtist";
 import getAlbumRankingSeries, {
 	AlbumRankingSeriesType,
 } from "./getAlbumRankingSeries";
@@ -20,10 +13,6 @@ export type AlbumStatsType = Omit<AlbumData, "tracks"> & {
 	top50PercentCount: number;
 	avgPoints: number;
 	avgBasePoints: number;
-	tracks: {
-		name: string;
-		id: string;
-	}[];
 	rankings?: {
 		ranking: number;
 		points: number;
@@ -46,7 +35,7 @@ type getAlbumsStatsProps = {
 const defaultOptions = {
 	includeAllRankings: false,
 };
-
+ 
 export async function getAlbumsStats({
 	artistId,
 	userId,
@@ -67,15 +56,7 @@ export async function getAlbumsStats({
 					userId,
 				},
 			},
-		},
-		include: {
-			tracks: {
-				select: {
-					id: true,
-					name: true,
-				},
-			},
-		},
+		}
 	});
 	const albumDataMap = new Map(albumData.map((album) => [album.id, album]));
 
