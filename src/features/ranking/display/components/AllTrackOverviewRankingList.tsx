@@ -1,61 +1,79 @@
-import getTracksStats, {
-	TimeFilterType,
-	TrackStatsType,
-} from "@/lib/database/ranking/overview/getTracksStats";
-import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
-import { dateToLong } from "@/lib/utils/helper";
-import React from "react";
-import { Column } from "./RankingList";
-import TrackRankingList from "./TrackRankingList";
+"use client";
 
-export default async function AllTrackOverviewRankingList({
-	artistId,
-	userId,
-	startDate,
-}: {
-	artistId: string;
-	userId: string;
-	startDate: Date | undefined;
-}) {
-	const time: TimeFilterType | undefined = startDate ? {
-		threshold: startDate,
-		filter: "gte",
-	} : undefined;
+import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
+import React, { useMemo } from "react";
+import {
+	Column,
+	RankingHeader,
+	RankingListItem,
+} from "./RankingList";
+import { AlbumData } from "@/types/data";
+import RankingAlbumFilter from "./RankingAlbumFilter";
+import useSortedAndFilteredRanking from "../hooks/useSortedAndFilteredRanking";
 
-	const albums = await getLoggedAlbums({ artistId, userId });
-	const tracksRankings = await getTracksStats({
-		artistId,
-		userId,
-		time, 
-		options: {
-			includeRankChange: true,
-			includeAllRankings: false,
-		},
-	});
+type AllTrackOverviewRankingListProps = {
+	tracksRankings: TrackStatsType[];
+	albums: AlbumData[];
+	title: string;
+};
 
-	const title = startDate ? `${dateToLong(startDate)} - now` : "all time";
+export default function AllTrackOverviewRankingList({
+	tracksRankings,
+	albums,
+	title,
+}: AllTrackOverviewRankingListProps) {
+	const {
+		sortedAndFilteredRankings,
+		handleHeaderClick,
+		dropdownOptions,
+		albumIdFilter,
+		sortKey,
+		sortOrder,
+	} = useSortedAndFilteredRanking(tracksRankings, albums);
+
+	const albumsMap = useMemo(
+		() => new Map(albums.map((album) => [album.id, album])),
+		[albums]
+	);
 
 	const columns: Column<TrackStatsType>[] = [
 		{
 			key: "peak",
 			header: "peak",
+			onClick: () => handleHeaderClick("peak"),
 		},
 		{
 			key: "gap",
 			header: "gap",
+			onClick: () => handleHeaderClick("gap"),
 		},
 		{
 			key: "averageRanking",
 			header: "avg",
+			onClick: () => handleHeaderClick("averageRanking"),
 		},
 	];
 
 	return (
-		<TrackRankingList
-			data={tracksRankings}
-			columns={columns}
-			albums={albums}
-			title={title}
-		/>
+		<div>
+			<div className="mb-10 flex items-center justify-between">
+				<RankingAlbumFilter
+					dropdownOptions={dropdownOptions}
+					selectedAlbum={albumIdFilter && albumsMap.get(albumIdFilter)?.name}
+				/>
+				<p className="hidden text-neutral-500 sm:block">{title}</p>
+			</div>
+			<section>
+				<RankingHeader
+					columns={columns}
+					selectedHeader={String(sortKey)}
+					sortOrder={sortOrder}
+				/>
+
+				{sortedAndFilteredRankings.map((row) => (
+					<RankingListItem key={row.id} data={row} columns={columns} />
+				))}
+			</section>
+		</div>
 	);
 }

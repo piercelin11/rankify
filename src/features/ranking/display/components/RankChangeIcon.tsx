@@ -8,15 +8,14 @@ import { cn } from "@/lib/cn";
 import React from "react";
 
 type RankChangeIconProps = {
-	data: { rankChange?: number | null };
+	rankChange?: number | null;
 };
 
 const iconSize = 14;
 
-export default function RankChangeIcon({ data }: RankChangeIconProps) {
+export default function RankChangeIcon({ rankChange }: RankChangeIconProps) {
 	let result: "debut" | "stable" | "up" | "down";
 	
-	const { rankChange } = data;
 
 	if (rankChange === 0) result = "stable";
 	else if (rankChange === null) result = "debut";

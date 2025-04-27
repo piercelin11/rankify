@@ -19,34 +19,6 @@ export default async function ArtistRankingPage({
 
 	const { id: userId } = await getUserSession();
 
-	return (
-		<>
-			<Suspense fallback={<LoadingAnimation />}>
-				<TrackHistoryRankingList
-					artistId={artistId}
-					userId={userId}
-					dateId={dateId}
-				/>
-				<Link href={`/artist/${artistId}/history?date=${dateId}`}>
-					<Button variant="ghost" className="mx-auto">
-						<ArrowLeftIcon />
-						Back
-					</Button>
-				</Link>
-			</Suspense>
-		</>
-	);
-}
-
-async function TrackHistoryRankingList({
-	artistId,
-	userId,
-	dateId,
-}: {
-	artistId: string;
-	userId: string;
-	dateId: string;
-}) {
 	const tracksRankings = await getTracksRankingHistory({
 		artistId,
 		userId,
@@ -65,10 +37,20 @@ async function TrackHistoryRankingList({
 	});
 
 	return (
-		<AllTrackHistoryRankingList
-			data={tracksRankings}
-			albums={albums}
-			title={dateToLong(tracksRankings[0].date)}
-		/>
+		<>
+			<Suspense fallback={<LoadingAnimation />}>
+				<AllTrackHistoryRankingList
+					tracksRankings={tracksRankings}
+					albums={albums}
+					title={dateToLong(tracksRankings[0].date)}
+				/>
+				<Link href={`/artist/${artistId}/history?date=${dateId}`}>
+					<Button variant="ghost" className="mx-auto">
+						<ArrowLeftIcon />
+						Back
+					</Button>
+				</Link>
+			</Suspense>
+		</>
 	);
 }

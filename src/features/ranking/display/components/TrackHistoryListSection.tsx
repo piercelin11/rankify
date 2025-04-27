@@ -1,5 +1,5 @@
 import React from "react";
-import RankingList from "./RankingList";
+import { RankingListItem } from "./RankingList";
 import Link from "next/link";
 import Button from "@/components/buttons/Button";
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";
@@ -26,7 +26,9 @@ export default async function TrackHistoryListSection({
 	return (
 		<section>
 			<h3 className="mb-6">Track Rankings</h3>
-			<RankingList data={trackRankings} hasHeader={false} columns={[]} />
+			{trackRankings.map((track) => (
+				<RankingListItem key={track.id} data={track} columns={[]} />
+			))}
 			<Link href={`/artist/${artistId}/history/${dateId}/ranking`}>
 				<Button variant="ghost" className="mx-auto">
 					View All Rankings

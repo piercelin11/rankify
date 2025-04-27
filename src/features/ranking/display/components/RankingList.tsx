@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode } from "react";
 import RankChangeIcon from "./RankChangeIcon";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -20,52 +20,31 @@ export type Column<T> = {
 	key: keyof T;
 	header: string;
 	render?: (value: T[keyof T]) => ReactNode;
+	onClick?: () => void;
 };
-
-type RankingListProps<T> = {
-	data: T[];
-	columns: Column<T>[];
-	hasHeader?: boolean;
-};
-
-export default function RankingList<T extends RankingListDataTypeExtend>({
-	data,
-	columns,
-	hasHeader = true,
-}: RankingListProps<T>) {
-	return (
-		<>
-			{hasHeader && <RankingHeader columns={columns} />}
-			{data.map((row) => (
-				<RankingListItem key={row.id} data={row} columns={columns} />
-			))}
-		</>
-	);
-}
 
 type RankingListItemProps<T> = {
 	data: T;
 	columns: Column<T>[];
+	selectedHeader?: string;
 };
 
 export function RankingListItem<T extends RankingListDataTypeExtend>({
 	data,
 	columns,
+	selectedHeader,
 }: RankingListItemProps<T>) {
-	const [isHover, setHover] = useState(false);
 	return (
 		<Link href={`/artist/${data.artistId}/track/${data.id}`}>
-			<div
-				className="group relative overflow-hidden"
-				onMouseEnter={() => setHover(true)}
-				onMouseLeave={() => setHover(false)}
-			>
+			<div className="group relative overflow-hidden">
 				<div className="z-10 grid cursor-pointer select-none grid-cols-[30px,_3fr] items-center gap-3 rounded border-b border-neutral-600/40 py-2 sm:py-3 sm:pr-6 md:grid-cols-[45px,_3fr,_2fr]">
 					<p className="justify-self-end font-numeric text-lg font-medium tabular-nums text-neutral-400 group-hover:text-neutral-100">
 						{data.ranking}
 					</p>
 					<div className="flex items-center gap-2 overflow-hidden">
-						{data.rankChange !== undefined && <RankChangeIcon data={data} />}
+						{data.rankChange !== undefined && (
+							<RankChangeIcon rankChange={data.rankChange} />
+						)}
 						<div className="relative min-h-16 min-w-16">
 							<Image
 								className="rounded-lg"
@@ -97,6 +76,7 @@ export function RankingListItem<T extends RankingListDataTypeExtend>({
 									columnKey={String(column.key)}
 									render={column.render}
 									value={data[column.key]}
+									selectedHeader={selectedHeader}
 								/>
 							))}
 						</div>
@@ -111,17 +91,16 @@ export function RankingListItem<T extends RankingListDataTypeExtend>({
 type RankingListCellProps<T> = {
 	columnKey: string;
 	render?: (value: T) => ReactNode;
+	selectedHeader?: string;
 	value: T;
 };
 
-export function RankingListCell<T>({
+function RankingListCell<T>({
 	columnKey,
 	render,
 	value,
+	selectedHeader,
 }: RankingListCellProps<T>) {
-	const searchParams = useSearchParams();
-	const sortQuery = searchParams.get("sort");
-
 	return (
 		<div>
 			{render ? (
@@ -129,7 +108,7 @@ export function RankingListCell<T>({
 			) : (
 				<p
 					className={cn("text-neutral-500 group-hover:text-neutral-100", {
-						"text-neutral-100": sortQuery === columnKey,
+						"text-neutral-100": selectedHeader === columnKey,
 					})}
 				>
 					{value != null ? String(value) : ""}
@@ -141,15 +120,19 @@ export function RankingListCell<T>({
 
 type RankingHeaderProps<T> = {
 	columns: Column<T>[];
+	selectedHeader?: string;
+	sortOrder?: "asc" | "desc" | null;
 };
 
 export function RankingHeader<T extends RankingListDataTypeExtend>({
 	columns,
+	selectedHeader,
+	sortOrder,
 }: RankingHeaderProps<T>) {
 	const searchParams = useSearchParams();
 	const sortQuery = searchParams.get("sort");
 	return (
-		<div className="hidden cursor-pointer select-none grid-cols-[45px,_3fr,_2fr] items-center gap-3 rounded border-b border-neutral-600/40 py-3 pl-2 pr-6 text-neutral-500 md:grid">
+		<div className="hidden select-none grid-cols-[45px,_3fr,_2fr] items-center gap-3 rounded border-b border-neutral-600/40 py-3 pl-2 pr-6 text-neutral-500 md:grid">
 			<p>#</p>
 			<p>info</p>
 			<div
@@ -165,7 +148,11 @@ export function RankingHeader<T extends RankingListDataTypeExtend>({
 						})}
 						key={String(column.key)}
 					>
-						<RankingHeaderCell column={column} />
+						<RankingHeaderCell
+							column={column}
+							selectedHeader={selectedHeader}
+							sortOrder={sortOrder}
+						/>
 					</div>
 				))}
 			</div>
@@ -175,50 +162,32 @@ export function RankingHeader<T extends RankingListDataTypeExtend>({
 
 type RankingHeaderCellProps<T> = {
 	column: Column<T>;
+	selectedHeader?: string;
+	sortOrder?: "asc" | "desc" | null;
 };
 
 export function RankingHeaderCell<T extends RankingListDataTypeExtend>({
 	column,
+	selectedHeader,
+	sortOrder,
 }: RankingHeaderCellProps<T>) {
-	const searchParams = useSearchParams();
-	const sortQuery = searchParams.get("sort");
-	const orderQuery = searchParams.get("order");
-
-	function handleClick(sortBy: keyof T) {
-		const params = new URLSearchParams(searchParams);
-
-		if (sortBy !== sortQuery) {
-			params.set("sort", String(sortBy));
-			params.set("order", "asc");
-		} else {
-			if (orderQuery === "asc") {
-				params.set("order", "desc");
-			} else {
-				params.delete("sort");
-				params.delete("order");
-			}
-		}
-
-		window.history.replaceState(null, "", `?${params.toString()}`);
-	}
-
 	return (
-		<div
+		<button
 			className={cn("flex items-center gap-1", {
-				"text-neutral-100": column.key === sortQuery,
+				"text-neutral-100": column.key === selectedHeader,
 			})}
-			onClick={() => {
-				handleClick(column.key);
-			}}
+			onClick={column.onClick}
 		>
-			{column.key !== sortQuery ? (
+			{!column.onClick ? (
+				""
+			) : column.key !== selectedHeader ? (
 				<CaretSortIcon />
-			) : orderQuery === "asc" ? (
+			) : sortOrder === "asc" ? (
 				<ArrowUpIcon />
 			) : (
 				<ArrowDownIcon />
 			)}
 			<p>{column.header}</p>
-		</div>
+		</button>
 	);
 }

@@ -1,51 +1,42 @@
 "use client";
 import React, { useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { AlbumData } from "@/types/data";
 import DropdownContainer from "@/components/menu/DropdownContainer";
 import DropdownTrigger from "@/components/menu/DropdownTrigger";
 import DropdownContent from "@/components/menu/DropdownContent";
 import DropdownItem from "@/components/menu/DropdownItem";
 
 type RankingAlbumFilterProps = {
-	menuData: AlbumData[];
+	dropdownOptions: {
+		id: string;
+		label: string;
+		onClick: () => void;
+	}[];
+	selectedAlbum?: string | null;
 };
 
 export default function RankingAlbumFilter({
-	menuData,
+	dropdownOptions,
+	selectedAlbum,
 }: RankingAlbumFilterProps) {
 	const [isOpen, setOpen] = useState(false);
-	const searchParams = useSearchParams();
-	const albumQuery = searchParams.get("album");
-
-	function handleMenuItemClick(albumId: string | null) {
-		if (albumQuery === albumId) return;
-		const params = new URLSearchParams(searchParams);
-		if (albumId !== null) {
-			params.set("album", albumId);
-		} else params.delete("album");
-		window.history.replaceState(null, "", `?${params.toString()}`);
-		setOpen(false);
-	}
-
 	return (
 		<DropdownContainer width={300}>
 			<DropdownTrigger
 				toggleDropdown={() => setOpen((prev) => !prev)}
 				isDropdownOpen={isOpen}
 			>
-				{menuData.find((data) => data.id === albumQuery)?.name ?? "Select..."}
+				{selectedAlbum || "Select..."}
 			</DropdownTrigger>
 			<DropdownContent isDropdownOpen={isOpen}>
-				<DropdownItem onClick={() => handleMenuItemClick(null)}>
-					Select All
-				</DropdownItem>
-				{menuData.map((album) => (
+				{dropdownOptions.map((option) => (
 					<DropdownItem
-						key={album.id}
-						onClick={() => handleMenuItemClick(album.id)}
+						key={option.id}
+						onClick={() => {
+							option.onClick();
+							setOpen(false);
+						}}
 					>
-						{album.name}
+						{option.label}
 					</DropdownItem>
 				))}
 			</DropdownContent>
