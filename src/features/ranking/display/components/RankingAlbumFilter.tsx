@@ -20,12 +20,12 @@ export default function RankingAlbumFilter({
 }: RankingAlbumFilterProps) {
 	const [isOpen, setOpen] = useState(false);
 	return (
-		<DropdownContainer width={300}>
+		<DropdownContainer width={400}>
 			<DropdownTrigger
 				toggleDropdown={() => setOpen((prev) => !prev)}
 				isDropdownOpen={isOpen}
 			>
-				{selectedAlbum || "Select..."}
+				{selectedAlbum ? <p className="text-nowrap text-ellipsis overflow-hidden">{selectedAlbum}</p> : "Select..."}
 			</DropdownTrigger>
 			<DropdownContent isDropdownOpen={isOpen}>
 				{dropdownOptions.map((option) => (

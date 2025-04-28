@@ -1,4 +1,4 @@
-"use server"; 
+"use server";
 
 import { db } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
@@ -9,7 +9,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 export default async function updateInfo(
 	type: "artist" | "album",
 	id: string,
-	token?: string,
+	token?: string
 ): Promise<ActionResponse> {
 	let success = false;
 
@@ -20,12 +20,20 @@ export default async function updateInfo(
 			if (!album)
 				return { success: false, message: "Faild to fetch album data." };
 
-			await db.album.update({
+			const albumData = await db.album.update({
 				where: {
 					id,
 				},
 				data: {
 					img: album.images[0].url,
+				},
+			});
+			await db.track.updateMany({
+				where: {
+					albumId: albumData.id,
+				},
+				data: {
+					img: albumData.img,
 				},
 			});
 		} else {

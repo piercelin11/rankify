@@ -20,7 +20,9 @@ export default async function AlbumPageLayout({
 }: LayoutProps) {
 	return (
 		<>
-			<Header params={params} />
+			<Suspense fallback={<ContentHeader />}>
+				<Header params={params} />
+			</Suspense>
 			<Suspense fallback={<LoadingAnimation />}>
 				<ContentWrapper className="space-y-10 2xl:space-y-20">
 					{children}

@@ -71,7 +71,7 @@ export default function AllTrackHistoryRankingList({
 					sortOrder={sortOrder}
 				/>
 
-				<div className="relative h-[calc(100vh-228px)] w-full overflow-auto scrollbar-hidden 2xl:h-[calc(100vh-280px)]">
+				<div className="relative h-virtualized-ranking w-full overflow-auto scrollbar-hidden">
 					<AutoSizer>
 						{({ height, width }) => (
 							<FixedSizeList

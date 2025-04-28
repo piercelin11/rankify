@@ -35,6 +35,10 @@
 		@apply bg-gradient-to-b from-transparent to-neutral-950;
 	}
 
+	.h-virtualized-ranking {
+		@apply h-[calc(100vh-240px)] 2xl:h-[calc(100vh-300px)];
+	}
+
 }
 
 :root {

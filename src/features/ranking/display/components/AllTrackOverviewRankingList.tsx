@@ -2,7 +2,11 @@
 
 import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
 import React, { useMemo } from "react";
-import { Column, RankingHeader, RankingListDataTypeExtend, RankingListItem } from "./RankingList";
+import {
+	Column,
+	RankingHeader,
+	RankingListItem,
+} from "./RankingList";
 import { AlbumData } from "@/types/data";
 import RankingAlbumFilter from "./RankingAlbumFilter";
 import useSortedAndFilteredRanking from "../hooks/useSortedAndFilteredRanking";
@@ -55,7 +59,6 @@ export default function AllTrackOverviewRankingList({
 		},
 	];
 
-
 	return (
 		<>
 			<div className="flex items-center justify-between">
@@ -71,7 +74,7 @@ export default function AllTrackOverviewRankingList({
 					selectedHeader={String(sortKey)}
 					sortOrder={sortOrder}
 				/>
-				<div className="relative h-[calc(100vh-228px)] w-full overflow-auto scrollbar-hidden 2xl:h-[calc(100vh-280px)]">
+				<div className="h-virtualized-ranking relative w-full overflow-auto scrollbar-hidden">
 					<AutoSizer>
 						{({ height, width }) => (
 							<FixedSizeList
@@ -122,4 +125,4 @@ function Row({ index, style, data }: ListChildComponentProps<RowData>) {
 			/>
 		</div>
 	);
-};
+}
