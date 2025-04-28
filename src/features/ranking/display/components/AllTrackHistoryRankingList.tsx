@@ -1,7 +1,7 @@
 "use client";
 
 import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
-import { AlbumData } from "@/types/data";
+import { AlbumData, ArtistData } from "@/types/data";
 import React, { useMemo } from "react";
 import { Column, RankingHeader, RankingListItem } from "./RankingList";
 import AchievementDisplay, {
@@ -12,17 +12,23 @@ import RankingAlbumFilter from "./RankingAlbumFilter";
 import useMediaQuery from "@/lib/hooks/useMediaQuery";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
+import Link from "next/link";
+import Image from "next/image";
+import { ChevronRightIcon } from "@radix-ui/react-icons";
+import Button from "@/components/buttons/Button";
 
 type TrackRankingListProps = {
 	tracksRankings: TrackHistoryType[];
 	albums: AlbumData[];
-	title: string;
+	artist: ArtistData | null;
+	onBackHref: string;
 };
 
 export default function AllTrackHistoryRankingList({
 	albums,
 	tracksRankings,
-	title,
+	artist,
+	onBackHref,
 }: TrackRankingListProps) {
 	const isMobole = useMediaQuery("max", 660);
 	const itemHeight = isMobole ? 72 : 89;
@@ -62,7 +68,21 @@ export default function AllTrackHistoryRankingList({
 					dropdownOptions={dropdownOptions}
 					selectedAlbum={albumIdFilter && albumsMap.get(albumIdFilter)?.name}
 				/>
-				<p className="hidden text-neutral-500 sm:block">{title}</p>
+				{artist && (
+					<Link href={onBackHref}>
+						<Button className="p-2 gap-2" variant="outline" rounded>
+							<Image
+								className="rounded-full"
+								src={artist?.img || ""}
+								width={50}
+								height={50}
+								alt={`${artist?.name}`}
+							/>
+							<p className="text-sm">{artist?.name}</p>
+							<ChevronRightIcon className="me-4" />
+						</Button>
+					</Link>
+				)}
 			</div>
 			<section>
 				<RankingHeader
@@ -71,12 +91,12 @@ export default function AllTrackHistoryRankingList({
 					sortOrder={sortOrder}
 				/>
 
-				<div className="relative h-virtualized-ranking w-full overflow-auto scrollbar-hidden">
+				<div className="h-virtualized-ranking relative w-full overflow-auto scrollbar-hidden">
 					<AutoSizer>
 						{({ height, width }) => (
 							<FixedSizeList
 								key={itemHeight}
-								className="scrollbar-hidden"
+								className="overscroll-contain scrollbar-hidden"
 								height={height}
 								itemCount={sortedAndFilteredRankings.length}
 								itemSize={itemHeight}

@@ -18,7 +18,7 @@ export default function DropdownTrigger({
 	return (
 		<div
 			className={cn(
-				"group flex justify-between gap-3 rounded-xl border border-neutral-700 bg-neutral-950 p-3 hover:border-neutral-600",
+				"group flex justify-between gap-3 text-neutral-400 rounded-xl border border-neutral-700 bg-neutral-950 p-3 hover:border-neutral-600",
 				{
 					"border-neutral-600": isDropdownOpen,
 				}

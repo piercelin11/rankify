@@ -9,6 +9,7 @@ import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import getTracksStats, {
 	TimeFilterType,
 } from "@/lib/database/ranking/overview/getTracksStats";
+import getArtistById from "@/lib/database/data/getArtistById";
 
 export default async function ArtistRankingPage({
 	params,
@@ -27,6 +28,7 @@ export default async function ArtistRankingPage({
 		: undefined;
 
 	const albums = await getLoggedAlbums({ artistId, userId });
+	const artist = await getArtistById(artistId);
 	const tracksRankings = await getTracksStats({
 		artistId,
 		userId,
@@ -37,21 +39,14 @@ export default async function ArtistRankingPage({
 		},
 	});
 
-	const title = startDate ? `${albums[0].artist.name} • ${dateToLong(startDate)} - now` : `${albums[0].artist.name} • all time`;
-
 	return (
 		<>
 			<AllTrackOverviewRankingList
 				tracksRankings={tracksRankings}
 				albums={albums}
-				title={title}
+				artist={artist}
+				onBackHref={`/artist/${artistId}/overview/${rangeSlug}`}
 			/>
-			<Link href={`/artist/${artistId}/overview/${rangeSlug}`}>
-				<Button variant="ghost" className="mx-auto">
-					<ArrowLeftIcon />
-					Back
-				</Button>
-			</Link>
 		</>
 	);
 }

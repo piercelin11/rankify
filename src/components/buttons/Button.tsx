@@ -25,7 +25,7 @@ const styles: Record<string, Record<"default" | "disabled", string>> = {
 	},
 	outline: {
 		default:
-			"bg-transparent text-neutral-400 hover:text-neutral-100 border border-neutral-500 hover:border-neutral-100",
+			"bg-transparent text-neutral-400 hover:text-neutral-100 border border-neutral-400/50 hover:border-neutral-100",
 		disabled: "bg-transparent text-neutral-400 border border-neutral-500",
 	},
 	ghost: {

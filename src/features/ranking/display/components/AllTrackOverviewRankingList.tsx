@@ -2,28 +2,30 @@
 
 import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
 import React, { useMemo } from "react";
-import {
-	Column,
-	RankingHeader,
-	RankingListItem,
-} from "./RankingList";
-import { AlbumData } from "@/types/data";
+import { Column, RankingHeader, RankingListItem } from "./RankingList";
+import { AlbumData, ArtistData } from "@/types/data";
 import RankingAlbumFilter from "./RankingAlbumFilter";
 import useSortedAndFilteredRanking from "../hooks/useSortedAndFilteredRanking";
 import useMediaQuery from "@/lib/hooks/useMediaQuery";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
+import Image from "next/image";
+import Link from "next/link";
+import { ChevronRightIcon } from "@radix-ui/react-icons";
+import Button from "@/components/buttons/Button";
 
 type AllTrackOverviewRankingListProps = {
 	tracksRankings: TrackStatsType[];
 	albums: AlbumData[];
-	title: string;
+	artist: ArtistData | null;
+	onBackHref: string;
 };
 
 export default function AllTrackOverviewRankingList({
 	tracksRankings,
 	albums,
-	title,
+	artist,
+	onBackHref,
 }: AllTrackOverviewRankingListProps) {
 	const isMobole = useMediaQuery("max", 660);
 	const itemHeight = isMobole ? 72 : 89;
@@ -66,7 +68,21 @@ export default function AllTrackOverviewRankingList({
 					dropdownOptions={dropdownOptions}
 					selectedAlbum={albumIdFilter && albumsMap.get(albumIdFilter)?.name}
 				/>
-				<p className="hidden text-neutral-500 sm:block">{title}</p>
+				{artist && (
+					<Link href={onBackHref}>
+						<Button className="p-2 gap-2" variant="outline" rounded>
+							<Image
+								className="rounded-full"
+								src={artist?.img || ""}
+								width={50}
+								height={50}
+								alt={`${artist?.name}`}
+							/>
+							<p className="text-sm">{artist?.name}</p>
+							<ChevronRightIcon className="me-4" />
+						</Button>
+					</Link>
+				)}
 			</div>
 			<section>
 				<RankingHeader
@@ -79,7 +95,7 @@ export default function AllTrackOverviewRankingList({
 						{({ height, width }) => (
 							<FixedSizeList
 								key={itemHeight}
-								className="scrollbar-hidden"
+								className="overscroll-contain scrollbar-hidden"
 								height={height}
 								itemCount={sortedAndFilteredRankings.length}
 								itemSize={itemHeight}

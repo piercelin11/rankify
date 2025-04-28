@@ -7,6 +7,7 @@ import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import Button from "@/components/buttons/Button";
 import Link from "next/link";
 import AllTrackHistoryRankingList from "@/features/ranking/display/components/AllTrackHistoryRankingList";
+import getArtistById from "@/lib/database/data/getArtistById";
 
 export default async function ArtistRankingPage({
 	params,
@@ -15,6 +16,7 @@ export default async function ArtistRankingPage({
 }) {
 	const dateId = (await params).dateId;
 	const artistId = (await params).artistId;
+	const artist = await getArtistById(artistId);
 
 	const { id: userId } = await getUserSession();
 
@@ -42,14 +44,9 @@ export default async function ArtistRankingPage({
 			<AllTrackHistoryRankingList
 				tracksRankings={tracksRankings}
 				albums={albums}
-				title={title}
+				artist={artist}
+				onBackHref={`/artist/${artistId}/history?date=${dateId}`}
 			/>
-			<Link href={`/artist/${artistId}/history?date=${dateId}`}>
-				<Button variant="ghost" className="mx-auto">
-					<ArrowLeftIcon />
-					Back
-				</Button>
-			</Link>
 		</>
 	);
 }

@@ -25,10 +25,10 @@ export default function RankChangeIcon({ rankChange }: RankChangeIconProps) {
 	return (
 		<div
 			className={cn("flex min-w-10 items-center gap-1 font-numeric text-sm", {
-				"text-red-700": result === "down",
-				"text-green-700": result === "up",
-				"text-blue-900": result === "debut",
-				"text-yellow-700": result === "stable",
+				"text-danger-700": result === "down",
+				"text-success-700": result === "up",
+				"text-blue-700": result === "debut",
+				"text-yellow-600": result === "stable",
 			})}
 		>
 			<div>

@@ -37,7 +37,7 @@ export function RankingListItem<T extends RankingListDataTypeExtend>({
 	return (
 		<Link href={`/artist/${data.artistId}/track/${data.id}`}>
 			<div className="group relative overflow-hidden">
-				<div className="z-10 grid cursor-pointer select-none grid-cols-[30px,_3fr] items-center gap-3 rounded border-b border-neutral-600/40 py-2 sm:py-3 sm:pr-6 md:grid-cols-[45px,_3fr,_2fr]">
+				<div className="z-10 grid cursor-pointer select-none grid-cols-[30px,_3fr] items-center gap-3 rounded border-b border-neutral-500/30 py-2 sm:py-3 sm:pr-6 md:grid-cols-[45px,_3fr,_2fr]">
 					<p className="justify-self-end font-numeric text-lg font-medium tabular-nums text-neutral-400 group-hover:text-neutral-100">
 						{data.ranking}
 					</p>
@@ -52,13 +52,14 @@ export function RankingListItem<T extends RankingListDataTypeExtend>({
 								sizes="(max-width: 768px) 56px, 64px"
 								src={data.img || ""}
 								alt={data.name}
+								quality={50}
 							/>
 						</div>
 						<div className="overflow-hidden">
-							<p className="overflow-hidden text-ellipsis text-nowrap text-neutral-300 group-hover:text-neutral-100">
+							<p className="overflow-hidden text-ellipsis text-nowrap text-neutral-100 group-hover:text-neutral-50">
 								{data.name}
 							</p>
-							<p className="overflow-hidden text-ellipsis text-nowrap text-sm text-neutral-500 group-hover:text-neutral-100">
+							<p className="overflow-hidden text-ellipsis text-nowrap text-sm text-neutral-300/70 group-hover:text-neutral-100">
 								{data.album?.name}
 							</p>
 						</div>
@@ -132,7 +133,7 @@ export function RankingHeader<T extends RankingListDataTypeExtend>({
 	const searchParams = useSearchParams();
 	const sortQuery = searchParams.get("sort");
 	return (
-		<div className="hidden select-none grid-cols-[45px,_3fr,_2fr] items-center gap-3 rounded border-b border-neutral-600/40 py-3 pl-2 pr-6 text-neutral-500 md:grid">
+		<div className="hidden select-none grid-cols-[45px,_3fr,_2fr] items-center gap-3 rounded border-b border-neutral-500/30 py-3 pl-2 pr-6 text-neutral-300/70 md:grid">
 			<p>#</p>
 			<p>info</p>
 			<div
@@ -175,6 +176,7 @@ export function RankingHeaderCell<T extends RankingListDataTypeExtend>({
 		<button
 			className={cn("flex items-center gap-1", {
 				"text-neutral-100": column.key === selectedHeader,
+				"hover:text-neutral-100": column.onClick
 			})}
 			onClick={column.onClick}
 		>
