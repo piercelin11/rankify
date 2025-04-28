@@ -102,8 +102,6 @@ export async function getTracksRankingHistory({
 		historicalPeak.map((data) => [data.trackId, data._min.ranking])
 	);
 
-	console.log(historicalPeak)
-
 	const result = rankings.map((data) => {
 		const prevPeak = historicalPeakMap.get(data.trackId);
 

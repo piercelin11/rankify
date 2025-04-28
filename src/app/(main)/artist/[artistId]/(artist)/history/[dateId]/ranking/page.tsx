@@ -1,7 +1,6 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { getUserSession } from "@/../auth";
 import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTracksRankingHistory";
-import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import { dateToLong } from "@/lib/utils/helper";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
@@ -36,21 +35,21 @@ export default async function ArtistRankingPage({
 		},
 	});
 
+	const title = `${albums[0].artist.name} • ${dateToLong(tracksRankings[0].date)}`;
+
 	return (
 		<>
-			<Suspense fallback={<LoadingAnimation />}>
-				<AllTrackHistoryRankingList
-					tracksRankings={tracksRankings}
-					albums={albums}
-					title={dateToLong(tracksRankings[0].date)}
-				/>
-				<Link href={`/artist/${artistId}/history?date=${dateId}`}>
-					<Button variant="ghost" className="mx-auto">
-						<ArrowLeftIcon />
-						Back
-					</Button>
-				</Link>
-			</Suspense>
+			<AllTrackHistoryRankingList
+				tracksRankings={tracksRankings}
+				albums={albums}
+				title={title}
+			/>
+			<Link href={`/artist/${artistId}/history?date=${dateId}`}>
+				<Button variant="ghost" className="mx-auto">
+					<ArrowLeftIcon />
+					Back
+				</Button>
+			</Link>
 		</>
 	);
 }

@@ -37,7 +37,7 @@ export default async function ArtistRankingPage({
 		},
 	});
 
-	const title = startDate ? `${dateToLong(startDate)} - now` : "all time";
+	const title = startDate ? `${albums[0].artist.name} • ${dateToLong(startDate)} - now` : `${albums[0].artist.name} • all time`;
 
 	return (
 		<>

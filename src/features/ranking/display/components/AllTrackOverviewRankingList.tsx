@@ -2,14 +2,13 @@
 
 import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
 import React, { useMemo } from "react";
-import {
-	Column,
-	RankingHeader,
-	RankingListItem,
-} from "./RankingList";
+import { Column, RankingHeader, RankingListDataTypeExtend, RankingListItem } from "./RankingList";
 import { AlbumData } from "@/types/data";
 import RankingAlbumFilter from "./RankingAlbumFilter";
 import useSortedAndFilteredRanking from "../hooks/useSortedAndFilteredRanking";
+import useMediaQuery from "@/lib/hooks/useMediaQuery";
+import { FixedSizeList, ListChildComponentProps } from "react-window";
+import AutoSizer from "react-virtualized-auto-sizer";
 
 type AllTrackOverviewRankingListProps = {
 	tracksRankings: TrackStatsType[];
@@ -22,6 +21,8 @@ export default function AllTrackOverviewRankingList({
 	albums,
 	title,
 }: AllTrackOverviewRankingListProps) {
+	const isMobole = useMediaQuery("max", 660);
+	const itemHeight = isMobole ? 72 : 89;
 	const {
 		sortedAndFilteredRankings,
 		handleHeaderClick,
@@ -54,9 +55,10 @@ export default function AllTrackOverviewRankingList({
 		},
 	];
 
+
 	return (
-		<div>
-			<div className="mb-10 flex items-center justify-between">
+		<>
+			<div className="flex items-center justify-between">
 				<RankingAlbumFilter
 					dropdownOptions={dropdownOptions}
 					selectedAlbum={albumIdFilter && albumsMap.get(albumIdFilter)?.name}
@@ -69,11 +71,55 @@ export default function AllTrackOverviewRankingList({
 					selectedHeader={String(sortKey)}
 					sortOrder={sortOrder}
 				/>
-
-				{sortedAndFilteredRankings.map((row) => (
-					<RankingListItem key={row.id} data={row} columns={columns} />
-				))}
+				<div className="relative h-[calc(100vh-228px)] w-full overflow-auto scrollbar-hidden 2xl:h-[calc(100vh-280px)]">
+					<AutoSizer>
+						{({ height, width }) => (
+							<FixedSizeList
+								key={itemHeight}
+								className="scrollbar-hidden"
+								height={height}
+								itemCount={sortedAndFilteredRankings.length}
+								itemSize={itemHeight}
+								width={width}
+								itemData={{
+									items: sortedAndFilteredRankings,
+									columns: columns,
+									sortKey: String(sortKey),
+								}}
+								overscanCount={5}
+							>
+								{Row}
+							</FixedSizeList>
+						)}
+					</AutoSizer>
+				</div>
 			</section>
-		</div>
+		</>
 	);
 }
+
+type RowData = {
+	items: TrackStatsType[];
+	columns: Column<TrackStatsType>[];
+	sortKey: string | null;
+};
+
+function Row({ index, style, data }: ListChildComponentProps<RowData>) {
+	const rowData = data.items[index];
+	const columns = data.columns;
+	const sortKey = data.sortKey;
+
+	if (!rowData) {
+		return null;
+	}
+
+	return (
+		<div style={style}>
+			<RankingListItem
+				data={rowData}
+				columns={columns}
+				selectedHeader={String(sortKey)}
+			/>
+		</div>
+	);
+};
