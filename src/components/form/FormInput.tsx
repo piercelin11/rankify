@@ -14,7 +14,7 @@ export default function FormInput({
 	...props
 }: FormItemProps) {
 	return (
-		<div className="space-y-3">
+		<div className="space-y-4">
 			<p className="text-sm text-neutral-500">{label}</p>
 			<Input className={className} {...props} />
 			{message && (

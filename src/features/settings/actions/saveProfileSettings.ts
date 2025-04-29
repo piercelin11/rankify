@@ -28,7 +28,7 @@ export default async function saveProfileSettings(
 			},
 		});
 
-		if (existedUsername)
+		if (existedUsername && existedUsername.id !== userId)
 			return { success: false, message: "Username already exist." };
 
 		await db.user.update({

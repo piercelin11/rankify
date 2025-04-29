@@ -28,7 +28,7 @@ export default async function saveRankingSettings(
 			},
 		});
 
-		if (existingUserPreference) {
+		if (existingUserPreference ) {
 			const preference = await db.userPreference.update({
 				where: {
 					id: existingUserPreference.id,

@@ -4,12 +4,9 @@ import { useMemo, useState } from "react";
 import { RankingListDataTypeExtend } from "../components/RankingList";
 import { AlbumData } from "@/types/data";
 
-
-export default function useSortedAndFilteredRanking<T extends RankingListDataTypeExtend>(
-	trackRankings: T[],
-    albums: AlbumData[]
-) {
-	
+export default function useSortedAndFilteredRanking<
+	T extends RankingListDataTypeExtend,
+>(trackRankings: T[], albums: AlbumData[]) {
 	const dropdownOptions = albums.map((album) => ({
 		id: album.id,
 		label: album.name,
@@ -55,6 +52,11 @@ export default function useSortedAndFilteredRanking<T extends RankingListDataTyp
 
 				if (typeof valA === "number" && typeof valB === "number") {
 					comparison = valA - valB;
+				} else if (
+					typeof Number(valA) === "number" &&
+					typeof Number(valB) === "number"
+				) {
+					comparison = Number(valA) - Number(valB);
 				} else if (typeof valA === "string" && typeof valB === "string") {
 					comparison = valA.localeCompare(valB);
 				} else if (valA instanceof Date && valB instanceof Date) {
@@ -70,7 +72,9 @@ export default function useSortedAndFilteredRanking<T extends RankingListDataTyp
 				return sortOrder === "asc" ? comparison : -comparison;
 			});
 		} else {
-			filteredRankings = filteredRankings.toSorted((a, b) => a.ranking - b.ranking);
+			filteredRankings = filteredRankings.toSorted(
+				(a, b) => a.ranking - b.ranking
+			);
 		}
 
 		return filteredRankings;
@@ -78,5 +82,12 @@ export default function useSortedAndFilteredRanking<T extends RankingListDataTyp
 
 	const sortedAndFilteredRankings = sortedAndFiltered();
 
-	return {sortedAndFilteredRankings, handleHeaderClick, dropdownOptions, albumIdFilter, sortKey, sortOrder}
+	return {
+		sortedAndFilteredRankings,
+		handleHeaderClick,
+		dropdownOptions,
+		albumIdFilter,
+		sortKey,
+		sortOrder,
+	};
 }

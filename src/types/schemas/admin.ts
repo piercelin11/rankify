@@ -34,6 +34,7 @@ export const updateTrackSchema = z.object({
 export type UpdateTrackType = z.infer<typeof updateTrackSchema>;
 
 export const updateAlbumSchema = z.object({
+	img: z.string().min(1, "Album cover is required."),
 	name: z.string().min(1, "Album name is required."),
 	color: z
 		.string()

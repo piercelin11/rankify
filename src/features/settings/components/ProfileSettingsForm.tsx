@@ -25,7 +25,11 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 	const [response, setResponse] = useState<ActionResponse | null>(null);
 	const [isPending, setPending] = useState<boolean>(false);
 
-	const { register, handleSubmit } = useForm<ProfileSettingsType>({
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm<ProfileSettingsType>({
 		resolver: zodResolver(profileSettingsSchema),
 		defaultValues: {
 			name: user.name || undefined,
@@ -67,8 +71,16 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 						Change
 					</Button>
 				</div>
-				<FormInput label="name" {...register("name")} />
-				<FormInput label="username" {...register("username")} />
+				<FormInput
+					label="name"
+					{...register("name")}
+					message={errors.name?.message}
+				/>
+				<FormInput
+					label="username"
+					{...register("username")}
+					message={errors.username?.message}
+				/>
 			</div>
 			<div className="flex items-center gap-4">
 				<Button variant="primary" type="submit" disabled={isPending}>

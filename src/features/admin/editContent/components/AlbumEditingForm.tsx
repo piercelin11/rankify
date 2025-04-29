@@ -10,6 +10,7 @@ import updateAlbum from "@/features/admin/editContent/actions/updateAlbum";
 import FormMessage from "@/components/form/FormMessage";
 import { ActionResponse } from "@/types/action";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
+import CoverSelector from "./AlbumCoverSelector";
 
 type AlbumEditingFormProps = {
 	data: AlbumData;
@@ -32,6 +33,7 @@ export default function AlbumEditingForm({
 	} = useForm<updateAlbumType>({
 		resolver: zodResolver(updateAlbumSchema),
 		defaultValues: {
+			img: data.img!,
 			name: data.name,
 			color: data.color || "",
 		},
@@ -64,10 +66,24 @@ export default function AlbumEditingForm({
 		<div className="space-y-8 p-5">
 			<div>
 				<h2>Edit Album</h2>
-				<p className="text-description">edit album name and album color.</p>
+				<p className="text-description">edit album info.</p>
 			</div>
 			<hr />
 			<form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
+				<Controller
+					name="img"
+					control={control}
+					render={({ field }) => (
+						<CoverSelector 
+						album={data}  
+						onChange={field.onChange}
+						onBlur={field.onBlur}
+						value={field.value}
+						
+						/>
+					)}
+				/>
+				
 				<FormItem
 					{...register("name")}
 					label="Album name"

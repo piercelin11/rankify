@@ -20,14 +20,14 @@ export default function FormMessage({
 	return (
 		<div
 			className={cn(
-				"flex items-center gap-1 rounded text-sm",
+				"flex items-center gap-1 rounded-xl text-sm",
 				className,
 				{
-					"px-4 py-3": border,
-					"border border-rose-500 bg-rose-700/10 text-rose-500": isError && border,
-					"border border-green-500 bg-green-700/10 text-green-500": !isError && border,
-					"text-rose-600": isError && !border,
-					"text-green-600": !isError && !border,
+					"p-4": border,
+					"border border-danger-500 bg-danger-700/10 text-danger-500": isError && border,
+					"border border-success-500 bg-success-700/10 text-success-500": !isError && border,
+					"text-danger-600": isError && !border,
+					"text-success-600": !isError && !border,
 				}
 			)}
 		>
