@@ -1,26 +1,5 @@
 import { ReactNode } from "react";
 
-type MenuItem = {
-	name: string;
-	icon: () => ReactNode;
-	link: string;
-};
-
-export const settingsMenuData: Omit<MenuItem, "icon">[] = [
-	{
-		name: "Profile",
-		link: "/settings/profile",
-	},
-	{
-		name: "Ranking",
-		link: "/settings/ranking",
-	},
-	{
-		name: "Notifications",
-		link: "/settings/notification",
-	},
-];
-
 export const getArtistTabOptions = (artistId: string) => [
 	{
 		id:"overview",

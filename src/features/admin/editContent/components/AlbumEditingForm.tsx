@@ -70,7 +70,7 @@ export default function AlbumEditingForm({
 			<form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
 				<FormItem
 					{...register("name")}
-					title="Album name"
+					label="Album name"
 					message={errors.name?.message}
 				/>
 				<Controller

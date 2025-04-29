@@ -1,15 +1,16 @@
 import React from "react";
 import { getUserSession } from "../../../../../auth";
 import getUserPreference from "@/lib/database/user/getUserPreference";
-import RankingSettings from "@/features/settings/RankingSettings";
+import RankingSettings from "@/features/settings/components/RankingSettingsForm";
 
 export default async function RankingSettingsPage() {
 	const {id: userId} = await getUserSession();
-
 	const userPreference = await getUserPreference({userId});
+
+	console.log(userPreference)
 	
 	return (
-		<div className="space-y-14">
+		<>
 			<div className="space-y-2">
 				<h2>Ranking Settings</h2>
 				<p className="text-description">
@@ -20,6 +21,6 @@ export default async function RankingSettingsPage() {
 			</div>
 
 			<RankingSettings settings={userPreference} />
-		</div>
+		</>
 	);
 }

@@ -1,24 +1,20 @@
-import { defaultRankingSettings } from "@/features/settings/RankingSettings";
+import { defaultRankingSettings } from "@/features/settings/components/RankingSettingsForm";
 import { db } from "@/lib/prisma";
 import { UserPreferenceData } from "@/types/data";
 import { $Enums } from "@prisma/client";
-import { boolean } from "zod";
 
 type getUserPreferenceProps = {
 	userId: string;
 };
 
-let userPreference: UserPreferenceData | null = null;
-
 export default async function getUserPreference({
 	userId,
 }: getUserPreferenceProps): Promise<UserPreferenceData | null> {
-	if (!userPreference)
-		userPreference = (await db.userPreference.findFirst({
-			where: {
-				userId,
-			},
-		})) as UserPreferenceData | null;
+	const userPreference = (await db.userPreference.findFirst({
+		where: {
+			userId,
+		},
+	})) as UserPreferenceData | null;
 
 	return userPreference;
 }
@@ -26,13 +22,11 @@ export default async function getUserPreference({
 export async function getUserRankingPreference({
 	userId,
 }: getUserPreferenceProps) {
-	if (!userPreference) {
-		userPreference = (await db.userPreference.findFirst({
-			where: {
-				userId,
-			},
-		})) as UserPreferenceData | null;
-	}
+	const userPreference = (await db.userPreference.findFirst({
+		where: {
+			userId,
+		},
+	})) as UserPreferenceData | null;
 
 	const rankingSettings =
 		userPreference?.rankingSettings || defaultRankingSettings;

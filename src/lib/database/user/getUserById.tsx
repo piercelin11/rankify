@@ -12,6 +12,12 @@ export default async function getUserById({
         where: {
             id: userId
         },
+        select: {
+            id: true,
+            name: true,
+            username: true,
+            image: true,
+        }
     });
 
     return user;

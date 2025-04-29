@@ -20,7 +20,7 @@ export default function SidebarMenuItem({
 }: SidebarMenuItemProps) {
 	const isSidebarOpen = useAppSelector((state) => state.sidebar.isSidebarOpen);
 	const buttonStyle =
-		"flex w-full items-center gap-4 overflow-hidden text-nowrap rounded-xl py-2 px-6 text-neutral-400 hover:bg-neutral-900 hover:text-neutral-100";
+		"flex w-full h-12 items-center gap-4 overflow-hidden text-nowrap rounded-xl py-2 px-6 text-neutral-400 hover:bg-neutral-900 hover:text-neutral-100";
 	if (href)
 		return (
 			<Link className="cursor-pointer" href={href}>

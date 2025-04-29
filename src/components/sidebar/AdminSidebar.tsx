@@ -1,7 +1,7 @@
 "use client";
 
 import {
-	adminSidebarMenuItem,
+	adminSidebarMenuItems,
 } from "@/config/sidebarMenu";
 import React from "react";
 import SidebarMenuItem from "./SidebarMenuItem";
@@ -30,7 +30,7 @@ export default function AdminSidebar({ userSession }: MainSidebarProps) {
 			</div>
 
 			<div className="m-2 space-y-2">
-				{adminSidebarMenuItem.map((item) => (
+				{adminSidebarMenuItems.map((item) => (
 					<SidebarMenuItem
 						key={item.id}
 						icon={item.icon}

@@ -56,13 +56,13 @@ export type UserData = {
     id: string;
     name: string | null;
     username: string | null;
-    email: string | null;
-    password: string | null;
-    emailVerified: Date | null;
+    email?: string | null;
+    password?: string | null;
+    emailVerified?: Date | null;
     image: string | null;
-    role: $Enums.Role;
-    createdAt: Date;
-    updatedAt: Date;
+    role?: $Enums.Role;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export type RankingSessionData = {

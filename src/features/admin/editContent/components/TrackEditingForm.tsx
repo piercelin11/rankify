@@ -95,7 +95,7 @@ export default function TrackEditingForm({
 			<hr />
 			<form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
 				<FormItem
-					title="Track name"
+					label="Track name"
 					message={errors.name?.message}
 					{...register("name")}
 				/>

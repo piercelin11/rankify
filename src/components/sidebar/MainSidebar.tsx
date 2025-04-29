@@ -34,7 +34,7 @@ export default function MainSidebar({
 				</button>
 			</div>
 			
-			<div className="mb-4 space-y-2">
+			<div>
 				{mainSidebarMenuItems.map((item) => (
 					<SidebarMenuItem
 						key={item.id}

@@ -4,7 +4,7 @@ import authConfig from "./auth.config";
 import { db } from "@/lib/prisma";
 import { $Enums } from "@prisma/client";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
 	adapter: PrismaAdapter(db),
 	session: { strategy: "jwt" },
 	events: {
@@ -20,7 +20,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 		},
 	},
 	callbacks: {
-		async session({ session, token }) {
+		async session({ session, token, trigger }) {
 			if (token.sub && session) {
 				session.user.id = token.sub;
 				session.user.role = token.role as $Enums.Role;
@@ -30,7 +30,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
 			return session;
 		},
-		async jwt({ token }) {
+		async jwt({ token, trigger }) {
 			if (!token.sub) return token;
 			const existingUser = await db.user.findFirst({
 				where: {

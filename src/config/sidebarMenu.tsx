@@ -54,7 +54,7 @@ export const getMainSidebarMenuItems = (
 	];
 };
 
-export const adminSidebarMenuItem: SidebarMenuItemType[] = [
+export const adminSidebarMenuItems: SidebarMenuItemType[] = [
 	{
 		id: "home",
 		label: "Home",
@@ -78,5 +78,23 @@ export const adminSidebarMenuItem: SidebarMenuItemType[] = [
 		label: "Settings",
 		icon: () => <GearIcon width={iconSize} height={iconSize} />,
 		href: "/admin/setting",
+	},
+];
+
+export const settingsSidebarMenuItems: Omit<SidebarMenuItemType, "icon">[] = [
+	{
+		id: "profile",
+		label: "Profile",
+		href: "/settings",
+	},
+	{
+		id: "ranking",
+		label: "Ranking",
+		href: "/settings/ranking",
+	},
+	{
+		id: "notifications",
+		label: "Notifications",
+		href: "/settings/notification",
 	},
 ];
