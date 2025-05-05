@@ -67,7 +67,7 @@ export function calculateDateRangeFromSlug(rangeSlug: string): {
 			startDate = date;
 			break;
 		}
-		case "past-2-year": {
+		case "past-2-years": {
 			const date = new Date(now);
 			date.setFullYear(date.getFullYear() - 2);
 			startDate = date;

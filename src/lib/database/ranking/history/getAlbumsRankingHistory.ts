@@ -14,7 +14,7 @@ export type AlbumHistoryType = Omit<AlbumData, "tracks"> & {
 };
 
 type getAlbumsRankingHistoryOptions = {
-	includeChange: boolean;
+	includeChange?: boolean;
 };
 
 type getAlbumsRankingHistoryProps = {

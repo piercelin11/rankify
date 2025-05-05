@@ -22,7 +22,7 @@ export type AlbumStatsType = Omit<AlbumData, "tracks"> & {
 };
 
 type getAlbumsStatsOptions = {
-	includeAllRankings: boolean;
+	includeAllRankings?: boolean;
 };
 
 type getAlbumsStatsProps = {
