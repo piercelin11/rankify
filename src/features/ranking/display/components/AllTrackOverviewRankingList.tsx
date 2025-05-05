@@ -14,6 +14,9 @@ import Link from "next/link";
 import { ChevronRightIcon } from "@radix-ui/react-icons";
 import Button from "@/components/buttons/Button";
 import useListScroll from "../hooks/useListScroll";
+import AchievementDisplay, {
+	AchievementType,
+} from "../../stats/components/AchievementDisplay";
 
 type AllTrackOverviewRankingListProps = {
 	tracksRankings: TrackStatsType[];
@@ -56,14 +59,18 @@ export default function AllTrackOverviewRankingList({
 			onClick: () => handleHeaderClick("peak"),
 		},
 		{
-			key: "gap",
-			header: "gap",
-			onClick: () => handleHeaderClick("gap"),
-		},
-		{
 			key: "averageRanking",
 			header: "avg",
 			onClick: () => handleHeaderClick("averageRanking"),
+		},
+		{
+			key: "achievement",
+			header: "achievement",
+			render: (value) => (
+				<AchievementDisplay
+					achievement={value as AchievementType | undefined}
+				/>
+			),
 		},
 	];
 

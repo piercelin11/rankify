@@ -36,6 +36,7 @@ export default async function ArtistRankingPage({
 		options: {
 			includeRankChange: true,
 			includeAllRankings: false,
+			includeAchievement: true,
 		},
 	});
 

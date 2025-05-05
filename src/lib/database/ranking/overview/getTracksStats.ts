@@ -6,6 +6,9 @@ import getLatestRankingSession from "../../user/getLatestRankingSession";
 import getTrackRankingSeries, {
 	TrackRankingSeriesType,
 } from "./getTrackRankingSeries";
+import { getTracksWithHotStreak } from "./getTracksWithHotStreak";
+import { AchievementType } from "@/features/ranking/stats/components/AchievementDisplay";
+import { getTracksWithColdStreak } from "./getTracksWithColdStreak";
 
 export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
 	ranking: number;
@@ -22,6 +25,7 @@ export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
 	top5PercentCount: number;
 	rankings?: { ranking: number; date: Date; dateId: string }[];
 	rankChange?: number | null;
+	achievement: AchievementType;
 };
 
 export type TimeFilterType = {
@@ -40,11 +44,13 @@ export type getTracksStatsProps = {
 type getTracksStatsOptions = {
 	includeRankChange: boolean;
 	includeAllRankings: boolean;
+	includeAchievement: boolean;
 };
 
 const defaultOptions = {
 	includeRankChange: false,
 	includeAllRankings: false,
+	includeAchievement: false,
 };
 
 export default async function getTracksStats({
@@ -135,7 +141,7 @@ export default async function getTracksStats({
 	});
 	const allTracksMap = new Map(allTracks.map((track) => [track.id, track]));
 
-	//依據 options 判斷是否獲取前次紀錄以及所以排名
+	//依據 options 判斷是否獲取前次紀錄以及所有排名
 	let prevTrackRankingMap: Map<string, number> | undefined;
 	if (options.includeRankChange && !time) {
 		const latestSession = await getLatestRankingSession({ userId, artistId });
@@ -182,27 +188,50 @@ export default async function getTracksStats({
 		trackRankingsMap = await getTrackRankingSeries({ artistId, userId });
 	}
 
-	const result = trackMetrics.map((data) => ({
-		...allTracksMap.get(data.id)!,
-		album: {
-			name: allTracksMap.get(data.id)?.album?.name ?? null,
-			color: allTracksMap.get(data.id)?.album?.color ?? null,
-		},
-		ranking: data.ranking,
-		averageRanking: data.averageRanking.toFixed(1),
-		peak: data.peak,
-		worst: data.worst,
-		gap: data.worst - data.peak,
-		top50PercentCount: top50PercentMap.get(data.id) ?? 0,
-		top25PercentCount: top25PercentMap.get(data.id) ?? 0,
-		top5PercentCount: top5PercentMap.get(data.id) ?? 0,
-		rankings: trackRankingsMap?.get(data.id),
-		rankChange: options.includeRankChange
-			? prevTrackRankingMap?.get(data.id)
-				? prevTrackRankingMap!.get(data.id)! - data.ranking
-				: null
-			: undefined,
-	}));
+	//依據 options 判斷是否獲取連續上漲及下跌趨勢
+	let hotStreakTrackIds: Set<string> | undefined;
+	let coldStreakTrackIds: Set<string> | undefined;
+	if (options.includeAchievement && !time) {
+		hotStreakTrackIds = await getTracksWithHotStreak({
+			userId,
+			artistId,
+		});
+		coldStreakTrackIds = await getTracksWithColdStreak({
+			userId,
+			artistId,
+		});
+	}
+
+	const result: TrackStatsType[] = trackMetrics.map((data) => {
+		const hasHotStreak = hotStreakTrackIds?.has(data.id);
+		const hasColdStreak = coldStreakTrackIds?.has(data.id);
+		return {
+			...allTracksMap.get(data.id)!,
+			album: {
+				name: allTracksMap.get(data.id)?.album?.name ?? null,
+				color: allTracksMap.get(data.id)?.album?.color ?? null,
+			},
+			ranking: data.ranking,
+			averageRanking: data.averageRanking.toFixed(1),
+			peak: data.peak,
+			worst: data.worst,
+			gap: data.worst - data.peak,
+			top50PercentCount: top50PercentMap.get(data.id) ?? 0,
+			top25PercentCount: top25PercentMap.get(data.id) ?? 0,
+			top5PercentCount: top5PercentMap.get(data.id) ?? 0,
+			rankings: trackRankingsMap?.get(data.id),
+			achievement: hasHotStreak
+				? "Hot Streak"
+				: hasColdStreak
+					? "Cold Streak"
+					: null,
+			rankChange: options.includeRankChange
+				? prevTrackRankingMap?.get(data.id)
+					? prevTrackRankingMap!.get(data.id)! - data.ranking
+					: null
+				: undefined,
+		};
+	});
 
 	return result;
 }
