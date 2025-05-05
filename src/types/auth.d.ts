@@ -3,7 +3,9 @@ import { type DefaultSession } from "next-auth";
 
 export type ExtendedUser = DefaultSession["user"] & {
     id: string,
-    role: $Enums.Role
+    role: $Enums.Role,
+    image: string | null,
+    name: string;
 }
 
 declare module "next-auth" {

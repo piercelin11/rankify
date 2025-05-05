@@ -40,28 +40,50 @@ export function toAcronym(string: string) {
 	}
 }
 
-export type getPastDateProps = {
-	days?: number;
-	weeks?: number;
-	months?: number;
-	years?: number;
-};
+export function calculateDateRangeFromSlug(rangeSlug: string): {
+	startDate?: Date;
+	endDate: Date;
+} {
+	const now = new Date();
+	const endDate = now;
+	let startDate: Date | undefined;
 
-export function getPastDate({
-	days = 0,
-	weeks = 0,
-	months = 0,
-	years = 0,
-}: getPastDateProps) {
-	if (!days && !weeks && !months && !years) return undefined;
+	switch (rangeSlug) {
+		case "past-month": {
+			const date = new Date(now);
+			date.setMonth(date.getMonth() - 1);
+			startDate = date;
+			break;
+		}
+		case "past-6-months": {
+			const date = new Date(now);
+			date.setMonth(date.getMonth() - 6);
+			startDate = date;
+			break;
+		}
+		case "past-year": {
+			const date = new Date(now);
+			date.setFullYear(date.getFullYear() - 1);
+			startDate = date;
+			break;
+		}
+		case "past-2-year": {
+			const date = new Date(now);
+			date.setFullYear(date.getFullYear() - 2);
+			startDate = date;
+			break;
+		}
+		case "all-time": {
+			startDate = undefined;
+			break;
+		}
+		default: {
+			startDate = undefined;
+			break;
+		}
+	}
 
-	const date = new Date();
-	date.setDate(date.getDate() - days);
-	date.setDate(date.getDate() - weeks * 7);
-	date.setMonth(date.getMonth() - months);
-	date.setFullYear(date.getFullYear() - years);
-
-	return date;
+	return { startDate, endDate };
 }
 
 type GetPrevNextIndex<T> = {
@@ -74,9 +96,38 @@ export function getPrevNextIndex<T extends { id: string }>({
 	key,
 }: GetPrevNextIndex<T>) {
 	const currentIndex = data.findIndex((data) => data.id === key);
-	const previousIndex =
-		currentIndex !== 0 ? currentIndex - 1 : data.length - 1;
+	const previousIndex = currentIndex !== 0 ? currentIndex - 1 : data.length - 1;
 	const nextIndex = currentIndex !== data.length - 1 ? currentIndex + 1 : 0;
 
-	return {previousIndex, nextIndex}
+	return { previousIndex, nextIndex };
+}
+
+export function throttle<T extends (...args: any[]) => any>(
+	fn: T,
+	delay: number = 500
+): (...args: Parameters<T>) => void {
+
+	let timer: null | NodeJS.Timeout = null;
+	return function (...args: Parameters<T>) {
+		if (!timer) {
+			fn(...args);
+			timer = setTimeout(() => {
+				timer = null;
+			}, delay);
+		}
+	};
+}
+
+export function debounce<T extends (...args: any[]) => any>(
+	fn: T,
+	delay: number = 500
+): (...args: Parameters<T>) => void {
+	let timer: undefined | NodeJS.Timeout;
+
+	return function (...args: Parameters<T>) {
+		if (timer) clearTimeout(timer);
+		timer = setTimeout(() => {
+			fn(...args);
+		}, delay);
+	};
 }

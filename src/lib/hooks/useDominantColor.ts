@@ -1,8 +1,11 @@
+import { RGB } from 'color-convert';
 import { useState, useEffect } from 'react';
 
+// 定義 color-convert 使用的 RGB 類型
+
 type DominantColorResult = {
-  dominantColor: Uint8ClampedArray;
-  colorPalette: Uint8ClampedArray[];
+  dominantColor: RGB;
+  colorPalette: RGB[];
 };
 
 export default function useDominantColor(src: string): [DominantColorResult | null, boolean] {
@@ -27,32 +30,48 @@ export default function useDominantColor(src: string): [DominantColorResult | nu
         }
 
         const img = new Image();
-        img.crossOrigin = "anonymous"; // 跨域設置
+        img.crossOrigin = "anonymous";
         img.src = src;
 
         img.onload = () => {
-          // 計算 1x1 的主色
-          canvas.width = 1;
-          canvas.height = 1;
-          context.drawImage(img, 0, 0, 1, 1);
-          const dominantColor = new Uint8ClampedArray(context.getImageData(0, 0, 1, 1).data.slice(0, 3));
+          try {
+            // 計算 1x1 的主色
+            canvas.width = 1;
+            canvas.height = 1;
+            context.drawImage(img, 0, 0, 1, 1);
+            const dominantColorUint8 = context.getImageData(0, 0, 1, 1).data;
+            // 將 Uint8ClampedArray 轉換為 [number, number, number]
+            const dominantColor: RGB = [
+                dominantColorUint8[0],
+                dominantColorUint8[1],
+                dominantColorUint8[2]
+            ];
 
-          // 計算 3x3 調色板
-          canvas.width = 3;
-          canvas.height = 3;
-          context.drawImage(img, 0, 0, 3, 3);
-          const imageData = context.getImageData(0, 0, 3, 3).data;
-          const colorPalette: Uint8ClampedArray[] = [];
 
-          for (let i = 0; i < imageData.length; i += 4) {
-            colorPalette.push(new Uint8ClampedArray(imageData.slice(i, i + 3)));
+            // 計算 3x3 調色板
+            canvas.width = 3;
+            canvas.height = 3;
+            context.drawImage(img, 0, 0, 3, 3);
+            const imageData = context.getImageData(0, 0, 3, 3).data;
+            const colorPalette: RGB[] = [];
+
+            for (let i = 0; i < imageData.length; i += 4) {
+              colorPalette.push([
+                  imageData[i],
+                  imageData[i + 1],
+                  imageData[i + 2]
+              ]);
+            }
+
+            resolve({ dominantColor, colorPalette });
+
+          } catch (error) {
+             reject("Failed to process image data: " + error);
           }
-
-          resolve({ dominantColor, colorPalette });
         };
 
-        img.onerror = (err) => {
-          reject("Failed to load image: " + err);
+        img.onerror = () => {
+          reject("Failed to load image");
         };
       });
     };
@@ -65,14 +84,15 @@ export default function useDominantColor(src: string): [DominantColorResult | nu
       })
       .catch((err) => {
         console.error(err);
+        setColor(null);
         setLoading(false);
       });
 
-    // 清理資源
     return () => {
-      setColor(null);
-      setLoading(false);
+       setColor(null);
+       setLoading(false);
     };
+
   }, [src]);
 
   return [color, loading];

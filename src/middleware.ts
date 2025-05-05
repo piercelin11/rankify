@@ -4,8 +4,9 @@ import {
 	publicRoutes,
 	authRoutes,
 	apiAuthPrefix,
-	DEFAULT_LOGIN_REDIRECT
+	DEFAULT_LOGIN_REDIRECT,
 } from "./config/route";
+import { NextResponse } from "next/server";
 
 const { auth } = NextAuth(authConfig);
 
@@ -31,7 +32,22 @@ export default auth(async function middleware(req) {
 		return Response.redirect(new URL("/auth/signin", nextUrl.origin));
 	}
 
-	return;
+
+	// --- 判斷是否為 Server Action 請求 ---
+    const isServerAction = req.headers.get("Next-Action") !== null;
+
+    if (isServerAction) {
+        return NextResponse.next(); // <--- 不帶參數
+    } else {
+        const requestHeaders = new Headers(req.headers);
+        requestHeaders.set("x-current-path", nextUrl.pathname);
+
+        return NextResponse.next({
+            request: {
+                headers: requestHeaders,
+            },
+        });
+    }
 });
 
 //設置啟用 Middleware 的路徑

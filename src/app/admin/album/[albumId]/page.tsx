@@ -1,13 +1,14 @@
 import { notFound } from "next/navigation";
 import React from "react";
-import InfoHeader from "@/components/display/showcase/InfoHeader";
+
 import getAlbumById from "@/lib/database/data/getAlbumById";
 import getTracksByAlbum from "@/lib/database/data/getTracksByAlbum";
 import { dateToLong } from "@/lib/utils/helper";
-import TrackListItem from "@/components/admin/TrackListItem";
+import TrackListItem from "@/features/admin/editContent/components/TrackListItem";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
-import AlbumActionIcons from "@/components/admin/AlbumActionIcons";
-import ContentWrapper from "@/components/general/ContentWrapper";
+import ContentWrapper from "@/components/layout/ContentWrapper";
+import AlbumActionSection from "@/features/admin/editContent/components/AlbumActionSection";
+import ContentHeader from "@/components/presentation/ContentHeader";
 
 export default async function AdminAlbumPage({
 	params,
@@ -25,17 +26,16 @@ export default async function AdminAlbumPage({
 
 	return (
 		<>
-			<InfoHeader data={album} subTitle={`${dateToLong(album.releaseDate)}`} />
+			<ContentHeader
+				data={album}
+				subTitleContent={<p>{dateToLong(album.releaseDate)}</p>}
+			/>
 			<ContentWrapper>
 				<div className="mb-12">
-					<AlbumActionIcons data={album} />
+					<AlbumActionSection data={album} />
 				</div>
 				{tracks.map((track) => (
-					<TrackListItem
-						key={track.id}
-						trackData={track}
-						albums={albums}
-					/>
+					<TrackListItem key={track.id} trackData={track} albums={albums} />
 				))}
 			</ContentWrapper>
 		</>

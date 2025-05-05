@@ -1,7 +1,7 @@
 import { Album, Artist, SearchContent, Track } from "spotify-types";
 import { generateSearchParams } from "../utils/helper";
 import getSpotifyToken from "./fetchSpotifyToken";
- 
+
 export type SpotifyTypeMap = {
 	album: Album[];
 	artist: Artist[];
@@ -10,7 +10,11 @@ export type SpotifyTypeMap = {
 
 export default async function fetchSearchResults<
 	T extends keyof SpotifyTypeMap,
->(searchQuery: string, type: T): Promise<SpotifyTypeMap[T] | null> {
+>(
+	searchQuery: string,
+	type: T,
+	limit?: number
+): Promise<SpotifyTypeMap[T] | null> {
 	const accessToken = await getSpotifyToken();
 
 	try {
@@ -19,7 +23,7 @@ export default async function fetchSearchResults<
 				generateSearchParams({
 					q: searchQuery,
 					type,
-					limit: "8",
+					limit: limit ? `${limit}` : "8",
 				}),
 			{
 				method: "GET",

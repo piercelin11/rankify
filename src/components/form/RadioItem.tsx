@@ -1,36 +1,42 @@
 import { cn } from "@/lib/cn";
-import React, { InputHTMLAttributes } from "react";
-
-type RadioData = {
-	id: string;
-	label: string;
-};
+import React from "react";
 
 type RadioItemProps = {
 	label: string;
-    isChecked: boolean;
-    defaultChecked: boolean;
-    value: string;
-} & InputHTMLAttributes<HTMLInputElement>;
+	isChecked: boolean;
+	value?: string;
+	onChange: () => void;
+	name?: string;
+	onBlur?: () => void;
+};
 
-export default function RadioItem({ label, value, isChecked, defaultChecked, ...props }: RadioItemProps) {
+export default function RadioItem({
+	label,
+	value,
+	name,
+	onChange,
+	onBlur,
+	isChecked,
+}: RadioItemProps) {
 	return (
 		<label
-			className={cn("flex items-center gap-2 text-zinc-500", {
-				"text-zinc-100": isChecked,
+			className={cn("flex items-center gap-2 text-neutral-500", {
+				"text-neutral-100": isChecked,
 			})}
 		>
 			<span
 				className={cn("aspect-square w-3 rounded-full border", {
-					"bg-lime-500": isChecked,
+					"bg-primary-500": isChecked,
 				})}
 			/>
 			<input
 				type="radio"
-				{...props}
+				name={name}
 				value={value}
+				checked={isChecked}
+				onChange={onChange}
+				onBlur={onBlur}
 				hidden
-				defaultChecked={defaultChecked}
 			/>
 			{label}
 		</label>

@@ -1,15 +1,17 @@
 import getArtistById from "@/lib/database/data/getArtistById";
 import { notFound } from "next/navigation";
 import React from "react";
-import GalleryWrapper from "@/components/display/showcase/GalleryWrapper";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
-import GalleryItem from "@/components/display/showcase/GalleryItem";
-import InfoHeader from "@/components/display/showcase/InfoHeader";
-import AddNewButton from "@/components/admin/AddNewButton";
 import getSinglesByArtist from "@/lib/database/data/getSinglesByArtist";
-import TrackListItem from "@/components/admin/TrackListItem";
-import ArtistActionIcons from "@/components/admin/ArtistActionIcons";
-import ContentWrapper from "@/components/general/ContentWrapper";
+import TrackListItem from "@/features/admin/editContent/components/TrackListItem";
+import ContentWrapper from "@/components/layout/ContentWrapper";
+import AddAlbumButton from "@/features/admin/addContent/components/AddAlbumButton";
+import AddEPButton from "@/features/admin/addContent/components/AddEPButton";
+import AddSingleButton from "@/features/admin/addContent/components/AddSingleButton";
+import ArtistActionSection from "@/features/admin/editContent/components/ArtistActionSection";
+import ContentHeader from "@/components/presentation/ContentHeader";
+import GalleryWrapper from "@/components/presentation/GalleryWrapper";
+import GalleryItem from "@/components/presentation/GalleryItem";
 
 export default async function AdminArtistPage({
 	params,
@@ -33,14 +35,14 @@ export default async function AdminArtistPage({
 
 	return (
 		<>
-			<InfoHeader
+			<ContentHeader
 				data={artist}
-				subTitle={`${artist.spotifyFollowers} followers`}
+				subTitleContent={<p>{artist.spotifyFollowers} followers</p>}
 				rounded
 			/>
 			<ContentWrapper>
 				<div className="mb-60 space-y-10">
-					<ArtistActionIcons data={artist} />
+					<ArtistActionSection data={artist} />
 					<div>
 						<h2>Albums</h2>
 						<GalleryWrapper>
@@ -53,7 +55,7 @@ export default async function AdminArtistPage({
 									subTitle="Album"
 								/>
 							))}
-							<AddNewButton kind="default" artistId={artistId} type="Album" />
+							<AddAlbumButton artistId={artistId} />
 						</GalleryWrapper>
 					</div>
 					<div>
@@ -68,19 +70,14 @@ export default async function AdminArtistPage({
 									subTitle="EP"
 								/>
 							))}
-							<AddNewButton kind="default" artistId={artistId} type="EP" />
+							<AddEPButton artistId={artistId} />
 						</GalleryWrapper>
 					</div>
 
 					<div>
 						<div className="mb-8 flex items-center justify-between">
 							<h2>Singles</h2>
-							<AddNewButton
-								kind="default"
-								artistId={artistId}
-								type="Single"
-								buttonLabel="Add Singles"
-							/>
+							<AddSingleButton artistId={artistId} />
 						</div>
 						{singles.map((single, index) => (
 							<TrackListItem

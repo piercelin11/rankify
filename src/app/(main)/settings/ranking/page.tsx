@@ -1,26 +1,26 @@
 import React from "react";
-import { Description } from "@/components/ui/Text";
-import RankingSettings from "@/components/settings/RankingSettings";
 import { getUserSession } from "../../../../../auth";
 import getUserPreference from "@/lib/database/user/getUserPreference";
+import RankingSettings from "@/features/settings/components/RankingSettingsForm";
 
 export default async function RankingSettingsPage() {
 	const {id: userId} = await getUserSession();
-
 	const userPreference = await getUserPreference({userId});
+
+	console.log(userPreference)
 	
 	return (
-		<div className="space-y-14">
+		<>
 			<div className="space-y-2">
 				<h2>Ranking Settings</h2>
-				<Description>
+				<p className="text-description">
 					Configure how rankings are calculated and displayed. Customize ranking
 					algorithms, display preferences, and other related settings to suit
 					your needs.
-				</Description>
+				</p>
 			</div>
 
 			<RankingSettings settings={userPreference} />
-		</div>
+		</>
 	);
 }

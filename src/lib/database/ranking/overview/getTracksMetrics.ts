@@ -2,27 +2,47 @@ import { db } from "@/lib/prisma";
 import { getTracksStatsProps } from "./getTracksStats";
 import { getUserRankingPreference } from "../../user/getUserPreference";
 
+export const TrackStatsOrder = [
+	{
+		_avg: {
+			ranking: "asc",
+		},
+	},
+	{
+		_min: {
+			ranking: "asc",
+		},
+	},
+	{
+		_max: {
+			ranking: "asc",
+		},
+	},
+	{
+		trackId: "desc",
+	},
+]
+
 export default async function getTracksMetrics({
 	artistId,
 	userId,
 	take,
 	time,
 }: getTracksStatsProps) {
-	const trackConditions = await getUserRankingPreference({userId});
+	const trackConditions = await getUserRankingPreference({ userId });
 	const date = time
 		? {
 				[time.filter]: time.threshold,
 			}
 		: undefined;
 
-	//const dateThreshold = time && getPastDate(time);
 	const rankingData = await db.ranking.groupBy({
 		by: ["trackId"],
 		where: {
 			userId,
+			artistId,
 			track: {
-				artistId,
-				...trackConditions
+				...trackConditions,
 			},
 			date: {
 				type: "ARTIST",
@@ -37,6 +57,9 @@ export default async function getTracksMetrics({
 		},
 		_avg: {
 			ranking: true,
+		},
+		_count: {
+			_all: true,
 		},
 		orderBy: [
 			{
@@ -66,6 +89,7 @@ export default async function getTracksMetrics({
 		ranking: index + 1,
 		peak: item._min.ranking ?? 0,
 		worst: item._max.ranking ?? 0,
+		count: item._count._all,
 		averageRanking: item._avg.ranking ?? 0,
 	}));
 }

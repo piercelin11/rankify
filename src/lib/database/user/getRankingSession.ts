@@ -1,6 +1,5 @@
 import { db } from "@/lib/prisma";
 import { TimeFilterType } from "../ranking/overview/getTracksStats";
-//import { unstable_cacheTag as cacheTag } from "next/cache";
 
 type getAlbumRankingsProps = {
 	artistId: string;
@@ -25,10 +24,10 @@ export default async function getRankingSession({
 			userId,
 			date,
 		},
-		include: {
+		/* include: {
 			artist: true,
 			rankings: true,
-		},
+		}, */
 		orderBy: {
 			date: "desc",
 		},
@@ -38,8 +37,6 @@ export default async function getRankingSession({
 }
 
 type getRankingSessionByIdProps = {
-	artistId: string;
-	userId: string;
 	dateId: string;
 };
 
@@ -47,14 +44,14 @@ export async function getRankingSessionById({
 	dateId
 }: getRankingSessionByIdProps) {
 
-	const rankingSessions = await db.rankingSession.findMany({
+	const rankingSessions = await db.rankingSession.findFirst({
 		where: {
 			id: dateId,
 		},
-		include: {
+		/* include: {
 			artist: true,
 			rankings: true,
-		},
+		}, */
 		orderBy: {
 			date: "desc",
 		},

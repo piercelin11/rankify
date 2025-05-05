@@ -1,4 +1,4 @@
-import NotFoundWrapper from "@/components/general/NotFoundWrapper";
+import NotFoundWrapper from "@/components/feedback/NotFoundWrapper";
 
 export default function NotFound() {
 	return (

@@ -1,8 +1,8 @@
-import GalleryWrapper from "@/components/display/showcase/GalleryWrapper";
-import ContentWrapper from "@/components/general/ContentWrapper";
+import ContentWrapper from "@/components/layout/ContentWrapper";
 import getUnloggedArtists from "@/lib/database/user/getUnloggedArtists";
 import { getUserSession } from "@/../auth";
-import GalleryItem from "@/components/display/showcase/GalleryItem";
+import GalleryItem from "@/components/presentation/GalleryItem";
+import GalleryWrapper from "@/components/presentation/GalleryWrapper";
 
 export default async function HomePage() {
 	const { id: userId } = await getUserSession();

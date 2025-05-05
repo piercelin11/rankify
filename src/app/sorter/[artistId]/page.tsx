@@ -1,11 +1,11 @@
-import SortingStage from "@/components/sorter/SorterResult";
 import getTracksByArtist from "@/lib/database/data/getTracksByArtist";
 import getRankingDraft from "@/lib/database/user/getRankingDraft";
 import React from "react";
 import { getUserSession } from "@/../auth";
-import SorterField from "@/components/sorter/SorterField";
+import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
+import SorterPage from "@/features/sorter/components/SorterPage";
 
-export default async function SorterPage({
+export default async function page({
 	params,
 }: {
 	params: Promise<{ artistId: string }>;
@@ -13,10 +13,8 @@ export default async function SorterPage({
 	const { id: userId } = await getUserSession();
 	const artistId = (await params).artistId;
 	const tracks = await getTracksByArtist(artistId);
-
+	const albums = await getAlbumsByArtist(artistId);
 	const draft = await getRankingDraft({ artistId, userId });
 
-	return (
-		<SorterField data={tracks} draft={draft} />
-	);
+	return <SorterPage albums={albums} tracks={tracks} draft={draft}  />;
 }

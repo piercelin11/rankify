@@ -1,103 +1,74 @@
 "use client";
-import { cn } from "@/lib/cn";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
-import React, { Dispatch, ReactNode, SetStateAction, useState } from "react";
+import React, { useState } from "react";
+import DropdownContainer from "./DropdownContainer";
+import DropdownTrigger from "./DropdownTrigger";
+import DropdownContent from "./DropdownContent";
+import DropdownItem from "./DropdownItem";
 
-export type MenuItemProps = {
+export type MenuOptionProps = {
+	id: string;
 	label: string;
-	link: string;
+	href?: string;
+	onClick?: () => void;
 };
 
 type DropDownMenuProps = {
-	menuData: MenuItemProps[];
-	defaultValue?: string;
+	options: MenuOptionProps[];
+	defaultValue?: string | React.ReactNode;
 };
 
 export default function DropdownMenu({
-	menuData,
+	options,
 	defaultValue,
 }: DropDownMenuProps) {
 	const [isOpen, setOpen] = useState(false);
 	const [selected, setSelected] = useState<string | null>(null);
 
-	return (
-		<div className="relative select-none">
-			<DropdownSelect isOpen={isOpen} setOpen={setOpen}>
-				{selected || defaultValue || "Select..."}
-			</DropdownSelect>
-			<DropdownList isOpen={isOpen}>
-				{menuData.map((menuItem) => (
-					<Link
-						key={menuItem.link}
-						href={menuItem.link}
-						onClick={() => {
-							setOpen(false);
-							setSelected(menuItem.label);
-						}}
-						replace
-					>
-						<div className="rounded-md px-4 py-3 text-zinc-500 hover:bg-zinc-850 hover:text-zinc-100">
-							{menuItem.label}
-						</div>
-					</Link>
-				))}
-			</DropdownList>
-		</div>
-	);
-}
+	function handleItemClick(item: MenuOptionProps) {
+		setOpen(false);
+		setSelected(item.label);
 
-type DropdownSelectProps = {
-	children: ReactNode;
-	isOpen: boolean;
-	setOpen: Dispatch<SetStateAction<boolean>>;
-};
+		if (item.onClick) {
+			item.onClick();
+		}
+	}
 
-export function DropdownSelect({
-	children,
-	isOpen,
-	setOpen,
-}: DropdownSelectProps) {
 	return (
-		<div
-			className="flex justify-between rounded-md bg-zinc-900 px-4 py-3 text-zinc-400 hover:text-zinc-300 hover:outline hover:outline-1 hover:outline-zinc-700"
-			onClick={() => setOpen((prev) => !prev)}
-		>
-			<div
-				className={cn("min-w-52", {
-					"text-zinc-100": isOpen,
-				})}
+		<DropdownContainer width={300}>
+			<DropdownTrigger
+				toggleDropdown={() => setOpen((prev) => !prev)}
+				isDropdownOpen={isOpen}
 			>
-				{children}
-			</div>
-			<ChevronDownIcon
-				className={cn("self-center text-zinc-400 transition ease-in-out", {
-					"rotate-180 transform text-zinc-600": isOpen,
+				{selected || defaultValue || "Select..."}
+			</DropdownTrigger>
+			<DropdownContent isDropdownOpen={isOpen}>
+				{options.map((menuItem) => {
+					if (menuItem.href)
+						return (
+							<Link
+								key={menuItem.id}
+								href={menuItem.href}
+								replace
+							>
+								<DropdownItem>
+									{menuItem.label}
+								</DropdownItem>
+							</Link>
+						);
+					else
+						return (
+							<DropdownItem
+								key={menuItem.id}
+								onClick={() => {
+									handleItemClick(menuItem);
+								}}
+							>
+								{menuItem.label}
+							</DropdownItem>
+						);
 				})}
-				width={18}
-				height={18}
-			/>
-		</div>
-	);
-}
-
-type DropdownList = {
-	isOpen: boolean;
-	children: ReactNode[];
-};
-
-export function DropdownList({ isOpen, children }: DropdownList) {
-	return (
-		<div
-			className={cn(
-				"absolute max-h-64 w-full overflow-auto rounded-md bg-zinc-900 opacity-0 transition ease-in-out",
-				{
-					"translate-y-3 opacity-100": isOpen,
-					"pointer-events-none": !isOpen,
-				}
-			)}
-		>
-			{children}
-		</div>
+			</DropdownContent>
+		</DropdownContainer>
 	);
 }

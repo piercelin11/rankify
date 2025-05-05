@@ -1,37 +1,37 @@
-import InfoHeader from "@/components/display/showcase/InfoHeader";
-import ContentWrapper from "@/components/general/ContentWrapper";
+import ContentWrapper from "@/components/layout/ContentWrapper";
 import getArtistById from "@/lib/database/data/getArtistById";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { ReactNode, Suspense } from "react";
+import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
+import ArtistHeader from "@/components/navigation/ArtistHeader";
 
 type LayoutProps = {
 	params: Promise<{ artistId: string }>;
-	children: React.ReactNode;
+	children: ReactNode;
 };
 
 export default async function MainLayout({ params, children }: LayoutProps) {
 	return (
 		<>
-			<Suspense fallback={<InfoHeader />}>
-				<Header params={params} />
+			<Header params={params} />
+			<Suspense fallback={<LoadingAnimation />}>
+				<ContentWrapper className="space-y-5 flex-1">{children}</ContentWrapper>
 			</Suspense>
-			<ContentWrapper className="space-y-10">{children}</ContentWrapper>
 		</>
 	);
 }
 
-async function Header({ params }: Omit<LayoutProps, "children">) {
+async function Header({ params }: { params: Promise<{ artistId: string }> }) {
 	const artistId = (await params).artistId;
 	const artist = await getArtistById(artistId);
 
 	if (!artist) notFound();
 
 	return (
-		<InfoHeader
-			data={artist}
-			subTitle={`${artist.spotifyFollowers} followers`}
-			rounded
-			type="Artist"
-		/>
+		<>
+			<ArtistHeader artistData={artist} />
+			<BlurredImageBackground src={artist.img || ""} />
+		</>
 	);
 }

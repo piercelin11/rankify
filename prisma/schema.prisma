@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -9,7 +10,7 @@ datasource db {
 
 model User {
   id             String           @id @default(cuid())
-  name           String?
+  name           String
   username       String?          @unique
   email          String?          @unique
   password       String?
@@ -23,6 +24,7 @@ model User {
   dates          RankingSession[]
   RankingDraft   RankingDraft[]
   UserPreference UserPreference[]
+  AlbumRanking   AlbumRanking[]
 }
 
 model UserPreference {
@@ -64,22 +66,25 @@ model Artist {
   dates            RankingSession[]
   tracks           Track[]
   rankingDrafts    RankingDraft[]
+  AlbumRanking     AlbumRanking[]
 }
 
 model Album {
-  id          String    @id
-  name        String
-  artistId    String
-  spotifyUrl  String    @unique
-  color       String?
-  img         String?
-  releaseDate DateTime
-  type        AlbumType
-  artist      Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  rankings    Ranking[]
-  tracks      Track[]
+  id           String         @id
+  name         String
+  artistId     String
+  spotifyUrl   String         @unique
+  color        String?
+  img          String?
+  releaseDate  DateTime
+  type         AlbumType
+  artist       Artist         @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  rankings     Ranking[]
+  tracks       Track[]
+  AlbumRanking AlbumRanking[]
 
   @@unique([name, artistId])
+  @@index([artistId])
 }
 
 model Track {
@@ -88,6 +93,7 @@ model Track {
   albumId     String?
   trackNumber Int?
   spotifyUrl  String    @unique
+  color       String?
   img         String?
   artistId    String
   releaseDate DateTime?
@@ -99,35 +105,60 @@ model Track {
 
   @@unique([albumId, name])
   @@unique([artistId, name])
+  @@index([albumId])
+  @@index([artistId])
 }
 
 model Ranking {
-  id         String         @id @default(uuid())
-  ranking    Int
-  dateId     String
-  trackId    String
-  albumId    String?
-  artistId   String
-  userId     String
-  rankChange Int?
-  album      Album?         @relation(fields: [albumId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  artist     Artist         @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  date       RankingSession @relation(fields: [dateId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  track      Track          @relation(fields: [trackId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  user       User           @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  id             String         @id @default(uuid())
+  ranking        Int
+  rankPercentile Float
+  dateId         String
+  trackId        String
+  albumId        String?
+  artistId       String
+  userId         String
+  rankChange     Int?
+  album          Album?         @relation(fields: [albumId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  artist         Artist         @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  date           RankingSession @relation(fields: [dateId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  track          Track          @relation(fields: [trackId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  user           User           @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
-  @@unique([id, trackId])
+  @@unique([userId, dateId, trackId])
+  @@index([ranking])
+  @@index([rankChange])
+  @@index([dateId])
+}
+
+model AlbumRanking {
+  id                  String         @id @default(uuid())
+  ranking             Int
+  points              Int
+  basePoints          Int
+  averageTrackRanking Float
+  dateId              String
+  albumId             String
+  artistId            String
+  userId              String
+  album               Album          @relation(fields: [albumId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  artist              Artist         @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  date                RankingSession @relation(fields: [dateId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  user                User           @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@unique([userId, dateId, albumId])
 }
 
 model RankingSession {
-  id       String       @id @default(uuid())
-  date     DateTime     @default(now())
-  userId   String
-  artistId String?
-  type     RankingType?
-  rankings Ranking[]
-  artist   Artist?      @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  user     User         @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  id           String         @id @default(uuid())
+  date         DateTime       @default(now())
+  userId       String
+  artistId     String
+  type         RankingType?
+  rankings     Ranking[]
+  artist       Artist         @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  user         User           @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  AlbumRanking AlbumRanking[]
 
   @@index([date])
 }

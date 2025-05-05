@@ -1,66 +1,78 @@
 import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
-import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTracksRankingHistory";
-import RankingNavButton from "@/components/display/ranking/RankingNavButton";
-import {
-	HistoryTrackRankingChart,
-} from "@/components/display/ranking/TrackRankingChart";
-import LoadingAnimation from "@/components/ui/LoadingAnimation";
-import { dateToLong } from "@/lib/utils/helper";
-import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
+import getRankingSession from "@/lib/database/user/getRankingSession";
+import { dateToDashFormat } from "@/lib/utils/helper";
+import NoData from "@/components/feedback/NoData";
+import LoadingAnimation from "@/components/feedback/LoadingAnimation";
+import TrackHistoryList from "@/features/ranking/display/components/TrackHistoryListSection";
+import { notFound } from "next/navigation";
+import AlbumHistoryStatsSection from "@/features/ranking/stats/components/AlbumHistoryStatsSection";
+import DropdownMenu from "@/components/menu/DropdownMenu";
+import AlbumHistoryPointsSection from "@/features/ranking/stats/components/AlbumHistoryPointsSection";
+import Link from "next/link";
+import { PlusIcon } from "@radix-ui/react-icons";
+import createAlbumRanking from "@/features/ranking/actions/createAlbumRanking";
 
-export default async function ArtistRankingPage({
+export default async function page({
 	params,
 }: {
 	params: Promise<{ artistId: string; dateId: string }>;
 }) {
-	const dateId = (await params).dateId;
 	const artistId = (await params).artistId;
+	const dateId = (await params).dateId;
 
 	const { id: userId } = await getUserSession();
 
+	const rankingSessions = await getRankingSession({ artistId, userId });
+	const currentDate = rankingSessions.find((session) => session.id === dateId);
+
+	if (!currentDate) notFound();
+
+	const dropdownOptions = rankingSessions.map((rankingSession) => ({
+		id: rankingSession.id,
+		label: dateToDashFormat(rankingSession.date),
+		href: rankingSession.id,
+	}));
+
+	
+
 	return (
-		<>
+		<div className="space-y-16">
 			<Suspense fallback={<LoadingAnimation />}>
-				<HistoryRankingChart
-					artistId={artistId}
-					userId={userId}
-					dateId={dateId}
-				/>
-				<RankingNavButton link={`/artist/${artistId}/history?date=${dateId}`}>
-					<ArrowLeftIcon />
-					Back
-				</RankingNavButton>
+				<div className="flex gap-4">
+					<DropdownMenu
+						options={dropdownOptions}
+						defaultValue={<p className="font-numeric tabular-nums">{dateToDashFormat(currentDate.date)}</p>}
+					/>
+					<Link href={`/sorter/${artistId}`}>
+						<div className="aspect-square rounded-full bg-primary-500 p-3 text-neutral-950 hover:bg-neutral-100">
+							<PlusIcon width={20} height={20} />
+						</div>
+					</Link>
+				</div>
+
+				{rankingSessions.length !== 0 ? (
+					<>
+						<TrackHistoryList
+							artistId={artistId}
+							userId={userId}
+							dateId={dateId}
+						/>
+						<AlbumHistoryStatsSection
+							artistId={artistId}
+							userId={userId}
+							dateId={dateId}
+						/>
+						<AlbumHistoryPointsSection
+							artistId={artistId}
+							userId={userId}
+							dateId={dateId}
+						/>
+					</>
+				) : (
+					<NoData />
+				)}
 			</Suspense>
-		</>
-	);
-}
-
-async function HistoryRankingChart({
-	artistId,
-	userId,
-	dateId,
-}: {
-	artistId: string;
-	userId: string;
-	dateId: string;
-}) {
-	const tracksRankings = await getTracksRankingHistory({
-		artistId,
-		userId,
-		dateId,
-	});
-	const albums = await getLoggedAlbums({ artistId, userId, time: {
-		threshold: tracksRankings[0].date.date,
-		filter: "equals"
-	} });
-
-	return (
-		<HistoryTrackRankingChart
-			data={tracksRankings}
-			albums={albums}
-			title={dateToLong(tracksRankings[0].date.date)}
-		/>
+		</div>
 	);
 }
