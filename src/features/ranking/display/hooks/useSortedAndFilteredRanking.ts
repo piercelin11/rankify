@@ -85,7 +85,14 @@ export default function useSortedAndFilteredRanking<
 	return {
 		sortedAndFilteredRankings,
 		handleHeaderClick,
-		dropdownOptions,
+		dropdownOptions: [
+			{
+				id: "all",
+				label: "select all",
+				onClick: () => setAlbumIdFilter(null),
+			},
+			...dropdownOptions,
+		],
 		albumIdFilter,
 		sortKey,
 		sortOrder,

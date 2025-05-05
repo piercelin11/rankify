@@ -8,6 +8,7 @@ import Image from "next/image";
 import { ArtistData, TrackData } from "@/types/data";
 import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
+import Scroll from "@/components/layout/Scroll";
 
 type LayoutProps = {
 	params: Promise<{ trackId: string; artistId: string }>;
@@ -20,6 +21,7 @@ export default async function TrackPageLayout({
 }: LayoutProps) {
 	return (
 		<>
+			<Scroll />
 			<Header params={params} />
 			<Suspense fallback={<LoadingAnimation />}>
 				<ContentWrapper className="space-y-10 2xl:space-y-20">

@@ -8,7 +8,7 @@ export default async function getAlbumById(albumId: string) {
 		},
 		include: {
 			artist: true,
-			tracks: true,
+			//tracks: true,
 		}
 	});
 

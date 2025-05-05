@@ -37,8 +37,6 @@ export default async function ArtistRankingPage({
 		},
 	});
 
-	const title = `${albums[0].artist.name} • ${dateToLong(tracksRankings[0].date)}`;
-
 	return (
 		<>
 			<AllTrackHistoryRankingList

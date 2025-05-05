@@ -8,6 +8,7 @@ import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackgro
 import { AlbumData, ArtistData } from "@/types/data";
 import Link from "next/link";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
+import Scroll from "@/components/layout/Scroll";
 
 type LayoutProps = {
 	params: Promise<{ albumId: string }>;
@@ -20,6 +21,7 @@ export default async function AlbumPageLayout({
 }: LayoutProps) {
 	return (
 		<>
+			<Scroll />
 			<Suspense fallback={<ContentHeader />}>
 				<Header params={params} />
 			</Suspense>

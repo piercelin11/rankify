@@ -2,7 +2,13 @@
 
 import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import { AlbumData, ArtistData } from "@/types/data";
-import React, { useMemo } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { Column, RankingHeader, RankingListItem } from "./RankingList";
 import AchievementDisplay, {
 	AchievementType,
@@ -10,12 +16,17 @@ import AchievementDisplay, {
 import useSortedAndFilteredRanking from "../hooks/useSortedAndFilteredRanking";
 import RankingAlbumFilter from "./RankingAlbumFilter";
 import useMediaQuery from "@/lib/hooks/useMediaQuery";
-import { FixedSizeList, ListChildComponentProps } from "react-window";
+import {
+	FixedSizeList,
+	ListChildComponentProps,
+	ListOnScrollProps,
+} from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRightIcon } from "@radix-ui/react-icons";
 import Button from "@/components/buttons/Button";
+import useListScroll from "../hooks/useListScroll";
 
 type TrackRankingListProps = {
 	tracksRankings: TrackHistoryType[];
@@ -23,6 +34,8 @@ type TrackRankingListProps = {
 	artist: ArtistData | null;
 	onBackHref: string;
 };
+
+const SCROLL_POSITION_KEY = "trackListHistoryScroll";
 
 export default function AllTrackHistoryRankingList({
 	albums,
@@ -40,6 +53,9 @@ export default function AllTrackHistoryRankingList({
 		sortKey,
 		sortOrder,
 	} = useSortedAndFilteredRanking(tracksRankings, albums);
+	const { listRefCallback, handleRowClick, handleListScroll } = useListScroll({
+		sessionKey: SCROLL_POSITION_KEY,
+	});
 
 	const albumsMap = useMemo(
 		() => new Map(albums.map((album) => [album.id, album])),
@@ -61,6 +77,7 @@ export default function AllTrackHistoryRankingList({
 			),
 		},
 	];
+
 	return (
 		<div>
 			<div className="mb-10 flex items-center justify-between">
@@ -70,7 +87,7 @@ export default function AllTrackHistoryRankingList({
 				/>
 				{artist && (
 					<Link href={onBackHref}>
-						<Button className="p-2 gap-2" variant="outline" rounded>
+						<Button className="gap-2 p-2" variant="outline" rounded>
 							<Image
 								className="rounded-full"
 								src={artist?.img || ""}
@@ -91,10 +108,11 @@ export default function AllTrackHistoryRankingList({
 					sortOrder={sortOrder}
 				/>
 
-				<div className="h-virtualized-ranking relative w-full overflow-auto scrollbar-hidden">
+				<div className="h-virtualized-ranking relative w-full">
 					<AutoSizer>
 						{({ height, width }) => (
 							<FixedSizeList
+								ref={listRefCallback}
 								key={itemHeight}
 								className="overscroll-contain scrollbar-hidden"
 								height={height}
@@ -105,8 +123,10 @@ export default function AllTrackHistoryRankingList({
 									items: sortedAndFilteredRankings,
 									columns: columns,
 									sortKey: String(sortKey),
+									handleRowClick: handleRowClick,
 								}}
 								overscanCount={5}
+								onScroll={handleListScroll}
 							>
 								{Row}
 							</FixedSizeList>
@@ -122,19 +142,21 @@ type RowData = {
 	items: TrackHistoryType[];
 	columns: Column<TrackHistoryType>[];
 	sortKey: string | null;
+	handleRowClick: () => void;
 };
 
 function Row({ index, style, data }: ListChildComponentProps<RowData>) {
 	const rowData = data.items[index];
 	const columns = data.columns;
 	const sortKey = data.sortKey;
+	const handleRowClick = data.handleRowClick;
 
 	if (!rowData) {
 		return null;
 	}
 
 	return (
-		<div style={style}>
+		<div style={style} onClick={handleRowClick}>
 			<RankingListItem
 				data={rowData}
 				columns={columns}

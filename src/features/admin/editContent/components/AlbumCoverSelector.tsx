@@ -1,11 +1,11 @@
 "use client";
 
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
-import FormMessage from "@/components/form/FormMessage";
 import { cn } from "@/lib/cn";
+import getArtistById from "@/lib/database/data/getArtistById";
 import fetchSearchResults from "@/lib/spotify/fetchSearchResults";
 import { AlbumData } from "@/types/data";
-import { CheckCircledIcon } from "@radix-ui/react-icons";
+import { CheckIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
@@ -28,7 +28,7 @@ export default function AlbumCoverSelector({
 	useEffect(() => {
 		async function fetchCover() {
 			const data =
-				(await fetchSearchResults(`album:${album.name}`, "album", 5)) ?? [];
+				(await fetchSearchResults(`artist:${album.artist?.name} album:${album.name}`, "album", 4)) ?? [];
 			setAlbumCoverOpiotns([
 				...new Set([
 					album.img!,
@@ -42,29 +42,32 @@ export default function AlbumCoverSelector({
 	return (
 		<div className="space-y-4">
 			<p className="text-sm text-neutral-500">Album cover</p>
-			<div className="flex items-center gap-4">
-				{albumCoverOpiotns.length !== 1 ? (
+			<div className="flex items-center gap-4 h-20">
+				{albumCoverOpiotns.length !== 0 ? (
 					albumCoverOpiotns?.map((url) => (
 						<label
 							key={url}
 							className={cn(
 								"relative flex items-center gap-2 overflow-hidden rounded text-neutral-500",
 								{
-									"outline outline-1 outline-primary-500": value === url,
+									"outline outline-2 outline-primary-500": value === url,
 								}
 							)}
 						>
 							{value === url && (
-								<CheckCircledIcon
-									className="absolute left-2 top-2 text-primary-500"
-									width={20}
-									height={20}
-								/>
+								<div className="absolute left-1 top-1 rounded-full bg-primary-500 p-1">
+									<CheckIcon
+										className="text-neutral-950"
+										width={15}
+										height={15}
+									/>
+								</div>
 							)}
 							<Image
+								className={cn({ "opacity-40": value !== url })}
 								src={url || ""}
-								width={70}
-								height={70}
+								width={80}
+								height={80}
 								alt={"album cover options"}
 							/>
 							<input

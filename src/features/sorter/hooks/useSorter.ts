@@ -118,6 +118,7 @@ export default function useSorter({
 	//用來對歌曲列表進行排序的根據 flag 的值，可以決定選擇左邊的歌曲、右邊的歌曲，或者宣告平局。
 	function sortList(flag: number) {
 		recordHistory();
+		dispatch(setSaveStatus("idle"));
 
 		var i;
 		if (flag === -1) {
@@ -230,7 +231,6 @@ export default function useSorter({
 		if (cmp1.current < 0) {
 			percent.current = 100;
 			dispatch(setPercentage(100));
-			dispatch(setSaveStatus("idle"));
 			showResult();
 			finishFlag.current = 1;
 		} else {

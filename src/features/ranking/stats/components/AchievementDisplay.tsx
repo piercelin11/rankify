@@ -2,11 +2,17 @@ import { cn } from "@/lib/cn";
 import {
 	ArrowDownIcon,
 	ArrowUpIcon,
+	CircleBackslashIcon,
 	StarFilledIcon,
 } from "@radix-ui/react-icons";
 import React from "react";
 
-export type AchievementType = "New Peak" | "Big Jump" | "Big Drop" | null;
+export type AchievementType =
+	| "Hit Peak"
+	| "New Low"
+	| "Big Jump"
+	| "Big Drop"
+	| null;
 
 type AchievementDisplayProps = {
 	achievement?: AchievementType | null;
@@ -16,12 +22,20 @@ export default function AchievementDisplay({
 	achievement,
 }: AchievementDisplayProps) {
 	function getAchievement() {
-		if (achievement === "New Peak")
+		if (achievement === "Hit Peak")
 			return (
 				<AchievementItem
 					icon={<StarFilledIcon width={12} height={12} />}
 					label={"Hit Peak"}
-					className={"border-primary-400 bg-primary-950/40 text-primary-400"}
+					className={"bg-primary-950/40 border-primary-400 text-primary-400"}
+				/>
+			);
+		else if (achievement === "New Low")
+			return (
+				<AchievementItem
+					icon={<CircleBackslashIcon width={12} height={12} />}
+					label={"New Low"}
+					className={"bg-warning-950/40 border-warning-400 text-warning-400"}
 				/>
 			);
 		else if (achievement === "Big Jump")
@@ -29,7 +43,7 @@ export default function AchievementDisplay({
 				<AchievementItem
 					icon={<ArrowUpIcon width={12} height={12} />}
 					label={"Big Jump"}
-					className={"border-success-400 bg-success-950/40 text-success-400"}
+					className={"border-success-400 bg-success-950/30 text-success-400"}
 				/>
 			);
 		if (achievement === "Big Drop")
@@ -61,7 +75,7 @@ function AchievementItem({ className, icon, label }: AchievementItemProps) {
 		>
 			<div className="flex items-center gap-1">
 				{icon}
-				<p className="text-nowrap text-sm hidden lg:block">{label}</p>
+				<p className="hidden text-nowrap text-sm lg:block">{label}</p>
 			</div>
 		</div>
 	);

@@ -51,7 +51,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<Scroll />
+			{/* <Scroll /> */}
 			<StoreProvider>
 				<body
 					className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${raleway.variable} antialiased`}

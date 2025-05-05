@@ -18,15 +18,15 @@ export default function AlbumActionSection({ data }: AlbumActionSectionProps) {
 
 	const { id } = data;
 
-	async function handleUpdate() {
+	/* async function handleUpdate() {
 		const accessToken = await fetchSpotifyToken();
 		updateInfo("album", id, accessToken);
-	}
+	} */
 
 	return (
 		<div>
 			<ActionIconGroup
-				onUpdateClick={handleUpdate}
+				//onUpdateClick={handleUpdate}
 				onEditClick={() => setEditOpen(true)}
 				onDeleteClick={() => setDeleteOpen(true)}
 			/>
