@@ -42,9 +42,9 @@ export type getTracksStatsProps = {
 };
 
 type getTracksStatsOptions = {
-	includeRankChange: boolean;
-	includeAllRankings: boolean;
-	includeAchievement: boolean;
+	includeRankChange?: boolean;
+	includeAllRankings?: boolean;
+	includeAchievement?: boolean;
 };
 
 const defaultOptions = {
@@ -225,9 +225,9 @@ export default async function getTracksStats({
 				: hasColdStreak
 					? "Cold Streak"
 					: null,
-			rankChange: options.includeRankChange
+			rankChange: options.includeRankChange && !time
 				? prevTrackRankingMap?.get(data.id)
-					? prevTrackRankingMap!.get(data.id)! - data.ranking
+					? prevTrackRankingMap.get(data.id)! - data.ranking
 					: null
 				: undefined,
 		};

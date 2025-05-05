@@ -35,6 +35,7 @@ export default async function TrackOverviewListSection({
 		options: {
 			includeRankChange: true,
 			includeAllRankings: false,
+			includeAchievement: false
 		},
 	});
 

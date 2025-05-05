@@ -21,7 +21,7 @@ export type TrackHistoryType = Omit<TrackData, "artist" | "album"> & {
 };
 
 type getTracksRankingHistoryOptions = {
-	includeAchievement: boolean;
+	includeAchievement?: boolean;
 };
 
 type getTracksRankingHistoryProps = {
