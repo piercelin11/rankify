@@ -10,8 +10,9 @@ export default function TrackPageSubtitleContent({
 }: {
 	trackData: TrackData & { artist: ArtistData };
 }) {
-	function handleLinkClick() {
-		sessionStorage.removeItem(SCROLL_SESSION_KEY);
+	function handleClick() {
+		if (sessionStorage.getItem(SCROLL_SESSION_KEY))
+			sessionStorage.removeItem(SCROLL_SESSION_KEY);
 	}
 	return (
 		<>
@@ -26,7 +27,7 @@ export default function TrackPageSubtitleContent({
 				<Link
 					className="font-bold hover:underline"
 					href={`/artist/${trackData.artist.id}`}
-					onClick={handleLinkClick}
+					onClick={handleClick}
 				>
 					{trackData.artist.name}
 				</Link>
@@ -37,7 +38,7 @@ export default function TrackPageSubtitleContent({
 					<Link
 						className="hover:underline"
 						href={`/artist/${trackData.artist.id}/album/${trackData.albumId}`}
-						onClick={handleLinkClick}
+						onClick={handleClick}
 					>
 						{trackData.album.name}
 					</Link>

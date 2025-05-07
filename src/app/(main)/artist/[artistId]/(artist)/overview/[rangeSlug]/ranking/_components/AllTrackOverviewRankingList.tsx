@@ -1,46 +1,35 @@
 "use client";
 
-import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
+import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
+import React, { useMemo } from "react";
 import { AlbumData, ArtistData } from "@/types/data";
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
-import { Column, RankingHeader, RankingListItem } from "./RankingList";
-import AchievementDisplay, {
-	AchievementType,
-} from "../../stats/components/AchievementDisplay";
-import useSortedAndFilteredRanking from "../hooks/useSortedAndFilteredRanking";
-import RankingAlbumFilter from "./RankingAlbumFilter";
 import useMediaQuery from "@/lib/hooks/useMediaQuery";
-import {
-	FixedSizeList,
-	ListChildComponentProps,
-	ListOnScrollProps,
-} from "react-window";
+import { FixedSizeList, ListChildComponentProps } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { ChevronRightIcon } from "@radix-ui/react-icons";
 import Button from "@/components/buttons/Button";
-import useListScroll from "../hooks/useListScroll";
+import useSortedAndFilteredRanking from "@/features/ranking/display/hooks/useSortedAndFilteredRanking";
+import useListScroll from "@/features/ranking/display/hooks/useListScroll";
+import { Column, RankingHeader, RankingListItem } from "@/features/ranking/display/components/RankingList";
+import AchievementDisplay, { AchievementType } from "@/features/ranking/stats/components/AchievementDisplay";
+import RankingAlbumFilter from "@/features/ranking/display/components/RankingAlbumFilter";
 
-type TrackRankingListProps = {
-	tracksRankings: TrackHistoryType[];
+
+type AllTrackOverviewRankingListProps = {
+	tracksRankings: TrackStatsType[];
 	albums: AlbumData[];
 	artist: ArtistData | null;
 	onBackHref: string;
 };
 
-export default function AllTrackHistoryRankingList({
-	albums,
+export default function AllTrackOverviewRankingList({
 	tracksRankings,
+	albums,
 	artist,
 	onBackHref,
-}: TrackRankingListProps) {
+}: AllTrackOverviewRankingListProps) {
 	const isMobole = useMediaQuery("max", 660);
 	const itemHeight = isMobole ? 72 : 89;
 	const {
@@ -57,11 +46,17 @@ export default function AllTrackHistoryRankingList({
 		() => new Map(albums.map((album) => [album.id, album])),
 		[albums]
 	);
-	const columns: Column<TrackHistoryType>[] = [
+
+	const columns: Column<TrackStatsType>[] = [
 		{
 			key: "peak",
 			header: "peak",
 			onClick: () => handleHeaderClick("peak"),
+		},
+		{
+			key: "averageRanking",
+			header: "avg",
+			onClick: () => handleHeaderClick("averageRanking"),
 		},
 		{
 			key: "achievement",
@@ -75,8 +70,8 @@ export default function AllTrackHistoryRankingList({
 	];
 
 	return (
-		<div>
-			<div className="mb-10 flex items-center justify-between">
+		<>
+			<div className="flex items-center justify-between">
 				<RankingAlbumFilter
 					dropdownOptions={dropdownOptions}
 					selectedAlbum={albumIdFilter && albumsMap.get(albumIdFilter)?.name}
@@ -103,8 +98,7 @@ export default function AllTrackHistoryRankingList({
 					selectedHeader={String(sortKey)}
 					sortOrder={sortOrder}
 				/>
-
-				<div className="h-virtualized-ranking relative w-full">
+				<div className="h-virtualized-ranking relative w-full overflow-auto scrollbar-hidden">
 					<AutoSizer>
 						{({ height, width }) => (
 							<FixedSizeList
@@ -130,13 +124,13 @@ export default function AllTrackHistoryRankingList({
 					</AutoSizer>
 				</div>
 			</section>
-		</div>
+		</>
 	);
 }
 
 type RowData = {
-	items: TrackHistoryType[];
-	columns: Column<TrackHistoryType>[];
+	items: TrackStatsType[];
+	columns: Column<TrackStatsType>[];
 	sortKey: string | null;
 	handleRowClick: () => void;
 };

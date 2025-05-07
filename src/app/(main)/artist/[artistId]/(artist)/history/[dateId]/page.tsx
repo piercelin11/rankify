@@ -4,14 +4,13 @@ import getRankingSession from "@/lib/database/user/getRankingSession";
 import { dateToDashFormat } from "@/lib/utils/helper";
 import NoData from "@/components/feedback/NoData";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
-import TrackHistoryList from "@/features/ranking/display/components/TrackHistoryListSection";
 import { notFound } from "next/navigation";
-import AlbumHistoryStatsSection from "@/features/ranking/stats/components/AlbumHistoryStatsSection";
 import DropdownMenu from "@/components/menu/DropdownMenu";
-import AlbumHistoryPointsSection from "@/features/ranking/stats/components/AlbumHistoryPointsSection";
 import Link from "next/link";
 import { PlusIcon } from "@radix-ui/react-icons";
-import createAlbumRanking from "@/features/ranking/actions/createAlbumRanking";
+import TrackHistoryListSection from "./_components/TrackHistoryListSection";
+import AlbumHistoryStatsSection from "./_components/AlbumHistoryStatsSection";
+import AlbumHistoryPointsSection from "./_components/AlbumHistoryPointsSection";
 
 export default async function page({
 	params,
@@ -53,7 +52,7 @@ export default async function page({
 
 				{rankingSessions.length !== 0 ? (
 					<>
-						<TrackHistoryList
+						<TrackHistoryListSection
 							artistId={artistId}
 							userId={userId}
 							dateId={dateId}

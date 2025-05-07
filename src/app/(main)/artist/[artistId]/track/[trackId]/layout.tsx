@@ -1,13 +1,8 @@
 import ContentHeader from "@/components/presentation/ContentHeader";
 import ContentWrapper from "@/components/layout/ContentWrapper";
 import getTrackById from "@/lib/database/data/getTrackById";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
-import Image from "next/image";
-import { ArtistData, TrackData } from "@/types/data";
 import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
-import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import Scroll from "@/components/layout/Scroll";
 import TrackPageSubtitleContent from "../_components/TrackPageSubtitleContent";
 

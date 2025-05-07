@@ -6,7 +6,7 @@ import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import Button from "@/components/buttons/Button";
 import Link from "next/link";
-import AllTrackHistoryRankingList from "@/features/ranking/display/components/AllTrackHistoryRankingList";
+import AllTrackHistoryRankingList from "@/app/(main)/artist/[artistId]/(artist)/history/[dateId]/ranking/_components/AllTrackHistoryRankingList";
 import getArtistById from "@/lib/database/data/getArtistById";
 
 export default async function ArtistRankingPage({

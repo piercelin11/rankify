@@ -1,36 +1,46 @@
 "use client";
 
-import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
-import React, { useMemo } from "react";
-import { Column, RankingHeader, RankingListItem } from "./RankingList";
+import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import { AlbumData, ArtistData } from "@/types/data";
-import RankingAlbumFilter from "./RankingAlbumFilter";
-import useSortedAndFilteredRanking from "../hooks/useSortedAndFilteredRanking";
-import useMediaQuery from "@/lib/hooks/useMediaQuery";
-import { FixedSizeList, ListChildComponentProps } from "react-window";
-import AutoSizer from "react-virtualized-auto-sizer";
-import Image from "next/image";
-import Link from "next/link";
-import { ChevronRightIcon } from "@radix-ui/react-icons";
-import Button from "@/components/buttons/Button";
-import useListScroll from "../hooks/useListScroll";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
+import { Column, RankingHeader, RankingListItem } from "../../../../../../../../../features/ranking/display/components/RankingList";
 import AchievementDisplay, {
 	AchievementType,
-} from "../../stats/components/AchievementDisplay";
+} from "../../../../../../../../../features/ranking/stats/components/AchievementDisplay";
+import useSortedAndFilteredRanking from "../../../../../../../../../features/ranking/display/hooks/useSortedAndFilteredRanking";
+import RankingAlbumFilter from "../../../../../../../../../features/ranking/display/components/RankingAlbumFilter";
+import useMediaQuery from "@/lib/hooks/useMediaQuery";
+import {
+	FixedSizeList,
+	ListChildComponentProps,
+	ListOnScrollProps,
+} from "react-window";
+import AutoSizer from "react-virtualized-auto-sizer";
+import Link from "next/link";
+import Image from "next/image";
+import { ChevronRightIcon } from "@radix-ui/react-icons";
+import Button from "@/components/buttons/Button";
+import useListScroll from "../../../../../../../../../features/ranking/display/hooks/useListScroll";
 
-type AllTrackOverviewRankingListProps = {
-	tracksRankings: TrackStatsType[];
+type TrackRankingListProps = {
+	tracksRankings: TrackHistoryType[];
 	albums: AlbumData[];
 	artist: ArtistData | null;
 	onBackHref: string;
 };
 
-export default function AllTrackOverviewRankingList({
-	tracksRankings,
+export default function AllTrackHistoryRankingList({
 	albums,
+	tracksRankings,
 	artist,
 	onBackHref,
-}: AllTrackOverviewRankingListProps) {
+}: TrackRankingListProps) {
 	const isMobole = useMediaQuery("max", 660);
 	const itemHeight = isMobole ? 72 : 89;
 	const {
@@ -47,17 +57,11 @@ export default function AllTrackOverviewRankingList({
 		() => new Map(albums.map((album) => [album.id, album])),
 		[albums]
 	);
-
-	const columns: Column<TrackStatsType>[] = [
+	const columns: Column<TrackHistoryType>[] = [
 		{
 			key: "peak",
 			header: "peak",
 			onClick: () => handleHeaderClick("peak"),
-		},
-		{
-			key: "averageRanking",
-			header: "avg",
-			onClick: () => handleHeaderClick("averageRanking"),
 		},
 		{
 			key: "achievement",
@@ -71,8 +75,8 @@ export default function AllTrackOverviewRankingList({
 	];
 
 	return (
-		<>
-			<div className="flex items-center justify-between">
+		<div>
+			<div className="mb-10 flex items-center justify-between">
 				<RankingAlbumFilter
 					dropdownOptions={dropdownOptions}
 					selectedAlbum={albumIdFilter && albumsMap.get(albumIdFilter)?.name}
@@ -99,7 +103,8 @@ export default function AllTrackOverviewRankingList({
 					selectedHeader={String(sortKey)}
 					sortOrder={sortOrder}
 				/>
-				<div className="h-virtualized-ranking relative w-full overflow-auto scrollbar-hidden">
+
+				<div className="h-virtualized-ranking relative w-full">
 					<AutoSizer>
 						{({ height, width }) => (
 							<FixedSizeList
@@ -125,13 +130,13 @@ export default function AllTrackOverviewRankingList({
 					</AutoSizer>
 				</div>
 			</section>
-		</>
+		</div>
 	);
 }
 
 type RowData = {
-	items: TrackStatsType[];
-	columns: Column<TrackStatsType>[];
+	items: TrackHistoryType[];
+	columns: Column<TrackHistoryType>[];
 	sortKey: string | null;
 	handleRowClick: () => void;
 };

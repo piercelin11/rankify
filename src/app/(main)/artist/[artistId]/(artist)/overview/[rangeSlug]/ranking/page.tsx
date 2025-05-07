@@ -1,13 +1,13 @@
 import React from "react";
 import { getUserSession } from "@/../auth";
 import { calculateDateRangeFromSlug } from "@/lib/utils/helper";
-import AllTrackOverviewRankingList from "@/features/ranking/display/components/AllTrackOverviewRankingList";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import getTracksStats, {
 	TimeFilterType,
 } from "@/lib/database/ranking/overview/getTracksStats";
 import getArtistById from "@/lib/database/data/getArtistById";
 import { headers } from "next/headers";
+import AllTrackOverviewRankingList from "./_components/AllTrackOverviewRankingList";
 
 export default async function ArtistRankingPage({
 	params,

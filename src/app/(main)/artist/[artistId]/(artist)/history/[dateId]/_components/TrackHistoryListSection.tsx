@@ -1,9 +1,9 @@
 import React from "react";
-import { RankingListItem } from "./RankingList";
 import Link from "next/link";
 import Button from "@/components/buttons/Button";
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";
 import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTracksRankingHistory";
+import { RankingListItem } from "@/features/ranking/display/components/RankingList";
 
 type TrackHistoryListSectionProps = {
 	artistId: string;

@@ -16,14 +16,15 @@ export default function SiblingNavigator({
 	nextData: { id: string; name: string; artistId: string };
 }) {
 	const artistId = prevData.artistId;
-	function handleLinkClick() {
-		sessionStorage.removeItem(SCROLL_SESSION_KEY);
+	function handleClick() {
+		if (sessionStorage.getItem(SCROLL_SESSION_KEY))
+			sessionStorage.removeItem(SCROLL_SESSION_KEY);
 	}
 	return (
 		<div className="mb-30 flex items-center justify-between gap-3">
 			<Link
 				href={`/artist/${artistId}/${type}/${prevData.id}`}
-				onClick={handleLinkClick}
+				onClick={handleClick}
 			>
 				<Button variant="outline" type="button">
 					<ChevronLeftIcon className="self-center" width={25} height={25} />
@@ -32,7 +33,7 @@ export default function SiblingNavigator({
 			</Link>
 			<Link
 				href={`/artist/${artistId}/${type}/${nextData.id}`}
-				onClick={handleLinkClick}
+				onClick={handleClick}
 			>
 				<Button variant="outline" type="button">
 					<p className="text-right">{nextData.name}</p>
