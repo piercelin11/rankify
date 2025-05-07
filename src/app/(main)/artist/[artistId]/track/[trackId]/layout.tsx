@@ -9,6 +9,7 @@ import { ArtistData, TrackData } from "@/types/data";
 import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import Scroll from "@/components/layout/Scroll";
+import TrackPageSubtitleContent from "../_components/TrackPageSubtitleContent";
 
 type LayoutProps = {
 	params: Promise<{ trackId: string; artistId: string }>;
@@ -32,7 +33,6 @@ export default async function TrackPageLayout({
 
 async function Header({ params }: Omit<LayoutProps, "children">) {
 	const trackId = (await params).trackId;
-	const artistId = (await params).artistId;
 	const trackData = await getTrackById(trackId);
 
 	if (!trackData) notFound();
@@ -41,49 +41,13 @@ async function Header({ params }: Omit<LayoutProps, "children">) {
 		<>
 			<ContentHeader
 				data={trackData}
-				subTitleContent={<TrackPageSubtitleContent trackData={trackData} />}
+				subTitleContent={
+					<TrackPageSubtitleContent key={trackData.id} trackData={trackData} />
+				}
 				type="Track"
 				color={trackData.album?.color}
 			/>
-
 			<BlurredImageBackground src={trackData.img ?? ""} />
-		</>
-	);
-}
-
-function TrackPageSubtitleContent({
-	trackData,
-}: {
-	trackData: TrackData & { artist: ArtistData };
-}) {
-	return (
-		<>
-			<div className="flex items-center gap-1">
-				<Image
-					className="rounded-full"
-					width={30}
-					height={30}
-					src={trackData.artist.img ?? ""}
-					alt={trackData.artist.name}
-				/>
-				<Link
-					className="font-bold hover:underline"
-					href={`/artist/${trackData.artist.id}`}
-				>
-					{trackData.artist.name}
-				</Link>
-			</div>
-			{trackData.album && (
-				<>
-					•
-					<Link
-						className="hover:underline"
-						href={`/artist/${trackData.artist.id}/album/${trackData.albumId}`}
-					>
-						{trackData.album.name}
-					</Link>
-				</>
-			)}
 		</>
 	);
 }

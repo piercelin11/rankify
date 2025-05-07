@@ -1,5 +1,6 @@
 "use client";
 
+import { SCROLL_SESSION_KEY } from "@/features/ranking/display/hooks/useListScroll";
 import { cn } from "@/lib/cn";
 import { useAppSelector } from "@/store/hooks";
 import Link from "next/link";
@@ -21,9 +22,14 @@ export default function SidebarMenuItem({
 	const isSidebarOpen = useAppSelector((state) => state.sidebar.isSidebarOpen);
 	const buttonStyle =
 		"flex w-full h-12 items-center gap-4 overflow-hidden text-nowrap rounded-xl py-2 px-6 text-neutral-400 hover:bg-neutral-900 hover:text-neutral-100";
+
+	function handleLinkClick() {
+		sessionStorage.removeItem(SCROLL_SESSION_KEY);
+		if (onClick) onClick();
+	}
 	if (href)
 		return (
-			<Link className="cursor-pointer" href={href}>
+			<Link className="cursor-pointer" href={href} onClick={handleLinkClick}>
 				<button
 					className={cn(buttonStyle, {
 						"hover:bg-neutral-950": !isSidebarOpen,
@@ -40,7 +46,7 @@ export default function SidebarMenuItem({
 			className={cn(buttonStyle, {
 				"hover:bg-neutral-950": !isSidebarOpen,
 			})}
-			onClick={onClick}
+			onClick={handleLinkClick}
 		>
 			<div>{icon()}</div>
 			<p className="overflow-hidden text-ellipsis">{label}</p>

@@ -1,54 +1,51 @@
-"use client"
+"use client";
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { FixedSizeList, ListOnScrollProps } from 'react-window';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { FixedSizeList, ListOnScrollProps } from "react-window";
 
-type UseListScrollProps = {
-    sessionKey: string
-}
+export const SCROLL_SESSION_KEY = "rankingListScrollPosition"
 
-export default function useListScroll({sessionKey}: UseListScrollProps) {
+export default function useListScroll() {
+	const [listInstance, setListInstance] = useState<FixedSizeList | null>(null);
+	const currentScrollOffsetRef = useRef<number>(0);
+	const listRefCallback = useCallback((node: FixedSizeList | null) => {
+		if (node) {
+			setListInstance(node);
+		} else {
+			setListInstance(null);
+		}
+	}, []);
 
-    const [listInstance, setListInstance] = useState<FixedSizeList | null>(null);
-    const currentScrollOffsetRef = useRef<number>(0);
-    const listRefCallback = useCallback((node: FixedSizeList | null) => {
-        if (node) {
-            setListInstance(node);
-        } else {
-            setListInstance(null);
-        }
-    }, []);
+	useEffect(() => {
+		const savedOffset = sessionStorage.getItem(SCROLL_SESSION_KEY);
+		if (savedOffset !== null && listInstance) {
+			const offset = parseInt(savedOffset, 10);
+			if (!isNaN(offset)) {
+				listInstance.scrollTo(offset);
+			}
+			sessionStorage.removeItem(SCROLL_SESSION_KEY);
+		}
+	}, [listInstance]);
 
-    useEffect(() => {
-        const savedOffset = sessionStorage.getItem(sessionKey);
-        if (savedOffset !== null && listInstance) {
-            const offset = parseInt(savedOffset, 10);
-            if (!isNaN(offset)) {
-                listInstance.scrollTo(offset);
-            }
-            sessionStorage.removeItem(sessionKey);
-        }
-    }, [listInstance]);
+	const handleRowClick = useCallback(() => {
+		const currentOffset = currentScrollOffsetRef.current;
+		if (currentOffset > 0) {
+			sessionStorage.setItem(SCROLL_SESSION_KEY, String(currentOffset));
+		} else {
+			sessionStorage.removeItem(SCROLL_SESSION_KEY);
+		}
+	}, []);
 
-    const handleRowClick = useCallback(() => {
-        const currentOffset = currentScrollOffsetRef.current;
-        if (currentOffset > 0) {
-            sessionStorage.setItem(sessionKey, String(currentOffset));
-        } else {
-            sessionStorage.removeItem(sessionKey);
-        }
-    }, []);
+	const handleListScroll = useCallback(
+		({ scrollOffset }: ListOnScrollProps) => {
+			currentScrollOffsetRef.current = scrollOffset;
+		},
+		[]
+	);
 
-    const handleListScroll = useCallback(
-        ({ scrollOffset }: ListOnScrollProps) => {
-            currentScrollOffsetRef.current = scrollOffset;
-        },
-        []
-    );
-
-    return {
-        listRefCallback,
-        handleRowClick,
-        handleListScroll
-    }
+	return {
+		listRefCallback,
+		handleRowClick,
+		handleListScroll,
+	};
 }

@@ -6,8 +6,6 @@ import RankingSettings from "@/features/settings/components/RankingSettingsForm"
 export default async function RankingSettingsPage() {
 	const {id: userId} = await getUserSession();
 	const userPreference = await getUserPreference({userId});
-
-	console.log(userPreference)
 	
 	return (
 		<>

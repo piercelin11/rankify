@@ -32,22 +32,21 @@ export default auth(async function middleware(req) {
 		return Response.redirect(new URL("/auth/signin", nextUrl.origin));
 	}
 
-
 	// --- 判斷是否為 Server Action 請求 ---
-    const isServerAction = req.headers.get("Next-Action") !== null;
+	const isServerAction = req.headers.get("Next-Action") !== null;
 
-    if (isServerAction) {
-        return NextResponse.next(); // <--- 不帶參數
-    } else {
-        const requestHeaders = new Headers(req.headers);
-        requestHeaders.set("x-current-path", nextUrl.pathname);
+	if (isServerAction) {
+		return NextResponse.next();
+	} else {
+		const requestHeaders = new Headers(req.headers);
+		requestHeaders.set("x-current-path", nextUrl.pathname);
 
-        return NextResponse.next({
-            request: {
-                headers: requestHeaders,
-            },
-        });
-    }
+		return NextResponse.next({
+			request: {
+				headers: requestHeaders,
+			},
+		});
+	}
 });
 
 //設置啟用 Middleware 的路徑

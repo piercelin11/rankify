@@ -1,7 +1,10 @@
+"use client";
+
 import Button from "@/components/buttons/Button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import React from "react";
+import { SCROLL_SESSION_KEY } from "../hooks/useListScroll";
 
 export default function SiblingNavigator({
 	type,
@@ -13,15 +16,24 @@ export default function SiblingNavigator({
 	nextData: { id: string; name: string; artistId: string };
 }) {
 	const artistId = prevData.artistId;
+	function handleLinkClick() {
+		sessionStorage.removeItem(SCROLL_SESSION_KEY);
+	}
 	return (
 		<div className="mb-30 flex items-center justify-between gap-3">
-			<Link href={`/artist/${artistId}/${type}/${prevData.id}`}>
+			<Link
+				href={`/artist/${artistId}/${type}/${prevData.id}`}
+				onClick={handleLinkClick}
+			>
 				<Button variant="outline" type="button">
 					<ChevronLeftIcon className="self-center" width={25} height={25} />
 					<p className="text-left">{prevData.name}</p>
 				</Button>
 			</Link>
-			<Link href={`/artist/${artistId}/${type}/${nextData.id}`}>
+			<Link
+				href={`/artist/${artistId}/${type}/${nextData.id}`}
+				onClick={handleLinkClick}
+			>
 				<Button variant="outline" type="button">
 					<p className="text-right">{nextData.name}</p>
 					<ChevronRightIcon className="self-center" width={25} height={25} />

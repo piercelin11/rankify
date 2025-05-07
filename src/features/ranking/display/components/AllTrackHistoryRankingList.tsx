@@ -35,8 +35,6 @@ type TrackRankingListProps = {
 	onBackHref: string;
 };
 
-const SCROLL_POSITION_KEY = "trackListHistoryScroll";
-
 export default function AllTrackHistoryRankingList({
 	albums,
 	tracksRankings,
@@ -53,9 +51,7 @@ export default function AllTrackHistoryRankingList({
 		sortKey,
 		sortOrder,
 	} = useSortedAndFilteredRanking(tracksRankings, albums);
-	const { listRefCallback, handleRowClick, handleListScroll } = useListScroll({
-		sessionKey: SCROLL_POSITION_KEY,
-	});
+	const { listRefCallback, handleRowClick, handleListScroll } = useListScroll();
 
 	const albumsMap = useMemo(
 		() => new Map(albums.map((album) => [album.id, album])),

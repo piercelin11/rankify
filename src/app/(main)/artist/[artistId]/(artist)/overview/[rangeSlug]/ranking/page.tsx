@@ -7,6 +7,7 @@ import getTracksStats, {
 	TimeFilterType,
 } from "@/lib/database/ranking/overview/getTracksStats";
 import getArtistById from "@/lib/database/data/getArtistById";
+import { headers } from "next/headers";
 
 export default async function ArtistRankingPage({
 	params,

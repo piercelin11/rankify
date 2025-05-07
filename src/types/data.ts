@@ -28,7 +28,12 @@ export type RankingData = Ranking & {
 	user?: UserData;
 };
 
-export type UserData = User;
+export type UserData = {
+	id: string;
+	name: string;
+	username: string | null;
+	image: string | null;
+};
 
 export type RankingSessionData = RankingSession & {
 	artist?: ArtistData;
