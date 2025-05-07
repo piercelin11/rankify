@@ -5,6 +5,7 @@ import { ReactNode, Suspense } from "react";
 import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import ArtistHeader from "@/components/navigation/ArtistHeader";
+import ContentHeader from "@/components/presentation/ContentHeader";
 
 type LayoutProps = {
 	params: Promise<{ artistId: string }>;
@@ -14,9 +15,11 @@ type LayoutProps = {
 export default async function MainLayout({ params, children }: LayoutProps) {
 	return (
 		<>
-			<Header params={params} />
+			<Suspense fallback={<ContentHeader />}>
+				<Header params={params} />
+			</Suspense>
 			<Suspense fallback={<LoadingAnimation />}>
-				<ContentWrapper className="space-y-5 flex-1">{children}</ContentWrapper>
+				<ContentWrapper className="flex-1 space-y-5">{children}</ContentWrapper>
 			</Suspense>
 		</>
 	);

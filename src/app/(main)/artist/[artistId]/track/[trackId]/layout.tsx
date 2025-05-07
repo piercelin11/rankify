@@ -23,11 +23,9 @@ export default async function TrackPageLayout({
 		<>
 			<Scroll />
 			<Header params={params} />
-			<Suspense fallback={<LoadingAnimation />}>
-				<ContentWrapper className="space-y-10 2xl:space-y-20">
-					{children}
-				</ContentWrapper>
-			</Suspense>
+			<ContentWrapper className="space-y-10 2xl:space-y-20">
+				{children}
+			</ContentWrapper>
 		</>
 	);
 }

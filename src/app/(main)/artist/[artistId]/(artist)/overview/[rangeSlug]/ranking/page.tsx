@@ -1,9 +1,6 @@
 import React from "react";
 import { getUserSession } from "@/../auth";
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
-import { calculateDateRangeFromSlug, dateToLong } from "@/lib/utils/helper";
-import Link from "next/link";
-import Button from "@/components/buttons/Button";
+import { calculateDateRangeFromSlug } from "@/lib/utils/helper";
 import AllTrackOverviewRankingList from "@/features/ranking/display/components/AllTrackOverviewRankingList";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import getTracksStats, {

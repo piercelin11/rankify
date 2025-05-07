@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Poppins, /* Lato, Archivo, */ Raleway} from "next/font/google";
 import "./globals.css";
-import Scroll from "@/components/layout/Scroll";
 import StoreProvider from "@/providers/StoreProvider";
 
 const geistSans = Geist({
@@ -51,7 +50,6 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			{/* <Scroll /> */}
 			<StoreProvider>
 				<body
 					className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${raleway.variable} antialiased`}

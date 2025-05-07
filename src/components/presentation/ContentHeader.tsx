@@ -40,15 +40,15 @@ const ContentHeader = React.memo(function ContentHeader({
 					<div className="flex items-center gap-6">
 						<div
 							className={cn(
-								"relative min-h-[220px] min-w-[220px] drop-shadow-2xl lg:min-h-[260px] lg:min-w-[260px] 2xl:min-h-[300px] 2xl:min-w-[300px]"
+								"relative min-h-[220px] min-w-[220px] overflow-hidden bg-neutral-900 drop-shadow-2xl lg:min-h-[260px] lg:min-w-[260px] 2xl:min-h-[300px] 2xl:min-w-[300px]",
+								{
+									"rounded-full": rounded,
+									"rounded-4xl": !rounded,
+								}
 							)}
 						>
 							{data?.img && (
 								<Image
-									className={cn("border border-neutral-500/20", {
-										"rounded-full": rounded,
-										"rounded-4xl": !rounded,
-									})}
 									fill
 									priority
 									src={data?.img}
