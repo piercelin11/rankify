@@ -27,19 +27,21 @@ type RankingListItemProps<T> = {
 	data: T;
 	columns: Column<T>[];
 	selectedHeader?: string;
+	index?:number;
 };
 
 export function RankingListItem<T extends RankingListDataTypeExtend>({
 	data,
 	columns,
 	selectedHeader,
+	index
 }: RankingListItemProps<T>) {
 	return (
 		<Link href={`/artist/${data.artistId}/track/${data.id}`}>
 			<div className="group relative overflow-hidden">
 				<div className="z-10 grid cursor-pointer select-none grid-cols-[30px,_3fr] items-center gap-3 rounded border-b border-neutral-500/30 py-2 sm:py-3 sm:pr-6 md:grid-cols-[45px,_3fr,_2fr]">
 					<p className="justify-self-end font-numeric text-lg font-medium tabular-nums text-neutral-400 group-hover:text-neutral-100">
-						{data.ranking}
+						{index || data.ranking}
 					</p>
 					<div className="flex items-center gap-2 overflow-hidden">
 						{data.rankChange !== undefined && (

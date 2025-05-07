@@ -46,16 +46,13 @@ export default function useSortedAndFilteredRanking<
 				const valA = a[sortKey];
 				const valB = b[sortKey];
 
-				if (valA == null || valB == null) return 0;
+				if (valA == null && valB == null) return 0;
 				if (valA == null) return 1;
 				if (valB == null) return -1;
 
 				if (typeof valA === "number" && typeof valB === "number") {
 					comparison = valA - valB;
-				} else if (
-					typeof Number(valA) === "number" &&
-					typeof Number(valB) === "number"
-				) {
+				} else if (!isNaN(Number(valA)) && !isNaN(Number(valB))) {
 					comparison = Number(valA) - Number(valB);
 				} else if (typeof valA === "string" && typeof valB === "string") {
 					comparison = valA.localeCompare(valB);
@@ -68,6 +65,8 @@ export default function useSortedAndFilteredRanking<
 						comparison = 0;
 					}
 				}
+
+				console.log(comparison);
 
 				return sortOrder === "asc" ? comparison : -comparison;
 			});

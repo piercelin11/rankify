@@ -79,8 +79,21 @@ export async function getTracksRankingHistory({
 	if (rankings.length === 0) notFound();
 
 	let latestSession: RankingSession | null = null;
-	if (options.includeAchievement)
+	let totalLogsCount = 0;
+	if (options.includeAchievement) {
 		latestSession = await getLatestRankingSession({ artistId, userId });
+		totalLogsCount = (
+			await db.rankingSession.findMany({
+				where: {
+					userId,
+					artistId,
+				},
+				select: {
+					id: true,
+				},
+			})
+		).length;
+	}
 
 	const currentDate = rankings[0].date.date;
 	const trackIds = rankings.map((ranking) => ranking.trackId);
@@ -114,9 +127,17 @@ export async function getTracksRankingHistory({
 
 		function getAchievement(): AchievementType {
 			if (!latestSession) return null;
-			if (data.ranking < Number(prevPeak) && latestSession.id === dateId)
+			if (
+				data.ranking < Number(prevPeak) &&
+				latestSession.id === dateId &&
+				totalLogsCount > 2
+			)
 				return "Hit Peak";
-			if (data.ranking > Number(prevWorst) && latestSession.id === dateId)
+			if (
+				data.ranking > Number(prevWorst) &&
+				latestSession.id === dateId &&
+				totalLogsCount > 3
+			)
 				return "New Low";
 			else if (Number(data.rankChange) > rankings.length / 5) return "Big Jump";
 			else if (Number(data.rankChange) < -(rankings.length / 5))

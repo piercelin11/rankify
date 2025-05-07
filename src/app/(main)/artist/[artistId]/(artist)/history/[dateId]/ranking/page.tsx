@@ -1,11 +1,7 @@
 import React from "react";
 import { getUserSession } from "@/../auth";
 import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTracksRankingHistory";
-import { dateToLong } from "@/lib/utils/helper";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
-import Button from "@/components/buttons/Button";
-import Link from "next/link";
 import AllTrackHistoryRankingList from "@/app/(main)/artist/[artistId]/(artist)/history/[dateId]/ranking/_components/AllTrackHistoryRankingList";
 import getArtistById from "@/lib/database/data/getArtistById";
 
@@ -43,7 +39,6 @@ export default async function ArtistRankingPage({
 				tracksRankings={tracksRankings}
 				albums={albums}
 				artist={artist}
-				onBackHref={`/artist/${artistId}/history?date=${dateId}`}
 			/>
 		</>
 	);

@@ -7,15 +7,18 @@ import useMediaQuery from "@/lib/hooks/useMediaQuery";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import Image from "next/image";
-import Link from "next/link";
-import { ChevronRightIcon } from "@radix-ui/react-icons";
-import Button from "@/components/buttons/Button";
 import useSortedAndFilteredRanking from "@/features/ranking/display/hooks/useSortedAndFilteredRanking";
 import useListScroll from "@/features/ranking/display/hooks/useListScroll";
-import { Column, RankingHeader, RankingListItem } from "@/features/ranking/display/components/RankingList";
-import AchievementDisplay, { AchievementType } from "@/features/ranking/stats/components/AchievementDisplay";
+import {
+	Column,
+	RankingHeader,
+	RankingListItem,
+} from "@/features/ranking/display/components/RankingList";
+import AchievementDisplay, {
+	AchievementType,
+} from "@/features/ranking/stats/components/AchievementDisplay";
 import RankingAlbumFilter from "@/features/ranking/display/components/RankingAlbumFilter";
-
+import { cn } from "@/lib/cn";
 
 type AllTrackOverviewRankingListProps = {
 	tracksRankings: TrackStatsType[];
@@ -40,7 +43,8 @@ export default function AllTrackOverviewRankingList({
 		sortKey,
 		sortOrder,
 	} = useSortedAndFilteredRanking(tracksRankings, albums);
-	const { listRefCallback, handleRowClick, handleListScroll } = useListScroll();
+	const { isScrolled, listRefCallback, handleRowClick, handleListScroll } =
+		useListScroll();
 
 	const albumsMap = useMemo(
 		() => new Map(albums.map((album) => [album.id, album])),
@@ -49,23 +53,24 @@ export default function AllTrackOverviewRankingList({
 
 	const columns: Column<TrackStatsType>[] = [
 		{
-			key: "peak",
-			header: "peak",
-			onClick: () => handleHeaderClick("peak"),
-		},
-		{
 			key: "averageRanking",
 			header: "avg",
 			onClick: () => handleHeaderClick("averageRanking"),
 		},
 		{
+			key: "peak",
+			header: "peak",
+			onClick: () => handleHeaderClick("peak"),
+		},
+		{
 			key: "achievement",
-			header: "achievement",
+			header: "achv",
 			render: (value) => (
 				<AchievementDisplay
 					achievement={value as AchievementType | undefined}
 				/>
 			),
+			onClick: () => handleHeaderClick("achievement"),
 		},
 	];
 
@@ -77,19 +82,16 @@ export default function AllTrackOverviewRankingList({
 					selectedAlbum={albumIdFilter && albumsMap.get(albumIdFilter)?.name}
 				/>
 				{artist && (
-					<Link href={onBackHref}>
-						<Button className="gap-2 p-2" variant="outline" rounded>
-							<Image
-								className="rounded-full"
-								src={artist?.img || ""}
-								width={50}
-								height={50}
-								alt={`${artist?.name}`}
-							/>
-							<p className="text-sm">{artist?.name}</p>
-							<ChevronRightIcon className="me-4" />
-						</Button>
-					</Link>
+					<div className="flex items-center gap-2 rounded-full bg-neutral-500/20 p-2">
+						<Image
+							className="rounded-full"
+							src={artist?.img || ""}
+							width={30}
+							height={30}
+							alt={`${artist?.name}`}
+						/>
+						<p className="me-2 text-sm text-neutral-400">{artist?.name}</p>
+					</div>
 				)}
 			</div>
 			<section>
@@ -104,7 +106,9 @@ export default function AllTrackOverviewRankingList({
 							<FixedSizeList
 								ref={listRefCallback}
 								key={itemHeight}
-								className="overscroll-contain scrollbar-hidden"
+								className={cn("overscroll-contain scrollbar-hidden", {
+									hidden: !isScrolled,
+								})}
 								height={height}
 								itemCount={sortedAndFilteredRankings.length}
 								itemSize={itemHeight}

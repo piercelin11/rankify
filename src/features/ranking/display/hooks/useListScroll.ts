@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FixedSizeList, ListOnScrollProps } from "react-window";
 
-export const SCROLL_SESSION_KEY = "rankingListScrollPosition"
+export const SCROLL_SESSION_KEY = "rankingListScrollPosition";
 
 export default function useListScroll() {
 	const [listInstance, setListInstance] = useState<FixedSizeList | null>(null);
+	const [isScrolled, setScrolled] = useState(false);
 	const currentScrollOffsetRef = useRef<number>(0);
 	const listRefCallback = useCallback((node: FixedSizeList | null) => {
 		if (node) {
@@ -25,6 +26,7 @@ export default function useListScroll() {
 			}
 			sessionStorage.removeItem(SCROLL_SESSION_KEY);
 		}
+		if (listInstance) setScrolled(true);
 	}, [listInstance]);
 
 	const handleRowClick = useCallback(() => {
@@ -44,6 +46,7 @@ export default function useListScroll() {
 	);
 
 	return {
+		isScrolled,
 		listRefCallback,
 		handleRowClick,
 		handleListScroll,
