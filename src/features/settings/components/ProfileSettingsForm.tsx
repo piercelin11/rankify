@@ -12,9 +12,11 @@ import {
 } from "@/types/schemas/settings";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import saveProfileSettings from "../actions/saveProfileSettings";
-import AvatarUploadInput from "./AvatarUploadInput";
+
+import Compressor from "compressorjs";
+import ImageUploadInput from "./ImageUploadInput";
 
 type ProfileSettingsForm = {
 	user: UserData;
@@ -41,21 +43,53 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 	});
 
 	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const fileList = e.target.files;
-		if (fileList && fileList.length > 0) {
-			const file = fileList[0];
-			setValue("image", fileList);
-			if (previewUrl) {
-				URL.revokeObjectURL(previewUrl);
-			}
-			setPreviewUrl(URL.createObjectURL(file));
-			trigger("image");
+		const originalFile = e.target.files?.[0];
+		if (originalFile) {
+			new Compressor(originalFile, {
+				maxWidth: 500,
+				maxHeight: 500,
+				quality: 0.6,
+				mimeType: "image/jpeg",
+
+				success(optimizedBlob: Blob) {
+					const optimizedFile = new File([optimizedBlob], originalFile.name, {
+						type: optimizedBlob.type,
+						lastModified: Date.now(),
+					});
+
+					const dataTransfer = new DataTransfer();
+					dataTransfer.items.add(optimizedFile);
+					const optimizedFileList = dataTransfer.files;
+
+					setValue("image", optimizedFileList);
+					if (previewUrl) URL.revokeObjectURL(previewUrl);
+					setPreviewUrl(URL.createObjectURL(optimizedBlob));
+
+					trigger("image");
+
+					//解決原生瀏覽器在處理檔案時，若上傳同個檔案不會觸發 onChange 的問題
+					const inputElement = e.target;
+					inputElement.value = "";
+				},
+				error(err: Error) {
+					console.error("Image compression failed:", err.message);
+
+					setValue("image", null);
+					if (previewUrl) URL.revokeObjectURL(previewUrl);
+					setPreviewUrl(null);
+
+					trigger("image");
+
+					const inputElement = e.target;
+					inputElement.value = "";
+				},
+			});
 		} else {
-			setValue("image", fileList as any);
-			if (previewUrl) {
-				URL.revokeObjectURL(previewUrl);
-				setPreviewUrl(null);
-			}
+			setValue("image", null);
+			if (previewUrl) URL.revokeObjectURL(previewUrl);
+			setPreviewUrl(null);
+			const inputElement = e.target;
+			inputElement.value = "";
 			trigger("image");
 		}
 	}
@@ -83,7 +117,7 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 	return (
 		<form className="space-y-14" onSubmit={handleSubmit(onSubmit)}>
 			<div className="space-y-4">
-				<AvatarUploadInput
+				<ImageUploadInput
 					img={previewUrl}
 					onChange={handleFileChange}
 					name="image"

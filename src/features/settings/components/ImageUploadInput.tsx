@@ -2,17 +2,17 @@ import { PLACEHOLDER_PIC } from "@/config/variables";
 import Image from "next/image";
 import React from "react";
 
-type AvatarUploadInputProps = {
+type ImageUploadInputProps = {
 	img: string | null;
 	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	name: string;
 };
 
-export default function AvatarUploadInput({
+export default function ImageUploadInput({
 	img,
 	onChange,
 	name,
-}: AvatarUploadInputProps) {
+}: ImageUploadInputProps) {
 	return (
 		<div className="flex items-center gap-4">
 			<div className="relative h-24 w-24">

@@ -10,7 +10,6 @@ import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { nanoid } from "nanoid";
-import { Upload } from "@aws-sdk/lib-storage";
 
 if (
 	!process.env.AWS_REGION ||
