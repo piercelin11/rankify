@@ -39,6 +39,10 @@
 		@apply h-[calc(100vh-220px)];
 	}
 
+	.grid-ranking-list {
+		@apply grid grid-cols-[30px,_3fr] md:grid-cols-[45px,_4fr,_3fr]
+	}
+
 }
 
 :root {

@@ -27,14 +27,13 @@ type AllTrackOverviewRankingListProps = {
 	onBackHref: string;
 };
 
+export const ITEM_HEIGHT = 76;
+
 export default function AllTrackOverviewRankingList({
 	tracksRankings,
 	albums,
 	artist,
-	onBackHref,
 }: AllTrackOverviewRankingListProps) {
-	const isMobole = useMediaQuery("max", 660);
-	const itemHeight = isMobole ? 72 : 89;
 	const {
 		sortedAndFilteredRankings,
 		handleHeaderClick,
@@ -105,13 +104,13 @@ export default function AllTrackOverviewRankingList({
 						{({ height, width }) => (
 							<FixedSizeList
 								ref={listRefCallback}
-								key={itemHeight}
+								key={ITEM_HEIGHT}
 								className={cn("overscroll-contain scrollbar-hidden", {
 									hidden: !isScrolled,
 								})}
 								height={height}
 								itemCount={sortedAndFilteredRankings.length}
-								itemSize={itemHeight}
+								itemSize={ITEM_HEIGHT}
 								width={width}
 								itemData={{
 									items: sortedAndFilteredRankings,

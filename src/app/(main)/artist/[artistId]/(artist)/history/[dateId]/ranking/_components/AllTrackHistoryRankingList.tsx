@@ -18,8 +18,8 @@ import { FixedSizeList, ListChildComponentProps } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import Image from "next/image";
 import useListScroll from "@/features/ranking/display/hooks/useListScroll";
-import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import { cn } from "@/lib/cn";
+import { ITEM_HEIGHT } from "@/app/(main)/artist/[artistId]/(artist)/overview/[rangeSlug]/ranking/_components/AllTrackOverviewRankingList";
 
 type TrackRankingListProps = {
 	tracksRankings: TrackHistoryType[];
@@ -32,8 +32,6 @@ export default function AllTrackHistoryRankingList({
 	tracksRankings,
 	artist,
 }: TrackRankingListProps) {
-	const isMobole = useMediaQuery("max", 660);
-	const itemHeight = isMobole ? 72 : 89;
 	const {
 		sortedAndFilteredRankings,
 		handleHeaderClick,
@@ -99,13 +97,13 @@ export default function AllTrackHistoryRankingList({
 						{({ height, width }) => (
 							<FixedSizeList
 								ref={listRefCallback}
-								key={itemHeight}
+								key={ITEM_HEIGHT}
 								className={cn("overscroll-contain scrollbar-hidden", {
 									hidden: !isScrolled,
 								})}
 								height={height}
 								itemCount={sortedAndFilteredRankings.length}
-								itemSize={itemHeight}
+								itemSize={ITEM_HEIGHT}
 								width={width}
 								itemData={{
 									items: sortedAndFilteredRankings,

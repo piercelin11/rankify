@@ -15,6 +15,12 @@ const nextConfig: NextConfig = {
 				port: "",
 				pathname: "/**",
 			},
+			{
+				protocol: "https",
+				hostname: "rankify-avatar.s3.ap-southeast-2.amazonaws.com",
+				port: "",
+				pathname: "/avatars/**",
+			},
 		],
 	},
 };

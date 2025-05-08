@@ -11,11 +11,10 @@ import {
 	ProfileSettingsType,
 } from "@/types/schemas/settings";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import saveProfileSettings from "../actions/saveProfileSettings";
-import { useSession } from "next-auth/react";
+import AvatarUploadInput from "./AvatarUploadInput";
 
 type ProfileSettingsForm = {
 	user: UserData;
@@ -24,11 +23,15 @@ type ProfileSettingsForm = {
 export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 	const [response, setResponse] = useState<ActionResponse | null>(null);
 	const [isPending, setPending] = useState<boolean>(false);
+	const [previewUrl, setPreviewUrl] = useState<string | null>(user.image);
 
 	const {
 		register,
 		handleSubmit,
 		formState: { errors },
+		setValue,
+		trigger,
+		watch,
 	} = useForm<ProfileSettingsType>({
 		resolver: zodResolver(profileSettingsSchema),
 		defaultValues: {
@@ -37,12 +40,33 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 		},
 	});
 
+	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+		const fileList = e.target.files;
+		if (fileList && fileList.length > 0) {
+			const file = fileList[0];
+			setValue("image", fileList);
+			if (previewUrl) {
+				URL.revokeObjectURL(previewUrl);
+			}
+			setPreviewUrl(URL.createObjectURL(file));
+			trigger("image");
+		} else {
+			setValue("image", fileList as any);
+			if (previewUrl) {
+				URL.revokeObjectURL(previewUrl);
+				setPreviewUrl(null);
+			}
+			trigger("image");
+		}
+	}
+
 	async function onSubmit(formData: ProfileSettingsType) {
 		setPending(true);
 		try {
 			const response = await saveProfileSettings(formData);
 			setResponse(response);
 		} catch (error) {
+			console.error("Something went wrong:", error);
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT") {
 					setResponse({
@@ -59,18 +83,12 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 	return (
 		<form className="space-y-14" onSubmit={handleSubmit(onSubmit)}>
 			<div className="space-y-4">
-				<div className="flex items-center gap-4">
-					<Image
-						className="rounded-full"
-						src={user.image || ""}
-						width={100}
-						height={100}
-						alt={`${user.name}'s profile picture`}
-					/>
-					<Button variant="secondary" type="button">
-						Change
-					</Button>
-				</div>
+				<AvatarUploadInput
+					img={previewUrl}
+					onChange={handleFileChange}
+					name="image"
+				/>
+
 				<FormInput
 					label="name"
 					{...register("name")}

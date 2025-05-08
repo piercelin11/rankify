@@ -27,19 +27,19 @@ type RankingListItemProps<T> = {
 	data: T;
 	columns: Column<T>[];
 	selectedHeader?: string;
-	index?:number;
+	index?: number;
 };
 
 export function RankingListItem<T extends RankingListDataTypeExtend>({
 	data,
 	columns,
 	selectedHeader,
-	index
+	index,
 }: RankingListItemProps<T>) {
 	return (
 		<Link href={`/artist/${data.artistId}/track/${data.id}`}>
 			<div className="group relative overflow-hidden">
-				<div className="z-10 grid cursor-pointer select-none grid-cols-[30px,_3fr] items-center gap-3 rounded border-b border-neutral-500/30 py-2 sm:py-3 sm:pr-6 md:grid-cols-[45px,_3fr,_2fr]">
+				<div className="grid-ranking-list z-10 select-none items-center gap-3 rounded border-b border-neutral-500/30 py-2.5 sm:pr-6">
 					<p className="justify-self-end font-numeric text-lg font-medium tabular-nums text-neutral-400 group-hover:text-neutral-100">
 						{index || data.ranking}
 					</p>
@@ -47,11 +47,11 @@ export function RankingListItem<T extends RankingListDataTypeExtend>({
 						{data.rankChange !== undefined && (
 							<RankChangeIcon rankChange={data.rankChange} />
 						)}
-						<div className="relative min-h-16 min-w-16">
+						<div className="relative min-h-14 min-w-14">
 							<Image
 								className="rounded-lg"
 								fill
-								sizes="(max-width: 768px) 56px, 64px"
+								sizes="(max-width: 768px) 56px, 56px"
 								src={data.img || ""}
 								alt={data.name}
 								quality={50}
@@ -85,7 +85,7 @@ export function RankingListItem<T extends RankingListDataTypeExtend>({
 						</div>
 					)}
 				</div>
-				<div className="absolute top-0 -z-10 h-full w-full translate-y-full bg-neutral-900 transition-all duration-100 ease-in-out group-hover:translate-y-0" />
+				<div className="absolute top-0 -z-10 h-full w-full translate-y-full bg-neutral-900 transition-all duration-150 ease-in-out group-hover:translate-y-0" />
 			</div>
 		</Link>
 	);
@@ -135,7 +135,7 @@ export function RankingHeader<T extends RankingListDataTypeExtend>({
 	const searchParams = useSearchParams();
 	const sortQuery = searchParams.get("sort");
 	return (
-		<div className="hidden select-none grid-cols-[45px,_3fr,_2fr] items-center gap-3 rounded border-b border-neutral-500/30 py-3 pl-2 pr-6 text-neutral-300/70 md:grid">
+		<div className="grid-ranking-list hidden select-none items-center gap-3 rounded border-b border-neutral-500/30 py-3 pl-2 pr-6 text-neutral-300/70 md:grid">
 			<p>#</p>
 			<p>info</p>
 			<div
@@ -178,7 +178,7 @@ export function RankingHeaderCell<T extends RankingListDataTypeExtend>({
 		<button
 			className={cn("flex items-center gap-1", {
 				"text-neutral-100": column.key === selectedHeader,
-				"hover:text-neutral-100": column.onClick
+				"hover:text-neutral-100": column.onClick,
 			})}
 			onClick={column.onClick}
 		>
