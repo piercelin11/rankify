@@ -1,9 +1,7 @@
-import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import ContentWrapper from "@/components/layout/ContentWrapper";
 import { SettingsSidebarLayout } from "@/components/layout/SidebarLayout";
 import { settingsSidebarMenuItems } from "@/config/sidebarMenu";
 import Link from "next/link";
-import { Suspense } from "react";
 
 type SettingsLayoutProps = {
 	children: React.ReactNode;
@@ -27,7 +25,7 @@ export default async function SettingsLayout({
 					))}
 				</div>
 			</ContentWrapper>
-			<ContentWrapper className="w-[800px] space-y-14">
+			<ContentWrapper className="max-w-[800px] space-y-14">
 				{children}
 			</ContentWrapper>
 		</SettingsSidebarLayout>

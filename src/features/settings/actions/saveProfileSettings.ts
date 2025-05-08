@@ -8,8 +8,9 @@ import { getUserSession } from "../../../../auth";
 import { ActionResponse } from "@/types/action";
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client } from "@aws-sdk/client-s3";
 import { nanoid } from "nanoid";
+import { Upload } from "@aws-sdk/lib-storage";
 
 if (
 	!process.env.AWS_REGION ||
@@ -38,46 +39,39 @@ export default async function saveProfileSettings(
 	if (!validatedField)
 		return { success: false, message: "Invalid Field", error: "Invalid Field" };
 
-	let s3Url: string | null = null;
+	let s3Url: string | undefined;
 
 	try {
 		if (data.image) {
 			const file = data.image[0] as File;
+			const fileStream = file.stream();
 
 			const fileExtension = file.name.split(".").pop();
 			const uniqueFileName = `${nanoid()}.${fileExtension}`;
 			const s3Key = `avatars/${userId}/${uniqueFileName}`;
 
-			const arrayBuffer = await file.arrayBuffer();
-			const fileBuffer = Buffer.from(arrayBuffer);
+			const upload = new Upload({
+				client: s3Client,
+				params: {
+					Bucket: process.env.S3_BUCKET_NAME,
+					Key: s3Key,
+					Body: fileStream,
+					ContentType: file.type,
+				},
+				partSize: 1024 * 1024 * 2,
+				queueSize: 4,
+			});
 
-			const uploadParams = {
-				Bucket: process.env.S3_BUCKET_NAME,
-				Key: s3Key,
-				Body: fileBuffer,
-				ContentType: file.type,
-			};
+			const resultData = await upload.done();
 
-			const uploadCommand = new PutObjectCommand(uploadParams);
-			await s3Client.send(uploadCommand);
-
-			s3Url = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
+			s3Url = resultData.Location;
 		}
 	} catch (error) {
 		console.error("Error during avatar upload Server Action:", error);
-
-		let errorMessage = "An unexpected error occurred during upload.";
-		if (error instanceof Error) {
-			errorMessage = `Upload failed: ${error.message}`;
-			if (error.message.includes("size"))
-				errorMessage = "The selected file is too large.";
-			if (error.message.includes("type"))
-				errorMessage = "The selected file type is not allowed.";
-			if (error.message.includes("database"))
-				errorMessage = "Failed to update user profile in database.";
-		}
-
-		return { success: false, message: errorMessage };
+		return {
+			success: false,
+			message: "An unexpected error occurred during upload.",
+		};
 	}
 
 	try {
