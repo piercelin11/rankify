@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 import { useAppSelector } from "@/store/hooks";
 import Link from "next/link";
 import React from "react";
-import Tooltip from "../overlay/Tooltip";
+import Tooltip from "@/components/overlay/Tooltip";
 
 type SidebarMenuItemProps = {
 	icon: () => React.ReactNode;
@@ -43,7 +43,7 @@ export default function SidebarMenuItem({
 							hidden: isSidebarOpen,
 						})}
 						content={label}
-						side="right"
+						position="right"
 					>
 						{icon()}
 					</Tooltip>
@@ -64,7 +64,7 @@ export default function SidebarMenuItem({
 					hidden: isSidebarOpen,
 				})}
 				content={label}
-				side="right"
+				position="right"
 			>
 				{icon()}
 			</Tooltip>

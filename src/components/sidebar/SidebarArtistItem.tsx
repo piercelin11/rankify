@@ -24,7 +24,7 @@ export default function SidebarArtistItem({
 						hidden: isSidebarOpen,
 					})}
 					content={artistData.name}
-					side="right"
+					position="right"
 				>
 					<div className="relative min-h-10 min-w-10">
 						<Image

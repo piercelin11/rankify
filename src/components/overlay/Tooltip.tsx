@@ -13,13 +13,13 @@ type TooltipProps = {
 	content?: string | React.ReactNode | null;
 	children: React.ReactNode;
 	className?: HTMLAttributes<HTMLDivElement>["className"];
-	side?: "top" | "right" | "bottom" | "left";
+	position?: "top" | "right" | "bottom" | "left";
 };
 
 export default function Tooltip({
 	content,
 	children,
-	side = "top",
+	position = "top",
 	className,
 }: TooltipProps) {
 	return (
@@ -32,7 +32,7 @@ export default function Tooltip({
 							"z-50 rounded-md bg-neutral-800 px-3 py-2 text-sm text-neutral-300",
 							className
 						)}
-						side={side}
+						side={position}
 					>
 						{content}
 						<TooltipArrow className="mb-2 fill-neutral-800" />
