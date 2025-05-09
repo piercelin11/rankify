@@ -24,7 +24,7 @@ type AllTrackOverviewRankingListProps = {
 	tracksRankings: TrackStatsType[];
 	albums: AlbumData[];
 	artist: ArtistData | null;
-	onBackHref: string;
+	caption?: string;
 };
 
 export const ITEM_HEIGHT = 76;
@@ -33,6 +33,7 @@ export default function AllTrackOverviewRankingList({
 	tracksRankings,
 	albums,
 	artist,
+	caption,
 }: AllTrackOverviewRankingListProps) {
 	const {
 		sortedAndFilteredRankings,
@@ -81,7 +82,7 @@ export default function AllTrackOverviewRankingList({
 					selectedAlbum={albumIdFilter && albumsMap.get(albumIdFilter)?.name}
 				/>
 				{artist && (
-					<div className="flex items-center gap-2 rounded-full bg-neutral-500/20 p-2">
+					<div className="flex items-center gap-2 rounded-full bg-neutral-600/20 p-2 text-neutral-500">
 						<Image
 							className="rounded-full"
 							src={artist?.img || ""}
@@ -89,7 +90,12 @@ export default function AllTrackOverviewRankingList({
 							height={30}
 							alt={`${artist?.name}`}
 						/>
-						<p className="me-2 text-sm text-neutral-400">{artist?.name}</p>
+						<p className="text-sm">{artist?.name}</p>
+						{caption && (
+							<>
+								•<p className="me-2 text-sm">{caption}</p>
+							</>
+						)}
 					</div>
 				)}
 			</div>

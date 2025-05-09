@@ -15,7 +15,7 @@ type LayoutProps = {
 export default async function MainLayout({ params, children }: LayoutProps) {
 	return (
 		<>
-			<Suspense fallback={<ContentHeader />}>
+			<Suspense fallback={<ContentHeader rounded />}>
 				<Header params={params} />
 			</Suspense>
 			<Suspense fallback={<LoadingAnimation />}>

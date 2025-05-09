@@ -20,6 +20,7 @@ import Image from "next/image";
 import useListScroll from "@/features/ranking/display/hooks/useListScroll";
 import { cn } from "@/lib/cn";
 import { ITEM_HEIGHT } from "@/app/(main)/artist/[artistId]/(artist)/overview/[rangeSlug]/ranking/_components/AllTrackOverviewRankingList";
+import { dateToLong } from "@/lib/utils/helper";
 
 type TrackRankingListProps = {
 	tracksRankings: TrackHistoryType[];
@@ -73,7 +74,7 @@ export default function AllTrackHistoryRankingList({
 					selectedAlbum={albumIdFilter && albumsMap.get(albumIdFilter)?.name}
 				/>
 				{artist && (
-					<div className="flex items-center gap-2 rounded-full bg-neutral-500/20 p-2">
+					<div className="flex items-center gap-2 rounded-full bg-neutral-600/20 p-2 text-neutral-500">
 						<Image
 							className="rounded-full"
 							src={artist?.img || ""}
@@ -81,7 +82,8 @@ export default function AllTrackHistoryRankingList({
 							height={30}
 							alt={`${artist?.name}`}
 						/>
-						<p className="me-2 text-sm text-neutral-400">{artist?.name}</p>
+						<p className="text-sm">{artist?.name}</p>•
+						<p className="text-sm me-2">{dateToLong(tracksRankings[0].date)}</p>
 					</div>
 				)}
 			</div>

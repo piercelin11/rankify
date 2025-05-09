@@ -64,6 +64,7 @@ export default {
 				"sidebar-sm": "88px",
 				"sidebar-lg": "260px",
 				"sidebar-xl": "300px",
+				"22": "5.5rem"
 			},
 			backgroundImage: {
 				"glow": `radial-gradient(ellipse farthest-side at top, ${colors.neutral[800]}40, ${colors.neutral[950]}CC)`

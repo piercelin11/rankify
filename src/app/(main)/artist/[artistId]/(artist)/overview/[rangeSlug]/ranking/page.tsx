@@ -1,6 +1,6 @@
 import React from "react";
 import { getUserSession } from "@/../auth";
-import { calculateDateRangeFromSlug } from "@/lib/utils/helper";
+import { calculateDateRangeFromSlug, dateToLong } from "@/lib/utils/helper";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import getTracksStats, {
 	TimeFilterType,
@@ -38,13 +38,15 @@ export default async function ArtistRankingPage({
 		},
 	});
 
+	const caption = startDate ? `${dateToLong(startDate)}  - now` : "all time";
+
 	return (
 		<>
 			<AllTrackOverviewRankingList
 				tracksRankings={tracksRankings}
 				albums={albums}
 				artist={artist}
-				onBackHref={`/artist/${artistId}/overview/${rangeSlug}`}
+				caption={caption}
 			/>
 		</>
 	);

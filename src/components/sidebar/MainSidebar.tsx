@@ -21,6 +21,7 @@ export default function MainSidebar({
 	artistData,
 }: MainSidebarProps) {
 	const mainSidebarMenuItems = getMainSidebarMenuItems(userSession.role);
+	
 	const dispatch = useAppDispatch();
 
 	return (

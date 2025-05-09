@@ -78,7 +78,7 @@ function getAchievement(achievement: AchievementType) {
 				<AchievementItem
 					icon={<FaFire size={ICON_SIZE} />}
 					label={"Burning"}
-					className={"border-amber-300 bg-amber-600/30 text-amber-300 lg:w-24"}
+					className={"border-amber-200 bg-amber-500/30 text-amber-200 lg:w-24"}
 				/>
 			);
 		}
@@ -96,7 +96,7 @@ function getAchievement(achievement: AchievementType) {
 				<AchievementItem
 					icon={<FaSnowflake size={ICON_SIZE} />}
 					label={"Freezing"}
-					className={"border-sky-300 bg-sky-600/30 text-sky-300 lg:w-24"}
+					className={"border-sky-200 bg-sky-500/30 text-sky-200 lg:w-24"}
 				/>
 			);
 		}
@@ -131,7 +131,7 @@ function AchievementItem({ className, icon, label }: AchievementItemProps) {
 	return (
 		<div
 			className={cn(
-				"flex justify-center rounded-lg border p-2 lg:w-20",
+				"flex justify-center rounded-lg border p-2 lg:w-22",
 				className
 			)}
 		>

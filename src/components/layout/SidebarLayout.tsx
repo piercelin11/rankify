@@ -15,14 +15,13 @@ type SidebarLayoutProps = {
 export default function SidebarLayout({ children }: SidebarLayoutProps) {
 	const isMobile = useMediaQuery("max", 1024);
 	const isSidebarOpen = useAppSelector((state) => state.sidebar.isSidebarOpen);
-
 	return (
 		<>
 			{isMobile && <MobileSidebarLayout>{children[0]}</MobileSidebarLayout>}
 
 			<aside
 				className={cn(
-					"sm:w-sidebar-lg fixed z-10 hidden h-screen border-r border-neutral-800 sm:block transition-all ease-in-out duration-200",
+					"fixed z-10 hidden h-screen border-r border-neutral-800 transition-all duration-200 ease-in-out sm:block sm:w-sidebar-lg",
 					{
 						"sm:w-sidebar-sm": !isSidebarOpen,
 					}
@@ -32,7 +31,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 			</aside>
 			<main
 				className={cn(
-					"main-content sm:pl-sidebar-lg pl-0 relative h-screen overflow-auto scrollbar-hidden transition-all ease-in-out duration-200",
+					"main-content relative h-screen overflow-auto pl-0 transition-all duration-200 ease-in-out scrollbar-hidden sm:pl-sidebar-lg",
 					{
 						"sm:pl-sidebar-sm": !isSidebarOpen,
 					}
@@ -69,7 +68,7 @@ function MobileSidebarLayout({ children }: { children: ReactNode }) {
 		<>
 			<Button
 				variant="ghost"
-				className="fixed z-10 right-4 top-4 sm:hidden"
+				className="fixed right-4 top-4 z-10 sm:hidden"
 				onClick={() => setOpen(true)}
 			>
 				<HamburgerMenuIcon />

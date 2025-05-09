@@ -5,6 +5,7 @@ import { cn } from "@/lib/cn";
 import { useAppSelector } from "@/store/hooks";
 import Link from "next/link";
 import React from "react";
+import Tooltip from "../overlay/Tooltip";
 
 type SidebarMenuItemProps = {
 	icon: () => React.ReactNode;
@@ -32,26 +33,42 @@ export default function SidebarMenuItem({
 	if (href)
 		return (
 			<Link className="cursor-pointer" href={href} onClick={handleClick}>
-				<button
+				<div
 					className={cn(buttonStyle, {
 						"hover:bg-neutral-950": !isSidebarOpen,
 					})}
 				>
-					<div>{icon()}</div>
+					<Tooltip
+						className={cn({
+							hidden: isSidebarOpen,
+						})}
+						content={label}
+						side="right"
+					>
+						{icon()}
+					</Tooltip>
 					<p className="overflow-hidden text-ellipsis">{label}</p>
-				</button>
+				</div>
 			</Link>
 		);
 
 	return (
-		<button
+		<div
 			className={cn(buttonStyle, {
 				"hover:bg-neutral-950": !isSidebarOpen,
 			})}
 			onClick={handleClick}
 		>
-			<div>{icon()}</div>
+			<Tooltip
+				className={cn({
+					hidden: isSidebarOpen,
+				})}
+				content={label}
+				side="right"
+			>
+				{icon()}
+			</Tooltip>
 			<p className="overflow-hidden text-ellipsis">{label}</p>
-		</button>
+		</div>
 	);
 }
