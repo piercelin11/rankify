@@ -14,7 +14,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import saveProfileSettings from "../actions/saveProfileSettings";
-
 import Compressor from "compressorjs";
 import ImageUploadInput from "./ImageUploadInput";
 
@@ -33,7 +32,6 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 		formState: { errors },
 		setValue,
 		trigger,
-		watch,
 	} = useForm<ProfileSettingsType>({
 		resolver: zodResolver(profileSettingsSchema),
 		defaultValues: {

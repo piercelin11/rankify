@@ -17,7 +17,7 @@ export type TrackHistoryType = Omit<TrackData, "artist" | "album"> & {
 	peak: number;
 	rankChange: number | null;
 	rankPercentile: number;
-	achievement: AchievementType;
+	achievement: AchievementType[];
 };
 
 type getTracksRankingHistoryOptions = {
@@ -125,25 +125,24 @@ export async function getTracksRankingHistory({
 		const prevPeak = historicalMap.get(data.trackId)?.peak;
 		const prevWorst = historicalMap.get(data.trackId)?.worst;
 
-		function getAchievement(): AchievementType {
-			if (!latestSession) return null;
-			if (
-				data.ranking < Number(prevPeak) &&
-				latestSession.id === dateId &&
-				totalLogsCount > 2
-			)
-				return "Hit Peak";
-			if (
-				data.ranking > Number(prevWorst) &&
-				latestSession.id === dateId &&
-				totalLogsCount > 3
-			)
-				return "New Low";
-			else if (Number(data.rankChange) > rankings.length / 5) return "Big Jump";
-			else if (Number(data.rankChange) < -(rankings.length / 5))
-				return "Big Drop";
-			else return null;
-		}
+		const achievement: AchievementType[] = [];
+
+		if (
+			data.ranking < Number(prevPeak) &&
+			latestSession?.id === dateId &&
+			totalLogsCount > 2
+		)
+			achievement.push("Hit Peak");
+		if (
+			data.ranking > Number(prevWorst) &&
+			latestSession?.id === dateId &&
+			totalLogsCount > 3
+		)
+			achievement.push("New Low");
+		if (Number(data.rankChange) > rankings.length / 5)
+			achievement.push("Big Jump");
+		if (Number(data.rankChange) < -(rankings.length / 5))
+			achievement.push("Big Drop");
 
 		return {
 			...data.track,
@@ -157,7 +156,7 @@ export async function getTracksRankingHistory({
 					? data.ranking
 					: Number(prevPeak),
 			countSongs: rankings.length,
-			achievement: getAchievement(),
+			achievement: achievement,
 			album: data.album,
 		};
 	});

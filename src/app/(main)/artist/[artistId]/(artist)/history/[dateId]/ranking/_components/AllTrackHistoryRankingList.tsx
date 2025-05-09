@@ -58,7 +58,7 @@ export default function AllTrackHistoryRankingList({
 			header: "achv",
 			render: (value) => (
 				<AchievementDisplay
-					achievement={value as AchievementType | undefined}
+					achievements={value as AchievementType[] | undefined}
 				/>
 			),
 			onClick: () => handleHeaderClick("achievement"),

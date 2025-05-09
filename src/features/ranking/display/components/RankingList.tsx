@@ -38,7 +38,7 @@ export function RankingListItem<T extends RankingListDataTypeExtend>({
 }: RankingListItemProps<T>) {
 	return (
 		<Link href={`/artist/${data.artistId}/track/${data.id}`}>
-			<div className="group relative overflow-hidden">
+			<div className="group relative">
 				<div className="grid-ranking-list z-10 select-none items-center gap-3 rounded border-b border-neutral-500/30 py-2.5 sm:pr-6">
 					<p className="justify-self-end font-numeric text-lg font-medium tabular-nums text-neutral-400 group-hover:text-neutral-100">
 						{index || data.ranking}
@@ -85,7 +85,9 @@ export function RankingListItem<T extends RankingListDataTypeExtend>({
 						</div>
 					)}
 				</div>
-				<div className="absolute top-0 -z-10 h-full w-full translate-y-full bg-neutral-900 transition-all duration-150 ease-in-out group-hover:translate-y-0" />
+				<div className="absolute top-0 -z-10 h-full w-full overflow-hidden">
+					<div className="absolute top-0 h-full w-full translate-y-full bg-neutral-900 transition-all duration-150 ease-in-out group-hover:translate-y-0" />
+				</div>
 			</div>
 		</Link>
 	);

@@ -36,12 +36,13 @@
 	}
 
 	.h-virtualized-ranking {
-		@apply h-[calc(100vh-220px)];
+		@apply h-[calc(100vh-180px)];
 	}
 
 	.grid-ranking-list {
-		@apply grid grid-cols-[30px,_3fr] md:grid-cols-[45px,_4fr,_3fr]
+		@apply grid grid-cols-[30px,_1fr] md:grid-cols-[45px,_1fr,_1fr]
 	}
+
 
 }
 

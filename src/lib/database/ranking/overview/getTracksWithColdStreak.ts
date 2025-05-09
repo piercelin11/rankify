@@ -1,26 +1,32 @@
 // 例如放在: src/features/ranking/data/getStreakAchievements.ts
 import { db } from "@/lib/prisma";
-import { Prisma } from '@prisma/client';
+import { Prisma } from "@prisma/client";
 
 type StreakResult = {
-    trackId: string;
+	trackId: string;
 };
 
 // 函數參數需要包含所有必要的篩選條件
 type GetStreakProps = {
-    userId: string;
-    artistId: string;
+	userId: string;
+	artistId: string;
+	streak?: 3 | 5;
 };
 
 // 計算 "Hot Streak" (連續上漲 >= 3 次，結算至最新一次)
 export async function getTracksWithColdStreak({
-    userId,
-    artistId,
-}: GetStreakProps): Promise<Set<string>> { // 返回一個包含 Track ID 的 Set
+	userId,
+	artistId,
+	streak = 3,
+}: GetStreakProps): Promise<Set<string>> {
+	// 返回一個包含 Track ID 的 Set
 
-    const parameters: string[] = [userId, artistId];
+	const parameters: string[] = [userId, artistId];
 
-    const query = Prisma.sql`
+	let query: Prisma.Sql;
+
+	if (streak === 3)
+		query = Prisma.sql`
         WITH LaggedRankings AS (
             SELECT
                 r."trackId",
@@ -49,12 +55,42 @@ export async function getTracksWithColdStreak({
           AND lr.prev_ranking_1 > lr.prev_ranking_2  -- 上次排名優於上上次
           AND lr.prev_ranking_2 > lr.prev_ranking_3; -- 上上次排名優於上上上次
     `;
+	else
+		query = Prisma.sql`
+    WITH LaggedRankings AS (
+        SELECT
+            r."trackId",
+            r.ranking,
+            s.date,
+            LAG(r.ranking, 1) OVER (PARTITION BY r."trackId" ORDER BY s.date ASC) as prev_ranking_1,
+            LAG(r.ranking, 2) OVER (PARTITION BY r."trackId" ORDER BY s.date ASC) as prev_ranking_2,
+            LAG(r.ranking, 3) OVER (PARTITION BY r."trackId" ORDER BY s.date ASC) as prev_ranking_3,
+            LAG(r.ranking, 4) OVER (PARTITION BY r."trackId" ORDER BY s.date ASC) as prev_ranking_4,
+            LAG(r.ranking, 5) OVER (PARTITION BY r."trackId" ORDER BY s.date ASC) as prev_ranking_5,
+            ROW_NUMBER() OVER (PARTITION BY r."trackId" ORDER BY s.date DESC) as rn
+        FROM "Ranking" r
+        INNER JOIN "RankingSession" s ON r."dateId" = s.id -- 需要 JOIN Session 來獲取日期
+        WHERE r."userId" = ${userId} AND r."artistId" = ${artistId} -- 應用篩選條件
+    )
+    SELECT
+        lr."trackId"
+    FROM LaggedRankings lr
+    WHERE lr.rn = 1 -- 只關心每個 track 的最新一筆記錄
+      AND lr.ranking IS NOT NULL       -- 確保排名有效
+      AND lr.prev_ranking_1 IS NOT NULL
+      AND lr.prev_ranking_2 IS NOT NULL
+      AND lr.ranking > lr.prev_ranking_1 
+      AND lr.prev_ranking_1 > lr.prev_ranking_2 
+      AND lr.prev_ranking_2 > lr.prev_ranking_3 
+      AND lr.prev_ranking_3 > lr.prev_ranking_4 
+      AND lr.prev_ranking_4 > lr.prev_ranking_5; 
+`;
 
-    try {
-        const results = await db.$queryRaw<StreakResult[]>(query, ...parameters);
-        return new Set(results.map(r => r.trackId)); // 返回包含 Track ID 的 Set
-    } catch (error) {
-        console.error("獲取 Hot Streaks 時發生錯誤:", error);
-        return new Set<string>(); // 出錯時返回空 Set
-    }
+	try {
+		const results = await db.$queryRaw<StreakResult[]>(query, ...parameters);
+		return new Set(results.map((r) => r.trackId)); // 返回包含 Track ID 的 Set
+	} catch (error) {
+		console.error("獲取 Cold Streaks 時發生錯誤:", error);
+		return new Set<string>(); // 出錯時返回空 Set
+	}
 }

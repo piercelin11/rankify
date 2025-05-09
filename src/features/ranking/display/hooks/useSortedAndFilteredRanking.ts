@@ -60,13 +60,11 @@ export default function useSortedAndFilteredRanking<
 					comparison = valA.getTime() - valB.getTime();
 				} else {
 					try {
-						comparison = String(valA).localeCompare(String(valB));
+						comparison = String(valB).localeCompare(String(valA));
 					} catch (err) {
 						comparison = 0;
 					}
 				}
-
-				console.log(comparison);
 
 				return sortOrder === "asc" ? comparison : -comparison;
 			});

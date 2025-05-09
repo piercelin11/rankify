@@ -25,7 +25,7 @@ export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
 	top5PercentCount: number;
 	rankings?: { ranking: number; date: Date; dateId: string }[];
 	rankChange?: number | null;
-	achievement: AchievementType;
+	achievement: AchievementType[];
 };
 
 export type TimeFilterType = {
@@ -191,6 +191,8 @@ export default async function getTracksStats({
 	//依據 options 判斷是否獲取連續上漲及下跌趨勢
 	let hotStreakTrackIds: Set<string> | undefined;
 	let coldStreakTrackIds: Set<string> | undefined;
+	let burningStreakTrackIds: Set<string> | undefined;
+	let freezingStreakTrackIds: Set<string> | undefined;
 	if (options.includeAchievement && !time) {
 		hotStreakTrackIds = await getTracksWithHotStreak({
 			userId,
@@ -200,11 +202,31 @@ export default async function getTracksStats({
 			userId,
 			artistId,
 		});
+		burningStreakTrackIds = await getTracksWithHotStreak({
+			userId,
+			artistId,
+			streak: 5,
+		});
+		freezingStreakTrackIds = await getTracksWithColdStreak({
+			userId,
+			artistId,
+			streak: 5,
+		});
 	}
 
 	const result: TrackStatsType[] = trackMetrics.map((data) => {
 		const hasHotStreak = hotStreakTrackIds?.has(data.id);
 		const hasColdStreak = coldStreakTrackIds?.has(data.id);
+		const hasBurningStreak = burningStreakTrackIds?.has(data.id);
+		const hasFreezingStreak = freezingStreakTrackIds?.has(data.id);
+
+		const achievement: AchievementType[] = [];
+		if (hasBurningStreak) achievement.push("Burning Streak");
+		else if (hasHotStreak) achievement.push("Hot Streak");
+
+		if (hasFreezingStreak) achievement.push("Freezing Streak");
+		else if (hasColdStreak) achievement.push("Cold Streak");
+
 		return {
 			...allTracksMap.get(data.id)!,
 			album: {
@@ -220,16 +242,13 @@ export default async function getTracksStats({
 			top25PercentCount: top25PercentMap.get(data.id) ?? 0,
 			top5PercentCount: top5PercentMap.get(data.id) ?? 0,
 			rankings: trackRankingsMap?.get(data.id),
-			achievement: hasHotStreak
-				? "Hot Streak"
-				: hasColdStreak
-					? "Cold Streak"
-					: null,
-			rankChange: options.includeRankChange && !time
-				? prevTrackRankingMap?.get(data.id)
-					? prevTrackRankingMap.get(data.id)! - data.ranking
-					: null
-				: undefined,
+			achievement: achievement,
+			rankChange:
+				options.includeRankChange && !time
+					? prevTrackRankingMap?.get(data.id)
+						? prevTrackRankingMap.get(data.id)! - data.ranking
+						: null
+					: undefined,
 		};
 	});
 
