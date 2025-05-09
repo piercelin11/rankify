@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import ModalWrapper from "@/components/modals/ModalWrapper";
 import { useState } from "react";
@@ -19,16 +19,17 @@ export default function AddAlbumButton({ artistId }: AddAlbumButtonProps) {
 
 	return (
 		<>
-			{isOpen && (
-				<ModalWrapper setOpen={setOpen}>
-					<ContentSelectionForm
-						artistId={artistId}
-						onCancel={() => setOpen(false)}
-						type="Album"
-						submitAction={handleSubmit}
-					/>
-				</ModalWrapper>
-			)}
+			<ModalWrapper
+				onRequestClose={() => setOpen(false)}
+				isRequestOpen={isOpen}
+			>
+				<ContentSelectionForm
+					artistId={artistId}
+					onCancel={() => setOpen(false)}
+					type="Album"
+					submitAction={handleSubmit}
+				/>
+			</ModalWrapper>
 
 			<AddButton variant="secondary" onClick={() => setOpen(true)} />
 		</>

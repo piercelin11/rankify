@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import ModalWrapper from "@/components/modals/ModalWrapper";
 import ArtistAddWizard from "./ArtistAddWizard";
@@ -11,11 +11,12 @@ export function AddArtistButton() {
 
 	return (
 		<>
-			{isOpen && (
-				<ModalWrapper setOpen={setOpen}>
-					<ArtistAddWizard />
-				</ModalWrapper>
-			)}
+			<ModalWrapper
+				onRequestClose={() => setOpen(false)}
+				isRequestOpen={isOpen}
+			>
+				<ArtistAddWizard />
+			</ModalWrapper>
 
 			<Button
 				variant="secondary"

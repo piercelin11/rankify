@@ -30,10 +30,10 @@ export default async function saveProfileSettings(
 	}
 	const validatedData = validatedField.data;
 
-	let s3Url: string | undefined;
+	//let s3Url: string | undefined;
 
 	try {
-		if (validatedData.image) {
+		/* if (validatedData.image) {
 			const currentUser = await db.user.findUnique({
 				where: {
 					id: userId,
@@ -46,7 +46,7 @@ export default async function saveProfileSettings(
 				imageFile: validatedData.image[0] as File,
 				oldImageUrl: currentUser?.image || null,
 			});
-		}
+		} */
 
 		const existedUser = await db.user.findUnique({
 			where: {
@@ -65,7 +65,7 @@ export default async function saveProfileSettings(
 			username: validatedData.username,
 		};
 
-		if (s3Url) updatePayload.image = s3Url;
+		//if (s3Url) updatePayload.image = s3Url;
 
 		await db.user.update({
 			where: {

@@ -22,7 +22,10 @@ export default function AddSingleButton({ artistId }: AddSingleButtonProps) {
 	return (
 		<>
 			{isOpen && (
-				<ModalWrapper setOpen={setOpen}>
+				<ModalWrapper
+					onRequestClose={() => setOpen(false)}
+					isRequestOpen={isOpen}
+				>
 					<ContentSelectionForm
 						artistId={artistId}
 						onCancel={() => setOpen(false)}

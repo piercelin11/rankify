@@ -10,14 +10,14 @@ import TrackEditingForm from "./TrackEditingForm";
 
 type TrackActionSectionProps = {
 	data: TrackData;
-    albums: AlbumData[];
+	albums: AlbumData[];
 };
 
 export default function TrackActionSection({
 	data,
-    albums,
+	albums,
 }: TrackActionSectionProps) {
-	const [isEditopen, setEditOpen] = useState(false);
+	const [isEditOpen, setEditOpen] = useState(false);
 	const [isDeleteOpen, setDeleteOpen] = useState(false);
 
 	const { id } = data;
@@ -40,15 +40,16 @@ export default function TrackActionSection({
 				warning="Warning: All associated data will also be removed."
 			/>
 
-			{isEditopen && (
-				<ModalWrapper setOpen={setEditOpen}>
-					<TrackEditingForm
-						trackData={data}
-						albums={albums}
-						onCancel={() => setEditOpen(false)}
-					/>
-				</ModalWrapper>
-			)}
+			<ModalWrapper
+				onRequestClose={() => setEditOpen(false)}
+				isRequestOpen={isEditOpen}
+			>
+				<TrackEditingForm
+					trackData={data}
+					albums={albums}
+					onCancel={() => setEditOpen(false)}
+				/>
+			</ModalWrapper>
 		</div>
 	);
 }
