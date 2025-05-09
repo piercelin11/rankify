@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import FormItem from "@/components/form/FormInput";
 import Button from "@/components/buttons/Button";
 import { useForm } from "react-hook-form";
@@ -20,32 +20,29 @@ export default function ArtistEditingForm({
 	setOpen,
 }: ArtistEditingFormProps) {
 	const [response, setResponse] = useState<ActionResponse | null>(null);
-	const [isPending, setPending] = useState<boolean>(false);
+	const isMounted = useRef<HTMLFormElement | null>(null);
 
 	const {
 		register,
 		handleSubmit,
 		setFocus,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<updateArtistType>({
 		resolver: zodResolver(updateArtistSchema),
 	});
 
 	async function onSubmit(formData: updateArtistType) {
-		setPending(true);
 		try {
 			const updateAlbumResponse = await updateArtist(data.id, formData);
-			setResponse(updateAlbumResponse);
-			if (updateAlbumResponse.success) setOpen(false);
+			if (isMounted.current) setResponse(updateAlbumResponse);
+			if (updateAlbumResponse.success && isMounted.current) setOpen(false);
 		} catch (error) {
 			if (error instanceof Error) {
-				if (error.message !== "NEXT_REDIRECT") {
+				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
 					setResponse({ success: false, message: "Something went wrong." });
 				}
 			}
 			console.error(`Error editing artist ${data.name}`, error);
-		} finally {
-			setPending(false);
 		}
 	}
 
@@ -60,10 +57,10 @@ export default function ArtistEditingForm({
 				<p className="text-description">edit artist name.</p>
 			</div>
 			<hr />
-			<form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
+			<form ref={isMounted} className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
 				<FormItem
 					{...register("name")}
-					title="Artist name"
+					label="Artist name"
 					defaultValue={data.name}
 					message={errors.name?.message}
 				/>
@@ -72,14 +69,14 @@ export default function ArtistEditingForm({
 						variant="outline"
 						type="button"
 						onClick={() => setOpen(false)}
-						disabled={isPending}
+						disabled={isSubmitting}
 					>
 						Cancel
 					</Button>
-					<Button variant="primary" type="submit" disabled={isPending}>
+					<Button variant="primary" type="submit" disabled={isSubmitting}>
 						Save
 					</Button>
-					{isPending && (
+					{isSubmitting && (
 						<div className="px-5">
 							<LoadingAnimation />
 						</div>

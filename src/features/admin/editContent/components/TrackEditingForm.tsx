@@ -1,7 +1,7 @@
 import { AlbumData, TrackData } from "@/types/data";
 import { updateTrackSchema, UpdateTrackType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import updateTrack from "../actions/updateTrack";
 import Button from "@/components/buttons/Button";
@@ -38,7 +38,7 @@ export default function TrackEditingForm({
 	onCancel,
 }: TrackEditingFormProps) {
 	const [response, setResponse] = useState<ActionResponse | null>(null);
-	const [isPending, setPending] = useState<boolean>(false);
+	const isMounted = useRef<HTMLFormElement | null>(null);
 
 	const selectOptions = [
 		{ id: "non-album-track", value: "", label: "Non-album track" },
@@ -54,7 +54,7 @@ export default function TrackEditingForm({
 		control,
 		setFocus,
 		handleSubmit,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<UpdateTrackType>({
 		resolver: zodResolver(updateTrackSchema),
 		defaultValues: {
@@ -65,20 +65,17 @@ export default function TrackEditingForm({
 	});
 
 	async function onSubmit(formData: UpdateTrackType) {
-		setPending(true);
 		try {
 			const editTrackResponse = await updateTrack(trackData, formData);
-			setResponse(editTrackResponse);
-			if (editTrackResponse.success) onCancel();
+			if (isMounted.current) setResponse(editTrackResponse);
+			if (editTrackResponse.success && isMounted.current) onCancel();
 		} catch (error) {
 			if (error instanceof Error) {
-				if (error.message !== "NEXT_REDIRECT") {
+				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
 					setResponse({ success: false, message: "Something went wrong." });
 				}
 			}
 			console.error(`Error editing track ${trackData.name}`, error);
-		} finally {
-			setPending(false);
 		}
 	}
 
@@ -93,7 +90,11 @@ export default function TrackEditingForm({
 				<p className="text-description">edit track info.</p>
 			</div>
 			<hr />
-			<form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
+			<form
+				ref={isMounted}
+				className="space-y-10"
+				onSubmit={handleSubmit(onSubmit)}
+			>
 				<FormItem
 					label="Track name"
 					message={errors.name?.message}
@@ -138,14 +139,14 @@ export default function TrackEditingForm({
 						variant="outline"
 						type="button"
 						onClick={onCancel}
-						disabled={isPending}
+						disabled={isSubmitting}
 					>
 						Cancel
 					</Button>
-					<Button variant="primary" type="submit" disabled={isPending}>
+					<Button variant="primary" type="submit" disabled={isSubmitting}>
 						Save
 					</Button>
-					{isPending && (
+					{isSubmitting && (
 						<div className="px-5">
 							<LoadingAnimation />
 						</div>

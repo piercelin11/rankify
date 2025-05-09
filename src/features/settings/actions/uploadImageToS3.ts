@@ -53,8 +53,8 @@ export default async function uploadImageToS3({
 		});
 
 		const resultData = await upload.done();
-
 		s3Url = resultData.Location;
+		
 	} catch (error) {
 		console.error("Error during avatar upload Server Action:", error);
 	}
@@ -63,10 +63,9 @@ export default async function uploadImageToS3({
 		const s3Domain = `${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`;
 		if (oldImageUrl.includes(s3Domain)) {
 			try {
-				const urlParts = oldImageUrl.substring(
+				const oldS3Key = oldImageUrl.substring(
 					oldImageUrl.indexOf(s3Domain) + s3Domain.length + 1
 				);
-				const oldS3Key = urlParts;
 
 				const deleteParams = {
 					Bucket: process.env.S3_BUCKET_NAME!,

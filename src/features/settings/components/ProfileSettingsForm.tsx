@@ -11,11 +11,12 @@ import {
 	ProfileSettingsType,
 } from "@/types/schemas/settings";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import saveProfileSettings from "../actions/saveProfileSettings";
 import Compressor from "compressorjs";
 import ImageUploadInput from "./ImageUploadInput";
+import ModalWrapper from "@/components/modals/ModalWrapper";
 
 type ProfileSettingsForm = {
 	user: UserData;
@@ -23,13 +24,13 @@ type ProfileSettingsForm = {
 
 export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 	const [response, setResponse] = useState<ActionResponse | null>(null);
-	const [isPending, setPending] = useState<boolean>(false);
 	const [previewUrl, setPreviewUrl] = useState<string | null>(user.image);
+	const isMounted = useRef<HTMLFormElement | null>(null);
 
 	const {
 		register,
 		handleSubmit,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 		setValue,
 		trigger,
 	} = useForm<ProfileSettingsType>({
@@ -93,27 +94,28 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 	}
 
 	async function onSubmit(formData: ProfileSettingsType) {
-		setPending(true);
 		try {
 			const response = await saveProfileSettings(formData);
-			setResponse(response);
+			if (isMounted.current) setResponse(response);
 		} catch (error) {
 			console.error("Something went wrong:", error);
 			if (error instanceof Error) {
-				if (error.message !== "NEXT_REDIRECT") {
+				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
 					setResponse({
 						message: "Something went wrong.",
 						success: false,
 					});
 				}
 			}
-		} finally {
-			setPending(false);
 		}
 	}
 
 	return (
-		<form className="space-y-14" onSubmit={handleSubmit(onSubmit)}>
+		<form
+			className="space-y-14"
+			ref={isMounted}
+			onSubmit={handleSubmit(onSubmit)}
+		>
 			<div className="space-y-4">
 				<ImageUploadInput
 					img={previewUrl}
@@ -133,13 +135,13 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 				/>
 			</div>
 			<div className="flex items-center gap-4">
-				<Button variant="primary" type="submit" disabled={isPending}>
+				<Button variant="primary" type="submit" disabled={isSubmitting}>
 					Save
 				</Button>
-				{!isPending && response && (
+				{!isSubmitting && response && (
 					<FormMessage message={response.message} isError={!response.success} />
 				)}
-				{isPending && (
+				{isSubmitting && (
 					<div>
 						<LoadingAnimation />
 					</div>

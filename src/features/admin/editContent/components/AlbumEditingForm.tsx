@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import FormItem from "@/components/form/FormInput";
 import Button from "@/components/buttons/Button";
 import ColorSelector from "./ColorSelector";
@@ -22,14 +22,14 @@ export default function AlbumEditingForm({
 	setOpen,
 }: AlbumEditingFormProps) {
 	const [response, setResponse] = useState<ActionResponse | null>(null);
-	const [isPending, setPending] = useState<boolean>(false);
+	const isMounted = useRef<HTMLFormElement | null>(null);
 
 	const {
 		control,
 		register,
 		handleSubmit,
 		setFocus,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<updateAlbumType>({
 		resolver: zodResolver(updateAlbumSchema),
 		defaultValues: {
@@ -37,24 +37,21 @@ export default function AlbumEditingForm({
 			name: data.name,
 			color: data.color || "",
 		},
-	}); 
+	});
 
 	async function onSubmit(formData: updateAlbumType) {
-		setPending(true);
 		try {
 			const updateAlbumResponse = await updateAlbum(data.id, formData);
-			setResponse(updateAlbumResponse);
-			if (updateAlbumResponse.success) setOpen(false);
+			if (isMounted.current) setResponse(updateAlbumResponse);
+			if (updateAlbumResponse.success && isMounted.current) setOpen(false);
 		} catch (error) {
-			console.log(error)
+			console.log(error);
 			if (error instanceof Error) {
-				if (error.message !== "NEXT_REDIRECT") {
+				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
 					setResponse({ success: false, message: "Something went wrong." });
 				}
 			}
 			console.error(`Error editing album ${data.name}`, error);
-		} finally {
-			setPending(false);
 		}
 	}
 
@@ -69,21 +66,20 @@ export default function AlbumEditingForm({
 				<p className="text-description">edit album info.</p>
 			</div>
 			<hr />
-			<form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
+			<form ref={isMounted} className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
 				<Controller
 					name="img"
 					control={control}
 					render={({ field }) => (
-						<CoverSelector 
-						album={data}  
-						onChange={field.onChange}
-						onBlur={field.onBlur}
-						value={field.value}
-						
+						<CoverSelector
+							album={data}
+							onChange={field.onChange}
+							onBlur={field.onBlur}
+							value={field.value}
 						/>
 					)}
 				/>
-				
+
 				<FormItem
 					{...register("name")}
 					label="Album name"
@@ -108,14 +104,14 @@ export default function AlbumEditingForm({
 						variant="outline"
 						type="button"
 						onClick={() => setOpen(false)}
-						disabled={isPending}
+						disabled={isSubmitting}
 					>
 						Cancel
 					</Button>
-					<Button variant="primary" type="submit" disabled={isPending}>
+					<Button variant="primary" type="submit" disabled={isSubmitting}>
 						Save
 					</Button>
-					{isPending && (
+					{isSubmitting && (
 						<div className="px-5">
 							<LoadingAnimation />
 						</div>

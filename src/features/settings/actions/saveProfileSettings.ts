@@ -4,11 +4,12 @@ import {
 	profileSettingsSchema,
 	ProfileSettingsType,
 } from "@/types/schemas/settings";
-import { getUserSession } from "../../../../auth";
+import { getUserSession } from "@/../auth";
 import { ActionResponse } from "@/types/action";
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import uploadImageToS3 from "./uploadImageToS3";
+import { Prisma } from "@prisma/client";
 
 export default async function saveProfileSettings(
 	data: ProfileSettingsType
@@ -16,14 +17,23 @@ export default async function saveProfileSettings(
 	const { id: userId } = await getUserSession();
 
 	const validatedField = profileSettingsSchema.safeParse(data);
-	if (!validatedField)
-		return { success: false, message: "Invalid Field", error: "Invalid Field" };
+	if (!validatedField.success) {
+		console.error(
+			"Profile settings validation failed:",
+			validatedField.error.flatten()
+		);
+		return {
+			success: false,
+			message: "Invalid field data.",
+			error: validatedField.error.flatten().fieldErrors,
+		};
+	}
+	const validatedData = validatedField.data;
 
 	let s3Url: string | undefined;
 
 	try {
-		
-		if (data.image) {
+		if (validatedData.image) {
 			const currentUser = await db.user.findUnique({
 				where: {
 					id: userId,
@@ -33,14 +43,14 @@ export default async function saveProfileSettings(
 				},
 			});
 			s3Url = await uploadImageToS3({
-				imageFile: data.image[0] as File,
+				imageFile: validatedData.image[0] as File,
 				oldImageUrl: currentUser?.image || null,
 			});
 		}
 
 		const existedUser = await db.user.findUnique({
 			where: {
-				username: data.username,
+				username: validatedData.username,
 			},
 			select: {
 				id: true,
@@ -50,15 +60,18 @@ export default async function saveProfileSettings(
 		if (existedUser && existedUser.id !== userId)
 			return { success: false, message: "Username already exist." };
 
+		const updatePayload: Prisma.UserUpdateInput = {
+			name: validatedData.name,
+			username: validatedData.username,
+		};
+
+		if (s3Url) updatePayload.image = s3Url;
+
 		await db.user.update({
 			where: {
 				id: userId,
 			},
-			data: {
-				name: data.name,
-				username: data.username,
-				image: s3Url,
-			},
+			data: updatePayload,
 		});
 	} catch (error) {
 		console.error("Failed to save profile settings:", error);

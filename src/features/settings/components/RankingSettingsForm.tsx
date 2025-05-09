@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
 	rankingSettingsSchema,
@@ -25,12 +25,18 @@ export const defaultRankingSettings: RankingSettingsType = {
 	includeReissueTrack: true,
 };
 
-export default function RankingSettingsForm({ settings }: RankingSettingsFormProps) {
+export default function RankingSettingsForm({
+	settings,
+}: RankingSettingsFormProps) {
 	const defaultSettings = settings?.rankingSettings || defaultRankingSettings;
 	const [response, setResponse] = useState<ActionResponse | null>(null);
-	const [isPending, setPending] = useState<boolean>(false);
+	const isMounted = useRef<HTMLFormElement | null>(null);
 
-	const { handleSubmit, control } = useForm<RankingSettingsType>({
+	const {
+		handleSubmit,
+		control,
+		formState: { isSubmitting },
+	} = useForm<RankingSettingsType>({
 		resolver: zodResolver(rankingSettingsSchema),
 		defaultValues: {
 			includeInterlude: defaultSettings.includeInterlude,
@@ -40,27 +46,27 @@ export default function RankingSettingsForm({ settings }: RankingSettingsFormPro
 	});
 
 	async function onSubmit(formData: RankingSettingsType) {
-		setPending(true);
 		try {
-			
 			const response = await saveRankingSettings(formData);
-			setResponse(response);
+			if (isMounted.current) setResponse(response);
 		} catch (error) {
 			if (error instanceof Error) {
-				if (error.message !== "NEXT_REDIRECT") {
+				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
 					setResponse({
 						message: "Something went wrong.",
 						success: false,
 					});
 				}
 			}
-		} finally {
-			setPending(false);
 		}
 	}
 
 	return (
-		<form className="space-y-14" onSubmit={handleSubmit(onSubmit)}>
+		<form
+			ref={isMounted}
+			className="space-y-14"
+			onSubmit={handleSubmit(onSubmit)}
+		>
 			<div className="space-y-4">
 				<div>
 					<h3>Album Stats</h3>
@@ -109,13 +115,13 @@ export default function RankingSettingsForm({ settings }: RankingSettingsFormPro
 				/>
 			</div>
 			<div className="flex items-center gap-4">
-				<Button variant="primary" type="submit" disabled={isPending}>
+				<Button variant="primary" type="submit" disabled={isSubmitting}>
 					Save
 				</Button>
-				{!isPending && response && (
+				{!isSubmitting && response && (
 					<FormMessage message={response.message} isError={!response.success} />
 				)}
-				{isPending && (
+				{isSubmitting && (
 					<div>
 						<LoadingAnimation />
 					</div>
