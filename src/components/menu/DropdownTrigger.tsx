@@ -23,7 +23,7 @@ export default function DropdownTrigger({
 		<>
 			<div
 				className={cn(
-					"group flex items-center justify-between gap-3 rounded-xl border border-neutral-700 bg-neutral-950 p-3 text-neutral-400 hover:border-neutral-600",
+					"group flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-neutral-700 bg-neutral-950 p-3 text-neutral-400 hover:border-neutral-500",
 					className,
 					{
 						"border-neutral-600": isDropdownOpen,
@@ -35,7 +35,7 @@ export default function DropdownTrigger({
 				{hasIcon && (
 					<ChevronDownIcon
 						className={cn(
-							"self-center text-neutral-500 transition ease-in-out group-hover:text-neutral-400",
+							"me-2 self-center text-neutral-500 transition ease-in-out group-hover:text-neutral-400",
 							{
 								"rotate-180 transform text-neutral-400": isDropdownOpen,
 							}

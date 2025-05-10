@@ -44,15 +44,18 @@ export default function RankingAlbumFilter({
 					>
 						{option.id !== "all" && (
 							<CheckBox
-								className="h-5 w-5"
+								className="min-h-5 min-w-5"
 								checked={selectedAlbums?.includes(option.id)}
 							/>
 						)}
 						<p
-							className={cn("text-neutral-500", {
-								"text-neutral-100": selectedAlbums?.includes(option.id),
-								"text-neutral-400": option.id === "all",
-							})}
+							className={cn(
+								"overflow-hidden text-ellipsis text-nowrap text-neutral-500",
+								{
+									"text-neutral-100": selectedAlbums?.includes(option.id),
+									"text-neutral-400": option.id === "all",
+								}
+							)}
 						>
 							{option.label}
 						</p>

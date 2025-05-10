@@ -39,7 +39,7 @@ export default function AllTrackOverviewRankingList({
 		sortedAndFilteredRankings,
 		handleHeaderClick,
 		dropdownOptions,
-		albumIdFilter,
+		selectedAlbumIds,
 		sortKey,
 		sortOrder,
 	} = useSortedAndFilteredRanking(tracksRankings, albums);
@@ -79,15 +79,15 @@ export default function AllTrackOverviewRankingList({
 			<div className="flex items-center justify-between">
 				<RankingAlbumFilter
 					dropdownOptions={dropdownOptions}
-					selectedAlbums={albumIdFilter}
+					selectedAlbums={selectedAlbumIds}
 				/>
 				{artist && (
-					<div className="flex items-center gap-2 rounded-full bg-neutral-600/20 p-2 text-neutral-500">
+					<div className="flex items-center gap-2 rounded-full border border-neutral-600 bg-neutral-900/20 p-2">
 						<Image
 							className="rounded-full"
 							src={artist?.img || ""}
-							width={30}
-							height={30}
+							width={36}
+							height={36}
 							alt={`${artist?.name}`}
 						/>
 						<p className="text-sm">{artist?.name}</p>

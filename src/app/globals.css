@@ -32,18 +32,16 @@
 	}
 
 	.bg-gradient-dark {
-		@apply bg-gradient-to-b from-transparent to-neutral-950;
+		background: linear-gradient(to bottom, transparent, #09090b90, #09090bE6, #09090b);
 	}
 
 	.h-virtualized-ranking {
-		@apply h-[calc(100vh-180px)];
+		@apply h-[calc(100vh-230px)];
 	}
 
 	.grid-ranking-list {
-		@apply grid grid-cols-[30px,_1fr] md:grid-cols-[45px,_1fr,_1fr]
+		@apply grid grid-cols-[30px,_1fr] md:grid-cols-[45px,_1fr,_1fr];
 	}
-
-
 }
 
 :root {

@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import Tabs from "./Tabs";
+import Tabs from "../../../../../../components/navigation/Tabs";
 import { getArtistTabOptions } from "@/config/navData";
 import { usePathname } from "next/navigation";
-import ContentHeader from "../presentation/ContentHeader";
+import ContentHeader from "../../../../../../components/presentation/ContentHeader";
 import { ArtistData } from "@/types/data";
 
 type ArtistHeaderProps = {
@@ -26,7 +26,7 @@ const ArtistHeader = React.memo(function ArtistHeader({
 				<ContentHeader
 					data={artistData}
 					subTitleContent={
-						<p className="text-description">
+						<p className="text-description text-neutral-300/40">
 							{artistData.spotifyFollowers} followers
 						</p>
 					}

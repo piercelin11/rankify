@@ -76,22 +76,19 @@ function ContentHeaderInfo({
 	data,
 	subTitleContent,
 	type,
-	color,
 }: ContentHeaderProps) {
 	return (
 		<div className={cn("space-y-2")}>
 			{type && <p>{type}</p>}
 			<h1 className={cn("text-display")}>{data?.name}</h1>
 			<div
-				className={cn("text-description mb-4 flex items-center gap-2", {
-					"text-neutral-100": color,
-				})}
+				className={cn(
+					"group text-description mb-4 flex items-center gap-2 text-neutral-400"
+				)}
 			>
 				<Link href={data?.spotifyUrl || ""} className="inline-block">
 					<SpotifyIcon
-						className={cn("text-neutral-600 hover:text-spotify", {
-							"text-neutral-300": color,
-						})}
+						className={cn("text-neutral-400 hover:text-spotify")}
 						size={30}
 					/>
 				</Link>

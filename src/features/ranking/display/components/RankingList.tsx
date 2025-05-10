@@ -39,7 +39,7 @@ export function RankingListItem<T extends RankingListDataTypeExtend>({
 	return (
 		<Link href={`/artist/${data.artistId}/track/${data.id}`}>
 			<div className="group relative">
-				<div className="grid-ranking-list z-10 select-none items-center gap-3 rounded border-b border-neutral-500/30 py-2.5 sm:pr-6">
+				<div className="grid-ranking-list z-10 select-none items-center gap-3 rounded border-b border-neutral-500/20 py-2.5 sm:pr-6">
 					<p className="justify-self-end font-numeric text-lg font-medium tabular-nums text-neutral-400 group-hover:text-neutral-100">
 						{index || data.ranking}
 					</p>
@@ -137,7 +137,7 @@ export function RankingHeader<T extends RankingListDataTypeExtend>({
 	const searchParams = useSearchParams();
 	const sortQuery = searchParams.get("sort");
 	return (
-		<div className="grid-ranking-list hidden select-none items-center gap-3 rounded border-b border-neutral-500/30 py-3 pl-2 pr-6 text-neutral-300/70 md:grid">
+		<div className="grid-ranking-list hidden select-none items-center gap-3 rounded border-b border-neutral-600/30 py-3 pl-2 pr-6 text-neutral-300/70 md:grid">
 			<p>#</p>
 			<p>info</p>
 			<div

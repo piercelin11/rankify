@@ -36,7 +36,7 @@ export default function AllTrackHistoryRankingList({
 		sortedAndFilteredRankings,
 		handleHeaderClick,
 		dropdownOptions,
-		albumIdFilter,
+		selectedAlbumIds,
 		sortKey,
 		sortOrder,
 	} = useSortedAndFilteredRanking(tracksRankings, albums);
@@ -70,20 +70,19 @@ export default function AllTrackHistoryRankingList({
 			<div className="mb-10 flex items-center justify-between">
 				<RankingAlbumFilter
 					dropdownOptions={dropdownOptions}
-					selectedAlbums={albumIdFilter}
-					//selectedAlbum={albumIdFilter && albumsMap.get(albumIdFilter)?.name}
+					selectedAlbums={selectedAlbumIds}
 				/>
 				{artist && (
-					<div className="flex items-center gap-2 rounded-full bg-neutral-600/20 p-2 text-neutral-500">
+					<div className="flex items-center gap-2 rounded-full border border-neutral-600 bg-neutral-900/20 p-2 text-neutral-400">
 						<Image
 							className="rounded-full"
 							src={artist?.img || ""}
-							width={30}
-							height={30}
+							width={36}
+							height={36}
 							alt={`${artist?.name}`}
 						/>
 						<p className="text-sm">{artist?.name}</p>•
-						<p className="text-sm me-2">{dateToLong(tracksRankings[0].date)}</p>
+						<p className="me-2 text-sm">{dateToLong(tracksRankings[0].date)}</p>
 					</div>
 				)}
 			</div>

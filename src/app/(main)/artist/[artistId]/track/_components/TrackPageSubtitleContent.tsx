@@ -25,7 +25,7 @@ export default function TrackPageSubtitleContent({
 					alt={trackData.artist.name}
 				/>
 				<Link
-					className="font-bold hover:underline"
+					className="font-bold hover:text-neutral-100 hover:underline"
 					href={`/artist/${trackData.artist.id}`}
 					onClick={handleClick}
 				>
@@ -36,7 +36,7 @@ export default function TrackPageSubtitleContent({
 				<>
 					•
 					<Link
-						className="hover:underline"
+						className="hover:text-neutral-100 hover:underline"
 						href={`/artist/${trackData.artist.id}/album/${trackData.albumId}`}
 						onClick={handleClick}
 					>

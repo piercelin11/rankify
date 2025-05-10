@@ -7,7 +7,7 @@ import { AlbumData } from "@/types/data";
 export default function useSortedAndFilteredRanking<
 	T extends RankingListDataTypeExtend,
 >(trackRankings: T[], albums: AlbumData[]) {
-	const [albumIdFilter, setAlbumIdFilter] = useState<string[]>([]);
+	const [selectedAlbumIds, setSelectedAlbumIds] = useState<string[]>([]);
 	const [sortKey, setSortKey] = useState<keyof T | null>(null);
 	const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
 
@@ -15,10 +15,10 @@ export default function useSortedAndFilteredRanking<
 		id: album.id,
 		label: album.name,
 		onClick: () => {
-			if (!albumIdFilter.includes(album.id))
-				setAlbumIdFilter((prev) => [...prev, album.id]);
+			if (!selectedAlbumIds.includes(album.id))
+				setSelectedAlbumIds((prev) => [...prev, album.id]);
 			else
-				setAlbumIdFilter((prev) => [...prev].filter((id) => id !== album.id));
+				setSelectedAlbumIds((prev) => [...prev].filter((id) => id !== album.id));
 		},
 	}));
 
@@ -39,10 +39,10 @@ export default function useSortedAndFilteredRanking<
 	function sortedAndFiltered() {
 		let filteredRankings = trackRankings;
 
-		if (albumIdFilter) {
+		if (selectedAlbumIds) {
 			filteredRankings = trackRankings.filter((track) => {
-				if (albumIdFilter.length !== 0)
-					return track.albumId && albumIdFilter.includes(track.albumId);
+				if (selectedAlbumIds.length !== 0)
+					return track.albumId && selectedAlbumIds.includes(track.albumId);
 				else return track;
 			});
 		}
@@ -94,11 +94,11 @@ export default function useSortedAndFilteredRanking<
 				id: "all",
 				label: "select all",
 				onClick: () =>
-					setAlbumIdFilter([]),
+					setSelectedAlbumIds([]),
 			},
 			...dropdownOptions,
 		],
-		albumIdFilter,
+		selectedAlbumIds,
 		sortKey,
 		sortOrder,
 	};

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ReactNode, Suspense } from "react";
 import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
-import ArtistHeader from "@/components/navigation/ArtistHeader";
+import ArtistHeader from "@/app/(main)/artist/[artistId]/(artist)/_components/ArtistHeader";
 import ContentHeader from "@/components/presentation/ContentHeader";
 
 type LayoutProps = {
