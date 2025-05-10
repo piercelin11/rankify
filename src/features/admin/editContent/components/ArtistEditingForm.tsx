@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import FormItem from "@/components/form/FormInput";
 import Button from "@/components/buttons/Button";
 import { useForm } from "react-hook-form";
-import { updateArtistSchema, updateArtistType } from "@/types/schemas/admin";
+import { updateArtistSchema, UpdateArtistType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArtistData } from "@/types/data";
 import FormMessage from "@/components/form/FormMessage";
@@ -27,11 +27,11 @@ export default function ArtistEditingForm({
 		handleSubmit,
 		setFocus,
 		formState: { errors, isSubmitting },
-	} = useForm<updateArtistType>({
+	} = useForm<UpdateArtistType>({
 		resolver: zodResolver(updateArtistSchema),
 	});
 
-	async function onSubmit(formData: updateArtistType) {
+	async function onSubmit(formData: UpdateArtistType) {
 		try {
 			const updateAlbumResponse = await updateArtist(data.id, formData);
 			if (isMounted.current) setResponse(updateAlbumResponse);
@@ -51,7 +51,7 @@ export default function ArtistEditingForm({
 	}, []);
 
 	return (
-		<div className="space-y-8 p-5">
+		<div className="space-y-8">
 			<div>
 				<h2>Edit Artist</h2>
 				<p className="text-description">edit artist name.</p>

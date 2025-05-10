@@ -44,7 +44,7 @@ export default function ContentSelectionForm({
 	);
 
 	return (
-		<div className="mt-4 space-y-8">
+		<div className="space-y-8">
 			<SearchInput
 				onChange={handleInput}
 				value={inputValue}

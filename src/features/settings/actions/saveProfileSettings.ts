@@ -8,7 +8,6 @@ import { getUserSession } from "@/../auth";
 import { ActionResponse } from "@/types/action";
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import uploadImageToS3 from "./uploadImageToS3";
 import { Prisma } from "@prisma/client";
 
 export default async function saveProfileSettings(
@@ -30,24 +29,7 @@ export default async function saveProfileSettings(
 	}
 	const validatedData = validatedField.data;
 
-	//let s3Url: string | undefined;
-
 	try {
-		/* if (validatedData.image) {
-			const currentUser = await db.user.findUnique({
-				where: {
-					id: userId,
-				},
-				select: {
-					image: true,
-				},
-			});
-			s3Url = await uploadImageToS3({
-				imageFile: validatedData.image[0] as File,
-				oldImageUrl: currentUser?.image || null,
-			});
-		} */
-
 		const existedUser = await db.user.findUnique({
 			where: {
 				username: validatedData.username,
@@ -64,8 +46,6 @@ export default async function saveProfileSettings(
 			name: validatedData.name,
 			username: validatedData.username,
 		};
-
-		//if (s3Url) updatePayload.image = s3Url;
 
 		await db.user.update({
 			where: {

@@ -22,7 +22,13 @@ export type ProfilePictureType = z.infer<typeof profilePictureSchema>;
 
 export const profilePictureSchema = z.object({
 	image: z
-		.any()
+		.custom<FileList>(
+			(value): value is FileList =>
+				typeof window !== "undefined" && value instanceof FileList,
+			{
+				message: "Image is required",
+			}
+		)
 		.optional()
 		.superRefine((fileList, ctx) => {
 			if (

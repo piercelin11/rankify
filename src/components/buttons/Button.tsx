@@ -46,6 +46,7 @@ export default function Button({
 	rounded = false,
 	disabled,
 	className,
+	type = "button",
 	...props
 }: ButtonProps) {
 	return (
@@ -59,6 +60,7 @@ export default function Button({
 					"rounded-xl": !rounded,
 				}
 			)}
+			type={type}
 			{...props}
 		>
 			{children}

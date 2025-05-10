@@ -2,12 +2,12 @@
 
 import { db } from "@/lib/prisma";
 import { ActionResponse } from "@/types/action";
-import { updateArtistType } from "@/types/schemas/admin";
+import { UpdateArtistType } from "@/types/schemas/admin";
 import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function updateArtist(
 	artistId: string,
-	formData: updateArtistType
+	formData: UpdateArtistType
 ): Promise<ActionResponse> {
 	let isSuccess = false;
 

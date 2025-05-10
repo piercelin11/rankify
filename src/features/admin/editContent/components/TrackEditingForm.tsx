@@ -84,7 +84,7 @@ export default function TrackEditingForm({
 	}, []);
 
 	return (
-		<div className="space-y-8 p-5">
+		<div className="space-y-8">
 			<div>
 				<h2>Edit Track</h2>
 				<p className="text-description">edit track info.</p>

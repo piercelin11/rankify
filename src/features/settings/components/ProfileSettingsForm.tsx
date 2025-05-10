@@ -36,7 +36,6 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 		},
 	});
 
-
 	async function onSubmit(formData: ProfileSettingsType) {
 		try {
 			const response = await saveProfileSettings(formData);
@@ -55,38 +54,42 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 	}
 
 	return (
-		<form
-			className="space-y-14"
-			ref={isMounted}
-			onSubmit={handleSubmit(onSubmit)}
-		>
-			<div className="space-y-4">
-				<ImageUploadForm img={user.image} />
-
-				<FormInput
-					label="name"
-					{...register("name")}
-					message={errors.name?.message}
-				/>
-				<FormInput
-					label="username"
-					{...register("username")}
-					message={errors.username?.message}
-				/>
-			</div>
-			<div className="flex items-center gap-4">
-				<Button variant="primary" type="submit" disabled={isSubmitting}>
-					Save
-				</Button>
-				{!isSubmitting && response && (
-					<FormMessage message={response.message} isError={!response.success} />
-				)}
-				{isSubmitting && (
-					<div>
-						<LoadingAnimation />
-					</div>
-				)}
-			</div>
-		</form>
+		<>
+			<ImageUploadForm img={user.image} />
+			<form
+				className="space-y-14"
+				ref={isMounted}
+				onSubmit={handleSubmit(onSubmit)}
+			>
+				<div className="space-y-4">
+					<FormInput
+						label="name"
+						{...register("name")}
+						message={errors.name?.message}
+					/>
+					<FormInput
+						label="username"
+						{...register("username")}
+						message={errors.username?.message}
+					/>
+				</div>
+				<div className="flex items-center gap-4">
+					<Button variant="primary" type="submit" disabled={isSubmitting}>
+						Save
+					</Button>
+					{!isSubmitting && response && (
+						<FormMessage
+							message={response.message}
+							isError={!response.success}
+						/>
+					)}
+					{isSubmitting && (
+						<div>
+							<LoadingAnimation />
+						</div>
+					)}
+				</div>
+			</form>
+		</>
 	);
 }

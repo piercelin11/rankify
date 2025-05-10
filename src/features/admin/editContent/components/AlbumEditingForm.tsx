@@ -3,7 +3,7 @@ import FormItem from "@/components/form/FormInput";
 import Button from "@/components/buttons/Button";
 import ColorSelector from "./ColorSelector";
 import { Controller, useForm } from "react-hook-form";
-import { updateAlbumSchema, updateAlbumType } from "@/types/schemas/admin";
+import { updateAlbumSchema, UpdateAlbumType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlbumData } from "@/types/data";
 import updateAlbum from "@/features/admin/editContent/actions/updateAlbum";
@@ -30,7 +30,7 @@ export default function AlbumEditingForm({
 		handleSubmit,
 		setFocus,
 		formState: { errors, isSubmitting },
-	} = useForm<updateAlbumType>({
+	} = useForm<UpdateAlbumType>({
 		resolver: zodResolver(updateAlbumSchema),
 		defaultValues: {
 			img: data.img!,
@@ -39,7 +39,7 @@ export default function AlbumEditingForm({
 		},
 	});
 
-	async function onSubmit(formData: updateAlbumType) {
+	async function onSubmit(formData: UpdateAlbumType) {
 		try {
 			const updateAlbumResponse = await updateAlbum(data.id, formData);
 			if (isMounted.current) setResponse(updateAlbumResponse);
@@ -60,7 +60,7 @@ export default function AlbumEditingForm({
 	}, []);
 
 	return (
-		<div className="space-y-8 p-5">
+		<div className="space-y-8">
 			<div>
 				<h2>Edit Album</h2>
 				<p className="text-description">edit album info.</p>

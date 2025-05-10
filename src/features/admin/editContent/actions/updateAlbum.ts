@@ -2,12 +2,12 @@
 
 import { db } from "@/lib/prisma";
 import { ActionResponse } from "@/types/action";
-import { updateAlbumSchema, updateAlbumType } from "@/types/schemas/admin";
+import { updateAlbumSchema, UpdateAlbumType } from "@/types/schemas/admin";
 import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function updateAlbum(
 	albumId: string,
-	formData: updateAlbumType
+	formData: UpdateAlbumType
 ): Promise<ActionResponse> {
 	const album = await db.album.findFirst({
 		where: {

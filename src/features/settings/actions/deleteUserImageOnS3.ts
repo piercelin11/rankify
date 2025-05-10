@@ -1,14 +1,9 @@
 "use server";
 
-import { nanoid } from "nanoid";
-import { getUserSession } from "@/../auth";
-import { Upload } from "@aws-sdk/lib-storage";
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
-
-type UploadImageProps = {
-	imageFile: File;
-	oldImageUrl: string | null;
-};
+import React from "react";
+import { getUserSession } from "@/../auth";
+import { db } from "@/lib/prisma";
 
 if (
 	!process.env.AWS_REGION ||
@@ -28,38 +23,20 @@ const s3Client = new S3Client({
 	},
 });
 
-export default async function uploadImageToS3({
-	imageFile,
-	oldImageUrl,
-}: UploadImageProps) {
+export default async function deleteUserImageOnS3() {
 	const { id: userId } = await getUserSession();
-	let s3Url: string | undefined;
-	try {
-		const file = imageFile;
-		const fileStream = file.stream();
+	const userData = await db.user.findUnique({
+		where: {
+			id: userId,
+		},
+		select: {
+			image: true,
+		},
+	});
 
-		const fileExtension = file.name.split(".").pop();
-		const uniqueFileName = `${nanoid()}.${fileExtension}`;
-		const s3Key = `avatars/${userId}/${uniqueFileName}`;
+	const oldImageUrl = userData?.image;
 
-		const upload = new Upload({
-			client: s3Client,
-			params: {
-				Bucket: process.env.S3_BUCKET_NAME,
-				Key: s3Key,
-				Body: fileStream,
-				ContentType: file.type,
-			},
-		});
-
-		const resultData = await upload.done();
-		s3Url = resultData.Location;
-		
-	} catch (error) {
-		console.error("Error during avatar upload Server Action:", error);
-	}
-
-	if (oldImageUrl && typeof oldImageUrl === "string" && oldImageUrl !== s3Url) {
+	if (oldImageUrl && typeof oldImageUrl === "string") {
 		const s3Domain = `${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`;
 		if (oldImageUrl.includes(s3Domain)) {
 			try {
@@ -82,6 +59,4 @@ export default async function uploadImageToS3({
 			}
 		}
 	}
-
-	return s3Url;
 }
