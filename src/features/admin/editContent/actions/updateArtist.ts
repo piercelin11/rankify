@@ -1,14 +1,19 @@
 "use server";
 
+import { ADMIN_MESSAGES } from "@/constants/messages";
 import { db } from "@/lib/prisma";
-import { AppResponseType } from "@/types/response.types";
-import { UpdateArtistType } from "@/types/schemas/admin";
+import { AppResponseType } from "@/types/response";
+import { updateArtistSchema, UpdateArtistType } from "@/types/schemas/admin";
 import { revalidatePath, revalidateTag } from "next/cache";
 
-export default async function updateArtist(
-	artistId: string,
-	formData: UpdateArtistType
-): Promise<AppResponseType> {
+type UpdateArtistProps = {
+	artistId: string;
+	formData: UpdateArtistType;
+};
+export default async function updateArtist({
+	artistId,
+	formData,
+}: UpdateArtistProps): Promise<AppResponseType> {
 	let isSuccess = false;
 
 	const artist = await db.artist.findFirst({
@@ -17,27 +22,43 @@ export default async function updateArtist(
 		},
 	});
 
+	const validatedField = updateArtistSchema.safeParse(formData);
+	if (!validatedField.success) {
+		console.error(
+			ADMIN_MESSAGES.ARTIST.UPDATE.ERROR_INVALID_FIELDS,
+			validatedField.error.flatten()
+		);
+		return {
+			type: "error",
+			message: ADMIN_MESSAGES.ARTIST.UPDATE.ERROR_INVALID_FIELDS,
+		};
+	}
+	const validatedData = validatedField.data;
+
 	if (!artist)
-		return { type: "error", message: "Failed to update artist with this id" };
+		return {
+			type: "error",
+			message: ADMIN_MESSAGES.ARTIST.UPDATE.ERROR_NOT_FOUND,
+		};
 	try {
 		await db.artist.update({
 			where: {
 				id: artistId,
 			},
 			data: {
-				name: formData.name,
+				name: validatedData.name,
 			},
 		});
 
 		isSuccess = true;
 	} catch (error) {
-		console.error("Failed to update artist.", error);
-		return { type: "error", message: "Failed to update artist." };
+		console.error(ADMIN_MESSAGES.ARTIST.UPDATE.FAILURE, error);
+		return { type: "error", message: ADMIN_MESSAGES.ARTIST.UPDATE.FAILURE };
 	}
 
 	if (isSuccess) {
 		revalidateTag("admin-data");
 		revalidatePath(`/admin/artist/${artistId}`);
 	}
-	return { type: "success", message: "Successfully updated album." };
+	return { type: "success", message: ADMIN_MESSAGES.ARTIST.UPDATE.SUCCESS };
 }

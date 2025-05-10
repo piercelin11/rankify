@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import CheckBox from "@/components/form/CheckBox";
-import { AlbumData, TrackData } from "@/types/data.types";
+import { AlbumData, TrackData } from "@/types/data";
 import { cn } from "@/lib/cn";
 import Button from "@/components/buttons/Button";
 import Link from "next/link";

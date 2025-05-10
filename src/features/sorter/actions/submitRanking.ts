@@ -3,7 +3,7 @@
 import { RankingResultData } from "@/features/sorter/components/SortingStage";
 import { $Enums } from "@prisma/client";
 import { getUserSession } from "@/../auth";
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
 import { db } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { revalidateTag } from "next/cache";

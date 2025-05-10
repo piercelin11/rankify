@@ -14,7 +14,7 @@ export default function AddEPButton({ artistId }: AddEPButtonProps) {
 	const [isOpen, setOpen] = useState(false);
 
 	function handleSubmit(EPId: string[], token: string) {
-		return addAlbum(artistId, EPId, "EP", token);
+		return addAlbum({ artistId, albumId: EPId, type: "EP", token });
 	}
 
 	return (

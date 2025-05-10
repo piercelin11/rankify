@@ -5,7 +5,7 @@ import Tabs from "./Tabs";
 import { getArtistTabOptions } from "@/config/navData.config";
 import { usePathname } from "next/navigation";
 import ContentHeader from "../presentation/ContentHeader";
-import { ArtistData } from "@/types/data.types";
+import { ArtistData } from "@/types/data";
 
 type ArtistHeaderProps = {
 	artistData: ArtistData;

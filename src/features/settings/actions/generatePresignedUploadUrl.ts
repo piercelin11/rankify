@@ -4,7 +4,8 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { getUserSession } from "../../../../auth";
 import { nanoid } from "nanoid";
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
+import { SETTINGS_MESSAGES } from "@/constants/messages";
 
 if (
 	!process.env.AWS_REGION ||
@@ -43,17 +44,16 @@ export async function generatePresignedUploadUrl({
 }: GenerateUrlParams): Promise<GenerateUrlResponse> {
 	const { id: userId } = await getUserSession();
 
-	if (!userId) {
-		return { type: "error", message: "Unauthorized" };
-	}
-
 	if (!fileName || !fileType) {
-		return { type: "error", message: "Filename and filetype are required." };
+		return {
+			type: "error",
+			message: SETTINGS_MESSAGES.FILE_UPLOAD.FILENAME_AND_TYPE_REQUIRED,
+		};
 	}
 	if (!fileType.startsWith("image/")) {
 		return {
 			type: "error",
-			message: "Invalid file type. Only images are allowed.",
+			message: SETTINGS_MESSAGES.FILE_UPLOAD.INVALID_TYPE_IMAGE_ONLY,
 		};
 	}
 
@@ -74,10 +74,13 @@ export async function generatePresignedUploadUrl({
 			signedUrl,
 			finalImageUrl,
 			s3Key,
-			message: "Successfully uploaded your profile picture.",
+			message: SETTINGS_MESSAGES.FILE_UPLOAD.PRESIGNED_URL_SUCCESS,
 		};
 	} catch (error) {
-		console.error("Error generating signed URL:", error);
-		return { type: "error", message: "Could not generate upload URL." };
+		console.error(SETTINGS_MESSAGES.FILE_UPLOAD.PRESIGNED_URL_FAILURE, error);
+		return {
+			type: "error",
+			message: SETTINGS_MESSAGES.FILE_UPLOAD.PRESIGNED_URL_FAILURE,
+		};
 	}
 }

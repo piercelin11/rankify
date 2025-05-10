@@ -4,7 +4,7 @@ import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import { cn } from "@/lib/cn";
 import getArtistById from "@/lib/database/data/getArtistById";
 import fetchSearchResults from "@/lib/spotify/fetchSearchResults";
-import { AlbumData } from "@/types/data.types";
+import { AlbumData } from "@/types/data";
 import { CheckIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";

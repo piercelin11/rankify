@@ -4,7 +4,6 @@ import ModalWrapper from "@/components/modals/ModalWrapper";
 import { useState } from "react";
 import ContentSelectionForm from "./ContentSelectionForm";
 import Button, { AddButton } from "@/components/buttons/Button";
-import addAlbum from "@/features/admin/addContent/actions/addAlbum";
 import { PlusIcon } from "@radix-ui/react-icons";
 import addSingle from "@/features/admin/addContent/actions/addSingle";
 
@@ -15,8 +14,8 @@ type AddSingleButtonProps = {
 export default function AddSingleButton({ artistId }: AddSingleButtonProps) {
 	const [isOpen, setOpen] = useState(false);
 
-	function handleSubmit(singleId: string[], token: string) {
-		return addSingle(artistId, singleId, token);
+	function handleSubmit(singleIds: string[], token: string) {
+		return addSingle({artistId, trackIds: singleIds, token});
 	}
 
 	return (

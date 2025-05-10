@@ -5,7 +5,7 @@ import ActionIconGroup from "./ActionIconGroup";
 import ComfirmationModal from "@/components/modals/ComfirmationModal";
 import ModalWrapper from "@/components/modals/ModalWrapper";
 import AlbumEditingForm from "./AlbumEditingForm";
-import { AlbumData, ArtistData } from "@/types/data.types";
+import { AlbumData, ArtistData } from "@/types/data";
 import deleteItem from "../actions/deleteItem";
 import fetchSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
 import updateInfo from "../actions/updateInfo";
@@ -23,7 +23,7 @@ export default function ArtistActionSection({
 
 	async function handleUpdate() {
 		const accessToken = await fetchSpotifyToken();
-		updateInfo("artist", id, accessToken);
+		updateInfo({ type: "artist", id, token: accessToken });
 	}
 
 	return (
@@ -35,7 +35,7 @@ export default function ArtistActionSection({
 				className="justify-end"
 			/>
 			<ComfirmationModal
-				onConfirm={() => deleteItem("artist", id)}
+				onConfirm={() => deleteItem({ type: "artist", id })}
 				onCancel={() => setDeleteOpen(false)}
 				comfirmLabel="Delete"
 				cancelLabel="Cancel"

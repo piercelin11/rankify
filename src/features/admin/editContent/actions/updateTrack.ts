@@ -1,20 +1,38 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { AppResponseType } from "@/types/response.types";
-import { AlbumData, TrackData } from "@/types/data.types";
-import { UpdateTrackType } from "@/types/schemas/admin";
+import { AppResponseType } from "@/types/response";
+import { AlbumData, TrackData } from "@/types/data";
+import { updateTrackSchema, UpdateTrackType } from "@/types/schemas/admin";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { ADMIN_MESSAGES } from "@/constants/messages";
 
-export default async function updateTrack(
-	originalData: TrackData,
-	formData: UpdateTrackType 
-): Promise<AppResponseType> {
+type UpdateTrackProps = {
+	originalData: TrackData;
+	formData: UpdateTrackType;
+};
+
+export default async function updateTrack({
+	originalData,
+	formData,
+}: UpdateTrackProps): Promise<AppResponseType> {
 	let isSuccess = false;
-
 	let newAlbum: AlbumData | null;
 
-	if (formData.album) {
+	const validatedField = updateTrackSchema.safeParse(formData);
+	if (!validatedField.success) {
+		console.error(
+			ADMIN_MESSAGES.TRACK.UPDATE.ERROR_INVALID_FIELDS,
+			validatedField.error.flatten()
+		);
+		return {
+			type: "error",
+			message: ADMIN_MESSAGES.TRACK.UPDATE.ERROR_INVALID_FIELDS,
+		};
+	}
+	const validatedData = validatedField.data;
+
+	if (validatedData.album) {
 		newAlbum = await db.album.findFirst({
 			where: {
 				artistId: originalData.artistId,
@@ -22,7 +40,11 @@ export default async function updateTrack(
 			},
 		});
 
-		if (!newAlbum) return { type: "error", message: "Invalid album name." };
+		if (!newAlbum)
+			return {
+				type: "error",
+				message: ADMIN_MESSAGES.TRACK.UPDATE.ERROR_INVALID_FIELDS,
+			};
 	} else {
 		newAlbum = null;
 	}
@@ -34,11 +56,11 @@ export default async function updateTrack(
 					id: originalData.id,
 				},
 				data: {
-					name: formData.name,
+					name: validatedData.name,
 					albumId: newAlbum.id,
 					img: newAlbum.img,
 					color: newAlbum.color,
-					type: formData.type,
+					type: validatedData.type,
 				},
 			});
 		} else {
@@ -47,25 +69,25 @@ export default async function updateTrack(
 					id: originalData.id,
 				},
 				data: {
-					name: formData.name,
+					name: validatedData.name,
 					album: {
 						disconnect: true,
 					},
-					type: formData.type,
-					color: formData.color
+					type: validatedData.type,
+					color: validatedData.color,
 				},
 			});
 		}
 
 		isSuccess = true;
 	} catch (error) {
-		console.error("Failed to update track.", error);
-		return { type: "error", message: "Failed to update track." };
+		console.error(ADMIN_MESSAGES.TRACK.UPDATE.FAILURE, error);
+		return { type: "error", message: ADMIN_MESSAGES.TRACK.UPDATE.FAILURE };
 	}
 
 	if (isSuccess) {
 		revalidatePath("/admin");
 		revalidateTag("admin-data");
 	}
-	return { type: "success", message: "Successfully updated track." };
+	return { type: "success", message: ADMIN_MESSAGES.TRACK.UPDATE.SUCCESS };
 }

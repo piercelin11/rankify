@@ -3,7 +3,7 @@ import SelectablecContentItem from "./SelectablecContentItem";
 import Button from "@/components/buttons/Button";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import FormMessage from "@/components/form/FormMessage";
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
 import useSearchInput from "@/features/admin/addContent/hooks/useSpotifySearch";
 import useAdminContentAddtion from "../hooks/useAdminContentAddtion";
 import SearchInput from "@/components/form/SearchInput";
@@ -93,7 +93,7 @@ export default function ContentSelectionForm({
 					</div>
 				)}
 				{response && !isPending && (
-					<FormMessage message={response.message} isError={!response.success} />
+					<FormMessage message={response.message} type={response.type} />
 				)}
 			</div>
 		</div>

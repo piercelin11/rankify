@@ -1,4 +1,4 @@
-import { AlbumData, TrackData } from "@/types/data.types";
+import { AlbumData, TrackData } from "@/types/data";
 import { updateTrackSchema, UpdateTrackType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef, useState } from "react";
@@ -8,10 +8,11 @@ import Button from "@/components/buttons/Button";
 import FormItem from "@/components/form/FormInput";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import FormMessage from "@/components/form/FormMessage";
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
 import FormRadioGroup from "@/components/form/FormRadioGroup";
 import FormSelect from "@/components/form/FormSelect";
 import ColorSelector from "./ColorSelector";
+import { ADMIN_MESSAGES } from "@/constants/messages";
 
 type TrackEditingFormProps = {
 	trackData: TrackData;
@@ -66,16 +67,22 @@ export default function TrackEditingForm({
 
 	async function onSubmit(formData: UpdateTrackType) {
 		try {
-			const editTrackResponse = await updateTrack(trackData, formData);
+			const editTrackResponse = await updateTrack({
+				originalData: trackData,
+				formData,
+			});
 			if (isMounted.current) setResponse(editTrackResponse);
-			if (editTrackResponse.success && isMounted.current) onCancel();
+			if (editTrackResponse.type === "success" && isMounted.current) onCancel();
 		} catch (error) {
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
-					setResponse({ type: "error", message: "Something went wrong." });
+					setResponse({
+						type: "error",
+						message: ADMIN_MESSAGES.TRACK.UPDATE.FAILURE,
+					});
 				}
 			}
-			console.error(`Error editing track ${trackData.name}`, error);
+			console.error(`Failed to update track ${trackData.name}`, error);
 		}
 	}
 
@@ -152,10 +159,7 @@ export default function TrackEditingForm({
 						</div>
 					)}
 					{response && (
-						<FormMessage
-							message={response.message}
-							isError={!response.success}
-						/>
+						<FormMessage message={response.message} type={response.type} />
 					)}
 				</div>
 			</form>

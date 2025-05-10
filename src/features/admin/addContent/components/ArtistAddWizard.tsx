@@ -14,11 +14,12 @@ export default function ArtistAddWizard() {
 		setSelecteArtistId(artistId);
 	}
 
-	function handleSubmit(
-		selectedIds: string[],
-		accessToken: string
-	) {
-		return addArtist(selecteArtistId!, selectedIds, accessToken);
+	function handleSubmit(selectedIds: string[], accessToken: string) {
+		return addArtist({
+			artistId: selecteArtistId!,
+			albumId: selectedIds,
+			token: accessToken,
+		});
 	}
 
 	return (

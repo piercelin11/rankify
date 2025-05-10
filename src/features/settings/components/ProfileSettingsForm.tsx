@@ -4,8 +4,8 @@ import Button from "@/components/buttons/Button";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import FormInput from "@/components/form/FormInput";
 import FormMessage from "@/components/form/FormMessage";
-import { AppResponseType } from "@/types/response.types";
-import { UserData } from "@/types/data.types";
+import { AppResponseType } from "@/types/response";
+import { UserData } from "@/types/data";
 import {
 	profileSettingsSchema,
 	ProfileSettingsType,
@@ -15,6 +15,7 @@ import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import saveProfileSettings from "../actions/saveProfileSettings";
 import ImageUploadForm from "./ImageUploadForm";
+import { SETTINGS_MESSAGES } from "@/constants/messages";
 
 type ProfileSettingsForm = {
 	user: UserData;
@@ -41,11 +42,11 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 			const response = await saveProfileSettings(formData);
 			if (isMounted.current) setResponse(response);
 		} catch (error) {
-			console.error("Something went wrong:", error);
+			console.error(SETTINGS_MESSAGES.PROFILE.SAVE_FAILURE, error);
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
 					setResponse({
-						message: "Something went wrong.",
+						message: SETTINGS_MESSAGES.PROFILE.SAVE_FAILURE,
 						type: "error",
 					});
 				}
@@ -78,10 +79,7 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 						Save
 					</Button>
 					{!isSubmitting && response && (
-						<FormMessage
-							message={response.message}
-							isError={!response.success}
-						/>
+						<FormMessage message={response.message} type={response.type} />
 					)}
 					{isSubmitting && (
 						<div>

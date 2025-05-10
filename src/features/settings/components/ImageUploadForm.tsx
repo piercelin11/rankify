@@ -52,7 +52,7 @@ export default function ImageUploadForm({ img }: ImageUploadFormProps) {
 					Edit picture
 				</Button>
 				{response && (
-					<FormMessage message={response.message} isError={!response.success} />
+					<FormMessage message={response.message} type={response.type} />
 				)}
 			</div>
 
@@ -101,7 +101,7 @@ export default function ImageUploadForm({ img }: ImageUploadFormProps) {
 					{errors.image?.message && (
 						<FormMessage
 							message={errors.image?.message}
-							isError={true}
+							type="error"
 							border={false}
 						/>
 					)}

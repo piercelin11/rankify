@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { RankingListDataTypeExtend } from "../components/RankingList";
-import { AlbumData } from "@/types/data.types";
+import { AlbumData } from "@/types/data";
 
 export default function useSortedAndFilteredRanking<
 	T extends RankingListDataTypeExtend,

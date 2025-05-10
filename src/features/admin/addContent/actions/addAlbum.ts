@@ -1,23 +1,31 @@
-"use server"; 
+"use server";
 
+import { ADMIN_MESSAGES } from "@/constants/messages";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import getTracksByArtist from "@/lib/database/data/getTracksByArtist";
 import { db } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
 import { revalidatePath, revalidateTag } from "next/cache";
 
-export default async function addAlbum(
-	artistId: string,
-	albumId: string | string[],
-	type: "ALBUM" | "EP",
-	token?: string,
-): Promise<AppResponseType> {
+type AddAlbumProps = {
+	artistId: string;
+	albumId: string | string[];
+	type: "ALBUM" | "EP";
+	token?: string;
+};
+
+export default async function addAlbum({
+	artistId,
+	albumId,
+	type,
+	token,
+}: AddAlbumProps): Promise<AppResponseType> {
 	let isSuccess = false;
 
 	if (Array.isArray(albumId) && albumId.length === 0)
-		return { type: "error", message: "You need to at least select an album." };
+		return { type: "error", message: ADMIN_MESSAGES.ALBUM_SELECTION_REQUIRED };
 
 	const albumData = Array.isArray(albumId)
 		? await Promise.all(albumId.map((id) => fetchAlbum(id, token)))
@@ -90,17 +98,17 @@ export default async function addAlbum(
 
 			isSuccess = true;
 		} catch (error) {
-			console.error("Failed to add album's track:", error);
-			return { type: "error", message: "Failed to add album's tracks." };
+			console.error(ADMIN_MESSAGES.TRACK.ADD.FAILURE, error);
+			return { type: "error", message: ADMIN_MESSAGES.TRACK.ADD.FAILURE };
 		}
 	} catch (error) {
-		console.error("Failed to add album. error:", error);
-		return { type: "error", message: "Failed to add albums." };
+		console.error(ADMIN_MESSAGES.ALBUM.ADD.FAILURE, error);
+		return { type: "error", message: ADMIN_MESSAGES.ALBUM.ADD.FAILURE };
 	}
 
 	if (isSuccess) {
 		revalidateTag("admin-data");
 		revalidatePath(`/admin/artist/${artistId}`);
 	}
-	return { type: "success", message: "Successfully added albums." };
+	return { type: "success", message: ADMIN_MESSAGES.ALBUM.ADD.SUCCESS };
 }

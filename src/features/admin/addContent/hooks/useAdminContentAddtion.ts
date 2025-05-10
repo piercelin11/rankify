@@ -1,6 +1,6 @@
 "use client";
 
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
 import React, { useEffect, useState } from "react";
 import { Album, Artist } from "spotify-types";
 import {

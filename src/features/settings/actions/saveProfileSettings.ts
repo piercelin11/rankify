@@ -5,26 +5,26 @@ import {
 	ProfileSettingsType,
 } from "@/types/schemas/settings";
 import { getUserSession } from "@/../auth";
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
+import { SETTINGS_MESSAGES } from "@/constants/messages";
 
 export default async function saveProfileSettings(
-	data: ProfileSettingsType
+	formData: ProfileSettingsType
 ): Promise<AppResponseType> {
 	const { id: userId } = await getUserSession();
 
-	const validatedField = profileSettingsSchema.safeParse(data);
+	const validatedField = profileSettingsSchema.safeParse(formData);
 	if (!validatedField.success) {
 		console.error(
-			"Profile settings validation failed:",
+			SETTINGS_MESSAGES.PROFILE.ERROR_INVALID_FIELDS,
 			validatedField.error.flatten()
 		);
 		return {
 			type: "error",
-			message: "Invalid field data.",
-			error: validatedField.error.flatten().fieldErrors,
+			message: SETTINGS_MESSAGES.PROFILE.ERROR_INVALID_FIELDS,
 		};
 	}
 	const validatedData = validatedField.data;
@@ -40,7 +40,7 @@ export default async function saveProfileSettings(
 		});
 
 		if (existedUser && existedUser.id !== userId)
-			return { type: "error", message: "Username already exist." };
+			return { type: "error", message: SETTINGS_MESSAGES.PROFILE.USERNAME_EXISTS_ERROR };
 
 		const updatePayload: Prisma.UserUpdateInput = {
 			name: validatedData.name,
@@ -54,9 +54,12 @@ export default async function saveProfileSettings(
 			data: updatePayload,
 		});
 	} catch (error) {
-		console.error("Failed to save profile settings:", error);
-		return { type: "error", message: "Failed to save profile settings." };
+		console.error(SETTINGS_MESSAGES.PROFILE.SAVE_FAILURE, error);
+		return { type: "error", message: SETTINGS_MESSAGES.PROFILE.SAVE_FAILURE };
 	}
 	revalidatePath("/settings/profile");
-	return { type: "success", message: "Profile settings is successfully saved." };
+	return {
+		type: "success",
+		message: SETTINGS_MESSAGES.PROFILE.SAVE_SUCCESS,
+	};
 }

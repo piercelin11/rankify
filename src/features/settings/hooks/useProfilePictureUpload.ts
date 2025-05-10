@@ -3,7 +3,7 @@
 import { PLACEHOLDER_PIC } from "@/constants";
 import compressImg from '@/lib/utils/compressor.utils';
 import { fileToFileList } from '@/lib/utils';
-import { AppResponseType } from '@/types/response.types';
+import { AppResponseType } from '@/types/response';
 import { profilePictureSchema, ProfilePictureType } from '@/types/schemas/settings';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useRef, useState } from 'react'
@@ -11,6 +11,7 @@ import { useForm } from 'react-hook-form';
 import { generatePresignedUploadUrl, GenerateUrlResponse } from '../actions/generatePresignedUploadUrl';
 import updateUserProfileImage from '../actions/updateUserProfileImage';
 import deleteUserImageOnS3 from '../actions/deleteUserImageOnS3';
+import { SETTINGS_MESSAGES } from "@/constants/messages";
 
 export default function useProfilePictureUpload(initialImgUrl: string | null) {
   const [optimisticImgUrl, setOptimisticImgUrl] = useState(initialImgUrl);
@@ -44,7 +45,7 @@ export default function useProfilePictureUpload(initialImgUrl: string | null) {
             setValue("image", optimizedFileList);
             trigger("image");
         } catch (err) {
-            console.error("Image compression failed:", err);
+            console.error(SETTINGS_MESSAGES.FILE_UPLOAD.COMPRESSION_ERROR, err);
   
             if (previewImgUrl) URL.revokeObjectURL(previewImgUrl);
             setPreviewImgUrl(null);
@@ -61,14 +62,14 @@ export default function useProfilePictureUpload(initialImgUrl: string | null) {
         const file = formData.image?.[0];
   
         if (!file) {
-            setResponse({ type: "error", message: "You need to upload a picture." });
+            setResponse({ type: "error", message: SETTINGS_MESSAGES.FILE_UPLOAD.FILE_REQUIRED});
             return;
         }
   
         if (!file.type.includes("image")) {
             setResponse({
                 type: "error",
-                message: "Your file needs to be an image file.",
+                message: SETTINGS_MESSAGES.FILE_UPLOAD.INVALID_TYPE_IMAGE_ONLY,
             });
             return;
         }
@@ -81,10 +82,10 @@ export default function useProfilePictureUpload(initialImgUrl: string | null) {
             });
             setFormOpen(false);
         } catch (err) {
-            console.error("Failed to generate presigned upload url:", err);
+            console.error(SETTINGS_MESSAGES.FILE_UPLOAD.PRESIGNED_URL_FAILURE, err);
             setResponse({
                 type: "error",
-                message: "Failed to generate presigned upload url.",
+                message: SETTINGS_MESSAGES.FILE_UPLOAD.PRESIGNED_URL_FAILURE,
             });
             throw err;
         }
@@ -132,17 +133,17 @@ export default function useProfilePictureUpload(initialImgUrl: string | null) {
                     }
                     setResponse({
                         type: "error",
-                        message: "Failed to update profile information.",
+                        message: SETTINGS_MESSAGES.FILE_UPLOAD.S3_UPLOAD_ERROR,
                     });
                 } else {
                     setResponse({
                         type: "error",
-                        message: "Failed to upload image to S3.",
+                        message: SETTINGS_MESSAGES.FILE_UPLOAD.S3_UPLOAD_ERROR,
                     });
-                    console.error("Failed to upload image to S3:", err);
+                    console.error(SETTINGS_MESSAGES.FILE_UPLOAD.S3_UPLOAD_ERROR, err);
                 }
                 if (err.name === "AbortError") {
-                    setResponse({ type: "error", message: "Upload cancelled by user." });
+                    setResponse({ type: "error", message: SETTINGS_MESSAGES.FILE_UPLOAD.UPLOAD_CANCELLED });
                 }
                 throw err;
             } finally {

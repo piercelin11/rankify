@@ -1,9 +1,6 @@
 "use server";
 
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import React from "react";
-import { getUserSession } from "@/../auth";
-import { db } from "@/lib/prisma";
 
 if (
 	!process.env.AWS_REGION ||

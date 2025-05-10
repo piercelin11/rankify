@@ -1,6 +1,6 @@
 import { defaultRankingSettings } from "@/features/settings/components/RankingSettingsForm";
 import { db } from "@/lib/prisma";
-import { UserPreferenceData } from "@/types/data.types";
+import { UserPreferenceData } from "@/types/data";
 import { $Enums } from "@prisma/client";
 
 type getUserPreferenceProps = {

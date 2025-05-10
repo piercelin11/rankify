@@ -1,16 +1,23 @@
 "use server";
 
+import { ADMIN_MESSAGES } from "@/constants/messages";
 import { db } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchArtist from "@/lib/spotify/fetchArtist";
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
 import { revalidatePath, revalidateTag } from "next/cache";
 
-export default async function updateInfo(
-	type: "artist" | "album",
-	id: string,
-	token?: string
-): Promise<AppResponseType> {
+type UpdateInfoProps = {
+	type: "artist" | "album";
+	id: string;
+	token?: string;
+};
+
+export default async function updateInfo({
+	type,
+	id,
+	token,
+}: UpdateInfoProps): Promise<AppResponseType> {
 	let success = false;
 
 	try {
@@ -18,7 +25,10 @@ export default async function updateInfo(
 			const album = await fetchAlbum(id, token);
 
 			if (!album)
-				return { type: "error", message: "Faild to fetch album data." };
+				return {
+					type: "error",
+					message: ADMIN_MESSAGES.ALBUM.UPDATE.ERROR_NOT_FOUND,
+				};
 
 			const albumData = await db.album.update({
 				where: {
@@ -40,7 +50,10 @@ export default async function updateInfo(
 			const artist = await fetchArtist(id, token);
 
 			if (!artist)
-				return { type: "error", message: "Faild to fetch artist data." };
+				return {
+					type: "error",
+					message: ADMIN_MESSAGES.ARTIST.UPDATE.ERROR_NOT_FOUND,
+				};
 
 			await db.artist.update({
 				where: {
@@ -54,13 +67,22 @@ export default async function updateInfo(
 		}
 		success = true;
 	} catch (error) {
-		console.error(`Failed to update ${type} info: `, error);
-		return { type: "error", message: `Failed to update ${type} info.` };
+		console.error(
+			ADMIN_MESSAGES.OPERATION_MESSAGES.UPDATE.FAILURE(type),
+			error
+		);
+		return {
+			type: "error",
+			message: ADMIN_MESSAGES.OPERATION_MESSAGES.UPDATE.FAILURE(type),
+		};
 	}
 
 	if (success) {
 		revalidatePath(`/admin/${type}/${id}`);
 		revalidateTag("admin-data");
 	}
-	return { type: "success", message: "Successfully updated album." };
+	return {
+		type: "success",
+		message: ADMIN_MESSAGES.OPERATION_MESSAGES.UPDATE.SUCCESS(type),
+	};
 }

@@ -7,13 +7,14 @@ import {
 	RankingSettingsType,
 } from "@/types/schemas/settings";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UserPreferenceData } from "@/types/data.types";
-import { AppResponseType } from "@/types/response.types";
+import { UserPreferenceData } from "@/types/data";
+import { AppResponseType } from "@/types/response";
 import Button from "@/components/buttons/Button";
 import FormMessage from "@/components/form/FormMessage";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import ToggleSwitch from "@/components/form/ToggleSwitch";
 import saveRankingSettings from "../actions/saveRankingSettings";
+import { SETTINGS_MESSAGES } from "@/constants/messages";
 
 type RankingSettingsFormProps = {
 	settings: UserPreferenceData | null;
@@ -53,7 +54,7 @@ export default function RankingSettingsForm({
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
 					setResponse({
-						message: "Something went wrong.",
+						message: SETTINGS_MESSAGES.RANKING.SAVE_FAILURE,
 						type: "error",
 					});
 				}
@@ -119,7 +120,7 @@ export default function RankingSettingsForm({
 					Save
 				</Button>
 				{!isSubmitting && response && (
-					<FormMessage message={response.message} isError={!response.success} />
+					<FormMessage message={response.message} type={response.type} />
 				)}
 				{isSubmitting && (
 					<div>

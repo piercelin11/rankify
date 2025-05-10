@@ -2,7 +2,7 @@
 
 import { LineChart } from "@/components/charts/LineChart";
 import { dateToDashFormat } from "@/lib/utils";
-import { AlbumData } from "@/types/data.types";
+import { AlbumData } from "@/types/data";
 import { useSearchParams } from "next/navigation";
 import React from "react";
 

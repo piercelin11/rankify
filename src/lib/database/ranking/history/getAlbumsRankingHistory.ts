@@ -1,4 +1,4 @@
-import { AlbumData } from "@/types/data.types";
+import { AlbumData } from "@/types/data";
 import { db } from "@/lib/prisma";
 
 export type AlbumHistoryType = Omit<AlbumData, "tracks"> & {

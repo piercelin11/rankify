@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import ActionIconGroup from "./ActionIconGroup";
 import deleteItem from "../actions/deleteItem";
-import { AlbumData, TrackData } from "@/types/data.types";
+import { AlbumData, TrackData } from "@/types/data";
 import ModalWrapper from "@/components/modals/ModalWrapper";
 import ComfirmationModal from "@/components/modals/ComfirmationModal";
 import TrackEditingForm from "./TrackEditingForm";
@@ -29,7 +29,7 @@ export default function TrackActionSection({
 			/>
 
 			<ComfirmationModal
-				onConfirm={() => deleteItem("track", id)}
+				onConfirm={() => deleteItem({ type: "track", id })}
 				onCancel={() => setDeleteOpen(false)}
 				comfirmLabel="Delete"
 				cancelLabel="Cancel"

@@ -4,11 +4,12 @@ import Button from "@/components/buttons/Button";
 import { useForm } from "react-hook-form";
 import { updateArtistSchema, UpdateArtistType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArtistData } from "@/types/data.types";
+import { ArtistData } from "@/types/data";
 import FormMessage from "@/components/form/FormMessage";
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import updateArtist from "@/features/admin/editContent/actions/updateArtist";
+import { ADMIN_MESSAGES } from "@/constants/messages";
 
 type ArtistEditingFormProps = {
 	data: ArtistData;
@@ -33,16 +34,23 @@ export default function ArtistEditingForm({
 
 	async function onSubmit(formData: UpdateArtistType) {
 		try {
-			const updateAlbumResponse = await updateArtist(data.id, formData);
+			const updateAlbumResponse = await updateArtist({
+				artistId: data.id,
+				formData,
+			});
 			if (isMounted.current) setResponse(updateAlbumResponse);
-			if (updateAlbumResponse.success && isMounted.current) setOpen(false);
+			if (updateAlbumResponse.type === "success" && isMounted.current)
+				setOpen(false);
 		} catch (error) {
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
-					setResponse({ type: "error", message: "Something went wrong." });
+					setResponse({
+						type: "error",
+						message: ADMIN_MESSAGES.ARTIST.UPDATE.FAILURE,
+					});
 				}
 			}
-			console.error(`Error editing artist ${data.name}`, error);
+			console.error(`Failed to updaye artist ${data.name}`, error);
 		}
 	}
 
@@ -57,7 +65,11 @@ export default function ArtistEditingForm({
 				<p className="text-description">edit artist name.</p>
 			</div>
 			<hr />
-			<form ref={isMounted} className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
+			<form
+				ref={isMounted}
+				className="space-y-10"
+				onSubmit={handleSubmit(onSubmit)}
+			>
 				<FormItem
 					{...register("name")}
 					label="Artist name"
@@ -82,10 +94,7 @@ export default function ArtistEditingForm({
 						</div>
 					)}
 					{response && (
-						<FormMessage
-							message={response.message}
-							isError={!response.success}
-						/>
+						<FormMessage message={response.message} type={response.type} />
 					)}
 				</div>
 			</form>

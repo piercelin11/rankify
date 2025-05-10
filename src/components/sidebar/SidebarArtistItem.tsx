@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppSelector } from "@/store/hooks";
-import { ArtistData } from "@/types/data.types";
+import { ArtistData } from "@/types/data";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";

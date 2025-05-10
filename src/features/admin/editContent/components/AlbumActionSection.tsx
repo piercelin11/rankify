@@ -5,7 +5,7 @@ import ActionIconGroup from "./ActionIconGroup";
 import ComfirmationModal from "@/components/modals/ComfirmationModal";
 import ModalWrapper from "@/components/modals/ModalWrapper";
 import AlbumEditingForm from "./AlbumEditingForm";
-import { AlbumData } from "@/types/data.types";
+import { AlbumData } from "@/types/data";
 import deleteItem from "../actions/deleteItem";
 
 type AlbumActionSectionProps = { data: AlbumData };
@@ -23,7 +23,7 @@ export default function AlbumActionSection({ data }: AlbumActionSectionProps) {
 				onDeleteClick={() => setDeleteOpen(true)}
 			/>
 			<ComfirmationModal
-				onConfirm={() => deleteItem("album", id)}
+				onConfirm={() => deleteItem({type: "album", id})}
 				onCancel={() => setDeleteOpen(false)}
 				comfirmLabel="Delete"
 				cancelLabel="Cancel"

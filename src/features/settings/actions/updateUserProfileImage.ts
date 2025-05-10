@@ -1,8 +1,9 @@
 "use server";
 
 import { getUserSession } from "@/../auth";
+import { SETTINGS_MESSAGES } from "@/constants/messages";
 import { db } from "@/lib/prisma";
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
 import { revalidatePath } from "next/cache";
 
 type UpdateUserProfileImageProps = {
@@ -24,12 +25,12 @@ export default async function updateUserProfileImage({
 			},
 		});
 	} catch (err) {
-		console.error("Error updating profile picture:", err);
-		return { type: "error", message: "Error updating profile picture." };
+		console.error(SETTINGS_MESSAGES.PROFILE_IMAGE.UPDATE_FAILURE, err);
+		return { type: "error", message: SETTINGS_MESSAGES.PROFILE_IMAGE.UPDATE_FAILURE };
 	}
 	revalidatePath("/settings");
 	return {
 		type: "success",
-		message: "Successfully updated your profile picture.",
+		message: SETTINGS_MESSAGES.PROFILE_IMAGE.UPDATE_SUCCESS,
 	};
 }

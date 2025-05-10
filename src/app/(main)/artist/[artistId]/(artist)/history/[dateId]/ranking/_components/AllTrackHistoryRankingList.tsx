@@ -1,7 +1,7 @@
 "use client";
 
 import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
-import { AlbumData, ArtistData } from "@/types/data.types";
+import { AlbumData, ArtistData } from "@/types/data";
 import React, { useMemo } from "react";
 import {
 	Column,

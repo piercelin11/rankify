@@ -1,26 +1,44 @@
 "use server";
 
+import { ADMIN_MESSAGES } from "@/constants/messages";
 import { db } from "@/lib/prisma";
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
 import { updateAlbumSchema, UpdateAlbumType } from "@/types/schemas/admin";
 import { revalidatePath, revalidateTag } from "next/cache";
 
-export default async function updateAlbum(
-	albumId: string,
-	formData: UpdateAlbumType
-): Promise<AppResponseType> {
+type UpdateAlbumProps = {
+	albumId: string;
+	formData: UpdateAlbumType;
+};
+
+export default async function updateAlbum({
+	albumId,
+	formData,
+}: UpdateAlbumProps): Promise<AppResponseType> {
 	const album = await db.album.findFirst({
 		where: {
 			id: albumId,
 		},
 	});
 
-	const validatedField = updateAlbumSchema.safeParse(formData);
-	if (!validatedField)
-		return { type: "error", message: "Invalid Field", error: "Invalid Field" };
-
 	if (!album)
-		return { type: "error", message: "Failed to update album with this id" };
+		return {
+			type: "error",
+			message: ADMIN_MESSAGES.ALBUM.UPDATE.ERROR_NOT_FOUND,
+		};
+
+	const validatedField = updateAlbumSchema.safeParse(formData);
+	if (!validatedField.success) {
+		console.error(
+			ADMIN_MESSAGES.ALBUM.UPDATE.ERROR_INVALID_FIELDS,
+			validatedField.error.flatten()
+		);
+		return {
+			type: "error",
+			message: ADMIN_MESSAGES.ALBUM.UPDATE.ERROR_INVALID_FIELDS,
+		};
+	}
+	const validatedData = validatedField.data;
 
 	try {
 		await db.$transaction(async (tx) => {
@@ -29,9 +47,9 @@ export default async function updateAlbum(
 					id: albumId,
 				},
 				data: {
-					name: formData.name,
-					color: formData.color,
-					img: formData.img,
+					name: validatedData.name,
+					color: validatedData.color,
+					img: validatedData.img,
 				},
 			});
 
@@ -45,11 +63,11 @@ export default async function updateAlbum(
 			});
 		});
 	} catch (error) {
-		console.error("Failed to update album.", error);
-		return { type: "error", message: "Failed to update album." };
+		console.error(ADMIN_MESSAGES.ALBUM.UPDATE.FAILURE, error);
+		return { type: "error", message: ADMIN_MESSAGES.ALBUM.UPDATE.FAILURE };
 	}
 
 	revalidatePath(`/admin/album/${albumId}`);
 	revalidateTag("admin-data");
-	return { type: "success", message: "Successfully updated album." };
+	return { type: "success", message: ADMIN_MESSAGES.ALBUM.UPDATE.SUCCESS };
 }

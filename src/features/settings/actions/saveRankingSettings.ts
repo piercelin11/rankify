@@ -5,18 +5,28 @@ import {
 	RankingSettingsType,
 } from "@/types/schemas/settings";
 import { getUserSession } from "../../../../auth";
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { SETTINGS_MESSAGES } from "@/constants/messages";
 
 export default async function saveRankingSettings(
-	data: RankingSettingsType
+	formData: RankingSettingsType
 ): Promise<AppResponseType> {
 	const { id: userId } = await getUserSession();
 
-	const validatedField = rankingSettingsSchema.safeParse(data);
-	if (!validatedField)
-		return { type: "error", message: "Invalid Field", error: "Invalid Field" };
+	const validatedField = rankingSettingsSchema.safeParse(formData);
+	if (!validatedField.success) {
+		console.error(
+			SETTINGS_MESSAGES.RANKING.ERROR_INVALID_FIELDS,
+			validatedField.error.flatten()
+		);
+		return {
+			type: "error",
+			message: SETTINGS_MESSAGES.RANKING.ERROR_INVALID_FIELDS,
+		};
+	}
+	const validatedData = validatedField.data;
 
 	try {
 		const existingUserPreference = await db.userPreference.findFirst({
@@ -28,14 +38,14 @@ export default async function saveRankingSettings(
 			},
 		});
 
-		if (existingUserPreference ) {
+		if (existingUserPreference) {
 			const preference = await db.userPreference.update({
 				where: {
 					id: existingUserPreference.id,
-                    userId,
+					userId,
 				},
 				data: {
-					rankingSettings: data,
+					rankingSettings: validatedData,
 				},
 			});
 			console.log("action", preference);
@@ -43,14 +53,17 @@ export default async function saveRankingSettings(
 			await db.userPreference.create({
 				data: {
 					userId,
-					rankingSettings: data,
+					rankingSettings: validatedData,
 				},
 			});
 		}
 	} catch (error) {
-		console.error("Failed to save ranking settings:", error);
-		return { type: "error", message: "Failed to save ranking settings." };
+		console.error(SETTINGS_MESSAGES.RANKING.SAVE_FAILURE, error);
+		return { type: "error", message: SETTINGS_MESSAGES.RANKING.SAVE_FAILURE };
 	}
-    revalidatePath("/settings/ranking")
-	return { type: "success", message: "Ranking settings is successfully saved." };
+	revalidatePath("/settings/ranking");
+	return {
+		type: "success",
+		message: SETTINGS_MESSAGES.RANKING.SAVE_SUCCESS,
+	};
 }

@@ -1,26 +1,34 @@
-"use server"; 
+"use server";
 
 import fetchArtist from "@/lib/spotify/fetchArtist";
 import { db } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
 import { redirect } from "next/navigation";
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import getTracksByArtist from "@/lib/database/data/getTracksByArtist";
 import { revalidateTag } from "next/cache";
+import { ADMIN_MESSAGES } from "@/constants/messages";
 
-export default async function addArtist(
-	artistId: string,
-	albumId: string | string[],
-	token?: string,
-): Promise<AppResponseType> {
+type AddArtistProps = {
+	artistId: string;
+	albumId: string | string[];
+	token?: string;
+};
+
+export default async function addArtist({
+	artistId,
+	albumId,
+	token,
+}: AddArtistProps): Promise<AppResponseType> {
 	let isSuccess = false;
 
 	const artistData = await fetchArtist(artistId, token);
 
-	if (!artistData)
-		throw new Error("Can't find any artist matching the given artist id.");
+	if (!artistData){
+		return { type: "error", message: ADMIN_MESSAGES.ARTIST.FETCH_NOT_FOUND };
+	}
 
 	const artistExists = await db.artist.findFirst({
 		where: {
@@ -29,7 +37,7 @@ export default async function addArtist(
 	});
 
 	if (artistExists)
-		return { type: "error", message: "This artist already exists." };
+		return { type: "error", message: ADMIN_MESSAGES.ARTIST.ALREADY_EXISTS };
 
 	try {
 		await db.artist.create({
@@ -45,7 +53,7 @@ export default async function addArtist(
 			if (Array.isArray(albumId) && albumId.length === 0)
 				return {
 					type: "error",
-					message: "You need to at least select an album.",
+					message: ADMIN_MESSAGES.ALBUM_SELECTION_REQUIRED,
 				};
 
 			const albumData = Array.isArray(albumId)
@@ -118,21 +126,21 @@ export default async function addArtist(
 
 				isSuccess = true;
 			} catch (error) {
-				console.error("Failed to add album's track:", error);
-				return { type: "error", message: "Failed to add album's tracks." };
+				console.error(ADMIN_MESSAGES.TRACK.ADD.FAILURE, error);
+				return { type: "error", message: ADMIN_MESSAGES.TRACK.ADD.FAILURE };
 			}
 		} catch (error) {
-			console.error("Failed to add album. error:", error);
-			return { type: "error", message: "Failed to add albums." };
+			console.error(ADMIN_MESSAGES.ALBUM.ADD.FAILURE, error);
+			return { type: "error", message: ADMIN_MESSAGES.ALBUM.ADD.FAILURE };
 		}
 	} catch (error) {
-		console.error("Failed to add artist:", error);
-		return { type: "error", message: "Failed to add artist." };
+		console.error(ADMIN_MESSAGES.ARTIST.ADD.FAILURE, error);
+		return { type: "error", message: ADMIN_MESSAGES.ARTIST.ADD.FAILURE };
 	}
 
 	if (isSuccess) {
 		revalidateTag("admin-data");
 		redirect(`/admin/artist/${artistId}`);
 	}
-	return { type: "success", message: "Successfully added the artist." };
+	return { type: "success", message: ADMIN_MESSAGES.ARTIST.ADD.SUCCESS };
 }

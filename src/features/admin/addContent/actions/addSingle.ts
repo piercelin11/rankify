@@ -1,21 +1,28 @@
-"use server"; 
+"use server";
 
+import { ADMIN_MESSAGES } from "@/constants/messages";
 import { db } from "@/lib/prisma";
 import fetchTracks from "@/lib/spotify/fetchTracks";
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
 import { revalidatePath, revalidateTag } from "next/cache";
 
-export default async function addSingle(
-	artistId: string,
-	trackIds: string[],
-	token?: string,
-): Promise<AppResponseType> {
+type AddSingleProps = {
+	artistId: string;
+	trackIds: string[];
+	token?: string;
+};
+
+export default async function addSingle({
+	artistId,
+	trackIds,
+	token,
+}: AddSingleProps): Promise<AppResponseType> {
 	let isSuccess = false;
 
 	if (trackIds.length === 0)
 		return {
 			type: "error",
-			message: "You need to at least select a single.",
+			message: ADMIN_MESSAGES.TRACK_SELECTION_REQUIRED,
 		};
 
 	try {
@@ -35,13 +42,13 @@ export default async function addSingle(
 
 		isSuccess = true;
 	} catch (error) {
-		console.error("Failed to add single:", error);
-		return { type: "error", message: "Failed to add singles." };
+		console.error(ADMIN_MESSAGES.SINGLE.ADD.FAILURE, error);
+		return { type: "error", message: ADMIN_MESSAGES.SINGLE.ADD.FAILURE };
 	}
 
 	if (isSuccess) {
 		revalidatePath(`/admin/artist/${artistId}`);
 		revalidateTag("admin-data");
 	}
-	return { type: "success", message: "Successfully added singles." };
+	return { type: "success", message: ADMIN_MESSAGES.SINGLE.ADD.SUCCESS };
 }

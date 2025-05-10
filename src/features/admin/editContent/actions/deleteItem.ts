@@ -1,14 +1,20 @@
 "use server";
 
+import { ADMIN_MESSAGES } from "@/constants/messages";
 import { db } from "@/lib/prisma";
-import { AppResponseType } from "@/types/response.types";
+import { AppResponseType } from "@/types/response";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
-export default async function deleteItem(
-	type: "artist" | "album" | "track",
-	id: string
-): Promise<AppResponseType> {
+type DeleteItemProps = {
+	type: "artist" | "album" | "track";
+	id: string;
+};
+
+export default async function deleteItem({
+	type,
+	id,
+}: DeleteItemProps): Promise<AppResponseType> {
 	let isSuccess = false;
 	let artistId: null | string = null;
 
@@ -40,15 +46,15 @@ export default async function deleteItem(
 
 		isSuccess = true;
 	} catch (error) {
-		console.error(`Failed to delete ${type}:`, error);
-		return { type: "error", message: `Failed to delete ${type}.` };
+		console.error(ADMIN_MESSAGES.OPERATION_MESSAGES.DELETE.FAILURE(type), error);
+		return { type: "error", message: ADMIN_MESSAGES.OPERATION_MESSAGES.DELETE.FAILURE(type) };
 	}
 
 	if (isSuccess) {
-		if (type === "track")revalidatePath("/admin");
-		if (type === "album")redirect(`/admin/artist/${artistId}`);
-		if (type === "artist")redirect("/admin/artist");
-		revalidateTag("admin-data")
+		if (type === "track") revalidatePath("/admin");
+		if (type === "album") redirect(`/admin/artist/${artistId}`);
+		if (type === "artist") redirect("/admin/artist");
+		revalidateTag("admin-data");
 	}
-	return { type: "success", message: `Successfully deleted ${type}.` };
+	return { type: "success", message: ADMIN_MESSAGES.OPERATION_MESSAGES.DELETE.SUCCESS(type) };
 }

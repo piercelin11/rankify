@@ -14,7 +14,7 @@ export default function AddAlbumButton({ artistId }: AddAlbumButtonProps) {
 	const [isOpen, setOpen] = useState(false);
 
 	function handleSubmit(albumId: string[], token: string) {
-		return addAlbum(artistId, albumId, "ALBUM", token);
+		return addAlbum({artistId, albumId, type: "ALBUM", token});
 	}
 
 	return (

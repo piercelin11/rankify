@@ -1,5 +1,5 @@
 import { TimeFilterType } from "./getTracksStats";
-import { AlbumData } from "@/types/data.types";
+import { AlbumData } from "@/types/data";
 import { db } from "@/lib/prisma";
 import getAlbumRankingSeries, {
 	AlbumRankingSeriesType,

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn";
-import { ResponseType } from "@/types/response.types";
+import { ResponseType } from "@/types/response";
 import {
 	CheckCircledIcon,
 	ExclamationTriangleIcon,

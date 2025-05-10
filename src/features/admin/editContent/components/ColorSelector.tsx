@@ -78,7 +78,7 @@ export default function ColorSelector({
 				</Button>
 			</div>
 			{message && (
-				<FormMessage message={message} isError={true} border={false} />
+				<FormMessage message={message} type="error" border={false} />
 			)}
 		</div>
 	);
