@@ -2,7 +2,7 @@
 
 import { getUserSession } from "@/../auth";
 import { db } from "@/lib/prisma";
-import { ActionResponse } from "@/types/action";
+import { AppResponseType } from "@/types/response.types";
 import { revalidatePath } from "next/cache";
 
 type UpdateUserProfileImageProps = {
@@ -11,7 +11,7 @@ type UpdateUserProfileImageProps = {
 
 export default async function updateUserProfileImage({
 	imageUrl,
-}: UpdateUserProfileImageProps): Promise<ActionResponse> {
+}: UpdateUserProfileImageProps): Promise<AppResponseType> {
 	const { id: userId } = await getUserSession();
 
 	try {
@@ -25,11 +25,11 @@ export default async function updateUserProfileImage({
 		});
 	} catch (err) {
 		console.error("Error updating profile picture:", err);
-		return { success: false, message: "Error updating profile picture." };
+		return { type: "error", message: "Error updating profile picture." };
 	}
 	revalidatePath("/settings");
 	return {
-		success: true,
+		type: "success",
 		message: "Successfully updated your profile picture.",
 	};
 }

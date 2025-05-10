@@ -1,5 +1,5 @@
-import { Album, Artist, SearchContent, Track } from "spotify-types";
-import { generateSearchParams } from "../utils/helper";
+import { Album, Artist, Track } from "spotify-types";
+import { generateSearchParams } from "@/lib/utils";
 import getSpotifyToken from "./fetchSpotifyToken";
 
 export type SpotifyTypeMap = {

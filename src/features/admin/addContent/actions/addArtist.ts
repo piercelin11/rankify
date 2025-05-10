@@ -5,7 +5,7 @@ import { db } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
 import { redirect } from "next/navigation";
-import { ActionResponse } from "@/types/action";
+import { AppResponseType } from "@/types/response.types";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import getTracksByArtist from "@/lib/database/data/getTracksByArtist";
 import { revalidateTag } from "next/cache";
@@ -14,7 +14,7 @@ export default async function addArtist(
 	artistId: string,
 	albumId: string | string[],
 	token?: string,
-): Promise<ActionResponse> {
+): Promise<AppResponseType> {
 	let isSuccess = false;
 
 	const artistData = await fetchArtist(artistId, token);
@@ -29,7 +29,7 @@ export default async function addArtist(
 	});
 
 	if (artistExists)
-		return { success: false, message: "This artist already exists." };
+		return { type: "error", message: "This artist already exists." };
 
 	try {
 		await db.artist.create({
@@ -44,7 +44,7 @@ export default async function addArtist(
 		try {
 			if (Array.isArray(albumId) && albumId.length === 0)
 				return {
-					success: false,
+					type: "error",
 					message: "You need to at least select an album.",
 				};
 
@@ -119,20 +119,20 @@ export default async function addArtist(
 				isSuccess = true;
 			} catch (error) {
 				console.error("Failed to add album's track:", error);
-				return { success: false, message: "Failed to add album's tracks." };
+				return { type: "error", message: "Failed to add album's tracks." };
 			}
 		} catch (error) {
 			console.error("Failed to add album. error:", error);
-			return { success: false, message: "Failed to add albums." };
+			return { type: "error", message: "Failed to add albums." };
 		}
 	} catch (error) {
 		console.error("Failed to add artist:", error);
-		return { success: false, message: "Failed to add artist." };
+		return { type: "error", message: "Failed to add artist." };
 	}
 
 	if (isSuccess) {
 		revalidateTag("admin-data");
 		redirect(`/admin/artist/${artistId}`);
 	}
-	return { success: true, message: "Successfully added the artist." };
+	return { type: "success", message: "Successfully added the artist." };
 }

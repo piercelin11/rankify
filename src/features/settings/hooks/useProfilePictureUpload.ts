@@ -1,9 +1,9 @@
 "use client"
 
-import { PLACEHOLDER_PIC } from '@/config/variables';
-import compressImg from '@/lib/utils/compressImg';
-import { fileToFileList } from '@/lib/utils/helper';
-import { ActionResponse } from '@/types/action';
+import { PLACEHOLDER_PIC } from "@/constants";
+import compressImg from '@/lib/utils/compressor.utils';
+import { fileToFileList } from '@/lib/utils';
+import { AppResponseType } from '@/types/response.types';
 import { profilePictureSchema, ProfilePictureType } from '@/types/schemas/settings';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useRef, useState } from 'react'
@@ -18,7 +18,7 @@ export default function useProfilePictureUpload(initialImgUrl: string | null) {
         initialImgUrl || PLACEHOLDER_PIC
     );
     const [isFormOpen, setFormOpen] = useState(false);
-    const [response, setResponse] = useState<ActionResponse | null>(null);
+    const [response, setResponse] = useState<AppResponseType | null>(null);
   
     const abortControllerRef = useRef<AbortController | null>(null);
   
@@ -61,13 +61,13 @@ export default function useProfilePictureUpload(initialImgUrl: string | null) {
         const file = formData.image?.[0];
   
         if (!file) {
-            setResponse({ success: false, message: "You need to upload a picture." });
+            setResponse({ type: "error", message: "You need to upload a picture." });
             return;
         }
   
         if (!file.type.includes("image")) {
             setResponse({
-                success: false,
+                type: "error",
                 message: "Your file needs to be an image file.",
             });
             return;
@@ -83,7 +83,7 @@ export default function useProfilePictureUpload(initialImgUrl: string | null) {
         } catch (err) {
             console.error("Failed to generate presigned upload url:", err);
             setResponse({
-                success: false,
+                type: "error",
                 message: "Failed to generate presigned upload url.",
             });
             throw err;
@@ -131,18 +131,18 @@ export default function useProfilePictureUpload(initialImgUrl: string | null) {
                         );
                     }
                     setResponse({
-                        success: false,
+                        type: "error",
                         message: "Failed to update profile information.",
                     });
                 } else {
                     setResponse({
-                        success: false,
+                        type: "error",
                         message: "Failed to upload image to S3.",
                     });
                     console.error("Failed to upload image to S3:", err);
                 }
                 if (err.name === "AbortError") {
-                    setResponse({ success: false, message: "Upload cancelled by user." });
+                    setResponse({ type: "error", message: "Upload cancelled by user." });
                 }
                 throw err;
             } finally {

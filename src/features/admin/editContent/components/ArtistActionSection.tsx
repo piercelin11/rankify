@@ -5,7 +5,7 @@ import ActionIconGroup from "./ActionIconGroup";
 import ComfirmationModal from "@/components/modals/ComfirmationModal";
 import ModalWrapper from "@/components/modals/ModalWrapper";
 import AlbumEditingForm from "./AlbumEditingForm";
-import { AlbumData, ArtistData } from "@/types/data";
+import { AlbumData, ArtistData } from "@/types/data.types";
 import deleteItem from "../actions/deleteItem";
 import fetchSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
 import updateInfo from "../actions/updateInfo";

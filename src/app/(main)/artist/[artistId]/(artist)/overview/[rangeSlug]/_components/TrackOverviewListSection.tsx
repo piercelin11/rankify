@@ -6,7 +6,7 @@ import { ArrowTopRightIcon } from "@radix-ui/react-icons";
 import getTracksStats, {
 	TimeFilterType,
 } from "@/lib/database/ranking/overview/getTracksStats";
-import { calculateDateRangeFromSlug } from "@/lib/utils/helper";
+import { calculateDateRangeFromSlug } from "@/lib/utils";
 
 type TrackOverviewListSectionProps = {
 	artistId: string;

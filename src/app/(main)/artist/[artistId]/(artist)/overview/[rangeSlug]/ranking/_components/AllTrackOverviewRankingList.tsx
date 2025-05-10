@@ -2,7 +2,7 @@
 
 import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
 import React, { useMemo } from "react";
-import { AlbumData, ArtistData } from "@/types/data";
+import { AlbumData, ArtistData } from "@/types/data.types";
 import useMediaQuery from "@/lib/hooks/useMediaQuery";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";

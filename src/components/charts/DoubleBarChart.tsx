@@ -11,9 +11,9 @@ import {
 	Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
-import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
-import { toAcronym } from "@/lib/utils/helper";
-import { DEFAULT_COLOR } from "@/config/variables";
+import { adjustColorLightness } from "@/lib/utils/color.utils";
+import { toAcronym } from "@/lib/utils";
+import { DEFAULT_COLOR } from "@/constants";
 
 ChartJS.register(
 	CategoryScale,

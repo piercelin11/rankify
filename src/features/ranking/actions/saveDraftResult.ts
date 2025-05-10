@@ -44,9 +44,9 @@ export default async function saveDraftResult(
         isSuccess = true;
     } catch (error) {
         console.error("Failed to save draft result:", error);
-        return { success: false, message: "Failed to save draft result" };
+        return { type: "error", message: "Failed to save draft result" };
     }
 
     revalidatePath(`/sorter/${artistId}/result`);
-    return { success: true, message: "Draft result is successfully saved." };
+    return { type: "success", message: "Draft result is successfully saved." };
 }

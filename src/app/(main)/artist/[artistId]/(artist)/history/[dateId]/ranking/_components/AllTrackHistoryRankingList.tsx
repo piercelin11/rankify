@@ -1,7 +1,7 @@
 "use client";
 
 import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
-import { AlbumData, ArtistData } from "@/types/data";
+import { AlbumData, ArtistData } from "@/types/data.types";
 import React, { useMemo } from "react";
 import {
 	Column,
@@ -20,7 +20,7 @@ import Image from "next/image";
 import useListScroll from "@/features/ranking/display/hooks/useListScroll";
 import { cn } from "@/lib/cn";
 import { ITEM_HEIGHT } from "@/app/(main)/artist/[artistId]/(artist)/overview/[rangeSlug]/ranking/_components/AllTrackOverviewRankingList";
-import { dateToLong } from "@/lib/utils/helper";
+import { dateToLong } from "@/lib/utils";
 
 type TrackRankingListProps = {
 	tracksRankings: TrackHistoryType[];

@@ -1,14 +1,14 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { ActionResponse } from "@/types/action";
+import { AppResponseType } from "@/types/response.types";
 import { updateAlbumSchema, UpdateAlbumType } from "@/types/schemas/admin";
 import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function updateAlbum(
 	albumId: string,
 	formData: UpdateAlbumType
-): Promise<ActionResponse> {
+): Promise<AppResponseType> {
 	const album = await db.album.findFirst({
 		where: {
 			id: albumId,
@@ -17,10 +17,10 @@ export default async function updateAlbum(
 
 	const validatedField = updateAlbumSchema.safeParse(formData);
 	if (!validatedField)
-		return { success: false, message: "Invalid Field", error: "Invalid Field" };
+		return { type: "error", message: "Invalid Field", error: "Invalid Field" };
 
 	if (!album)
-		return { success: false, message: "Failed to update album with this id" };
+		return { type: "error", message: "Failed to update album with this id" };
 
 	try {
 		await db.$transaction(async (tx) => {
@@ -46,10 +46,10 @@ export default async function updateAlbum(
 		});
 	} catch (error) {
 		console.error("Failed to update album.", error);
-		return { success: false, message: "Failed to update album." };
+		return { type: "error", message: "Failed to update album." };
 	}
 
 	revalidatePath(`/admin/album/${albumId}`);
 	revalidateTag("admin-data");
-	return { success: true, message: "Successfully updated album." };
+	return { type: "success", message: "Successfully updated album." };
 }

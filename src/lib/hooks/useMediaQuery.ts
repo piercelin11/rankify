@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { throttle } from "../utils/helper";
+import { throttle } from "@/lib/utils";
 
 type MediaQueryType = "min" | "max";
 

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/cn";
+import { ResponseType } from "@/types/response.types";
 import {
 	CheckCircledIcon,
 	ExclamationTriangleIcon,
@@ -7,31 +8,29 @@ import React from "react";
 
 type ErrorMessageProps = {
 	message: string;
-	isError: boolean;
+	type: ResponseType;
 	border?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 export default function FormMessage({
 	message,
-	isError,
+	type,
 	border = true,
 	className,
 }: ErrorMessageProps) {
 	return (
 		<div
-			className={cn(
-				"flex items-center gap-1 rounded-xl text-sm",
-				className,
-				{
-					"p-4": border,
-					"border border-danger-500 bg-danger-700/10 text-danger-500": isError && border,
-					"border border-success-500 bg-success-700/10 text-success-500": !isError && border,
-					"text-danger-600": isError && !border,
-					"text-success-600": !isError && !border,
-				}
-			)}
+			className={cn("flex items-center gap-1 rounded-xl text-sm", className, {
+				"p-4": border,
+				"border border-danger-500 bg-danger-700/10 text-danger-500":
+					type === "error" && border,
+				"border border-success-500 bg-success-700/10 text-success-500":
+					type === "success" && border,
+				"text-danger-600": type === "error" && !border,
+				"text-success-600": type === "success" && !border,
+			})}
 		>
-			{isError ? <ExclamationTriangleIcon /> : <CheckCircledIcon />}
+			{type === "error" ? <ExclamationTriangleIcon /> : <CheckCircledIcon />}
 			<p>{message}</p>
 		</div>
 	);

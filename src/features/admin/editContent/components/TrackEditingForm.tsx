@@ -1,4 +1,4 @@
-import { AlbumData, TrackData } from "@/types/data";
+import { AlbumData, TrackData } from "@/types/data.types";
 import { updateTrackSchema, UpdateTrackType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef, useState } from "react";
@@ -8,7 +8,7 @@ import Button from "@/components/buttons/Button";
 import FormItem from "@/components/form/FormInput";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import FormMessage from "@/components/form/FormMessage";
-import { ActionResponse } from "@/types/action";
+import { AppResponseType } from "@/types/response.types";
 import FormRadioGroup from "@/components/form/FormRadioGroup";
 import FormSelect from "@/components/form/FormSelect";
 import ColorSelector from "./ColorSelector";
@@ -37,7 +37,7 @@ export default function TrackEditingForm({
 	trackData,
 	onCancel,
 }: TrackEditingFormProps) {
-	const [response, setResponse] = useState<ActionResponse | null>(null);
+	const [response, setResponse] = useState<AppResponseType | null>(null);
 	const isMounted = useRef<HTMLFormElement | null>(null);
 
 	const selectOptions = [
@@ -72,7 +72,7 @@ export default function TrackEditingForm({
 		} catch (error) {
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
-					setResponse({ success: false, message: "Something went wrong." });
+					setResponse({ type: "error", message: "Something went wrong." });
 				}
 			}
 			console.error(`Error editing track ${trackData.name}`, error);

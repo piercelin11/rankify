@@ -1,8 +1,8 @@
 "use client";
 
-import { DEFAULT_COLOR } from "@/config/variables";
+import { DEFAULT_COLOR } from "@/constants";
 import { cn } from "@/lib/cn";
-import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
+import { adjustColorLightness } from "@/lib/utils/color.utils";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import useLineChartFilter from "../hooks/useLineChartFilter";
 import { useState } from "react";

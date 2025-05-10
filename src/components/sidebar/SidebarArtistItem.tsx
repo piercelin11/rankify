@@ -1,12 +1,13 @@
 "use client";
 
 import { useAppSelector } from "@/store/hooks";
-import { ArtistData } from "@/types/data";
+import { ArtistData } from "@/types/data.types";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import Tooltip from "../overlay/Tooltip";
 import { cn } from "@/lib/cn";
+import { PLACEHOLDER_PIC } from "@/constants";
 
 type SidebarArtistItemProps = {
 	artistData: ArtistData;
@@ -30,7 +31,7 @@ export default function SidebarArtistItem({
 						<Image
 							className="rounded-full"
 							fill
-							src={artistData.img || "/pic/placeholder.jpg"}
+							src={artistData.img || PLACEHOLDER_PIC}
 							alt={artistData.name}
 							sizes="40px"
 						/>

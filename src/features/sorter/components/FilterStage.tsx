@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import CheckBox from "@/components/form/CheckBox";
-import { AlbumData, TrackData } from "@/types/data";
+import { AlbumData, TrackData } from "@/types/data.types";
 import { cn } from "@/lib/cn";
 import Button from "@/components/buttons/Button";
 import Link from "next/link";
 import { FilterType, setExcluded, setPercentage } from "@/features/sorter/slices/sorterSlice";
 import { useAppDispatch } from "@/store/hooks";
 import { CurrentStage } from "./SorterPage";
+import { PLACEHOLDER_PIC } from "@/constants";
 
 type FilterStageProps = {
 	albums: AlbumData[];
@@ -117,7 +118,7 @@ function FilterGalleryItem({
 				className={cn("opacity-100 transition-all", {
 					"opacity-25": !checked,
 				})}
-				src={data.img ?? "/pic/placeholder.jpg"}
+				src={data.img ?? PLACEHOLDER_PIC}
 				draggable={false}
 			/>
 			<div>

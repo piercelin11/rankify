@@ -18,7 +18,7 @@ export default function FormInput({
 			<p className="text-sm text-neutral-500">{label}</p>
 			<Input className={className} {...props} />
 			{message && (
-				<FormMessage message={message} isError={true} border={false} />
+				<FormMessage message={message} type="error" border={false} />
 			)}
 		</div>
 	);

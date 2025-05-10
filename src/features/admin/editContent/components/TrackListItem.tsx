@@ -1,5 +1,5 @@
 "use client";
-import { AlbumData, TrackData } from "@/types/data";
+import { AlbumData, TrackData } from "@/types/data.types";
 import React, { HTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 import TrackActionSection from "./TrackActionSection";

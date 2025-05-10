@@ -1,6 +1,6 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@/../auth";
-import { RankingDraftData } from "@/types/data";
+import { RankingDraftData } from "@/types/data.types";
 
 type getRankingDraftProps = {
     artistId: string; 

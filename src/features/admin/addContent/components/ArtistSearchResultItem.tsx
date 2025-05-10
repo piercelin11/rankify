@@ -2,6 +2,7 @@ import React from "react";
 import { Artist } from "spotify-api.js";
 import { ChevronRightIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/cn";
+import { PLACEHOLDER_PIC } from "@/constants";
 
 type ArtistSearchResultItemProps = {
 	data: Omit<Artist, "externalURL" | "makeCodeImage">;
@@ -22,7 +23,7 @@ export default function ArtistSearchResultItem({
 		>
 			<img
 				className="rounded-full"
-				src={data.images?.[2]?.url || "/pic/placeholder.jpg"}
+				src={data.images?.[2]?.url || PLACEHOLDER_PIC}
 				alt={data.name}
 				width={45}
 				height={45}

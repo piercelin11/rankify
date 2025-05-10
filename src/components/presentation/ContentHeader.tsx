@@ -4,7 +4,7 @@ import { cn } from "@/lib/cn";
 import Link from "next/link";
 import React, { ReactNode, useEffect } from "react";
 import { SpotifyIcon } from "../icons/LogoIcons";
-import { AlbumData, ArtistData, TrackData } from "@/types/data";
+import { AlbumData, ArtistData, TrackData } from "@/types/data.types";
 import Image from "next/image";
 
 type ContentHeaderProps = {

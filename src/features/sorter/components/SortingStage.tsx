@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeftIcon } from "@radix-ui/react-icons";
-import { RankingDraftData, TrackData } from "@/types/data";
+import { RankingDraftData, TrackData } from "@/types/data.types";
 import { cn } from "@/lib/cn";
 import deleteRankingDraft from "../../ranking/actions/deleteRankingDraft";
 import ComfirmationModal from "@/components/modals/ComfirmationModal";
@@ -14,6 +14,7 @@ import {
 import Button from "@/components/buttons/Button";
 import { CurrentStage } from "./SorterPage";
 import useSorter from "@/features/sorter/hooks/useSorter";
+import { PLACEHOLDER_PIC } from "@/constants";
 
 export type RankingResultData = TrackData & {
 	ranking: number;
@@ -235,7 +236,7 @@ function TrackBtn({ isPressed, onClick, data }: TrackBtnProps) {
 			></iframe>
 			<img
 				className="rounded-lg"
-				src={data?.img || "/pic/placeholder.jpg"}
+				src={data?.img || PLACEHOLDER_PIC}
 				alt="cover"
 			/>
 			<div className="m-auto flex-1 space-y-1 sm:pb-6 sm:pt-8">

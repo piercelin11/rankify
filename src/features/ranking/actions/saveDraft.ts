@@ -39,8 +39,8 @@ export default async function saveDraft(
 		isSuccess = true;
 	} catch (error) {
 		console.error("Failed to save draft:", error);
-		return { success: false, message: "Failed to save draft" };
+		return { type: "error", message: "Failed to save draft" };
 	}
 
-	return { success: true, message: "Draft is successfully saved." };
+	return { type: "success", message: "Draft is successfully saved." };
 }

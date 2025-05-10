@@ -3,7 +3,7 @@
 import { RankingResultData } from "@/features/sorter/components/SortingStage";
 import { $Enums } from "@prisma/client";
 import { getUserSession } from "@/../auth";
-import { ActionResponse } from "@/types/action";
+import { AppResponseType } from "@/types/response.types";
 import { db } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { revalidateTag } from "next/cache";
@@ -14,7 +14,7 @@ export default async function submitRanking(
 	trackRankings: RankingResultData[],
 	artistId: string,
 	type: $Enums.RankingType
-): Promise<ActionResponse> {
+): Promise<AppResponseType> {
 	const { id: userId } = await getUserSession();
 	let isSuccess = false;
 
@@ -43,7 +43,7 @@ export default async function submitRanking(
 		isSuccess = true;
 	} catch (error) {
 		console.error("Failed to submit the rankings:", error);
-		return { success: false, message: "Failed to submit the rankings" };
+		return { type: "error", message: "Failed to submit the rankings" };
 	}
 
 	if (isSuccess) {
@@ -51,5 +51,5 @@ export default async function submitRanking(
 		redirect(`/artist/${trackRankings[0].artistId}/history`);
 	}
 
-	return { success: true, message: "You successfully submitted the rankings." };
+	return { type: "success", message: "You successfully submitted the rankings." };
 }

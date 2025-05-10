@@ -5,7 +5,7 @@ import getTracksByArtist from "@/lib/database/data/getTracksByArtist";
 import { db } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
-import { ActionResponse } from "@/types/action";
+import { AppResponseType } from "@/types/response.types";
 import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function addAlbum(
@@ -13,11 +13,11 @@ export default async function addAlbum(
 	albumId: string | string[],
 	type: "ALBUM" | "EP",
 	token?: string,
-): Promise<ActionResponse> {
+): Promise<AppResponseType> {
 	let isSuccess = false;
 
 	if (Array.isArray(albumId) && albumId.length === 0)
-		return { success: false, message: "You need to at least select an album." };
+		return { type: "error", message: "You need to at least select an album." };
 
 	const albumData = Array.isArray(albumId)
 		? await Promise.all(albumId.map((id) => fetchAlbum(id, token)))
@@ -91,16 +91,16 @@ export default async function addAlbum(
 			isSuccess = true;
 		} catch (error) {
 			console.error("Failed to add album's track:", error);
-			return { success: false, message: "Failed to add album's tracks." };
+			return { type: "error", message: "Failed to add album's tracks." };
 		}
 	} catch (error) {
 		console.error("Failed to add album. error:", error);
-		return { success: false, message: "Failed to add albums." };
+		return { type: "error", message: "Failed to add albums." };
 	}
 
 	if (isSuccess) {
 		revalidateTag("admin-data");
 		revalidatePath(`/admin/artist/${artistId}`);
 	}
-	return { success: true, message: "Successfully added albums." };
+	return { type: "success", message: "Successfully added albums." };
 }

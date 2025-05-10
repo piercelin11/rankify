@@ -1,6 +1,6 @@
 "use client";
 
-import { RankingDraftData } from "@/types/data";
+import { RankingDraftData } from "@/types/data.types";
 import React, {
 	startTransition,
 	useEffect,

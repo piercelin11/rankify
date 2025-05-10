@@ -4,7 +4,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { getUserSession } from "../../../../auth";
 import { nanoid } from "nanoid";
-import { ActionResponse } from "@/types/action";
+import { AppResponseType } from "@/types/response.types";
 
 if (
 	!process.env.AWS_REGION ||
@@ -35,7 +35,7 @@ export type GenerateUrlResponse = {
 	signedUrl?: string;
 	finalImageUrl?: string;
 	s3Key?: string;
-} & ActionResponse;
+} & AppResponseType;
 
 export async function generatePresignedUploadUrl({
 	fileName,
@@ -44,15 +44,15 @@ export async function generatePresignedUploadUrl({
 	const { id: userId } = await getUserSession();
 
 	if (!userId) {
-		return { success: false, message: "Unauthorized" };
+		return { type: "error", message: "Unauthorized" };
 	}
 
 	if (!fileName || !fileType) {
-		return { success: false, message: "Filename and filetype are required." };
+		return { type: "error", message: "Filename and filetype are required." };
 	}
 	if (!fileType.startsWith("image/")) {
 		return {
-			success: false,
+			type: "error",
 			message: "Invalid file type. Only images are allowed.",
 		};
 	}
@@ -70,7 +70,7 @@ export async function generatePresignedUploadUrl({
 		const finalImageUrl = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
 
 		return {
-			success: true,
+			type: "success",
 			signedUrl,
 			finalImageUrl,
 			s3Key,
@@ -78,6 +78,6 @@ export async function generatePresignedUploadUrl({
 		};
 	} catch (error) {
 		console.error("Error generating signed URL:", error);
-		return { success: false, message: "Could not generate upload URL." };
+		return { type: "error", message: "Could not generate upload URL." };
 	}
 }

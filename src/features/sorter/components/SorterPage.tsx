@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import FilterStage from "./FilterStage";
 import SortingStage from "./SortingStage";
 import ResultStage from "./ResultStage";
-import { AlbumData, RankingDraftData, TrackData } from "@/types/data";
+import { AlbumData, RankingDraftData, TrackData } from "@/types/data.types";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 
 export type CurrentStage = "filter" | "sorting" | "result";

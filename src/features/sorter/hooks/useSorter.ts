@@ -3,7 +3,7 @@ import {
 	setSaveStatus,
 } from "@/features/sorter/slices/sorterSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { RankingDraftData, TrackData } from "@/types/data";
+import { RankingDraftData, TrackData } from "@/types/data.types";
 import React, { startTransition, useEffect, useRef, useState } from "react";
 import saveDraft from "../../ranking/actions/saveDraft";
 import { RankingResultData } from "../components/SortingStage";

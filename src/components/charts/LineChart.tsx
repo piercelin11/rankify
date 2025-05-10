@@ -13,8 +13,8 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { Filler } from "chart.js";
-import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
-import { DEFAULT_COLOR } from "@/config/variables";
+import { adjustColorLightness } from "@/lib/utils/color.utils";
+import { DEFAULT_COLOR } from "@/constants";
 
 ChartJS.register(
 	CategoryScale,

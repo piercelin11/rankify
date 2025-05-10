@@ -3,7 +3,7 @@ import React from "react";
 
 import getAlbumById from "@/lib/database/data/getAlbumById";
 import getTracksByAlbum from "@/lib/database/data/getTracksByAlbum";
-import { dateToLong } from "@/lib/utils/helper";
+import { dateToLong } from "@/lib/utils";
 import TrackListItem from "@/features/admin/editContent/components/TrackListItem";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import ContentWrapper from "@/components/layout/ContentWrapper";

@@ -8,7 +8,7 @@ import {
 	HeartFilledIcon,
 	StarFilledIcon,
 } from "@radix-ui/react-icons";
-import { getPrevNextIndex } from "@/lib/utils/helper";
+import { getPrevNextIndex } from "@/lib/utils";
 import AlbumRankingLineChart from "@/features/ranking/display/charts/AlbumRankingLineChart";
 import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
 import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";

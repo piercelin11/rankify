@@ -1,23 +1,6 @@
 import { $Enums } from "@prisma/client";
 import * as z from "zod";
 
-/* export function updateTrackSchema(albumNames: string[]) {
-	const schema = z.object({
-		name: z.string(),
-		album: z
-			.string()
-			.refine((value) => albumNames.includes(value), "Invalid album name.")
-			.or(z.literal("")),
-	});
-
-	return schema;
-}
-
-export type UpdateTrackType = {
-	name: string;
-	album: string;
-}; */
-
 export const updateTrackSchema = z.object({
 	name: z.string(),
 	album: z.string().or(z.literal("")),

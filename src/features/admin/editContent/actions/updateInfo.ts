@@ -3,14 +3,14 @@
 import { db } from "@/lib/prisma";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchArtist from "@/lib/spotify/fetchArtist";
-import { ActionResponse } from "@/types/action";
+import { AppResponseType } from "@/types/response.types";
 import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function updateInfo(
 	type: "artist" | "album",
 	id: string,
 	token?: string
-): Promise<ActionResponse> {
+): Promise<AppResponseType> {
 	let success = false;
 
 	try {
@@ -18,7 +18,7 @@ export default async function updateInfo(
 			const album = await fetchAlbum(id, token);
 
 			if (!album)
-				return { success: false, message: "Faild to fetch album data." };
+				return { type: "error", message: "Faild to fetch album data." };
 
 			const albumData = await db.album.update({
 				where: {
@@ -40,7 +40,7 @@ export default async function updateInfo(
 			const artist = await fetchArtist(id, token);
 
 			if (!artist)
-				return { success: false, message: "Faild to fetch artist data." };
+				return { type: "error", message: "Faild to fetch artist data." };
 
 			await db.artist.update({
 				where: {
@@ -55,12 +55,12 @@ export default async function updateInfo(
 		success = true;
 	} catch (error) {
 		console.error(`Failed to update ${type} info: `, error);
-		return { success: false, message: `Failed to update ${type} info.` };
+		return { type: "error", message: `Failed to update ${type} info.` };
 	}
 
 	if (success) {
 		revalidatePath(`/admin/${type}/${id}`);
 		revalidateTag("admin-data");
 	}
-	return { success: true, message: "Successfully updated album." };
+	return { type: "success", message: "Successfully updated album." };
 }

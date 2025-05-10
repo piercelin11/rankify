@@ -1,6 +1,6 @@
 "use client";
 
-import { PLACEHOLDER_PIC } from "@/config/variables";
+import { PLACEHOLDER_PIC } from "@/constants";
 import Image from "next/image";
 import Button from "@/components/buttons/Button";
 import ModalWrapper from "@/components/modals/ModalWrapper";

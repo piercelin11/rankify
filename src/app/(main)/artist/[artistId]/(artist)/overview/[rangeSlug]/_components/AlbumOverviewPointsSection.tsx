@@ -2,7 +2,7 @@ import React from "react";
 import { TimeFilterType } from "@/lib/database/ranking/overview/getTracksStats";
 import DoubleBarChart from "@/components/charts/DoubleBarChart";
 import { getAlbumsStats } from "@/lib/database/ranking/overview/getAlbumsStats";
-import { calculateDateRangeFromSlug } from "@/lib/utils/helper";
+import { calculateDateRangeFromSlug } from "@/lib/utils";
 
 type AlbumOverviewPointsSectionProps = {
 	artistId: string;

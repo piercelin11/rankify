@@ -22,9 +22,9 @@ export default async function deleteRankingDraft(
 		isSuccess = true;
 	} catch (error) {
 		console.error("Failed to delete draft:", error);
-		return { success: false, message: "Failed to delete draft" };
+		return { type: "error", message: "Failed to delete draft" };
 	}
 
 	if (redirectPath) redirect(redirectPath);
-	return { success: true, message: "Draft is successfully deleted." };
+	return { type: "success", message: "Draft is successfully deleted." };
 }

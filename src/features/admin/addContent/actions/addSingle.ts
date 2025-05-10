@@ -2,19 +2,19 @@
 
 import { db } from "@/lib/prisma";
 import fetchTracks from "@/lib/spotify/fetchTracks";
-import { ActionResponse } from "@/types/action";
+import { AppResponseType } from "@/types/response.types";
 import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function addSingle(
 	artistId: string,
 	trackIds: string[],
 	token?: string,
-): Promise<ActionResponse> {
+): Promise<AppResponseType> {
 	let isSuccess = false;
 
 	if (trackIds.length === 0)
 		return {
-			success: false,
+			type: "error",
 			message: "You need to at least select a single.",
 		};
 
@@ -36,12 +36,12 @@ export default async function addSingle(
 		isSuccess = true;
 	} catch (error) {
 		console.error("Failed to add single:", error);
-		return { success: false, message: "Failed to add singles." };
+		return { type: "error", message: "Failed to add singles." };
 	}
 
 	if (isSuccess) {
 		revalidatePath(`/admin/artist/${artistId}`);
 		revalidateTag("admin-data");
 	}
-	return { success: true, message: "Successfully added singles." };
+	return { type: "success", message: "Successfully added singles." };
 }

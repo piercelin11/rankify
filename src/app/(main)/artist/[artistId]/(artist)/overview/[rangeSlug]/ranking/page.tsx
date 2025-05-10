@@ -1,6 +1,6 @@
 import React from "react";
 import { getUserSession } from "@/../auth";
-import { calculateDateRangeFromSlug, dateToLong } from "@/lib/utils/helper";
+import { calculateDateRangeFromSlug, dateToLong } from "@/lib/utils";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
 import getTracksStats, {
 	TimeFilterType,

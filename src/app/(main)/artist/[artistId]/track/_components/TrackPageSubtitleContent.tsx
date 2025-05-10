@@ -1,7 +1,7 @@
 "use client";
 
 import { SCROLL_SESSION_KEY } from "@/features/ranking/display/hooks/useListScroll";
-import { ArtistData, TrackData } from "@/types/data";
+import { ArtistData, TrackData } from "@/types/data.types";
 import Image from "next/image";
 import Link from "next/link";
 

@@ -2,7 +2,7 @@
 
 import React from "react";
 import LogoDisplay from "@/components/sidebar/LogoDisplay";
-import { ArtistData } from "@/types/data";
+import { ArtistData } from "@/types/data.types";
 import { CheckIcon } from "@radix-ui/react-icons";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import { useAppSelector } from "@/store/hooks";

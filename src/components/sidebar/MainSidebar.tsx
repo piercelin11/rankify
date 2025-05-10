@@ -1,10 +1,10 @@
 "use client";
 
-import { getMainSidebarMenuItems } from "@/config/sidebarMenu";
+import { getMainSidebarMenuItems } from "@/config/sidebarMenu.config";
 import React from "react";
 import SidebarMenuItem from "./SidebarMenuItem";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
-import { ArtistData } from "@/types/data";
+import { ArtistData } from "@/types/data.types";
 import SidebarArtistItem from "./SidebarArtistItem";
 import { useAppDispatch } from "@/store/hooks";
 import { toggleSidebar } from "@/store/slices/sidebarSlice";

@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
 import getRankingSession from "@/lib/database/user/getRankingSession";
-import { dateToDashFormat } from "@/lib/utils/helper";
+import { dateToDashFormat } from "@/lib/utils";
 import NoData from "@/components/feedback/NoData";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import { notFound } from "next/navigation";

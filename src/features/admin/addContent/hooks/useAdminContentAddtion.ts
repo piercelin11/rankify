@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionResponse } from "@/types/action";
+import { AppResponseType } from "@/types/response.types";
 import React, { useEffect, useState } from "react";
 import { Album, Artist } from "spotify-types";
 import {
@@ -20,7 +20,7 @@ export default function useAdminContentAddtion(
 	const [albums, setAlbums] = useState<Album[] | null>(null);
 	const [artist, setArtist] = useState<Artist | null>(null);
 	const [selectedIds, setSelectedIds] = useState<string[]>([]);
-	const [response, setResponse] = useState<ActionResponse | null>(null);
+	const [response, setResponse] = useState<AppResponseType | null>(null);
 	const [isLoading, setLoading] = useState<boolean>(false);
 	const [isPending, setPending] = useState<boolean>(false);
 
@@ -66,7 +66,7 @@ export default function useAdminContentAddtion(
 				if (error.message !== "NEXT_REDIRECT") {
 					setResponse({
 						message: "Something went wrong.",
-						success: false,
+						type: "error",
 					});
 				}
 			}

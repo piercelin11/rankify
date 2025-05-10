@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
-import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
+import { adjustColorLightness } from "@/lib/utils/color.utils";
 import React, { ReactNode, useState } from "react";
 
 type StatsCardProps = {

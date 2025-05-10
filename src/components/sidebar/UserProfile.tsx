@@ -1,3 +1,4 @@
+import { PLACEHOLDER_PIC } from "@/constants";
 import { ExtendedUser } from "@/types/auth";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
@@ -14,7 +15,7 @@ export default function UserProfile({ userSession }: UserProfileProps) {
 				<Image
 					className="rounded-xl"
 					fill
-					src={userSession.image || "/pic/placeholder.jpg"}
+					src={userSession.image || PLACEHOLDER_PIC}
 					alt="user profile"
 					sizes="48px"
 				/>

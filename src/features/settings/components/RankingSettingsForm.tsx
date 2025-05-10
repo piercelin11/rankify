@@ -7,8 +7,8 @@ import {
 	RankingSettingsType,
 } from "@/types/schemas/settings";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UserPreferenceData } from "@/types/data";
-import { ActionResponse } from "@/types/action";
+import { UserPreferenceData } from "@/types/data.types";
+import { AppResponseType } from "@/types/response.types";
 import Button from "@/components/buttons/Button";
 import FormMessage from "@/components/form/FormMessage";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
@@ -29,7 +29,7 @@ export default function RankingSettingsForm({
 	settings,
 }: RankingSettingsFormProps) {
 	const defaultSettings = settings?.rankingSettings || defaultRankingSettings;
-	const [response, setResponse] = useState<ActionResponse | null>(null);
+	const [response, setResponse] = useState<AppResponseType | null>(null);
 	const isMounted = useRef<HTMLFormElement | null>(null);
 
 	const {
@@ -54,7 +54,7 @@ export default function RankingSettingsForm({
 				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
 					setResponse({
 						message: "Something went wrong.",
-						success: false,
+						type: "error",
 					});
 				}
 			}

@@ -1,8 +1,8 @@
 "use client";
-import { DEFAULT_COLOR } from "@/config/variables";
+import { DEFAULT_COLOR } from "@/constants";
 import { cn } from "@/lib/cn";
-import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
-import { throttle } from "@/lib/utils/helper";
+import { adjustColorLightness } from "@/lib/utils/color.utils";
+import { throttle } from "@/lib/utils";
 import Link from "next/link";
 import React, { forwardRef, useEffect, useRef, useState } from "react";
 

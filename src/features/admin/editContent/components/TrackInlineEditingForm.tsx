@@ -1,4 +1,4 @@
-import { AlbumData, TrackData } from "@/types/data";
+import { AlbumData, TrackData } from "@/types/data.types";
 import { updateTrackSchema, UpdateTrackType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { startTransition, useEffect, useOptimistic } from "react";

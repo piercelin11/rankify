@@ -9,7 +9,7 @@ import {
 } from "@radix-ui/react-icons";
 import getLoggedTracks from "@/lib/database/user/getLoggedTracks";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
-import { getPrevNextIndex } from "@/lib/utils/helper";
+import { getPrevNextIndex } from "@/lib/utils";
 import TrackRankingLineChart from "@/features/ranking/display/charts/TrackRankingLineChart";
 import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";
 import PercentileBarsCard, {

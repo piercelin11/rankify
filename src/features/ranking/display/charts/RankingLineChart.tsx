@@ -1,8 +1,8 @@
 "use client";
 
 import { LineChart } from "@/components/charts/LineChart";
-import { dateToDashFormat } from "@/lib/utils/helper";
-import { AlbumData } from "@/types/data";
+import { dateToDashFormat } from "@/lib/utils";
+import { AlbumData } from "@/types/data.types";
 import { useSearchParams } from "next/navigation";
 import React from "react";
 

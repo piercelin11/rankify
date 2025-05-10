@@ -4,9 +4,9 @@ import Button from "@/components/buttons/Button";
 import { useForm } from "react-hook-form";
 import { updateArtistSchema, UpdateArtistType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArtistData } from "@/types/data";
+import { ArtistData } from "@/types/data.types";
 import FormMessage from "@/components/form/FormMessage";
-import { ActionResponse } from "@/types/action";
+import { AppResponseType } from "@/types/response.types";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import updateArtist from "@/features/admin/editContent/actions/updateArtist";
 
@@ -19,7 +19,7 @@ export default function ArtistEditingForm({
 	data,
 	setOpen,
 }: ArtistEditingFormProps) {
-	const [response, setResponse] = useState<ActionResponse | null>(null);
+	const [response, setResponse] = useState<AppResponseType | null>(null);
 	const isMounted = useRef<HTMLFormElement | null>(null);
 
 	const {
@@ -39,7 +39,7 @@ export default function ArtistEditingForm({
 		} catch (error) {
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
-					setResponse({ success: false, message: "Something went wrong." });
+					setResponse({ type: "error", message: "Something went wrong." });
 				}
 			}
 			console.error(`Error editing artist ${data.name}`, error);

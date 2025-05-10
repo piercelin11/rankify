@@ -6,7 +6,7 @@ import Tabs from "@/components/navigation/Tabs";
 import LineChartFilter, {
 	MenuOptionType,
 } from "../components/LineChartFilter";
-import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
+import { adjustColorLightness } from "@/lib/utils/color.utils";
 
 type AlbumRankingLineChartData = {
 	ranking: number;

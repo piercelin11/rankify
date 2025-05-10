@@ -3,7 +3,7 @@ import SelectablecContentItem from "./SelectablecContentItem";
 import Button from "@/components/buttons/Button";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import FormMessage from "@/components/form/FormMessage";
-import { ActionResponse } from "@/types/action";
+import { AppResponseType } from "@/types/response.types";
 import useSearchInput from "@/features/admin/addContent/hooks/useSpotifySearch";
 import useAdminContentAddtion from "../hooks/useAdminContentAddtion";
 import SearchInput from "@/components/form/SearchInput";
@@ -12,7 +12,7 @@ export type ContentType = "Album" | "EP" | "Single";
 export type ContentSubmitActionType = (
 	selectedIds: string[],
 	accessToken: string
-) => Promise<ActionResponse>;
+) => Promise<AppResponseType>;
 
 type ContentSelectionFormProps = {
 	artistId: string;

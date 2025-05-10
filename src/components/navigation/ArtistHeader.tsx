@@ -2,10 +2,10 @@
 
 import React from "react";
 import Tabs from "./Tabs";
-import { getArtistTabOptions } from "@/config/menuData";
+import { getArtistTabOptions } from "@/config/navData.config";
 import { usePathname } from "next/navigation";
 import ContentHeader from "../presentation/ContentHeader";
-import { ArtistData } from "@/types/data";
+import { ArtistData } from "@/types/data.types";
 
 type ArtistHeaderProps = {
 	artistData: ArtistData;

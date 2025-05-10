@@ -1,15 +1,15 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { ActionResponse } from "@/types/action";
-import { AlbumData, TrackData } from "@/types/data";
+import { AppResponseType } from "@/types/response.types";
+import { AlbumData, TrackData } from "@/types/data.types";
 import { UpdateTrackType } from "@/types/schemas/admin";
 import { revalidatePath, revalidateTag } from "next/cache";
 
 export default async function updateTrack(
 	originalData: TrackData,
 	formData: UpdateTrackType 
-): Promise<ActionResponse> {
+): Promise<AppResponseType> {
 	let isSuccess = false;
 
 	let newAlbum: AlbumData | null;
@@ -22,7 +22,7 @@ export default async function updateTrack(
 			},
 		});
 
-		if (!newAlbum) return { success: false, message: "Invalid album name." };
+		if (!newAlbum) return { type: "error", message: "Invalid album name." };
 	} else {
 		newAlbum = null;
 	}
@@ -60,12 +60,12 @@ export default async function updateTrack(
 		isSuccess = true;
 	} catch (error) {
 		console.error("Failed to update track.", error);
-		return { success: false, message: "Failed to update track." };
+		return { type: "error", message: "Failed to update track." };
 	}
 
 	if (isSuccess) {
 		revalidatePath("/admin");
 		revalidateTag("admin-data");
 	}
-	return { success: true, message: "Successfully updated track." };
+	return { type: "success", message: "Successfully updated track." };
 }

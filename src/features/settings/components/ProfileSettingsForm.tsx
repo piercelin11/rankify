@@ -4,8 +4,8 @@ import Button from "@/components/buttons/Button";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import FormInput from "@/components/form/FormInput";
 import FormMessage from "@/components/form/FormMessage";
-import { ActionResponse } from "@/types/action";
-import { UserData } from "@/types/data";
+import { AppResponseType } from "@/types/response.types";
+import { UserData } from "@/types/data.types";
 import {
 	profileSettingsSchema,
 	ProfileSettingsType,
@@ -21,7 +21,7 @@ type ProfileSettingsForm = {
 };
 
 export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
-	const [response, setResponse] = useState<ActionResponse | null>(null);
+	const [response, setResponse] = useState<AppResponseType | null>(null);
 	const isMounted = useRef<HTMLFormElement | null>(null);
 
 	const {
@@ -46,7 +46,7 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
 					setResponse({
 						message: "Something went wrong.",
-						success: false,
+						type: "error",
 					});
 				}
 			}

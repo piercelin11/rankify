@@ -5,10 +5,10 @@ import ColorSelector from "./ColorSelector";
 import { Controller, useForm } from "react-hook-form";
 import { updateAlbumSchema, UpdateAlbumType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlbumData } from "@/types/data";
+import { AlbumData } from "@/types/data.types";
 import updateAlbum from "@/features/admin/editContent/actions/updateAlbum";
 import FormMessage from "@/components/form/FormMessage";
-import { ActionResponse } from "@/types/action";
+import { AppResponseType } from "@/types/response.types";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import CoverSelector from "./AlbumCoverSelector";
 
@@ -21,7 +21,7 @@ export default function AlbumEditingForm({
 	data,
 	setOpen,
 }: AlbumEditingFormProps) {
-	const [response, setResponse] = useState<ActionResponse | null>(null);
+	const [response, setResponse] = useState<AppResponseType | null>(null);
 	const isMounted = useRef<HTMLFormElement | null>(null);
 
 	const {
@@ -48,7 +48,7 @@ export default function AlbumEditingForm({
 			console.log(error);
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
-					setResponse({ success: false, message: "Something went wrong." });
+					setResponse({ type: "error", message: "Something went wrong." });
 				}
 			}
 			console.error(`Error editing album ${data.name}`, error);

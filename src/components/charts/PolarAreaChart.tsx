@@ -9,7 +9,7 @@ import {
 	Legend,
 } from "chart.js";
 import { PolarArea } from "react-chartjs-2";
-import { adjustColorLightness } from "@/lib/utils/colorAdjustment";
+import { adjustColorLightness } from "@/lib/utils/color.utils";
 
 ChartJS.register(RadialLinearScale, ArcElement, Tooltip, Legend);
 

@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import Image from "next/image";
 import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
-import { AlbumData, ArtistData } from "@/types/data";
+import { AlbumData, ArtistData } from "@/types/data.types";
 import Link from "next/link";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import Scroll from "@/components/layout/Scroll";

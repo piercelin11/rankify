@@ -1,5 +1,5 @@
 import { db } from "@/lib/prisma";
-import { TrackData } from "@/types/data";
+import { TrackData } from "@/types/data.types";
 import getTracksMetrics from "./getTracksMetrics";
 import { getUserRankingPreference } from "../../user/getUserPreference";
 import getLatestRankingSession from "../../user/getLatestRankingSession";

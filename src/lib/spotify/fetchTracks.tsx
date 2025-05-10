@@ -1,6 +1,6 @@
 import getSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
 import { Album, Track } from "spotify-types";
-import { generateSearchParams } from "../utils/helper";
+import { generateSearchParams } from "@/lib/utils";
 
 export default async function fetchTracks(
 	TrackIds: string[],

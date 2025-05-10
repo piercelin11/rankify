@@ -5,7 +5,7 @@ import ActionIconGroup from "./ActionIconGroup";
 import ComfirmationModal from "@/components/modals/ComfirmationModal";
 import ModalWrapper from "@/components/modals/ModalWrapper";
 import AlbumEditingForm from "./AlbumEditingForm";
-import { AlbumData } from "@/types/data";
+import { AlbumData } from "@/types/data.types";
 import deleteItem from "../actions/deleteItem";
 
 type AlbumActionSectionProps = { data: AlbumData };
