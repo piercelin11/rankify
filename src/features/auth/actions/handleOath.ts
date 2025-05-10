@@ -2,7 +2,7 @@
 
 import { AuthError } from "next-auth"
 import { signIn } from "@/../auth"
-import { DEFAULT_LOGIN_REDIRECT } from "@/config/route.config"
+import { DEFAULT_LOGIN_REDIRECT } from "@/config/route"
 
 export default async function handleOath(provider: "google") {
 

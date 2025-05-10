@@ -4,6 +4,9 @@ import DropdownContainer from "@/components/menu/DropdownContainer";
 import DropdownTrigger from "@/components/menu/DropdownTrigger";
 import DropdownContent from "@/components/menu/DropdownContent";
 import DropdownItem from "@/components/menu/DropdownItem";
+import CheckBox from "@/components/form/CheckBox";
+import { cn } from "@/lib/cn";
+import { IoFilter } from "react-icons/io5";
 
 type RankingAlbumFilterProps = {
 	dropdownOptions: {
@@ -11,32 +14,48 @@ type RankingAlbumFilterProps = {
 		label: string;
 		onClick: () => void;
 	}[];
-	selectedAlbum?: string | null;
+	selectedAlbums: string[];
 };
 
 export default function RankingAlbumFilter({
 	dropdownOptions,
-	selectedAlbum,
+	selectedAlbums,
 }: RankingAlbumFilterProps) {
 	const [isOpen, setOpen] = useState(false);
 	return (
 		<DropdownContainer width={400}>
 			<DropdownTrigger
+				className="w-max"
 				toggleDropdown={() => setOpen((prev) => !prev)}
 				isDropdownOpen={isOpen}
+				hasIcon={false}
 			>
-				{selectedAlbum ? <p className="text-nowrap text-ellipsis overflow-hidden">{selectedAlbum}</p> : "Select..."}
+				<IoFilter />
+				<p className="me-1">Filter</p>
 			</DropdownTrigger>
-			<DropdownContent isDropdownOpen={isOpen}>
+			<DropdownContent className="py-2" isDropdownOpen={isOpen}>
 				{dropdownOptions.map((option) => (
 					<DropdownItem
+						className="flex items-center gap-2"
 						key={option.id}
 						onClick={() => {
 							option.onClick();
-							setOpen(false);
 						}}
 					>
-						{option.label}
+						{option.id !== "all" && (
+							<CheckBox
+								className="h-5 w-5"
+								checked={selectedAlbums?.includes(option.id)}
+							/>
+						)}
+						<p
+							className={cn("text-neutral-500", {
+								"text-neutral-100": selectedAlbums?.includes(option.id),
+								"text-neutral-400": option.id === "all",
+							})}
+						>
+							{option.label}
+						</p>
 					</DropdownItem>
 				))}
 			</DropdownContent>

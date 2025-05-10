@@ -79,7 +79,7 @@ export default function AllTrackOverviewRankingList({
 			<div className="flex items-center justify-between">
 				<RankingAlbumFilter
 					dropdownOptions={dropdownOptions}
-					selectedAlbum={albumIdFilter && albumsMap.get(albumIdFilter)?.name}
+					selectedAlbums={albumIdFilter}
 				/>
 				{artist && (
 					<div className="flex items-center gap-2 rounded-full bg-neutral-600/20 p-2 text-neutral-500">

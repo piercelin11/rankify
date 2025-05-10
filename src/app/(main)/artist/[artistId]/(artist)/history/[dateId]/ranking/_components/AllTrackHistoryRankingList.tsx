@@ -13,7 +13,6 @@ import AchievementDisplay, {
 } from "@/features/ranking/stats/components/AchievementDisplay";
 import useSortedAndFilteredRanking from "@/features/ranking/display/hooks/useSortedAndFilteredRanking";
 import RankingAlbumFilter from "@/features/ranking/display/components/RankingAlbumFilter";
-import useMediaQuery from "@/lib/hooks/useMediaQuery";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import Image from "next/image";
@@ -71,7 +70,8 @@ export default function AllTrackHistoryRankingList({
 			<div className="mb-10 flex items-center justify-between">
 				<RankingAlbumFilter
 					dropdownOptions={dropdownOptions}
-					selectedAlbum={albumIdFilter && albumsMap.get(albumIdFilter)?.name}
+					selectedAlbums={albumIdFilter}
+					//selectedAlbum={albumIdFilter && albumsMap.get(albumIdFilter)?.name}
 				/>
 				{artist && (
 					<div className="flex items-center gap-2 rounded-full bg-neutral-600/20 p-2 text-neutral-500">

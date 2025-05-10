@@ -1,14 +1,23 @@
-import React from "react";
+import { cn } from "@/lib/cn";
+import React, { HTMLAttributes, ReactNode } from "react";
 
 type DropdownItemProps = {
 	onClick?: () => void;
-	children: string;
+	children: string | ReactNode;
+	className?: HTMLAttributes<HTMLDivElement>["className"];
 };
 
-export default function DropdownItem({ children, onClick }: DropdownItemProps) {
+export default function DropdownItem({
+	children,
+	onClick,
+	className,
+}: DropdownItemProps) {
 	return (
 		<button
-			className="text-label w-full rounded-md px-4 py-2 text-left text-neutral-400 hover:bg-neutral-900 hover:text-neutral-100"
+			className={cn(
+				"text-label w-full rounded-md px-4 py-2 text-left text-neutral-400 hover:bg-neutral-900 hover:text-neutral-100",
+				className
+			)}
 			onClick={onClick}
 		>
 			{children}

@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import { getUserSession } from "@/../auth";
 import DropdownMenu from "@/components/menu/DropdownMenu";
 import NoData from "@/components/feedback/NoData";
-import { getOverviewDropdownData } from "@/config/navData.config";
+import { getOverviewDropdownData } from "@/config/navData";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import getRankingSession from "@/lib/database/user/getRankingSession";
 import TrackOverviewListSection from "@/app/(main)/artist/[artistId]/(artist)/overview/[rangeSlug]/_components/TrackOverviewListSection";

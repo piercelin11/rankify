@@ -1,6 +1,6 @@
 "use client";
 
-import { getMainSidebarMenuItems } from "@/config/sidebarMenu.config";
+import { getMainSidebarMenuItems } from "@/config/sidebarMenu";
 import React from "react";
 import SidebarMenuItem from "./SidebarMenuItem";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";

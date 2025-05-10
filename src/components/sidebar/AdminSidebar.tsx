@@ -2,7 +2,7 @@
 
 import {
 	adminSidebarMenuItems,
-} from "@/config/sidebarMenu.config";
+} from "@/config/sidebarMenu";
 import React from "react";
 import SidebarMenuItem from "./SidebarMenuItem";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
