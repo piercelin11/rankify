@@ -106,7 +106,6 @@ export function throttle<T extends (...args: any[]) => any>(
 	fn: T,
 	delay: number = 500
 ): (...args: Parameters<T>) => void {
-
 	let timer: null | NodeJS.Timeout = null;
 	return function (...args: Parameters<T>) {
 		if (!timer) {
@@ -130,4 +129,12 @@ export function debounce<T extends (...args: any[]) => any>(
 			fn(...args);
 		}, delay);
 	};
+}
+
+export function fileToFileList(file: File) {
+	const dataTransfer = new DataTransfer();
+	dataTransfer.items.add(file);
+	const fileList = dataTransfer.files;
+
+	return fileList;
 }

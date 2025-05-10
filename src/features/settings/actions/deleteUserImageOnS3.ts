@@ -23,25 +23,18 @@ const s3Client = new S3Client({
 	},
 });
 
-export default async function deleteUserImageOnS3() {
-	const { id: userId } = await getUserSession();
-	const userData = await db.user.findUnique({
-		where: {
-			id: userId,
-		},
-		select: {
-			image: true,
-		},
-	});
+type DeleteUserImageOnS3 = {
+	imageUrlToDelete: string | null
+}
 
-	const oldImageUrl = userData?.image;
+export default async function deleteUserImageOnS3({imageUrlToDelete}: DeleteUserImageOnS3) {
 
-	if (oldImageUrl && typeof oldImageUrl === "string") {
+	if (imageUrlToDelete && typeof imageUrlToDelete === "string") {
 		const s3Domain = `${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`;
-		if (oldImageUrl.includes(s3Domain)) {
+		if (imageUrlToDelete.includes(s3Domain)) {
 			try {
-				const oldS3Key = oldImageUrl.substring(
-					oldImageUrl.indexOf(s3Domain) + s3Domain.length + 1
+				const oldS3Key = imageUrlToDelete.substring(
+					imageUrlToDelete.indexOf(s3Domain) + s3Domain.length + 1
 				);
 
 				const deleteParams = {
@@ -53,7 +46,7 @@ export default async function deleteUserImageOnS3() {
 				await s3Client.send(deleteCommand);
 			} catch (deleteError) {
 				console.error(
-					`Failed to delete old avatar ${oldImageUrl}:`,
+					`Failed to delete old avatar ${imageUrlToDelete}:`,
 					deleteError
 				);
 			}
