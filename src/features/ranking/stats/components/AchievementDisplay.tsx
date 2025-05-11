@@ -1,24 +1,28 @@
 import { cn } from "@/lib/cn";
-import {
-	ArrowDownIcon,
-	ArrowUpIcon,
-	CircleBackslashIcon,
-	StarFilledIcon,
-} from "@radix-ui/react-icons";
-import { FaFireAlt, FaSnowflake, FaFire } from "react-icons/fa";
-import { IoSnowOutline } from "react-icons/io5";
+import { CircleBackslashIcon, StarFilledIcon } from "@radix-ui/react-icons";
 import React from "react";
 import Tooltip from "@/components/overlay/Tooltip";
+import { TbWaveSine } from "react-icons/tb";
+import { RiAnchorFill } from "react-icons/ri";
+import {
+	MdKeyboardArrowDown,
+	MdKeyboardArrowUp,
+	MdKeyboardDoubleArrowDown,
+	MdKeyboardDoubleArrowUp,
+} from "react-icons/md";
+import { IoMdArrowRoundUp, IoMdArrowRoundDown } from "react-icons/io";
 
 export type AchievementType =
-	| "Hit Peak"
+	| "New Peak"
 	| "New Low"
 	| "Big Jump"
 	| "Big Drop"
-	| "Hot Streak"
-	| "Cold Streak"
-	| "Burning Streak"
-	| "Freezing Streak";
+	| "Ascent"
+	| "Descent"
+	| "Surge"
+	| "Plunge"
+	| "Drifter"
+	| "Anchor";
 
 type AchievementDisplayProps = {
 	achievements?: AchievementType[] | null;
@@ -26,13 +30,18 @@ type AchievementDisplayProps = {
 
 const ICON_SIZE = 12;
 
+const POSITIVE_STYLE = "border-success-500 bg-success-900/10 text-success-500";
+const NEGATIVE_STYLE = "border-danger-500 bg-danger-900/10 text-danger-500";
+const NEUTRAL_STYLE =
+	"border-lavender-500 bg-lavender-900/20 text-lavender-500";
+
 function getAchievement(achievement: AchievementType) {
 	switch (achievement) {
-		case "Hit Peak": {
+		case "New Peak": {
 			return (
 				<AchievementItem
 					icon={<StarFilledIcon width={ICON_SIZE} height={ICON_SIZE} />}
-					label={"Hit Peak"}
+					label={"New Peak"}
 					className={"border-primary-500 bg-primary-900/30 text-primary-500"}
 				/>
 			);
@@ -49,54 +58,72 @@ function getAchievement(achievement: AchievementType) {
 		case "Big Jump": {
 			return (
 				<AchievementItem
-					icon={<ArrowUpIcon width={ICON_SIZE} height={ICON_SIZE} />}
+					icon={<IoMdArrowRoundUp size={ICON_SIZE} />}
 					label={"Big Jump"}
-					className={"border-success-500 bg-success-900/30 text-success-500"}
+					className={POSITIVE_STYLE}
 				/>
 			);
 		}
 		case "Big Drop": {
 			return (
 				<AchievementItem
-					icon={<ArrowDownIcon width={ICON_SIZE} height={ICON_SIZE} />}
+					icon={<IoMdArrowRoundDown size={ICON_SIZE} />}
 					label={"Big Drop"}
-					className={"border-danger-500 bg-danger-900/30 text-danger-500"}
+					className={NEGATIVE_STYLE}
 				/>
 			);
 		}
-		case "Hot Streak": {
+		case "Ascent": {
 			return (
 				<AchievementItem
-					icon={<FaFireAlt size={ICON_SIZE} />}
-					label={"Hot Streak"}
-					className={"border-amber-500 bg-amber-900/30 text-amber-500 lg:w-24"}
+					icon={<MdKeyboardArrowUp size={ICON_SIZE} />}
+					label={"Ascent"}
+					className={cn("lg:w-20", POSITIVE_STYLE)}
 				/>
 			);
 		}
-		case "Burning Streak": {
+		case "Surge": {
 			return (
 				<AchievementItem
-					icon={<FaFire size={ICON_SIZE} />}
-					label={"Burning"}
-					className={"border-amber-200 bg-amber-500/30 text-amber-200 lg:w-24"}
+					icon={<MdKeyboardDoubleArrowUp size={ICON_SIZE} />}
+					label={"Surge"}
+					className={cn("lg:w-20", POSITIVE_STYLE)}
 				/>
 			);
 		}
-		case "Cold Streak": {
+		case "Descent": {
 			return (
 				<AchievementItem
-					icon={<IoSnowOutline size={ICON_SIZE} />}
-					label={"Cold Streak"}
-					className={"border-sky-500 bg-sky-900/30 text-sky-400 lg:w-24"}
+					icon={<MdKeyboardArrowDown size={ICON_SIZE} />}
+					label={"Descent"}
+					className={cn("lg:w-20", NEGATIVE_STYLE)}
 				/>
 			);
 		}
-		case "Freezing Streak": {
+		case "Plunge": {
 			return (
 				<AchievementItem
-					icon={<FaSnowflake size={ICON_SIZE} />}
-					label={"Freezing"}
-					className={"border-sky-200 bg-sky-500/30 text-sky-200 lg:w-24"}
+					icon={<MdKeyboardDoubleArrowDown size={ICON_SIZE} />}
+					label={"Plunge"}
+					className={cn("lg:w-20", NEGATIVE_STYLE)}
+				/>
+			);
+		}
+		case "Drifter": {
+			return (
+				<AchievementItem
+					icon={<TbWaveSine size={ICON_SIZE} />}
+					label={"Drifter"}
+					className={cn("lg:w-20", NEUTRAL_STYLE)}
+				/>
+			);
+		}
+		case "Anchor": {
+			return (
+				<AchievementItem
+					icon={<RiAnchorFill size={ICON_SIZE} />}
+					label={"Anchor"}
+					className={cn("lg:w-20", NEUTRAL_STYLE)}
 				/>
 			);
 		}
@@ -107,8 +134,8 @@ export default function AchievementDisplay({
 	achievements,
 }: AchievementDisplayProps) {
 	return (
-		<>
-			{achievements && (
+		<div className="flex gap-2">
+			{/* {achievements && (
 				<Tooltip
 					key={achievements[0]}
 					content={achievements[0]}
@@ -116,24 +143,36 @@ export default function AchievementDisplay({
 				>
 					{getAchievement(achievements[0])}
 				</Tooltip>
-			)}
-		</>
+			)} */}
+			{achievements?.map((achievement) => (
+				<Tooltip key={achievement} content={achievement} className="lg:hidden">
+					{getAchievement(achievement)}
+				</Tooltip>
+			))}
+		</div>
 	);
 }
 
 type AchievementItemProps = {
 	icon: React.ReactNode;
 	label: string;
-	className: React.HTMLAttributes<HTMLDivElement>["className"];
+	className?: React.HTMLAttributes<HTMLDivElement>["className"];
+	style?: React.HTMLAttributes<HTMLDivElement>["style"];
 };
 
-function AchievementItem({ className, icon, label }: AchievementItemProps) {
+function AchievementItem({
+	className,
+	icon,
+	label,
+	style,
+}: AchievementItemProps) {
 	return (
 		<div
 			className={cn(
-				"flex justify-center rounded-lg border p-2 lg:w-22",
+				"flex justify-center rounded-xl border p-2 lg:w-24",
 				className
 			)}
+			style={style}
 		>
 			<div className="flex items-center gap-1">
 				{icon}

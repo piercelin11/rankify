@@ -127,22 +127,23 @@ export async function getTracksRankingHistory({
 
 		const achievement: AchievementType[] = [];
 
+		if (Number(data.rankChange) > rankings.length / 5)
+			achievement.push("Big Jump");
+		if (Number(data.rankChange) < -(rankings.length / 5))
+			achievement.push("Big Drop");
 		if (
 			data.ranking < Number(prevPeak) &&
 			latestSession?.id === dateId &&
 			totalLogsCount > 2
 		)
-			achievement.push("Hit Peak");
+			achievement.push("New Peak");
 		if (
 			data.ranking > Number(prevWorst) &&
 			latestSession?.id === dateId &&
 			totalLogsCount > 3
 		)
 			achievement.push("New Low");
-		if (Number(data.rankChange) > rankings.length / 5)
-			achievement.push("Big Jump");
-		if (Number(data.rankChange) < -(rankings.length / 5))
-			achievement.push("Big Drop");
+		
 
 		return {
 			...data.track,

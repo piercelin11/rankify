@@ -36,11 +36,11 @@
 	}
 
 	.h-virtualized-ranking {
-		@apply h-[calc(100vh-230px)];
+		@apply h-[calc(100vh-180px)] 2xl:h-[calc(100vh-220px)];
 	}
 
 	.grid-ranking-list {
-		@apply grid grid-cols-[30px,_1fr] md:grid-cols-[45px,_1fr,_1fr];
+		@apply grid grid-cols-[30px,_1fr] md:grid-cols-[45px,_2fr,_3fr];
 	}
 }
 

@@ -45,6 +45,18 @@ export default {
 					800: "#5E7022",
 					900: "#3B4511",
 				},
+				lavender: {
+					50: "#F7F9FA",
+					100: "#F0F3F5",
+					200: "#DDE5E9",
+					300: "#C7D3DB",
+					400: "#B0BCC6",
+					500: "#90A4AE",
+					600: "#748892",
+					700: "#59676E",
+					800: "#424E54",
+					900: "#2C3437",
+				},
 				neutral: colors.zinc,
 				success: colors.green,
 				warning: colors.yellow,
@@ -64,11 +76,11 @@ export default {
 				"sidebar-sm": "88px",
 				"sidebar-lg": "260px",
 				"sidebar-xl": "300px",
-				"22": "5.5rem"
+				"22": "5.5rem",
 			},
 			backgroundImage: {
-				"glow": `radial-gradient(ellipse farthest-side at top, ${colors.neutral[800]}40, ${colors.neutral[950]}CC)`
-			}
+				glow: `radial-gradient(ellipse farthest-side at top, ${colors.neutral[800]}40, ${colors.neutral[950]}CC)`,
+			},
 		},
 	},
 	plugins: [

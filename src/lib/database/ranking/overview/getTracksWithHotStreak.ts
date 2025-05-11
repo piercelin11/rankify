@@ -13,7 +13,7 @@ type GetStreakProps = {
 	streak?: 3 | 5;
 };
 
-// 計算 "Hot Streak" (連續上漲 >= 3 次，結算至最新一次)
+// 計算 "Ascent" (連續上漲 >= 3 次，結算至最新一次)
 export async function getTracksWithHotStreak({
 	userId,
 	artistId,

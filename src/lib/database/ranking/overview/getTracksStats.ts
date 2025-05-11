@@ -221,11 +221,16 @@ export default async function getTracksStats({
 		const hasFreezingStreak = freezingStreakTrackIds?.has(data.id);
 
 		const achievement: AchievementType[] = [];
-		if (hasBurningStreak) achievement.push("Burning Streak");
-		else if (hasHotStreak) achievement.push("Hot Streak");
+		if (hasBurningStreak) achievement.push("Surge");
+		else if (hasHotStreak) achievement.push("Ascent");
 
-		if (hasFreezingStreak) achievement.push("Freezing Streak");
-		else if (hasColdStreak) achievement.push("Cold Streak");
+		if (hasFreezingStreak) achievement.push("Plunge");
+		else if (hasColdStreak) achievement.push("Descent");
+
+		if (data.worst - data.peak > trackMetrics.length / 2 && data.count > 2)
+			achievement.push("Drifter");
+		if (data.worst - data.peak < trackMetrics.length / 8 && data.count > 3)
+			achievement.push("Anchor");
 
 		return {
 			...allTracksMap.get(data.id)!,
