@@ -8,6 +8,7 @@ import deleteRankingDraft from "../../ranking/actions/deleteRankingDraft";
 import ComfirmationModal from "@/components/modals/ComfirmationModal";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
+	setError,
 	setPercentage,
 	setSaveStatus,
 } from "@/features/sorter/slices/sorterSlice";
@@ -15,6 +16,7 @@ import Button from "@/components/buttons/Button";
 import { CurrentStage } from "./SorterPage";
 import useSorter from "@/features/sorter/hooks/useSorter";
 import { PLACEHOLDER_PIC } from "@/constants";
+import ModalWrapper from "@/components/modals/ModalWrapper";
 
 export type RankingResultData = TrackData & {
 	ranking: number;
@@ -35,6 +37,7 @@ export default function SortingStage({
 }: SortingStageProps) {
 	const excluded = useAppSelector((state) => state.sorter.excluded);
 	const saveStatus = useAppSelector((state) => state.sorter.saveStatus);
+	const isError = useAppSelector((state) => state.sorter.isError);
 	const dispatch = useAppDispatch();
 
 	const [isQuitOpen, setQuitOpen] = useState<boolean>(false);
@@ -71,7 +74,6 @@ export default function SortingStage({
 	function handleQuit() {
 		dispatch(setSaveStatus("idle"));
 		router.replace(`/artist/${artistId}/overview`);
-		
 	}
 
 	//用鍵盤選擇歌曲
@@ -124,6 +126,29 @@ export default function SortingStage({
 
 	return (
 		<section className="container select-none space-y-6">
+			<ModalWrapper className="w-max" isRequestOpen={isError}>
+				<div className="flex flex-col items-center space-y-8 p-10">
+					<div className="space-y-2">
+						<h2 className="text-center">Oops!</h2>
+						<p className="text-description text-center">
+							Something went wrong! Please try again!
+						</p>
+						<p className="text-center font-semibold">
+							Warning: this may delete your draft.
+						</p>
+					</div>
+					<Button
+						variant="primary"
+						onClick={async () => {
+							await deleteRankingDraft(artistId);
+							setCurrentStage("filter");
+							dispatch(setError(false));
+						}}
+					>
+						try again
+					</Button>
+				</div>
+			</ModalWrapper>
 			{(excluded || draft) && (
 				<>
 					<div className="grid grid-cols-2 grid-rows-[150px_75px_150px] gap-3 sm:grid-flow-col sm:grid-cols-3 sm:grid-rows-2 xl:gap-6">

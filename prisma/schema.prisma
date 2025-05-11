@@ -167,7 +167,7 @@ model RankingDraft {
   id       String       @id @default(uuid())
   date     DateTime     @default(now())
   userId   String
-  artistId String?
+  artistId String
   draft    String?
   result   Json?
   type     RankingType?

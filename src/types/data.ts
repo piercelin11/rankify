@@ -40,9 +40,7 @@ export type RankingSessionData = RankingSession & {
 	user?: UserData;
 };
 
-export type RankingDraftData = RankingDraft & {
-	draft: RankingResultData | null;
-};
+export type RankingDraftData = RankingDraft;
 
 export type UserPreferenceData = {
 	id: string;

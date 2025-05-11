@@ -4,7 +4,7 @@ import React, { HTMLAttributes } from "react";
 
 export type ModalWrapperProps = {
 	children: React.ReactNode;
-	onRequestClose: () => void;
+	onRequestClose?: () => void;
 	isRequestOpen: boolean;
 	className?: HTMLAttributes<HTMLDivElement>["className"];
 };
@@ -25,12 +25,14 @@ export default function ModalWrapper({
 							className
 						)}
 					>
-						<Cross2Icon
-							className="absolute right-4 top-4 cursor-pointer text-neutral-500 hover:text-neutral-100"
-							onClick={onRequestClose}
-							width={20}
-							height={20}
-						/>
+						{onRequestClose && (
+							<Cross2Icon
+								className="absolute right-4 top-4 cursor-pointer text-neutral-500 hover:text-neutral-100"
+								onClick={onRequestClose}
+								width={20}
+								height={20}
+							/>
+						)}
 						<div className="space-y-8">{children}</div>
 					</div>
 					<div className="fixed h-full w-full bg-neutral-950/70"></div>

@@ -17,7 +17,7 @@ type SorterPageProps = {
 
 export default function SorterPage({ albums, tracks, draft }: SorterPageProps) {
 	const [currentStage, setCurrentStage] = useState<CurrentStage | null>(null);
-
+ 
 	useEffect(() => {
 		if (draft?.result) setCurrentStage("result");
 		else if (draft) setCurrentStage("sorting");

@@ -16,15 +16,15 @@
 	}
 
 	.text-description {
-		@apply text-base font-normal leading-relaxed text-neutral-500;
+		@apply text-base font-normal leading-tight text-neutral-500;
 	}
 
 	.text-caption {
-		@apply text-sm font-normal leading-relaxed text-neutral-600;
+		@apply text-sm font-normal leading-tight text-neutral-600;
 	}
 
 	.text-label {
-		@apply text-sm font-normal leading-relaxed xl:text-base;
+		@apply text-sm font-normal leading-tight xl:text-base;
 	}
 
 	.stats-card {

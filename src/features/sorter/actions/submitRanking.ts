@@ -13,6 +13,7 @@ import createRankingSession from "../../ranking/actions/createRankingSession";
 export default async function submitRanking(
 	trackRankings: RankingResultData[],
 	artistId: string,
+	draftId: string,
 	type: $Enums.RankingType
 ): Promise<AppResponseType> {
 	const { id: userId } = await getUserSession();
@@ -34,8 +35,7 @@ export default async function submitRanking(
 
 			await tx.rankingDraft.deleteMany({
 				where: {
-					artistId,
-					userId,
+					id: draftId,
 				},
 			});
 		});

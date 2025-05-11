@@ -1,4 +1,5 @@
 import {
+	setError,
 	setPercentage,
 	setSaveStatus,
 } from "@/features/sorter/slices/sorterSlice";
@@ -10,6 +11,7 @@ import { RankingResultData } from "../components/SortingStage";
 import saveDraftResult from "../../ranking/actions/saveDraftResult";
 import { debounce } from "chart.js/helpers";
 import { CurrentStage } from "../components/SorterPage";
+import deleteRankingDraft from "@/features/ranking/actions/deleteRankingDraft";
 
 type HistoryState = {
 	cmp1: number;
@@ -240,22 +242,29 @@ export default function useSorter({
 	}
 
 	//將歌名顯示於比較兩首歌曲的表格中
-	function showImage() {
+	async function showImage() {
 		const percentage = Math.floor(
 			(finishSize.current * 100) / totalSize.current
 		);
-		const leftField =
-			"" + toNameFace(lstMember.current[cmp1.current][head1.current]);
-		const rightField =
-			"" + toNameFace(lstMember.current[cmp2.current][head2.current]);
 
-		const leftFieldData = tracks.find((item) => item.name === leftField);
-		const rightFieldData = tracks.find((item) => item.name === rightField);
-		setLeftField(leftFieldData);
-		setRightField(rightFieldData);
+		try {
+			const leftField =
+				"" + toNameFace(lstMember.current[cmp1.current][head1.current]);
+			const rightField =
+				"" + toNameFace(lstMember.current[cmp2.current][head2.current]);
 
-		percent.current = percentage;
-		dispatch(setPercentage(percentage));
+			const leftFieldData = tracks.find((item) => item.name === leftField);
+			const rightFieldData = tracks.find((item) => item.name === rightField);
+			setLeftField(leftFieldData);
+			setRightField(rightFieldData);
+
+			percent.current = percentage;
+			dispatch(setPercentage(percentage));
+		} catch (err) {
+			console.error(err);
+			
+			dispatch(setError(true));
+		}
 	}
 
 	//將排序數字轉換成歌名
@@ -417,20 +426,20 @@ export default function useSorter({
 
 	useEffect(() => {
 		if (draft?.draft) {
-			const history = JSON.parse(draft.draft);
-			cmp1.current = history.cmp1;
-			cmp2.current = history.cmp2;
-			head1.current = history.head1;
-			head2.current = history.head2;
-			rec.current = history.rec;
-			nrec.current = history.nrec;
-			equal.current = history.equal;
-			finishSize.current = history.finishSize;
-			finishFlag.current = history.finishFlag;
-			lstMember.current = history.lstMember;
-			parent.current = history.parent;
-			totalSize.current = history.totalSize;
-			namMember.current = history.namMember;
+			const loadedState = JSON.parse(draft.draft);
+			cmp1.current = loadedState.cmp1;
+			cmp2.current = loadedState.cmp2;
+			head1.current = loadedState.head1;
+			head2.current = loadedState.head2;
+			rec.current = loadedState.rec;
+			nrec.current = loadedState.nrec;
+			equal.current = loadedState.equal;
+			finishSize.current = loadedState.finishSize;
+			finishFlag.current = loadedState.finishFlag;
+			lstMember.current = loadedState.lstMember;
+			parent.current = loadedState.parent;
+			totalSize.current = loadedState.totalSize;
+			namMember.current = loadedState.namMember;
 			showImage();
 		} else {
 			initList();

@@ -25,7 +25,7 @@ type ResultStageProps = {
 
 export default function ResultStage({ draft }: ResultStageProps) {
 	if (!draft.result) notFound();
-	const result = draft.result!;
+	const result = draft.result! as RankingResultData[];
 	const dispatch = useAppDispatch();
 
 	const [isCancelOpen, setCancelOpen] = useState(false);
@@ -94,7 +94,12 @@ export default function ResultStage({ draft }: ResultStageProps) {
 						<Button
 							variant="primary"
 							onClick={() => {
-								submitRanking(optimisticResult, draft.artistId, "ARTIST");
+								submitRanking(
+									optimisticResult,
+									draft.artistId,
+									draft.id,
+									"ARTIST"
+								);
 							}}
 						>
 							<p className="w-full">Submit</p>
