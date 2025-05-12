@@ -1,7 +1,10 @@
-export function toAcronym(string: string) {
-	if (!string) return;
+export function toAcronym(input: string) {
+	if (typeof input !== "string")
+		throw new Error(
+			`Invalid input: Expected a string, but received ${typeof input}.`
+		);
 
-	const cleanedString = string.replace(/\(.*?\)|\[.*?\]/g, "").trim();
+	const cleanedString = input.replace(/\(.*?\)|\[.*?\]/g, "").trim();
 
 	if (cleanedString.length > 18) {
 		const words = cleanedString.split(" ");
@@ -12,6 +15,10 @@ export function toAcronym(string: string) {
 	}
 }
 
-export function capitalizeFirstLetter(string: string): string {
-	return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+export function capitalizeFirstLetter(input: string): string {
+	if (typeof input !== "string")
+		throw new Error(
+			`Invalid input: Expected a string, but received ${typeof input}.`
+		);
+	return input.charAt(0).toUpperCase() + input.slice(1).toLowerCase();
 }
