@@ -101,8 +101,8 @@ export default async function TrackPage({
 	];
 
 	const { previousIndex, nextIndex } = getPrevNextIndex({
-		data: albumStats,
-		key: albumId,
+		items: albumStats,
+		targetItemId: albumId,
 	});
 
 	return (

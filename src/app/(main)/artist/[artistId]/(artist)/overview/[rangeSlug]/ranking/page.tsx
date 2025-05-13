@@ -16,7 +16,7 @@ export default async function ArtistRankingPage({
 }) {
 	const { artistId, rangeSlug } = await params;
 	const { id: userId } = await getUserSession();
-	const { startDate } = calculateDateRangeFromSlug(rangeSlug);
+	const startDate = calculateDateRangeFromSlug(rangeSlug);
 
 	const time: TimeFilterType | undefined = startDate
 		? {

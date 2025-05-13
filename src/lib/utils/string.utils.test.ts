@@ -1,3 +1,4 @@
+import { getDevInputTypeError } from "@/constants";
 import { toAcronym, capitalizeFirstLetter } from "./string.utils";
 
 describe("toAcronym funtion", () => {
@@ -5,7 +6,7 @@ describe("toAcronym funtion", () => {
 		test.each([
 			["THE TORTURED POETS DEPARTMENT", "TTPD"],
 			["1989", "1989"],
-            ["SOUR", "SOUR"],
+			["SOUR", "SOUR"],
 			["Dragon New Warm Mountain I Believe In You", "DNWMIBIY"],
 			["A Tiny House, In Secret Speeches, Polar Equals", "ATHISSPE"],
 			["", ""],
@@ -27,7 +28,7 @@ describe("toAcronym funtion", () => {
 			"should throw an error for non-string input '%s' with type '%s'",
 			(input, typeName) => {
 				expect(() => toAcronym(input as any)).toThrow(
-					`Invalid input: Expected a string, but received ${typeName}.`
+					getDevInputTypeError("string", typeName)
 				);
 			}
 		);
@@ -61,7 +62,7 @@ describe("capitalizeFirstLetter function", () => {
 			"should throw an error for non-string input '%s' with type '%s'",
 			(input, typeName) => {
 				expect(() => capitalizeFirstLetter(input as any)).toThrow(
-					`Invalid input: Expected a string, but received ${typeName}.`
+					getDevInputTypeError("string", typeName)
 				);
 			}
 		);

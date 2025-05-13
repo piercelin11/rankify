@@ -19,7 +19,7 @@ export default async function TrackOverviewListSection({
 	userId,
 	rangeSlug,
 }: TrackOverviewListSectionProps) {
-	const { startDate } = calculateDateRangeFromSlug(rangeSlug);
+	const startDate = calculateDateRangeFromSlug(rangeSlug);
 	const time: TimeFilterType | undefined = startDate
 		? {
 				threshold: startDate,

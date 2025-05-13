@@ -94,8 +94,8 @@ export default async function page({
 	];
 
 	const { previousIndex, nextIndex } = getPrevNextIndex({
-		data: trackStats,
-		key: trackId,
+		items: trackStats,
+		targetItemId: trackId,
 	});
 
 	return (

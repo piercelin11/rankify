@@ -15,7 +15,7 @@ export default async function AlbumOverviewPointsSection({
 	userId,
 	rangeSlug,
 }: AlbumOverviewPointsSectionProps) {
-	const { startDate } = calculateDateRangeFromSlug(rangeSlug);
+	const startDate = calculateDateRangeFromSlug(rangeSlug);
 	const time: TimeFilterType | undefined = startDate
 		? {
 				threshold: startDate,

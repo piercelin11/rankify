@@ -1,6 +1,11 @@
-export function dateToLong(date: Date) {
-	const originalDate = new Date(date);
-	const formattedDate = originalDate.toLocaleDateString("en-US", {
+import { getDevInputTypeError } from "@/constants/devErrors.constants";
+
+export function dateToLong(input: Date) {
+	if (!(input instanceof Date)) {
+		throw new Error(getDevInputTypeError("Date", typeof input));
+	}
+
+	const formattedDate = input.toLocaleDateString("en-US", {
 		year: "numeric",
 		month: "long",
 		day: "numeric",
@@ -8,24 +13,24 @@ export function dateToLong(date: Date) {
 	return formattedDate;
 }
 
-export function dateToDashFormat(date: Date | null) {
-	if (!date) return "No Date";
-	const d = new Date(date);
+export function dateToDashFormat(input: Date) {
+	if (!(input instanceof Date)) {
+		throw new Error(getDevInputTypeError("Date", typeof input));
+	}
 
-	const year = d.getFullYear();
-	const month = (d.getMonth() + 1).toString().padStart(2, "0");
-	const day = d.getDate().toString().padStart(2, "0");
+	const year = input.getFullYear();
+	const month = (input.getMonth() + 1).toString().padStart(2, "0");
+	const day = input.getDate().toString().padStart(2, "0");
 
 	const formattedDate = `${year}-${month}-${day}`;
 	return formattedDate;
 }
 
-export function calculateDateRangeFromSlug(rangeSlug: string): {
-	startDate?: Date;
-	endDate: Date;
-} {
+export function calculateDateRangeFromSlug(rangeSlug: string): Date | undefined {
+	if (typeof rangeSlug !== "string") {
+		throw new Error(getDevInputTypeError("Date", typeof rangeSlug));
+	}
 	const now = new Date();
-	const endDate = now;
 	let startDate: Date | undefined;
 
 	switch (rangeSlug) {
@@ -63,5 +68,5 @@ export function calculateDateRangeFromSlug(rangeSlug: string): {
 		}
 	}
 
-	return { startDate, endDate };
+	return startDate;
 }
