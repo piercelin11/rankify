@@ -79,7 +79,7 @@ describe("calculateDateRangeFromSlug Function", () => {
 			jest.setSystemTime(mockDate);
 		});
 
-		test('should return the correct start date for "past-month"', () => {
+		test("should return the correct start date for 'past-month'", () => {
 			const expectedDate = new Date(mockDate);
 			expectedDate.setMonth(expectedDate.getMonth() - 1);
 
@@ -89,7 +89,7 @@ describe("calculateDateRangeFromSlug Function", () => {
 			expect(result?.getTime()).toBe(expectedDate.getTime());
 		});
 
-		test('should return the correct start date for "past-6-months"', () => {
+		test("should return the correct start date for 'past-6-months'", () => {
 			const expectedDate = new Date(mockDate);
 			expectedDate.setMonth(expectedDate.getMonth() - 6);
 
@@ -99,7 +99,7 @@ describe("calculateDateRangeFromSlug Function", () => {
 			expect(result?.getTime()).toBe(expectedDate.getTime());
 		});
 
-		test('should return the correct start date for "past-year"', () => {
+		test("should return the correct start date for 'past-year'", () => {
 			const expectedDate = new Date(mockDate);
 			expectedDate.setFullYear(expectedDate.getFullYear() - 1);
 
@@ -109,7 +109,7 @@ describe("calculateDateRangeFromSlug Function", () => {
 			expect(result?.getTime()).toBe(expectedDate.getTime());
 		});
 
-		test('should return the correct start date for "past-2-years"', () => {
+		test("should return the correct start date for 'past-2-years'", () => {
 			const expectedDate = new Date(mockDate);
 			expectedDate.setFullYear(expectedDate.getFullYear() - 2);
 
@@ -119,7 +119,7 @@ describe("calculateDateRangeFromSlug Function", () => {
 			expect(result?.getTime()).toBe(expectedDate.getTime());
 		});
 
-		test('should return undefined for "all-time"', () => {
+		test("should return undefined for 'all-time'", () => {
 			const result = calculateDateRangeFromSlug("all-time");
 			expect(result).toBeUndefined();
 		});
