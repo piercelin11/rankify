@@ -9,7 +9,7 @@
 		"lint": "next lint",
 		"prettier": "prettier --write",
 		"test": "NODE_OPTIONS='--experimental-vm-modules' jest",
-		"test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch"
+		"test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watchAll"
 	},
 	"dependencies": {
 		"@auth/prisma-adapter": "^2.7.4",

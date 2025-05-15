@@ -101,7 +101,7 @@ describe("adjustColor function", () => {
 			["#FFFFFF", -1, 1],
 			["#FFFFFF", 10, 1],
 		])(
-			"should throw an error when receive invalid hex value '%s'",
+			"should throw an error when receive invalid targetLightness '%f'",
 			(hex, lightness, saturation) => {
 				const errorMessage = `Invalid targetLightness: ${lightness}. Expected a number or float between 0.0 and 1.0.`;
 				expect(() => adjustColor(hex, lightness, saturation)).toThrow(
