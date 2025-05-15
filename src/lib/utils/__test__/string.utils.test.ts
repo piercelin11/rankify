@@ -1,5 +1,5 @@
 import { getDevInputTypeError } from "@/constants";
-import { toAcronym, capitalizeFirstLetter } from "./string.utils";
+import { toAcronym, capitalizeFirstLetter } from "../string.utils";
 
 describe("toAcronym funtion", () => {
 	describe("When given a valid string input", () => {

@@ -1,14 +1,7 @@
 import colorConvert from "color-convert";
 
-export function rgbToHex(
-	colorArray: Uint8ClampedArray | undefined | number[]
-): string {
-	if (!colorArray) return "#4d4d4d";
-	return `#${colorArray[0].toString(16).padStart(2, "0")}${colorArray[1].toString(16).padStart(2, "0")}${colorArray[2].toString(16).padStart(2, "0")}`;
-}
-
 // 調整顏色亮度
-export function adjustColorLightness(
+export function adjustColor(
 	hexColor: string,
 	targetLightness: number,
 	saturationFactor: number = 1.0
@@ -18,12 +11,12 @@ export function adjustColorLightness(
 		!hexColor.startsWith("#") ||
 		hexColor.length !== 7
 	) {
-		throw new Error(`無效的 hexColor 格式: ${hexColor}。預期 '#RRGGBB'。`);
+		throw new Error(`Invalid hexColor format: ${hexColor}. Expected '#RRGGBB'.`);
 	}
 
 	const hexValue = hexColor.slice(1);
 	if (!/^[0-9a-fA-F]{6}$/.test(hexValue)) {
-		throw new Error(`無效的 Hex 顏色值: ${hexColor}`);
+		throw new Error(`Invalid Hex value: ${hexColor}`);
 	}
 
 	if (
@@ -32,7 +25,7 @@ export function adjustColorLightness(
 		targetLightness > 1.0
 	) {
 		throw new Error(
-			`無效的 targetLightness: ${targetLightness}。預期一個介於 0.0 和 1.0 之間的數字。`
+			`Invalid targetLightness: ${targetLightness}. Expected a number or float between 0.0 and 1.0.`
 		);
 	}
 
@@ -42,18 +35,12 @@ export function adjustColorLightness(
 
 	const lch = colorConvert.lab.lch(lab);
 
-	const originalL = lch[0];
 	const originalC = lch[1];
 	const originalH = lch[2];
 
 	const newL = targetLightness * 100;
 
-	let newC;
-	if (originalC === 0) {
-		newC = 0;
-	} else {
-		newC = originalC * saturationFactor;
-	}
+	const newC = originalC * saturationFactor
 	const newH = originalH;
 
 	const newLch: [number, number, number] = [newL, newC, newH];
@@ -70,65 +57,64 @@ export function adjustColorLightness(
 export function adjustColorOpacity(hexColor: string, opacity: number) {
 	switch (opacity) {
 		case 0.95: {
-			return hexColor + "F2"
+			return hexColor + "F2";
 		}
 		case 0.9: {
-			return hexColor + "E6"
+			return hexColor + "E6";
 		}
 		case 0.85: {
-			return hexColor + "D9"
+			return hexColor + "D9";
 		}
 		case 0.8: {
-			return hexColor + "CC"
+			return hexColor + "CC";
 		}
 		case 0.75: {
-			return hexColor + "BF"
+			return hexColor + "BF";
 		}
 		case 0.7: {
-			return hexColor + "B3"
+			return hexColor + "B3";
 		}
 		case 0.65: {
-			return hexColor + "A6"
+			return hexColor + "A6";
 		}
 		case 0.6: {
-			return hexColor + "99"
+			return hexColor + "99";
 		}
 		case 0.55: {
-			return hexColor + "8C"
+			return hexColor + "8C";
 		}
 		case 0.5: {
-			return hexColor + "80"
+			return hexColor + "80";
 		}
 		case 0.45: {
-			return hexColor + "73"
+			return hexColor + "73";
 		}
 		case 0.4: {
-			return hexColor + "66"
+			return hexColor + "66";
 		}
 		case 0.35: {
-			return hexColor + "59"
+			return hexColor + "59";
 		}
 		case 0.3: {
-			return hexColor + "4D"
+			return hexColor + "4D";
 		}
 		case 0.25: {
-			return hexColor + "40"
+			return hexColor + "40";
 		}
 		case 0.2: {
-			return hexColor + "33"
+			return hexColor + "33";
 		}
 		case 0.15: {
-			return hexColor + "26"
+			return hexColor + "26";
 		}
 		case 0.1: {
-			return hexColor + "1A"
+			return hexColor + "1A";
 		}
 		case 0.05: {
-			return hexColor + "0D"
+			return hexColor + "0D";
 		}
-		default : {
-			return hexColor
+		default: {
+			return hexColor;
 		}
-
 	}
 }

@@ -3,7 +3,7 @@ import {
 	calculateDateRangeFromSlug,
 	dateToDashFormat,
 	dateToLong,
-} from "./date.utils";
+} from "../date.utils";
 
 describe("dateToLong Function", () => {
 	describe("when given a valid Date input", () => {

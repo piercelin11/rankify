@@ -6,7 +6,7 @@ import Tabs from "@/components/navigation/Tabs";
 import LineChartFilter, {
 	MenuOptionType,
 } from "../components/LineChartFilter";
-import { adjustColorLightness } from "@/lib/utils/color.utils";
+import { adjustColor } from "@/lib/utils/color.utils";
 
 type AlbumRankingLineChartData = {
 	ranking: number;
@@ -41,7 +41,7 @@ export default function AlbumRankingLineChart({
 			<div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
 				<Tabs
 					options={tabOptions}
-					color={defaultAlbumData.color ? adjustColorLightness(defaultAlbumData.color, 0.8) : null}
+					color={defaultAlbumData.color ? adjustColor(defaultAlbumData.color, 0.8) : null}
 					activeId={view}
 				/>
 				<LineChartFilter

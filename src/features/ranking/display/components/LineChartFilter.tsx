@@ -2,7 +2,7 @@
 
 import { DEFAULT_COLOR } from "@/constants";
 import { cn } from "@/lib/cn";
-import { adjustColorLightness } from "@/lib/utils/color.utils";
+import { adjustColor } from "@/lib/utils/color.utils";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import useLineChartFilter from "../hooks/useLineChartFilter";
 import { useState } from "react";
@@ -116,12 +116,12 @@ function TrackTag({
 		<div
 			className="text-label flex flex-none flex-grow-0 items-center gap-1 rounded-lg px-2 py-1 sm:px-3 sm:py-2"
 			style={{
-				backgroundColor: adjustColorLightness(
+				backgroundColor: adjustColor(
 					tag.color ?? DEFAULT_COLOR,
 					isCrossHover ? 0.1 : 0.05
 				),
-				border: `solid 1px ${adjustColorLightness(tag.color ?? DEFAULT_COLOR, 0.7, 1.5)}`,
-				color: adjustColorLightness(tag.color ?? DEFAULT_COLOR, 0.8, 1.5),
+				border: `solid 1px ${adjustColor(tag.color ?? DEFAULT_COLOR, 0.7, 1.5)}`,
+				color: adjustColor(tag.color ?? DEFAULT_COLOR, 0.8, 1.5),
 			}}
 		>
 			{!isDefault && (
@@ -162,12 +162,12 @@ function AlbumTag({
 				}
 			)}
 			style={{
-				backgroundColor: adjustColorLightness(
+				backgroundColor: adjustColor(
 					tag.color ?? DEFAULT_COLOR,
 					isHighlight ? 0.1 : 0
 				),
-				border: `solid 1px ${adjustColorLightness(tag.color ?? DEFAULT_COLOR, isHighlight ? 0.7 : 0.4, 1.5)}`,
-				color: adjustColorLightness(
+				border: `solid 1px ${adjustColor(tag.color ?? DEFAULT_COLOR, isHighlight ? 0.7 : 0.4, 1.5)}`,
+				color: adjustColor(
 					tag.color ?? DEFAULT_COLOR,
 					isHighlight ? 0.8 : 0.5,
 					1.5

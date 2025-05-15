@@ -13,7 +13,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { Filler } from "chart.js";
-import { adjustColorLightness } from "@/lib/utils/color.utils";
+import { adjustColor } from "@/lib/utils/color.utils";
 import { DEFAULT_COLOR } from "@/constants";
 
 ChartJS.register(
@@ -108,10 +108,10 @@ export function LineChart({
 			data: item.datas,
 			borderWidth: 2,
 			borderColor: item.color
-				? adjustColorLightness(item.color, 0.6, 2)
+				? adjustColor(item.color, 0.6, 2)
 				: DEFAULT_COLOR,
 			backgroundColor: item.color
-				? `${adjustColorLightness(item.color, 0.2, 1.5)}30`
+				? `${adjustColor(item.color, 0.2, 1.5)}30`
 				: DEFAULT_COLOR + "1A",
 			fill: "start",
 		})),

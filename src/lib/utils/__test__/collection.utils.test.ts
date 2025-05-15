@@ -1,5 +1,5 @@
 import { getDevInputTypeError } from "@/constants";
-import { getPrevNextIndex } from "./collection.utils";
+import { getPrevNextIndex } from "../collection.utils";
 
 describe("getPrevNextIndex function", () => {
 	type MockDataType = {

@@ -1,7 +1,7 @@
 "use client";
 import { DEFAULT_COLOR } from "@/constants";
 import { cn } from "@/lib/cn";
-import { adjustColorLightness } from "@/lib/utils/color.utils";
+import { adjustColor } from "@/lib/utils/color.utils";
 import { throttle } from "@/lib/utils";
 import Link from "next/link";
 import React, { forwardRef, useEffect, useRef, useState } from "react";
@@ -98,7 +98,7 @@ export default function Tabs({ options, activeId, color }: TabsProps) {
 						style={{
 							...indicatorStyle,
 							backgroundColor: color
-								? adjustColorLightness(color, 0.5)
+								? adjustColor(color, 0.5)
 								: DEFAULT_COLOR,
 						}}
 					/>

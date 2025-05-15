@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
-import { adjustColorLightness } from "@/lib/utils/color.utils";
+import { adjustColor } from "@/lib/utils/color.utils";
 import React, { ReactNode, useState } from "react";
 
 type StatsCardProps = {
@@ -26,7 +26,7 @@ export default function StatsCard({
 			)}
 			style={{
 				backgroundImage: color
-					? `radial-gradient(ellipse farthest-corner at top left, transparent 30%,${adjustColorLightness(color, 0.1)}80 45%, ${adjustColorLightness(color, 0.3, 1.5)}E6 75%, ${adjustColorLightness(color, 0.55, 1.5)} 125%), linear-gradient(to bottom, rgb(9 9 11 / 1), rgb(9 9 11 / 1))`
+					? `radial-gradient(ellipse farthest-corner at top left, transparent 30%,${adjustColor(color, 0.1)}80 45%, ${adjustColor(color, 0.3, 1.5)}E6 75%, ${adjustColor(color, 0.55, 1.5)} 125%), linear-gradient(to bottom, rgb(9 9 11 / 1), rgb(9 9 11 / 1))`
 					: "",
 			}}
 			onMouseEnter={() => setHover(true)}

@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
-import { adjustColorLightness } from "@/lib/utils/color.utils";
+import { adjustColor } from "@/lib/utils/color.utils";
 import React, { useEffect, useState } from "react";
 
 export type BarData = {
@@ -65,7 +65,7 @@ export function PercentileBar({ width, color }: PercentileBarProps) {
 				style={{
 					width: animatedWidth,
 					background: color
-						? `linear-gradient(to right, ${adjustColorLightness(color, 0.45, 1.8)}, ${adjustColorLightness(color, 0.7, 1.8)})`
+						? `linear-gradient(to right, ${adjustColor(color, 0.45, 1.8)}, ${adjustColor(color, 0.7, 1.8)})`
 						: "#fef27a",
 				}}
 			></div>

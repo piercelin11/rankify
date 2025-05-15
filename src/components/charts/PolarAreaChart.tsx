@@ -9,7 +9,7 @@ import {
 	Legend,
 } from "chart.js";
 import { PolarArea } from "react-chartjs-2";
-import { adjustColorLightness } from "@/lib/utils/color.utils";
+import { adjustColor } from "@/lib/utils/color.utils";
 
 ChartJS.register(RadialLinearScale, ArcElement, Tooltip, Legend);
 
@@ -62,16 +62,16 @@ export default function PolarAreaChart({
 				label: "label",
 				data: mainData,
 				backgroundColor: color.map(
-					(item) => adjustColorLightness(item!, 0.2, 1.5) + "66"
+					(item) => adjustColor(item!, 0.2, 1.5) + "66"
 				),
 				borderColor: color.map(
-					(item) => adjustColorLightness(item!, 0.6, 2)
+					(item) => adjustColor(item!, 0.6, 2)
 				),
 				hoverBackgroundColor: color.map(
-					(item) => adjustColorLightness(item!, 0.4, 1.5) + "80"
+					(item) => adjustColor(item!, 0.4, 1.5) + "80"
 				),
 				hoverBorderColor: color.map(
-					(item) => adjustColorLightness(item!, 0.6, 2)
+					(item) => adjustColor(item!, 0.6, 2)
 				),
 				borderWidth: 1.5,
 			},
