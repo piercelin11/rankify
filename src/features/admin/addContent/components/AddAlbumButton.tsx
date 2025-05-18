@@ -3,8 +3,8 @@
 import ModalWrapper from "@/components/modals/ModalWrapper";
 import { useState } from "react";
 import ContentSelectionForm from "./ContentSelectionForm";
-import { AddButton } from "@/components/buttons/Button";
 import addAlbum from "@/features/admin/addContent/actions/addAlbum";
+import AddButton from "@/components/buttons/AddButton";
 
 type AddAlbumButtonProps = {
 	artistId: string;

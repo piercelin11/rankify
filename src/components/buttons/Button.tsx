@@ -61,31 +61,12 @@ export default function Button({
 				}
 			)}
 			type={type}
+			disabled={disabled}
+			data-test-variant={variant}
+			data-test-rounded={rounded}
 			{...props}
 		>
 			{children}
-		</button>
-	);
-}
-
-export function AddButton({
-	variant,
-	disabled,
-	className,
-	...props
-}: Omit<ButtonProps, "children">) {
-	return (
-		<button
-			className={cn(
-				`m-3 flex aspect-square items-center justify-center gap-2 rounded-full ${disabled ? styles[variant].disabled : styles[variant].default}`,
-				className,
-				{
-					"opacity-70": disabled,
-				}
-			)}
-			{...props}
-		>
-			<PlusIcon width={35} height={35} />
 		</button>
 	);
 }
