@@ -4,6 +4,7 @@ import * as z from "zod";
 export const updateTrackSchema = z.object({
 	name: z.string(),
 	album: z.string().or(z.literal("")),
+	trackNumber: z.coerce.number(),
 	type: z.nativeEnum($Enums.TrackType),
 	color: z
 		.string()

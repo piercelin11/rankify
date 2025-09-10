@@ -62,6 +62,7 @@ export default function TrackEditingForm({
 			name: trackData.name,
 			album: trackData.album?.name,
 			type: trackData.type,
+			trackNumber: trackData.trackNumber ?? undefined
 		},
 	});
 
@@ -107,6 +108,13 @@ export default function TrackEditingForm({
 					message={errors.name?.message}
 					{...register("name")}
 				/>
+				{trackData.albumId && (
+					<FormItem
+						label="Track number"
+						message={errors.name?.message}
+						{...register("trackNumber")}
+					/>
+				)}
 				<FormSelect
 					title={"Album"}
 					options={selectOptions}

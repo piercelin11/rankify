@@ -42,6 +42,7 @@ export default function MainSidebar({
 						icon={item.icon}
 						href={item.href}
 						label={item.label}
+						onClick={item.onClick}
 					/>
 				))}
 			</div>

@@ -1,17 +1,21 @@
+import { DEFAULT_COLOR } from "@/constants";
 import colorConvert from "color-convert";
 
 // 調整顏色亮度
 export function adjustColor(
-	hexColor: string,
+	hexColor: string | null,
 	targetLightness: number,
 	saturationFactor: number = 1.0
 ): string {
+	if (!hexColor) return DEFAULT_COLOR;
 	if (
 		typeof hexColor !== "string" ||
 		!hexColor.startsWith("#") ||
 		hexColor.length !== 7
 	) {
-		throw new Error(`Invalid hexColor format: ${hexColor}. Expected '#RRGGBB'.`);
+		throw new Error(
+			`Invalid hexColor format: ${hexColor}. Expected '#RRGGBB'.`
+		);
 	}
 
 	const hexValue = hexColor.slice(1);
@@ -40,7 +44,7 @@ export function adjustColor(
 
 	const newL = targetLightness * 100;
 
-	const newC = originalC * saturationFactor
+	const newC = originalC * saturationFactor;
 	const newH = originalH;
 
 	const newLch: [number, number, number] = [newL, newC, newH];

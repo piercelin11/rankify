@@ -58,9 +58,11 @@ export default async function updateTrack({
 				data: {
 					name: validatedData.name,
 					albumId: newAlbum.id,
+					trackNumber: validatedData.trackNumber,
 					img: newAlbum.img,
 					color: newAlbum.color,
 					type: validatedData.type,
+					discNumber: 1
 				},
 			});
 		} else {
@@ -75,6 +77,7 @@ export default async function updateTrack({
 					},
 					type: validatedData.type,
 					color: validatedData.color,
+					trackNumber: validatedData.trackNumber,
 				},
 			});
 		}

@@ -4,7 +4,7 @@ import Image from "next/image";
 type BlurredImageBackgroundProps = {
 	src: string;
 };
-
+ 
 export default function BlurredImageBackground({
 	src,
 }: BlurredImageBackgroundProps) {

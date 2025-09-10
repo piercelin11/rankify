@@ -49,7 +49,10 @@ export const getMainSidebarMenuItems = (
 			id: "signout",
 			label: "Sign Out",
 			icon: () => <ExitIcon width={iconSize} height={iconSize} />,
-			onClick: () => signOut(),
+			onClick: () => {
+				console.log("hi")
+				signOut()
+			},
 		},
 	];
 };

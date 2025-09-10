@@ -7,6 +7,7 @@ import GalleryWrapper from "@/components/presentation/GalleryWrapper";
 export default async function HomePage() {
 	const { id: userId } = await getUserSession();
 	const unloggedArtists = await getUnloggedArtists({ userId });
+	
 
 	return (
 		<ContentWrapper>
