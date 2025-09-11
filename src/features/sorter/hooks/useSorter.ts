@@ -5,29 +5,39 @@ import {
 } from "@/features/sorter/slices/sorterSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { RankingDraftData, TrackData } from "@/types/data";
-import React, { startTransition, useEffect, useRef, useState } from "react";
+import React, { startTransition, useEffect, useCallback, useState, useRef, useMemo } from "react";
 import saveDraft from "../../ranking/actions/saveDraft";
 import { RankingResultData } from "../components/SortingStage";
 import saveDraftResult from "../../ranking/actions/saveDraftResult";
 import { debounce } from "chart.js/helpers";
 import { CurrentStage } from "../components/SorterPage";
-import deleteRankingDraft from "@/features/ranking/actions/deleteRankingDraft";
 
-type HistoryState = {
+// 使用 type 慣例定義狀態
+type SorterState = {
+	// 核心演算法狀態 (完全對應原本的 ref)
+	lstMember: number[][];
+	parent: number[];
+	equal: number[];
+	rec: number[];
 	cmp1: number;
 	cmp2: number;
 	head1: number;
 	head2: number;
-	rec: number[];
 	nrec: number;
-	equal: number[];
+	totalSize: number;
 	finishSize: number;
 	finishFlag: number;
-	lstMember: number[][];
-	parent: number[];
-	totalSize: number;
 	percent: number;
+	
+	// 歌曲資料
+	namMember: string[];
+	
+	// UI 狀態
+	currentLeftIndex: number | null;
+	currentRightIndex: number | null;
 };
+
+type SortChoice = -1 | 0 | 1;
 
 type UseSorterProps = {
 	tracks: TrackData[];
@@ -35,376 +45,309 @@ type UseSorterProps = {
 	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>;
 };
 
+type UseSorterReturn = {
+	leftField: TrackData | undefined;
+	rightField: TrackData | undefined;
+	finishFlag: { current: number };
+	handleSave: () => Promise<void>;
+	restorePreviousState: () => void;
+	sortList: (flag: number) => void;
+};
+
 const autoSaveCounter = 15;
 
+// 初始化排序狀態 (對應原本的 initList)
+function initializeSorterState(tracks: TrackData[]): SorterState {
+	const namMember = tracks.map((item) => item.name);
+	const lstMember: number[][] = [];
+	const parent: number[] = [];
+	let n = 0;
+	let totalSize = 0;
+
+	// 原本的 initList 邏輯，完全相同
+	lstMember[n] = [];
+	for (let i = 0; i < namMember.length; i++) {
+		lstMember[n][i] = i;
+	}
+	parent[n] = -1;
+	n++;
+
+	for (let i = 0; i < lstMember.length; i++) {
+		if (lstMember[i].length >= 2) {
+			const mid = Math.ceil(lstMember[i].length / 2);
+			lstMember[n] = lstMember[i].slice(0, mid);
+			totalSize += lstMember[n].length;
+			parent[n] = i;
+			n++;
+			lstMember[n] = lstMember[i].slice(mid, lstMember[i].length);
+			totalSize += lstMember[n].length;
+			parent[n] = i;
+			n++;
+		}
+	}
+
+	const rec = new Array(namMember.length).fill(0);
+	const equal = new Array(namMember.length + 1).fill(-1);
+	
+	const cmp1 = lstMember.length - 2;
+	const cmp2 = lstMember.length - 1;
+
+	// 取得初始比較對的索引
+	const leftIndex = (cmp1 >= 0 && lstMember[cmp1] && lstMember[cmp1].length > 0) ? lstMember[cmp1][0] : null;
+	const rightIndex = (cmp2 >= 0 && lstMember[cmp2] && lstMember[cmp2].length > 0) ? lstMember[cmp2][0] : null;
+
+	return {
+		lstMember,
+		parent,
+		equal,
+		rec,
+		cmp1,
+		cmp2,
+		head1: 0,
+		head2: 0,
+		nrec: 0,
+		totalSize,
+		finishSize: 0,
+		finishFlag: 0,
+		percent: 0,
+		namMember,
+		currentLeftIndex: leftIndex,
+		currentRightIndex: rightIndex,
+	};
+}
+
+// 核心排序邏輯 (對應原本的 sortList)
+function processSortChoice(state: SorterState, flag: SortChoice): SorterState {
+	// 深拷貝需要修改的部分
+	const newState: SorterState = {
+		...state,
+		lstMember: state.lstMember.map(arr => [...arr]),
+		parent: [...state.parent],
+		equal: [...state.equal],
+		rec: [...state.rec],
+	};
+
+	// 原本 sortList 的邏輯，完全相同
+	if (flag === -1) {
+		newState.rec[newState.nrec] = newState.lstMember[newState.cmp1][newState.head1];
+		newState.head1++;
+		newState.nrec++;
+		newState.finishSize++;
+		while (newState.equal[newState.rec[newState.nrec - 1]] !== -1) {
+			newState.rec[newState.nrec] = newState.lstMember[newState.cmp1][newState.head1];
+			newState.head1++;
+			newState.nrec++;
+			newState.finishSize++;
+		}
+	} else if (flag === 1) {
+		newState.rec[newState.nrec] = newState.lstMember[newState.cmp2][newState.head2];
+		newState.head2++;
+		newState.nrec++;
+		newState.finishSize++;
+		while (newState.equal[newState.rec[newState.nrec - 1]] !== -1) {
+			newState.rec[newState.nrec] = newState.lstMember[newState.cmp2][newState.head2];
+			newState.head2++;
+			newState.nrec++;
+			newState.finishSize++;
+		}
+	} else {
+		// flag === 0 (平手)
+		newState.rec[newState.nrec] = newState.lstMember[newState.cmp1][newState.head1];
+		newState.head1++;
+		newState.nrec++;
+		newState.finishSize++;
+		while (newState.equal[newState.rec[newState.nrec - 1]] !== -1) {
+			newState.rec[newState.nrec] = newState.lstMember[newState.cmp1][newState.head1];
+			newState.head1++;
+			newState.nrec++;
+			newState.finishSize++;
+		}
+		newState.equal[newState.rec[newState.nrec - 1]] = newState.lstMember[newState.cmp2][newState.head2];
+		newState.rec[newState.nrec] = newState.lstMember[newState.cmp2][newState.head2];
+		newState.head2++;
+		newState.nrec++;
+		newState.finishSize++;
+		while (newState.equal[newState.rec[newState.nrec - 1]] !== -1) {
+			newState.rec[newState.nrec] = newState.lstMember[newState.cmp2][newState.head2];
+			newState.head2++;
+			newState.nrec++;
+			newState.finishSize++;
+		}
+	}
+
+	// 處理組別結束的情況
+	if (
+		newState.head1 < newState.lstMember[newState.cmp1].length &&
+		newState.head2 === newState.lstMember[newState.cmp2].length
+	) {
+		while (newState.head1 < newState.lstMember[newState.cmp1].length) {
+			newState.rec[newState.nrec] = newState.lstMember[newState.cmp1][newState.head1];
+			newState.head1++;
+			newState.nrec++;
+			newState.finishSize++;
+		}
+	} else if (
+		newState.head1 === newState.lstMember[newState.cmp1].length &&
+		newState.head2 < newState.lstMember[newState.cmp2].length
+	) {
+		while (newState.head2 < newState.lstMember[newState.cmp2].length) {
+			newState.rec[newState.nrec] = newState.lstMember[newState.cmp2][newState.head2];
+			newState.head2++;
+			newState.nrec++;
+			newState.finishSize++;
+		}
+	}
+
+	// 合併完成的組別
+	if (
+		newState.head1 === newState.lstMember[newState.cmp1].length &&
+		newState.head2 === newState.lstMember[newState.cmp2].length
+	) {
+		const totalLength = newState.lstMember[newState.cmp1].length + newState.lstMember[newState.cmp2].length;
+		for (let i = 0; i < totalLength; i++) {
+			newState.lstMember[newState.parent[newState.cmp1]][i] = newState.rec[i];
+		}
+		newState.lstMember.pop();
+		newState.lstMember.pop();
+		newState.cmp1 = newState.cmp1 - 2;
+		newState.cmp2 = newState.cmp2 - 2;
+		newState.head1 = 0;
+		newState.head2 = 0;
+
+		if (newState.head1 === 0 && newState.head2 === 0) {
+			for (let i = 0; i < newState.namMember.length; i++) {
+				newState.rec[i] = 0;
+			}
+			newState.nrec = 0;
+		}
+	}
+
+	// 檢查是否完成或更新當前比較對
+	if (newState.cmp1 < 0) {
+		newState.percent = 100;
+		newState.finishFlag = 1;
+		newState.currentLeftIndex = null;
+		newState.currentRightIndex = null;
+	} else {
+		newState.percent = Math.floor((newState.finishSize * 100) / newState.totalSize);
+		
+		// 更安全的索引取得方式
+		const leftGroup = newState.lstMember[newState.cmp1];
+		const rightGroup = newState.lstMember[newState.cmp2];
+		
+		newState.currentLeftIndex = (leftGroup && newState.head1 < leftGroup.length) 
+			? leftGroup[newState.head1] 
+			: null;
+			
+		newState.currentRightIndex = (rightGroup && newState.head2 < rightGroup.length) 
+			? rightGroup[newState.head2] 
+			: null;
+	}
+
+	return newState;
+}
+
+// 生成最終結果 (對應原本的 showResult)
+async function generateFinalResult(
+	state: SorterState,
+	tracks: TrackData[],
+	artistId: string,
+	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>
+): Promise<void> {
+	let rankingNum = 1;
+	let sameRank = 1;
+	const resultArray: RankingResultData[] = [];
+	
+	const trackMap = new Map(tracks.map((track) => [track.name, track]));
+
+	for (let i = 0; i < state.namMember.length; i++) {
+		const foundTrack = trackMap.get(state.namMember[state.lstMember[0][i]])!;
+
+		resultArray.push({
+			ranking: rankingNum,
+			...foundTrack,
+		});
+
+		if (i < state.namMember.length - 1) {
+			if (state.equal[state.lstMember[0][i]] === state.lstMember[0][i + 1]) {
+				sameRank++;
+			} else {
+				rankingNum += sameRank;
+				sameRank = 1;
+			}
+		}
+	}
+
+	try {
+		await saveDraftResult(artistId, resultArray, JSON.stringify(state));
+	} catch (err) {
+		console.error("Error saving sorter result:", err);
+	} finally {
+		setCurrentStage("result");
+	}
+}
+
+// 主要的 hook
 export default function useSorter({
 	tracks,
 	draft,
 	setCurrentStage,
-}: UseSorterProps) {
+}: UseSorterProps): UseSorterReturn {
 	const saveStatus = useAppSelector((state) => state.sorter.saveStatus);
 	const dispatch = useAppDispatch();
-
 	const artistId = tracks[0].artistId;
 
-	const namMember = useRef<string[]>(tracks.map((item) => item.name));
+	// 用 useState 取代所有 useRef
+	const [state, setState] = useState<SorterState | null>(null);
+	const [history, setHistory] = useState<SorterState[]>([]);
 
-	const [leftField, setLeftField] = useState<TrackData | undefined>();
-	const [rightField, setRightField] = useState<TrackData | undefined>();
-
-	const history = useRef<HistoryState[]>([]);
-	const lstMember = useRef<number[][]>([]);
-	const parent = useRef<number[]>([]);
-	const equal = useRef<number[]>([]);
-	const rec = useRef<number[]>([]);
-	const array = useRef<string[]>([]);
-
-	const cmp1 = useRef(0);
-	const cmp2 = useRef(0);
-	const head1 = useRef(0);
-	const head2 = useRef(0);
-	const nrec = useRef(0);
-	const totalSize = useRef(0);
-	const finishSize = useRef(0);
-	const finishFlag = useRef(0);
-	const percent = useRef(0);
-
-	//將歌曲分割成小單位
-	function initList() {
-		var n = 0;
-		var mid;
-		var i;
-
-		lstMember.current[n] = [];
-		for (i = 0; i < namMember.current.length; i++) {
-			lstMember.current[n][i] = i;
-		}
-		parent.current[n] = -1;
-		totalSize.current = 0;
-		n++;
-
-		for (i = 0; i < lstMember.current.length; i++) {
-			if (lstMember.current[i].length >= 2) {
-				mid = Math.ceil(lstMember.current[i].length / 2);
-				lstMember.current[n] = lstMember.current[i].slice(0, mid);
-				totalSize.current += lstMember.current[n].length;
-				parent.current[n] = i;
-				n++;
-				lstMember.current[n] = lstMember.current[i].slice(
-					mid,
-					lstMember.current[i].length
-				);
-				totalSize.current += lstMember.current[n].length;
-				parent.current[n] = i;
-				n++;
-			}
-		}
-
-		for (i = 0; i < namMember.current.length; i++) {
-			rec.current[i] = 0;
-		}
-		nrec.current = 0;
-
-		for (i = 0; i <= namMember.current.length; i++) {
-			equal.current[i] = -1;
-		}
-
-		cmp1.current = lstMember.current.length - 2;
-		cmp2.current = lstMember.current.length - 1;
-		head1.current = 0;
-		head2.current = 0;
-		finishSize.current = 0;
-		finishFlag.current = 0;
-	}
-
-	//用來對歌曲列表進行排序的根據 flag 的值，可以決定選擇左邊的歌曲、右邊的歌曲，或者宣告平局。
-	function sortList(flag: number) {
-		recordHistory();
-		dispatch(setSaveStatus("idle"));
-
-		var i;
-		if (flag === -1) {
-			rec.current[nrec.current] =
-				lstMember.current[cmp1.current][head1.current];
-			head1.current++;
-			nrec.current++;
-			finishSize.current++;
-			while (equal.current[rec.current[nrec.current - 1]] != -1) {
-				rec.current[nrec.current] =
-					lstMember.current[cmp1.current][head1.current];
-				head1.current++;
-				nrec.current++;
-				finishSize.current++;
-			}
-		} else if (flag === 1) {
-			rec.current[nrec.current] =
-				lstMember.current[cmp2.current][head2.current];
-			head2.current++;
-			nrec.current++;
-			finishSize.current++;
-			while (equal.current[rec.current[nrec.current - 1]] != -1) {
-				rec.current[nrec.current] =
-					lstMember.current[cmp2.current][head2.current];
-				head2.current++;
-				nrec.current++;
-				finishSize.current++;
+	// 初始化 (對應原本的 useEffect)
+	useEffect(() => {
+		if (tracks.length === 0) return;
+		
+		if (draft?.draft) {
+			// 載入存檔狀態 (與原本邏輯相同)
+			try {
+				const loadedState = JSON.parse(draft.draft);
+				setState(loadedState);
+			} catch (error) {
+				console.error("Failed to load draft state:", error);
+				setState(initializeSorterState(tracks));
 			}
 		} else {
-			rec.current[nrec.current] =
-				lstMember.current[cmp1.current][head1.current];
-			head1.current++;
-			nrec.current++;
-			finishSize.current++;
-			while (equal.current[rec.current[nrec.current - 1]] != -1) {
-				rec.current[nrec.current] =
-					lstMember.current[cmp1.current][head1.current];
-				head1.current++;
-				nrec.current++;
-				finishSize.current++;
-			}
-			equal.current[rec.current[nrec.current - 1]] =
-				lstMember.current[cmp2.current][head2.current];
-			rec.current[nrec.current] =
-				lstMember.current[cmp2.current][head2.current];
-			head2.current++;
-			nrec.current++;
-			finishSize.current++;
-			while (equal.current[rec.current[nrec.current - 1]] != -1) {
-				rec.current[nrec.current] =
-					lstMember.current[cmp2.current][head2.current];
-				head2.current++;
-				nrec.current++;
-				finishSize.current++;
-			}
+			// 新開始 (對應原本的 initList + showImage)
+			setState(initializeSorterState(tracks));
 		}
+	}, [draft?.draft, tracks.length]); // 使用 tracks.length 而不是整個 tracks 陣列
 
-		if (
-			head1.current < lstMember.current[cmp1.current].length &&
-			head2.current == lstMember.current[cmp2.current].length
-		) {
-			while (head1.current < lstMember.current[cmp1.current].length) {
-				rec.current[nrec.current] =
-					lstMember.current[cmp1.current][head1.current];
-				head1.current++;
-				nrec.current++;
-				finishSize.current++;
-			}
-		} else if (
-			head1.current == lstMember.current[cmp1.current].length &&
-			head2.current < lstMember.current[cmp2.current].length
-		) {
-			while (head2.current < lstMember.current[cmp2.current].length) {
-				rec.current[nrec.current] =
-					lstMember.current[cmp2.current][head2.current];
-				head2.current++;
-				nrec.current++;
-				finishSize.current++;
-			}
-		}
+	// 當前比較的歌曲 (對應原本的 leftField, rightField)
+	const leftField = useMemo(() => {
+		if (!state || typeof state.currentLeftIndex !== 'number' || state.currentLeftIndex < 0) return undefined;
+		if (state.currentLeftIndex >= state.namMember.length) return undefined;
+		
+		const trackName = state.namMember[state.currentLeftIndex];
+		if (!trackName) return undefined;
+		
+		return tracks.find((track) => track.name === trackName);
+	}, [state?.currentLeftIndex, state?.namMember, tracks]);
 
-		if (
-			head1.current == lstMember.current[cmp1.current].length &&
-			head2.current == lstMember.current[cmp2.current].length
-		) {
-			for (
-				i = 0;
-				i <
-				lstMember.current[cmp1.current].length +
-					lstMember.current[cmp2.current].length;
-				i++
-			) {
-				lstMember.current[parent.current[cmp1.current]][i] = rec.current[i];
-			}
-			lstMember.current.pop();
-			lstMember.current.pop();
-			cmp1.current = cmp1.current - 2;
-			cmp2.current = cmp2.current - 2;
-			head1.current = 0;
-			head2.current = 0;
+	const rightField = useMemo(() => {
+		if (!state || typeof state.currentRightIndex !== 'number' || state.currentRightIndex < 0) return undefined;
+		if (state.currentRightIndex >= state.namMember.length) return undefined;
+		
+		const trackName = state.namMember[state.currentRightIndex];
+		if (!trackName) return undefined;
+		
+		return tracks.find((track) => track.name === trackName);
+	}, [state?.currentRightIndex, state?.namMember, tracks]);
 
-			if (head1.current == 0 && head2.current == 0) {
-				for (i = 0; i < namMember.current.length; i++) {
-					rec.current[i] = 0;
-				}
-				nrec.current = 0;
-			}
-		}
+	// 儲存功能 (對應原本的 handleSave)
+	const handleSave = useCallback(async () => {
+		if (!state) return;
+		await saveDraft(artistId, JSON.stringify(state));
+	}, [state, artistId]);
 
-		if (cmp1.current < 0) {
-			percent.current = 100;
-			dispatch(setPercentage(100));
-			showResult();
-			finishFlag.current = 1;
-		} else {
-			showImage();
-			handleAutoSave();
-		}
-	}
-
-	//將歌名顯示於比較兩首歌曲的表格中
-	async function showImage() {
-		const percentage = Math.floor(
-			(finishSize.current * 100) / totalSize.current
-		);
-
-		try {
-			const leftField =
-				"" + toNameFace(lstMember.current[cmp1.current][head1.current]);
-			const rightField =
-				"" + toNameFace(lstMember.current[cmp2.current][head2.current]);
-
-			const leftFieldData = tracks.find((item) => item.name === leftField);
-			const rightFieldData = tracks.find((item) => item.name === rightField);
-			setLeftField(leftFieldData);
-			setRightField(rightFieldData);
-
-			percent.current = percentage;
-			dispatch(setPercentage(percentage));
-		} catch (err) {
-			console.error(err);
-			
-			dispatch(setError(true));
-		}
-	}
-
-	//將排序數字轉換成歌名
-	function toNameFace(n: number) {
-		var str = namMember.current[n];
-		return str;
-	}
-
-	//紀錄當前變數與陣列資料，用於 sortList 中
-	function recordHistory() {
-		var prevState = {
-			cmp1: cmp1.current,
-			cmp2: cmp2.current,
-			head1: head1.current,
-			head2: head2.current,
-			rec: rec.current.slice(),
-			nrec: nrec.current,
-			equal: equal.current.slice(),
-			finishSize: finishSize.current,
-			finishFlag: finishFlag.current,
-			lstMember: lstMember.current.slice(),
-			parent: parent.current.slice(),
-			totalSize: totalSize.current,
-			percent: percent.current,
-		};
-		history.current.push(prevState);
-	}
-
-	//儲存記錄到本地存儲
-	async function handleSave() {
-		var currentState = {
-			cmp1: cmp1.current,
-			cmp2: cmp2.current,
-			head1: head1.current,
-			head2: head2.current,
-			rec: rec.current.slice(),
-			nrec: nrec.current,
-			equal: equal.current.slice(),
-			finishSize: finishSize.current,
-			finishFlag: finishFlag.current,
-			lstMember: lstMember.current.slice(),
-			parent: parent.current.slice(),
-			totalSize: totalSize.current,
-			namMember: namMember.current,
-			percent: percent.current,
-		};
-		await saveDraft(artistId, JSON.stringify(currentState));
-	}
-
-	//將所有變數與陣列資料重回上一步驟的資料
-	function restorePreviousState() {
-		var prevState = history.current.pop();
-
-		if (!prevState) {
-			alert("No previous step available.");
-		} else {
-			cmp1.current = prevState.cmp1;
-			cmp2.current = prevState.cmp2;
-			head1.current = prevState.head1;
-			head2.current = prevState.head2;
-			rec.current = prevState.rec;
-			nrec.current = prevState.nrec;
-			equal.current = prevState.equal;
-			finishSize.current = prevState.finishSize;
-			finishFlag.current = prevState.finishFlag;
-			lstMember.current = prevState.lstMember.slice();
-			parent.current = prevState.parent.slice();
-			totalSize.current = prevState.totalSize;
-			percent.current = prevState.percent;
-			showImage();
-			dispatch(setPercentage(prevState.percent));
-		}
-	}
-
-	//顯示最終排序結果
-	async function showResult() {
-		var rankingNum = 1;
-		var sameRank = 1;
-		var i: number;
-		let resultArray: RankingResultData[] | null = [];
-
-		const trackMap = new Map(tracks.map((track) => [track.name, track]));
-
-		for (i = 0; i < namMember.current.length; i++) {
-			const foundTrack = trackMap.get(
-				namMember.current[lstMember.current[0][i]]
-			)!;
-
-			resultArray.push({
-				ranking: rankingNum,
-				...foundTrack,
-			});
-
-			if (i < namMember.current.length - 1) {
-				if (
-					equal.current[lstMember.current[0][i]] == lstMember.current[0][i + 1]
-				) {
-					sameRank++;
-				} else {
-					rankingNum += sameRank;
-					sameRank = 1;
-				}
-			}
-		}
-
-		for (i = 0; i < namMember.current.length; i++) {
-			array.current[i] = namMember.current[lstMember.current[0][i]];
-		}
-
-		var currentState = {
-			cmp1: cmp1.current,
-			cmp2: cmp2.current,
-			head1: head1.current,
-			head2: head2.current,
-			rec: rec.current.slice(),
-			nrec: nrec.current,
-			equal: equal.current.slice(),
-			finishSize: finishSize.current,
-			finishFlag: finishFlag.current,
-			lstMember: lstMember.current.slice(),
-			parent: parent.current.slice(),
-			totalSize: totalSize.current,
-			namMember: namMember.current,
-			percent: percent.current,
-		};
-
-		try {
-			await saveDraftResult(
-				artistId,
-				resultArray,
-				JSON.stringify(currentState)
-			);
-		} catch (err) {
-			console.error("Error saving sorter result:", err);
-		} finally {
-			setCurrentStage("result");
-		}
-	}
-
-	//處理自動儲存的部分
+	// 自動儲存 (對應原本的 autoSave)
 	const autoSave = useRef(
 		debounce(() => {
 			startTransition(async () => {
@@ -419,38 +362,59 @@ export default function useSorter({
 		}, 1000 * autoSaveCounter)
 	).current;
 
-	function handleAutoSave() {
-		if (saveStatus === "saved") dispatch(setSaveStatus("idle"));
-		autoSave();
-	}
 
-	useEffect(() => {
-		if (draft?.draft) {
-			const loadedState = JSON.parse(draft.draft);
-			cmp1.current = loadedState.cmp1;
-			cmp2.current = loadedState.cmp2;
-			head1.current = loadedState.head1;
-			head2.current = loadedState.head2;
-			rec.current = loadedState.rec;
-			nrec.current = loadedState.nrec;
-			equal.current = loadedState.equal;
-			finishSize.current = loadedState.finishSize;
-			finishFlag.current = loadedState.finishFlag;
-			lstMember.current = loadedState.lstMember;
-			parent.current = loadedState.parent;
-			totalSize.current = loadedState.totalSize;
-			namMember.current = loadedState.namMember;
-			showImage();
-		} else {
-			initList();
-			showImage();
+	// 核心排序函數 (完全對應原本的 sortList)
+	const sortList = useCallback((flag: number) => {
+		if (!state) return;
+		
+		// 記錄歷史 (對應原本的 recordHistory)
+		setHistory(prev => [...prev, state]);
+		
+		// 更新狀態
+		dispatch(setSaveStatus("idle"));
+		
+		try {
+			// 執行排序邏輯 (邏輯完全相同)
+			const newState = processSortChoice(state, flag as SortChoice);
+			setState(newState);
+			
+			// 更新進度
+			dispatch(setPercentage(newState.percent));
+			
+			// 如果完成，跳到結果頁面
+			if (newState.finishFlag === 1) {
+				generateFinalResult(newState, tracks, artistId, setCurrentStage);
+			} else {
+				// 延遲執行自動儲存，避免同步狀態更新
+				setTimeout(() => {
+					if (saveStatus === "saved") dispatch(setSaveStatus("idle"));
+					autoSave();
+				}, 0);
+			}
+		} catch (err) {
+			console.error(err);
+			dispatch(setError(true));
 		}
-	}, [draft]);
+	}, [state, dispatch, tracks, artistId, setCurrentStage, saveStatus, autoSave]);
 
+	// 復原上一步 (對應原本的 restorePreviousState)
+	const restorePreviousState = useCallback(() => {
+		const prevState = history[history.length - 1];
+		
+		if (!prevState) {
+			alert("No previous step available.");
+		} else {
+			setState(prevState);
+			setHistory(prev => prev.slice(0, -1));
+			dispatch(setPercentage(prevState.percent));
+		}
+	}, [history, dispatch]);
+
+	// 返回與原本完全相同的介面
 	return {
 		leftField,
 		rightField,
-		finishFlag,
+		finishFlag: { current: state?.finishFlag || 0 }, // 保持原本的 ref 介面
 		handleSave,
 		restorePreviousState,
 		sortList,

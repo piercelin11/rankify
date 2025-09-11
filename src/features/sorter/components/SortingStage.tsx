@@ -14,7 +14,7 @@ import {
 } from "@/features/sorter/slices/sorterSlice";
 import Button from "@/components/buttons/Button";
 import { CurrentStage } from "./SorterPage";
-import useSorter from "@/features/sorter/hooks/useSorterV2";
+import useSorter from "@/features/sorter/hooks/useSorter";
 import { PLACEHOLDER_PIC } from "@/constants";
 import ModalWrapper from "@/components/modals/ModalWrapper";
 
