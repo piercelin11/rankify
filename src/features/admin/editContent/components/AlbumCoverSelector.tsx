@@ -1,13 +1,14 @@
 "use client";
 
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import getArtistById from "@/lib/database/data/getArtistById";
 import fetchSearchResults from "@/lib/spotify/fetchSearchResults";
 import { AlbumData } from "@/types/data";
 import { CheckIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import { Label } from "../../ui/label";
 
 type AlbumCoverSelectorProps = {
 	album: AlbumData;
@@ -28,7 +29,11 @@ export default function AlbumCoverSelector({
 	useEffect(() => {
 		async function fetchCover() {
 			const data =
-				(await fetchSearchResults(`artist:${album.artist?.name} album:${album.name}`, "album", 4)) ?? [];
+				(await fetchSearchResults(
+					`artist:${album.artist?.name} album:${album.name}`,
+					"album",
+					4
+				)) ?? [];
 			setAlbumCoverOpiotns([
 				...new Set([
 					album.img!,
@@ -40,9 +45,9 @@ export default function AlbumCoverSelector({
 	}, []);
 
 	return (
-		<div className="space-y-4">
-			<p className="text-sm text-neutral-500">Album cover</p>
-			<div className="flex items-center gap-4 h-20">
+		<div className="space-y-3">
+			<Label className="text-neutral-200">Album Cover</Label>
+			<div className="flex h-20 items-center gap-4">
 				{albumCoverOpiotns.length !== 0 ? (
 					albumCoverOpiotns?.map((url) => (
 						<label

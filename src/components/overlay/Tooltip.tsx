@@ -7,7 +7,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@radix-ui/react-tooltip";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 type TooltipProps = {
 	content?: string | React.ReactNode | null;

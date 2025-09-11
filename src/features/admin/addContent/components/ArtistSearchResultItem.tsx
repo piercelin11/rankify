@@ -1,7 +1,7 @@
 import React from "react";
 import { Artist } from "spotify-api.js";
 import { ChevronRightIcon } from "@radix-ui/react-icons";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { PLACEHOLDER_PIC } from "@/constants";
 
 type ArtistSearchResultItemProps = {

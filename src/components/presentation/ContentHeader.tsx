@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import React, { ReactNode, useEffect } from "react";
 import { SpotifyIcon } from "../icons/LogoIcons";
@@ -13,6 +13,7 @@ type ContentHeaderProps = {
 	rounded?: boolean;
 	type?: string;
 	color?: string | null;
+	imageSize?: number;
 	children?: ReactNode;
 };
 
@@ -22,6 +23,7 @@ const ContentHeader = React.memo(function ContentHeader({
 	rounded = false,
 	type,
 	color,
+	imageSize = 220,
 	children,
 }: ContentHeaderProps) {
 	return (

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import CheckBox from "@/components/form/CheckBox";
 import { AlbumData, TrackData } from "@/types/data";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import Button from "@/components/buttons/Button";
 import Link from "next/link";
 import { FilterType, setExcluded, setPercentage } from "@/features/sorter/slices/sorterSlice";

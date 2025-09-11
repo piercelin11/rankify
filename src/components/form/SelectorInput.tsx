@@ -1,4 +1,4 @@
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import React, { InputHTMLAttributes, useState } from "react";
 import { FieldValues, Path, PathValue, UseFormSetValue } from "react-hook-form";
 

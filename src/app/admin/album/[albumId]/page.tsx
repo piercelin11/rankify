@@ -4,11 +4,11 @@ import React from "react";
 import getAlbumById from "@/lib/database/data/getAlbumById";
 import getTracksByAlbum from "@/lib/database/data/getTracksByAlbum";
 import { dateToLong } from "@/lib/utils";
-import TrackListItem from "@/features/admin/editContent/components/TrackListItem";
+import TracksTable from "@/features/admin/editContent/components/TracksTable";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import ContentWrapper from "@/components/layout/ContentWrapper";
 import AlbumActionSection from "@/features/admin/editContent/components/AlbumActionSection";
-import ContentHeader from "@/components/presentation/ContentHeader";
+import AdminContentHeader from "@/features/admin/editContent/components/AdminContentHeader";
 
 export default async function AdminAlbumPage({
 	params,
@@ -26,17 +26,14 @@ export default async function AdminAlbumPage({
 
 	return (
 		<>
-			<ContentHeader
+			<AdminContentHeader
 				data={album}
 				subTitleContent={<p>{dateToLong(album.releaseDate)}</p>}
-			/>
+			>
+				<AlbumActionSection data={album} />
+			</AdminContentHeader>
 			<ContentWrapper>
-				<div className="mb-12">
-					<AlbumActionSection data={album} />
-				</div>
-				{tracks.map((track) => (
-					<TrackListItem key={track.id} trackData={track} albums={albums} />
-				))}
+				<TracksTable tracks={tracks} albums={albums} />
 			</ContentWrapper>
 		</>
 	);

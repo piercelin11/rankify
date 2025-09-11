@@ -72,4 +72,11 @@ Required for Spotify API integration and database connectivity:
 - `POSTGRES_DATABASE_URL`
 - `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`
 - Spotify API credentials for music data fetching
+
+### Others
 - 一律使用繁體中文跟我互動
+- 型別定義統一使用 `type` 而非 `interface`
+- 避免預防性優化。預設情況下不使用 `useCallback`, `useMemo`, `React.memo`。使用時機：只有當明確觀察到效能瓶頸，且子元件被 `React.memo` 包裹時，才為傳遞給它的 props (函式或物件) 加上 `useCallback` 或 `useMemo`。
+- React hooks 必須使用具名導入。
+- 所有表單功能一律使用 `react-hook-form` 進行開發。必須搭配 `zod` 和 `@hookform/resolvers/zod` 進行 schema 驗證。必須使用 `formState`.`errors` 物件來捕獲錯誤，並將錯誤訊息傳遞給專案內的顯示錯誤的元件。
+- 撰寫程式碼時，需時刻考慮「單一職責原則」與「程式碼複用」。如果一個 UI 區塊在多處重複出現，請將其拆分為獨立的元件。如果一個元件的邏輯變得過於複雜，請將其拆分為更小的、功能單一的子元件。如果你發現有元件化或提取 Hook 的機會，請先提出建議並詢問我的意見，再進行實作。提問範例：「我建議將 `ArtistEditingForm` 和 `AlbumEditingForm` 中處理表單提交、錯誤和載入狀態的邏輯提取到一個名為 `useEditForm` 的 Hook 中，以簡化元件並達成邏輯複用。請問您同意嗎？」

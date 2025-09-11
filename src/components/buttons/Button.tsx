@@ -1,5 +1,4 @@
-import { cn } from "@/lib/cn";
-import { PlusIcon } from "@radix-ui/react-icons";
+import { cn } from "@/lib/utils";
 import React from "react";
 
 export type ButtonProps = {

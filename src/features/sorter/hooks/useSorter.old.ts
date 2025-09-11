@@ -344,7 +344,7 @@ export default function useSorter({
 		var rankingNum = 1;
 		var sameRank = 1;
 		var i: number;
-		let resultArray: RankingResultData[] | null = [];
+		const resultArray: RankingResultData[] | null = [];
 
 		const trackMap = new Map(tracks.map((track) => [track.name, track]));
 

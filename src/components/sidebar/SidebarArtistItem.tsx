@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import Tooltip from "../overlay/Tooltip";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { PLACEHOLDER_PIC } from "@/constants";
 
 type SidebarArtistItemProps = {

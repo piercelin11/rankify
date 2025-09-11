@@ -9,7 +9,7 @@ import {
 	ArrowUpIcon,
 	CaretSortIcon,
 } from "@radix-ui/react-icons";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";

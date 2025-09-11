@@ -1,4 +1,4 @@
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
 type SearchInputProps = {} & React.InputHTMLAttributes<HTMLInputElement>;

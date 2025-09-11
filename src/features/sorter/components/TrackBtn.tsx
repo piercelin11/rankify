@@ -1,4 +1,4 @@
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { TrackData } from "@/types/data";
 import { PLACEHOLDER_PIC } from "@/constants";
 

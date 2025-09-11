@@ -1,11 +1,12 @@
 import useDominantColor from "@/lib/hooks/useDominantColor";
 import Button from "@/components/buttons/Button";
 import { InputHTMLAttributes, useState } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import FormMessage from "@/components/form/FormMessage";
-import { Input } from "@/components/form/FormInput";
 import colorConvert from "color-convert";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
 
 type ColorSelectorProps = {
 	data: { img: string | null };
@@ -29,17 +30,17 @@ export default function ColorSelector({
 	];
 
 	return (
-		<div className="space-y-4">
-			<p className="text-sm text-neutral-500">Album color</p>
+		<div className="space-y-1">
+			<Label className="text-neutral-200">Album Color</Label>
 			<div className="flex items-center justify-between gap-2">
 				{isRadio ? (
-					<div className="flex flex-wrap gap-2">
+					<div className="flex flex-wrap gap-1">
 						{hexArray?.map((colorOption) => (
 							<label
 								key={`${name}-${colorOption}`}
 								htmlFor={`${name}-${colorOption}`}
 								className={cn(
-									"aspect-square w-10 rounded-full border border-neutral-800 lg:w-12",
+									"aspect-square w-8 rounded-full border border-neutral-800 lg:w-10",
 									{
 										"border-2 border-neutral-200": value === colorOption,
 									}

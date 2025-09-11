@@ -62,7 +62,7 @@ export default async function updateTrack({
 					img: newAlbum.img,
 					color: newAlbum.color,
 					type: validatedData.type,
-					discNumber: 1
+					discNumber: validatedData.discNumber ?? originalData.discNumber ?? 1
 				},
 			});
 		} else {
@@ -78,6 +78,7 @@ export default async function updateTrack({
 					type: validatedData.type,
 					color: validatedData.color,
 					trackNumber: validatedData.trackNumber,
+					discNumber: validatedData.discNumber ?? originalData.discNumber ?? 1,
 				},
 			});
 		}

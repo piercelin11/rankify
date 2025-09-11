@@ -18,7 +18,7 @@ import AchievementDisplay, {
 	AchievementType,
 } from "@/features/ranking/stats/components/AchievementDisplay";
 import RankingAlbumFilter from "@/features/ranking/display/components/RankingAlbumFilter";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 type AllTrackOverviewRankingListProps = {
 	tracksRankings: TrackStatsType[];

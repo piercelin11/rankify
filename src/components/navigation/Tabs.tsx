@@ -1,6 +1,6 @@
 "use client";
 import { DEFAULT_COLOR } from "@/constants";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { adjustColor } from "@/lib/utils/color.utils";
 import { throttle } from "@/lib/utils";
 import Link from "next/link";

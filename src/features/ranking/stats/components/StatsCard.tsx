@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { adjustColor } from "@/lib/utils/color.utils";
 import React, { ReactNode, useState } from "react";
 

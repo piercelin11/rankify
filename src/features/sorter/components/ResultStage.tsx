@@ -12,7 +12,7 @@ import Button from "@/components/buttons/Button";
 import submitRanking from "../actions/submitRanking";
 import { notFound } from "next/navigation";
 import deleteRankingDraft from "../../ranking/actions/deleteRankingDraft";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import saveDraftResult from "../../ranking/actions/saveDraftResult";
 import { RankingResultData } from "./SortingStage";
 import ComfirmationModal from "@/components/modals/ComfirmationModal";
