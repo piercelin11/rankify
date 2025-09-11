@@ -5,7 +5,7 @@ import Button from "../buttons/Button";
 import { Cross1Icon, HamburgerMenuIcon } from "@radix-ui/react-icons";
 import { usePathname } from "next/navigation";
 import useMediaQuery from "@/lib/hooks/useMediaQuery";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/store/hooks";
 
 type SidebarLayoutProps = {

@@ -17,7 +17,7 @@ import { FixedSizeList, ListChildComponentProps } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import Image from "next/image";
 import useListScroll from "@/features/ranking/display/hooks/useListScroll";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { ITEM_HEIGHT } from "@/app/(main)/artist/[artistId]/(artist)/overview/[rangeSlug]/ranking/_components/AllTrackOverviewRankingList";
 import { dateToLong } from "@/lib/utils";
 

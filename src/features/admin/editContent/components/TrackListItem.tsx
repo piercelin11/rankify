@@ -1,7 +1,7 @@
 "use client";
 import { AlbumData, TrackData } from "@/types/data";
 import React, { HTMLAttributes } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import TrackActionSection from "./TrackActionSection";
 
 type TrackListItemProps = {

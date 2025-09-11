@@ -1,4 +1,4 @@
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { CheckIcon } from "@radix-ui/react-icons";
 import React from "react";
 

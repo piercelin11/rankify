@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import React, { HTMLAttributes, useState } from "react";
 

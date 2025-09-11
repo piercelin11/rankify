@@ -1,7 +1,7 @@
 "use client";
 
 import { SCROLL_SESSION_KEY } from "@/features/ranking/display/hooks/useListScroll";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/store/hooks";
 import Link from "next/link";
 import React from "react";

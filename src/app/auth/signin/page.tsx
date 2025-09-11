@@ -16,7 +16,7 @@ export default function LoginPage() {
             <SocialButton />
     
             <p className="text-center text-neutral-400">
-              Don't have an account yet?{" "}
+              Don&apos;t have an account yet?{" "}
               <span className="text-neutral-100 underline">
                 <Link href={"/auth/signup"}>Sign up</Link></span>
             </p>

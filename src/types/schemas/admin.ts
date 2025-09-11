@@ -5,6 +5,7 @@ export const updateTrackSchema = z.object({
 	name: z.string(),
 	album: z.string().or(z.literal("")),
 	trackNumber: z.coerce.number(),
+	discNumber: z.coerce.number().optional(),
 	type: z.nativeEnum($Enums.TrackType),
 	color: z
 		.string()

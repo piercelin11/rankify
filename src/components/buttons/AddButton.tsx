@@ -1,4 +1,4 @@
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { PlusIcon } from "@radix-ui/react-icons";
 
 export type ButtonProps = {
@@ -7,7 +7,6 @@ export type ButtonProps = {
 } & React.ComponentProps<"button">;
 
 export default function AddButton({
-	variant,
 	disabled,
 	className,
 	...props

@@ -1,4 +1,4 @@
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { ResponseType } from "@/types/response";
 import {
 	CheckCircledIcon,
@@ -20,7 +20,7 @@ export default function FormMessage({
 }: ErrorMessageProps) {
 	return (
 		<div
-			className={cn("flex items-center gap-1 rounded-xl text-sm", className, {
+			className={cn("flex items-center gap-1 rounded-xl text-xs", className, {
 				"p-4": border,
 				"border border-danger-500 bg-danger-700/10 text-danger-500":
 					type === "error" && border,

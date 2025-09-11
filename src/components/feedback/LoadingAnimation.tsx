@@ -1,4 +1,3 @@
-import { cn } from "@/lib/cn";
 
 type LoadingAnimationProps = {
 	size?: "small" | "base";

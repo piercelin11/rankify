@@ -5,7 +5,7 @@ import DropdownTrigger from "@/components/menu/DropdownTrigger";
 import DropdownContent from "@/components/menu/DropdownContent";
 import DropdownItem from "@/components/menu/DropdownItem";
 import CheckBox from "@/components/form/CheckBox";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { IoFilter } from "react-icons/io5";
 
 type RankingAlbumFilterProps = {

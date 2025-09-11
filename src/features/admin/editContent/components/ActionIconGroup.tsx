@@ -2,12 +2,12 @@
 
 import React from "react";
 import { Pencil1Icon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
+import { Button } from "@/features/admin/ui/button";
 
-const svgAttributes = {
-	className: "text-neutral-400 hover:text-neutral-100",
-	width: 25,
-	height: 25,
+const iconSize = {
+	width: 18,
+	height: 18,
 };
 
 type ActionIconGroupProps = {
@@ -24,13 +24,36 @@ export default function ActionIconGroup({
 	className,
 }: ActionIconGroupProps) {
 	return (
-		<div className={cn("flex gap-6", className)}>
+		<div className={cn("flex gap-2", className)}>
 			{onUpdateClick && (
-				<UpdateIcon {...svgAttributes} onClick={onUpdateClick} />
+				<Button
+					variant="ghost"
+					size="icon"
+					onClick={onUpdateClick}
+					className="h-9 w-9 text-muted-foreground hover:text-foreground"
+				>
+					<UpdateIcon {...iconSize} />
+				</Button>
 			)}
-			{onEditClick && <Pencil1Icon {...svgAttributes} onClick={onEditClick} />}
+			{onEditClick && (
+				<Button
+					variant="ghost"
+					size="icon"
+					onClick={onEditClick}
+					className="h-9 w-9 text-muted-foreground hover:text-foreground"
+				>
+					<Pencil1Icon {...iconSize} />
+				</Button>
+			)}
 			{onDeleteClick && (
-				<TrashIcon {...svgAttributes} onClick={onDeleteClick} />
+				<Button
+					variant="ghost"
+					size="icon"
+					onClick={onDeleteClick}
+					className="h-9 w-9 text-muted-foreground hover:text-destructive"
+				>
+					<TrashIcon {...iconSize} />
+				</Button>
 			)}
 		</div>
 	);

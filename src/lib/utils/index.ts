@@ -5,3 +5,4 @@ export * from "./string.utils";
 export * from "./collection.utils";
 export * from "./url.utils";
 export * from "./performance.utils";
+export * from "./cn";

@@ -28,7 +28,7 @@
 	}
 
 	.stats-card {
-		@apply rounded-3xl p-8 shadow-card 2xl:p-10;
+		@apply rounded-3xl p-8 shadow-stats-card 2xl:p-10;
 	}
 
 	.bg-gradient-dark {
@@ -51,6 +51,32 @@
 :root {
 	font-size: 14px;
 	font-weight: 500;
+	
+	--background: 0 0% 4%; /* #09090b */
+	--foreground: 0 0% 98%; /* #fafafa */
+	--card: 0 0% 4%; /* #09090b */
+	--card-foreground: 0 0% 98%; /* #fafafa */
+	--popover: 0 0% 4%; /* #09090b */
+	--popover-foreground: 0 0% 98%; /* #fafafa */
+	--primary: 0 0% 98%; /* #fafafa */
+	--primary-foreground: 0 0% 9%; /* #171717 */
+	--secondary: 0 0% 15%; /* #262626 */
+	--secondary-foreground: 0 0% 98%; /* #fafafa */
+	--muted: 0 0% 15%; /* #262626 */
+	--muted-foreground: 0 0% 64%; /* #a3a3a3 */
+	--accent: 0 0% 15%; /* #262626 */
+	--accent-foreground: 0 0% 98%; /* #fafafa */
+	--destructive: 0 84% 60%; /* #ef4444 */
+	--destructive-foreground: 0 0% 98%; /* #fafafa */
+	--border: 0 0% 15%; /* #262626 */
+	--input: 0 0% 15%; /* #262626 */
+	--ring: 0 0% 83%; /* #d4d4d4 */
+	--chart-1: 12 76% 61%; /* #e88c30 */
+	--chart-2: 173 58% 39%; /* #3b82a0 */
+	--chart-3: 197 37% 24%; /* #264756 */
+	--chart-4: 43 74% 66%; /* #e1c340 */
+	--chart-5: 27 87% 67%; /* #f97316 */
+	--radius: 0.5rem;
 }
 
 @media (min-width: 768px) {

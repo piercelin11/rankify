@@ -1,6 +1,6 @@
 import React from "react";
 import FormMessage from "./FormMessage";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 type FormItemProps = {
 	label: string;

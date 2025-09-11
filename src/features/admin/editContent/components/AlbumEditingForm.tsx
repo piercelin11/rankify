@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import FormItem from "@/components/form/FormInput";
-import Button from "@/components/buttons/Button";
+import { Button } from "../../ui/button";
 import ColorSelector from "./ColorSelector";
 import { Controller, useForm } from "react-hook-form";
 import { updateAlbumSchema, UpdateAlbumType } from "@/types/schemas/admin";
@@ -12,6 +12,8 @@ import { AppResponseType } from "@/types/response";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import CoverSelector from "./AlbumCoverSelector";
 import { ADMIN_MESSAGES } from "@/constants/messages";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
 
 type AlbumEditingFormProps = {
 	data: AlbumData;
@@ -68,15 +70,17 @@ export default function AlbumEditingForm({
 	}, []);
 
 	return (
-		<div className="space-y-8">
+		<div className="space-y-6">
 			<div>
-				<h2>Edit Album</h2>
-				<p className="text-description">edit album info.</p>
+				<h2 className="font-semibold text-white">Edit Album</h2>
+				<p className="mt-1 text-sm text-neutral-400">
+					Make changes to {data.name}
+				</p>
 			</div>
 			<hr />
 			<form
 				ref={isMounted}
-				className="space-y-10"
+				className="space-y-6"
 				onSubmit={handleSubmit(onSubmit)}
 			>
 				<Controller
@@ -91,12 +95,19 @@ export default function AlbumEditingForm({
 						/>
 					)}
 				/>
-
-				<FormItem
-					{...register("name")}
-					label="Album name"
-					message={errors.name?.message}
-				/>
+				<div>
+					<Label htmlFor={`albumName-${data.id}`} className="text-neutral-200">
+						Album Name
+					</Label>
+					<Input
+						id={`albumName-${data.id}`}
+						{...register("name")}
+						className="mt-1"
+					/>
+					{errors.name && (
+						<p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
+					)}
+				</div>
 				<Controller
 					name="color"
 					control={control}
@@ -111,17 +122,18 @@ export default function AlbumEditingForm({
 						/>
 					)}
 				/>
-				<div className="flex items-center gap-6">
+				<div className="flex items-center gap-3">
+					<Button type="submit" disabled={isSubmitting} className="flex-1">
+						Save
+					</Button>
 					<Button
 						variant="outline"
 						type="button"
+						className="flex-1"
 						onClick={() => setOpen(false)}
 						disabled={isSubmitting}
 					>
 						Cancel
-					</Button>
-					<Button variant="primary" type="submit" disabled={isSubmitting}>
-						Save
 					</Button>
 					{isSubmitting && (
 						<div className="px-5">

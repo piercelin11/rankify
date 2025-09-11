@@ -20,19 +20,36 @@ export default {
 		},
 		extend: {
 			colors: {
-				/* primary: {
-					50: "#FFFAE0",
-					100: "#FFF5C1",
-					200: "#FFF3AA",
-					300: "#FEF598",
-					400: "#FFF485",
-					500: "#FEF27A",
-					600: "#E5D766",
-					700: "#CCBC51",
-					800: "#B3A13D",
-					900: "#998629",
-					950: "#7F7320",
-				} */
+				border: "hsl(var(--border))",
+				input: "hsl(var(--input))",
+				ring: "hsl(var(--ring))",
+				background: "hsl(var(--background))",
+				foreground: "hsl(var(--foreground))",
+				secondary: {
+					DEFAULT: "hsl(var(--secondary))",
+					foreground: "hsl(var(--secondary-foreground))",
+				},
+				destructive: {
+					DEFAULT: "hsl(var(--destructive))",
+					foreground: "hsl(var(--destructive-foreground))",
+				},
+				muted: {
+					DEFAULT: "hsl(var(--muted))",
+					foreground: "hsl(var(--muted-foreground))",
+				},
+				accent: {
+					DEFAULT: "hsl(var(--accent))",
+					foreground: "hsl(var(--accent-foreground))",
+				},
+				popover: {
+					DEFAULT: "hsl(var(--popover))",
+					foreground: "hsl(var(--popover-foreground))",
+				},
+				card: {
+					DEFAULT: "hsl(var(--card))",
+					foreground: "hsl(var(--card-foreground))",
+				},
+				// 保留原有的自定義調色板以供前台使用
 				primary: {
 					50: "#F2FFE1",
 					100: "#E0FFBF",
@@ -44,6 +61,8 @@ export default {
 					700: "#7C972E",
 					800: "#5E7022",
 					900: "#3B4511",
+					DEFAULT: "hsl(var(--primary))",
+					foreground: "hsl(var(--primary-foreground))",
 				},
 				lavender: {
 					50: "#F7F9FA",
@@ -65,7 +84,7 @@ export default {
 			},
 			boxShadow: {
 				dent: `inset -2px 2px 8px 0 ${colors.neutral[950]}AA`,
-				card: `inset -1px 1px 0 0 ${colors.neutral[600]},inset 1px -1px 0 0 ${colors.neutral[600]}40`,
+				"stats-card": `inset -1px 1px 0 0 ${colors.neutral[600]},inset 1px -1px 0 0 ${colors.neutral[600]}40`,
 				button: `inset -1px 1px 2px 0 ${colors.neutral[500]},inset 1.5px -1.5px 2px 0 ${colors.neutral[800]}`,
 			},
 			borderRadius: {
