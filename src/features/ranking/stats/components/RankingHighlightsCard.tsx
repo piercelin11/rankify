@@ -82,7 +82,7 @@ function RankingHighlightsCard({
 		<>
 			{info ? (
 				<div
-					className="relative flex aspect-square flex-col overflow-hidden rounded-4xl border border-neutral-700 bg-[length:100%] bg-center bg-no-repeat p-4 transition-all duration-500 ease-in-out hover:bg-[length:110%] sm:aspect-video md:aspect-auto 2xl:p-8"
+					className="relative flex aspect-square flex-col overflow-hidden rounded-3xl border border-neutral-700 bg-[length:100%] bg-center bg-no-repeat p-4 transition-all duration-500 ease-in-out hover:bg-[length:110%] sm:aspect-video md:aspect-auto 2xl:p-8"
 					style={{
 						backgroundImage: `linear-gradient(to bottom ,rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0.75) 90%), url("${info.img || PLACEHOLDER_PIC}")`,
 					}}
