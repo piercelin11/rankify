@@ -2,7 +2,7 @@ import type { Config } from "tailwindcss";
 import { PluginAPI } from "tailwindcss/types/config";
 import colors from "tailwindcss/colors";
 
-export default {
+export default { 
 	content: [
 		"./src/components/**/*.{js,ts,jsx,tsx,mdx}",
 		"./src/app/**/*.{js,ts,jsx,tsx,mdx}",
@@ -11,7 +11,7 @@ export default {
 	],
 	theme: {
 		fontFamily: {
-			sans: "var(--font-poppins)",
+			sans: "var(--font-geist)",
 			serif: "var(--font-geist-mono)",
 			numeric: "var(--font-raleway)",
 		},
@@ -73,7 +73,7 @@ export default {
 				"5xl": "2.5rem",
 			},
 			spacing: {
-				"sidebar-sm": "88px",
+				"sidebar-sm": "80px",
 				"sidebar-lg": "260px",
 				"sidebar-xl": "300px",
 				"22": "5.5rem",
@@ -81,6 +81,21 @@ export default {
 			backgroundImage: {
 				glow: `radial-gradient(ellipse farthest-side at top, ${colors.neutral[800]}40, ${colors.neutral[950]}CC)`,
 			},
+			/* fontSize: {
+				xs: ["0.625rem", "1rem"], // 10px
+				sm: ["0.75rem", "1.25rem"], // 12px
+				base: ["0.875rem", "1.5rem"], // 14px
+				lg: ["1rem", "1.75rem"], // 16px
+				xl: ["1.125rem", "1.75rem"], // 18px
+				"2xl": ["1.375rem", "2rem"], // 22px
+				"3xl": ["1.75rem", "2.25rem"], // 28px
+				"4xl": ["2.125rem", "2.5rem"], // 34px
+				"5xl": ["2.875rem", "1"], // 46px
+				"6xl": ["3.625rem", "1"], // 58px
+				"7xl": ["4.375rem", "1"], // 70px
+				"8xl": ["5.875rem", "1"], // 94px
+				"9xl": ["7.875rem", "1"], // 126px
+			}, */
 		},
 	},
 	plugins: [

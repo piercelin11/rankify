@@ -25,7 +25,7 @@ export default function MainSidebar({
 	const dispatch = useAppDispatch();
 
 	return (
-		<div className="flex h-full flex-col [&>div]:m-2">
+		<div className="flex h-full flex-col [&>div]:m-1">
 			<div className="mb-4 px-2">
 				<button
 					className="rounded-full p-4 hover:bg-neutral-900"

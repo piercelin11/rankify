@@ -28,11 +28,15 @@
 	}
 
 	.stats-card {
-		@apply rounded-5xl p-6 shadow-card 2xl:p-10;
+		@apply rounded-3xl p-8 shadow-card 2xl:p-10;
 	}
 
 	.bg-gradient-dark {
 		background: linear-gradient(to bottom, transparent, #09090b90, #09090bE6, #09090b);
+	}
+
+	.bg-gradient-neutral {
+		background: linear-gradient(to bottom, transparent, #18181b90, #18181bE6, #18181b);
 	}
 
 	.h-virtualized-ranking {
@@ -46,11 +50,12 @@
 
 :root {
 	font-size: 14px;
+	font-weight: 500;
 }
 
 @media (min-width: 768px) {
 	:root {
-		font-size: 16px;
+		font-size: 15px;
 	}
 }
 
