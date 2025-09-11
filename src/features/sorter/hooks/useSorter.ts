@@ -5,12 +5,12 @@ import {
 } from "@/features/sorter/slices/sorterSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { RankingDraftData, TrackData } from "@/types/data";
-import React, { startTransition, useEffect, useCallback, useState, useRef, useMemo } from "react";
+import React, { startTransition, useEffect, useCallback, useState, useMemo, useRef } from "react";
 import saveDraft from "../../ranking/actions/saveDraft";
 import { RankingResultData } from "../components/SortingStage";
 import saveDraftResult from "../../ranking/actions/saveDraftResult";
-import { debounce } from "chart.js/helpers";
 import { CurrentStage } from "../components/SorterPage";
+import { debounce } from "@/lib/utils/performance.utils";
 
 // 使用 type 慣例定義狀態
 type SorterState = {
@@ -49,7 +49,7 @@ type UseSorterReturn = {
 	leftField: TrackData | undefined;
 	rightField: TrackData | undefined;
 	finishFlag: { current: number };
-	handleSave: () => Promise<void>;
+	handleSave: () => Promise<{ type: string; message: string; }>;
 	restorePreviousState: () => void;
 	sortList: (flag: number) => void;
 };
@@ -343,24 +343,45 @@ export default function useSorter({
 
 	// 儲存功能 (對應原本的 handleSave)
 	const handleSave = useCallback(async () => {
-		if (!state) return;
-		await saveDraft(artistId, JSON.stringify(state));
+		if (!state) {
+			return { type: "error", message: "No state to save" };
+		}
+		const result = await saveDraft(artistId, JSON.stringify(state));
+		return result;
 	}, [state, artistId]);
 
-	// 自動儲存 (對應原本的 autoSave)
-	const autoSave = useRef(
-		debounce(() => {
+	// 使用 ref 來獲取最新的值，避免閉包問題
+	const stateRef = useRef(state);
+	const artistIdRef = useRef(artistId);
+	const dispatchRef = useRef(dispatch);
+	
+	// 更新 refs
+	useEffect(() => {
+		stateRef.current = state;
+		artistIdRef.current = artistId;
+		dispatchRef.current = dispatch;
+	}, [state, artistId, dispatch]);
+
+	// 創建穩定的 debounced 函數 (只創建一次)
+	const debouncedAutoSave = useMemo(
+		() => debounce(async () => {
+			if (!stateRef.current) {
+				return;
+			}
+			
 			startTransition(async () => {
-				dispatch(setSaveStatus("pending"));
+				dispatchRef.current(setSaveStatus("pending"));
 				try {
-					await handleSave();
-					dispatch(setSaveStatus("saved"));
+					const result = await saveDraft(artistIdRef.current, JSON.stringify(stateRef.current));
+					dispatchRef.current(setSaveStatus("saved"));
 				} catch (error) {
 					console.error("Failed to save draft:", error);
+					dispatchRef.current(setSaveStatus("idle"));
 				}
 			});
-		}, 1000 * autoSaveCounter)
-	).current;
+		}, 1000 * autoSaveCounter),
+		[] // 空依賴數組，只創建一次
+	);
 
 
 	// 核心排序函數 (完全對應原本的 sortList)
@@ -387,15 +408,16 @@ export default function useSorter({
 			} else {
 				// 延遲執行自動儲存，避免同步狀態更新
 				setTimeout(() => {
+					console.log("⏰ Triggering auto save in setTimeout, saveStatus:", saveStatus);
 					if (saveStatus === "saved") dispatch(setSaveStatus("idle"));
-					autoSave();
+					debouncedAutoSave();
 				}, 0);
 			}
 		} catch (err) {
 			console.error(err);
 			dispatch(setError(true));
 		}
-	}, [state, dispatch, tracks, artistId, setCurrentStage, saveStatus, autoSave]);
+	}, [state, dispatch, tracks, artistId, setCurrentStage, saveStatus, debouncedAutoSave]);
 
 	// 復原上一步 (對應原本的 restorePreviousState)
 	const restorePreviousState = useCallback(() => {
