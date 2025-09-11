@@ -72,4 +72,4 @@ Required for Spotify API integration and database connectivity:
 - `POSTGRES_DATABASE_URL`
 - `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`
 - Spotify API credentials for music data fetching
-- Always use traditional chinese.
+- 一律使用繁體中文跟我互動
