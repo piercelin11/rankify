@@ -1,14 +1,14 @@
 "use client";
 
-import { Badge } from "@/features/admin/ui/badge";
-import { Input } from "@/features/admin/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/features/admin/ui/select";
+} from "@/components/ui/select";
 
 import { cn } from "@/lib/utils";
 import { useInlineEdit } from "../hooks/useInlineEdit";
@@ -55,7 +55,7 @@ export function InlineEditCell({
 	return (
 		<div
 			className={cn(
-				"flex h-8 w-full cursor-pointer items-center rounded px-2 py-1 hover:bg-muted/50",
+				"flex h-8 w-full cursor-pointer items-center rounded px-2 py-1 hover:bg-neutral-800/50",
 				className
 			)}
 			onClick={startEdit}
@@ -102,7 +102,7 @@ export function InlineSelectCell({
 
 	return (
 		<div
-			className="flex mr-4 h-8 w-full cursor-pointer items-center rounded px-2 py-1 hover:bg-muted/50"
+			className="flex mr-4 h-8 w-full cursor-pointer items-center rounded px-2 py-1 hover:bg-neutral-800/50"
 			onClick={startEdit}
 		>
 			<Badge variant="outline" className="text-xs">

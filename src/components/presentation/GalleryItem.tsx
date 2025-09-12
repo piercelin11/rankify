@@ -17,7 +17,7 @@ export default function GalleryItem({
 	subTitle,
 }: GalleryItemProps) {
 	return (
-		<div className="rounded-lg p-3 hover:bg-muted/50">
+		<div className="rounded-lg p-3 hover:bg-neutral-800/50">
 			<Link href={href}>
 				<div className="relative mb-4 aspect-square h-auto w-full">
 					<Image

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button } from "../../ui/button";
+import { Button } from "@/components/ui/button";
 import ColorSelector from "./ColorSelector";
 import { Controller, useForm } from "react-hook-form";
 import { updateAlbumSchema, UpdateAlbumType } from "@/types/schemas/admin";
@@ -11,17 +11,17 @@ import { AppResponseType } from "@/types/response";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import CoverSelector from "./AlbumCoverSelector";
 import { ADMIN_MESSAGES } from "@/constants/messages";
-import { Label } from "../../ui/label";
-import { Input } from "../../ui/input";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 type AlbumEditingFormProps = {
 	data: AlbumData;
-	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	onClose: () => void;
 };
 
 export default function AlbumEditingForm({
 	data,
-	setOpen,
+	onClose,
 }: AlbumEditingFormProps) {
 	const [response, setResponse] = useState<AppResponseType | null>(null);
 	const isMounted = useRef<HTMLFormElement | null>(null);
@@ -49,7 +49,7 @@ export default function AlbumEditingForm({
 			});
 			if (isMounted.current) setResponse(updateAlbumResponse);
 			if (updateAlbumResponse.type === "success" && isMounted.current)
-				setOpen(false);
+				onClose();
 		} catch (error) {
 			console.log(error);
 			if (error instanceof Error) {
@@ -70,13 +70,6 @@ export default function AlbumEditingForm({
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h2 className="font-semibold text-white">Edit Album</h2>
-				<p className="mt-1 text-sm text-neutral-400">
-					Make changes to {data.name}
-				</p>
-			</div>
-			<hr />
 			<form
 				ref={isMounted}
 				className="space-y-6"
@@ -129,7 +122,7 @@ export default function AlbumEditingForm({
 						variant="outline"
 						type="button"
 						className="flex-1"
-						onClick={() => setOpen(false)}
+						onClick={onClose}
 						disabled={isSubmitting}
 					>
 						Cancel

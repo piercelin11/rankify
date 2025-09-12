@@ -1,36 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { TrackData, AlbumData } from "@/types/data";
-import { Button } from "@/features/admin/ui/button";
+import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@/features/admin/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import TrackEditingForm from "./TrackEditingForm";
+import { useModal } from "@/lib/hooks/useModal";
 
 type TrackActionDropdownProps = {
 	data: TrackData;
 	albums: AlbumData[];
-	handleUpdateTrack: (
-		trackId: string,
-		updates: Partial<TrackData>
-	) => Promise<void>;
 };
 
 export default function TrackActionDropdown({
 	data,
 	albums,
-	handleUpdateTrack,
 }: TrackActionDropdownProps) {
-	const [isEditOpen, setEditOpen] = useState(false);
-	//const [_isDeleteOpen, _setDeleteOpen] = useState(false);
-
-	//const { id: _id } = data;
+	const { showCustom, closeTop } = useModal();
 
 	return (
 		<>
@@ -42,7 +35,20 @@ export default function TrackActionDropdown({
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
-					<DropdownMenuItem onClick={() => setEditOpen(true)}>
+					<DropdownMenuItem
+						onClick={() =>
+							showCustom({
+								title: "Edit Track",
+								content: (
+									<TrackEditingForm
+										track={data}
+										albums={albums}
+										onClose={closeTop}
+									/>
+								),
+							})
+						}
+					>
 						<Edit className="mr-2 h-4 w-4" />
 						Edit
 					</DropdownMenuItem>
@@ -53,16 +59,6 @@ export default function TrackActionDropdown({
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
-
-			<TrackEditingForm
-				track={data}
-				albums={albums}
-				isOpen={isEditOpen}
-				onOpenChange={setEditOpen}
-				onUpdateTrack={handleUpdateTrack}
-			>
-				<div />
-			</TrackEditingForm>
 		</>
 	);
 }

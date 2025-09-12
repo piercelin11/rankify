@@ -36,7 +36,7 @@ export default function ContentSelectionForm({
 		isPending,
 		handleCheckboxClick,
 		handleSubmit,
-	} = useAdminContentAddtion(type, artistId, submitAction, onCancel);
+	} = useAdminContentAddtion(type, artistId, submitAction);
 
 	const { inputValue, handleInput, result, isSearcing } = useSearchInput(
 		type === "Single" ? "track" : "album",
@@ -44,14 +44,13 @@ export default function ContentSelectionForm({
 	);
 
 	return (
-		<div className="space-y-8">
+		<div className="space-y-2">
 			<SearchInput
 				onChange={handleInput}
 				value={inputValue}
 				placeholder={`search for ${type.toLowerCase()}s`}
 				spellCheck={false}
 			/>
-
 			<div className="space-y-8">
 				<div className="relaive h-[500px] overflow-y-auto">
 					{isLoading || isSearcing ? (

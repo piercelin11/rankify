@@ -42,7 +42,7 @@ function getAchievement(achievement: AchievementType) {
 				<AchievementItem
 					icon={<StarFilledIcon width={ICON_SIZE} height={ICON_SIZE} />}
 					label={"New Peak"}
-					className={"border-primary-500 bg-primary-900/30 text-primary-500"}
+					className={"border-primary-500 bg-neutral-100-900/30 text-primary-500"}
 				/>
 			);
 		}

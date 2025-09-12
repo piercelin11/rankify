@@ -1,9 +1,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { AlbumData, TrackData } from "@/types/data";
-import { Button } from "@/features/admin/ui/button";
-import { Input } from "@/features/admin/ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import {
 	Select,
@@ -11,17 +10,17 @@ import {
 	SelectValue,
 	SelectContent,
 	SelectItem,
-} from "@/features/admin/ui/select";
-import ModalWrapper from "@/components/modals/ModalWrapper";
+} from "@/components/ui/select";
 import { $Enums } from "@prisma/client";
 import { trackEditSchema, TrackEditFormData } from "../schemas/trackEditSchema";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import updateTrack from "../actions/updateTrack";
 
 type TrackEditingFormProps = {
 	track: TrackData;
 	albums: AlbumData[];
-	children: React.ReactNode;
 	isOpen?: boolean;
+	onClose: () => void;
 	onOpenChange?: (open: boolean) => void;
 	onUpdateTrack?: (trackId: string, updates: Partial<TrackData>) => void;
 };
@@ -29,16 +28,8 @@ type TrackEditingFormProps = {
 export default function TrackEditingForm({
 	track,
 	albums,
-	children,
-	isOpen: externalIsOpen,
-	onOpenChange: externalOnOpenChange,
-	onUpdateTrack,
+	onClose,
 }: TrackEditingFormProps) {
-	const [internalIsOpen, setInternalIsOpen] = useState(false);
-
-	const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
-	const setIsOpen = externalOnOpenChange || setInternalIsOpen;
-
 	const form = useForm<TrackEditFormData>({
 		resolver: zodResolver(trackEditSchema),
 		defaultValues: {
@@ -59,196 +50,155 @@ export default function TrackEditingForm({
 			discNumber: track.discNumber || 1,
 			type: track.type,
 		});
-	}, [track, isOpen, form]);
+	}, [track, form]);
 
-	const onSubmit = (data: TrackEditFormData) => {
-		if (!onUpdateTrack) return;
-
-		const updates: Partial<TrackData> = {};
-
-		if (data.name !== track.name) {
-			updates.name = data.name;
+	const onSubmit = async (data: TrackEditFormData) => {
+		const response = await updateTrack({
+			originalData: track,
+			formData: {
+				name: data.name,
+				album: data.album || "",
+				trackNumber: data.trackNumber,
+				discNumber: data.discNumber,
+				type: data.type,
+				color: track.color || undefined,
+			},
+		});
+		if (response.type === "success") {
+			onClose();
 		}
-
-		if (data.album !== (track.album?.name || "")) {
-			const selectedAlbum = albums.find((a) => a.name === data.album);
-			updates.album = selectedAlbum;
-		}
-
-		if (!data.album) {
-			updates.album = null;
-		}
-
-		if (data.trackNumber !== track.trackNumber) {
-			updates.trackNumber = data.trackNumber;
-		}
-
-		if (data.discNumber !== track.discNumber) {
-			updates.discNumber = data.discNumber;
-		}
-
-		if (data.type !== track.type) {
-			updates.type = data.type;
-		}
-
-		if (Object.keys(updates).length > 0) {
-			onUpdateTrack(track.id, updates);
-		}
-
-		setIsOpen(false);
 	};
 
 	return (
-		<>
-			<div onClick={() => setIsOpen(true)}>{children}</div>
-			<ModalWrapper
-				isRequestOpen={isOpen}
-				onRequestClose={() => setIsOpen(false)}
-				className="max-w-2xl"
-			>
-				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+		<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+			<hr />
+			<div className="space-y-4">
+				<div className="grid grid-cols-2 gap-4">
 					<div>
-						<h2 className="font-semibold text-white">Edit Track</h2>
-						<p className="mt-1 text-sm text-neutral-400">
-							Make changes to {track.name}
-						</p>
-					</div>
-					<hr />
-					<div className="space-y-4">
-						<div className="grid grid-cols-2 gap-4">
-							<div>
-								<Label
-									htmlFor={`trackName-${track.id}`}
-									className="text-neutral-200"
-								>
-									Track Name
-								</Label>
-								<Input
-									id={`trackName-${track.id}`}
-									{...form.register("name")}
-									className="mt-1"
-								/>
-								{form.formState.errors.name && (
-									<p className="mt-1 text-sm text-red-400">
-										{form.formState.errors.name.message}
-									</p>
-								)}
-							</div>
-							<div>
-								<Label
-									htmlFor={`album-${track.id}`}
-									className="text-neutral-200"
-								>
-									Album
-								</Label>
-								<Select
-									value={form.watch("album") || "no-album"}
-									onValueChange={(value) =>
-										form.setValue("album", value === "no-album" ? "" : value)
-									}
-								>
-									<SelectTrigger
-										id={`album-${track.id}`}
-										className="mt-1 border-muted bg-neutral-900 text-white"
-									>
-										<SelectValue placeholder="Select album" />
-									</SelectTrigger>
-									<SelectContent className="border-muted bg-neutral-900">
-										<SelectItem value="no-album">No album</SelectItem>
-										{albums.map((album) => (
-											<SelectItem key={album.id} value={album.name}>
-												{album.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-						</div>
-						<div className="grid grid-cols-3 gap-4">
-							<div>
-								<Label
-									htmlFor={`trackNumber-${track.id}`}
-									className="text-neutral-200"
-								>
-									Track #
-								</Label>
-								<Input
-									id={`trackNumber-${track.id}`}
-									type="number"
-									{...form.register("trackNumber", { valueAsNumber: true })}
-									className="mt-1"
-								/>
-								{form.formState.errors.trackNumber && (
-									<p className="mt-1 text-sm text-red-400">
-										{form.formState.errors.trackNumber.message}
-									</p>
-								)}
-							</div>
-							<div>
-								<Label
-									htmlFor={`discNumber-${track.id}`}
-									className="text-neutral-200"
-								>
-									Disc #
-								</Label>
-								<Input
-									id={`discNumber-${track.id}`}
-									type="number"
-									{...form.register("discNumber", { valueAsNumber: true })}
-									className="mt-1"
-								/>
-								{form.formState.errors.discNumber && (
-									<p className="mt-1 text-sm text-red-400">
-										{form.formState.errors.discNumber.message}
-									</p>
-								)}
-							</div>
-							<div>
-								<Label
-									htmlFor={`type-${track.id}`}
-									className="text-neutral-200"
-								>
-									Type
-								</Label>
-								<Select
-									value={form.watch("type")}
-									onValueChange={(value) =>
-										form.setValue("type", value as $Enums.TrackType)
-									}
-								>
-									<SelectTrigger
-										id={`type-${track.id}`}
-										className="mt-1 border-muted bg-neutral-900 text-white"
-									>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent className="border-muted bg-neutral-900">
-										{Object.values($Enums.TrackType).map((type) => (
-											<SelectItem key={type} value={type}>
-												{type}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-						</div>
-					</div>
-
-					<div className="flex gap-3 pt-4">
-						<Button type="submit" className="flex-1">
-							Save Changes
-						</Button>
-						<Button
-							type="button"
-							variant="outline"
-							onClick={() => setIsOpen(false)}
-							className="flex-1 border-neutral-600 text-neutral-200 hover:bg-neutral-800"
+						<Label
+							htmlFor={`trackName-${track.id}`}
+							className="text-neutral-200"
 						>
-							Cancel
-						</Button>
+							Track Name
+						</Label>
+						<Input
+							id={`trackName-${track.id}`}
+							{...form.register("name")}
+							className="mt-1"
+						/>
+						{form.formState.errors.name && (
+							<p className="mt-1 text-sm text-red-400">
+								{form.formState.errors.name.message}
+							</p>
+						)}
 					</div>
-				</form>
-			</ModalWrapper>
-		</>
+					<div>
+						<Label htmlFor={`album-${track.id}`} className="text-neutral-200">
+							Album
+						</Label>
+						<Select
+							value={form.watch("album") || "no-album"}
+							onValueChange={(value) =>
+								form.setValue("album", value === "no-album" ? "" : value)
+							}
+						>
+							<SelectTrigger
+								id={`album-${track.id}`}
+								className="mt-1 border-muted bg-neutral-900 text-white"
+							>
+								<SelectValue placeholder="Select album" />
+							</SelectTrigger>
+							<SelectContent className="border-muted bg-neutral-900">
+								<SelectItem value="no-album">No album</SelectItem>
+								{albums.map((album) => (
+									<SelectItem key={album.id} value={album.name}>
+										{album.name}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+				</div>
+				<div className="grid grid-cols-3 gap-4">
+					<div>
+						<Label
+							htmlFor={`trackNumber-${track.id}`}
+							className="text-neutral-200"
+						>
+							Track #
+						</Label>
+						<Input
+							id={`trackNumber-${track.id}`}
+							type="number"
+							{...form.register("trackNumber", { valueAsNumber: true })}
+							className="mt-1"
+						/>
+						{form.formState.errors.trackNumber && (
+							<p className="mt-1 text-sm text-red-400">
+								{form.formState.errors.trackNumber.message}
+							</p>
+						)}
+					</div>
+					<div>
+						<Label
+							htmlFor={`discNumber-${track.id}`}
+							className="text-neutral-200"
+						>
+							Disc #
+						</Label>
+						<Input
+							id={`discNumber-${track.id}`}
+							type="number"
+							{...form.register("discNumber", { valueAsNumber: true })}
+							className="mt-1"
+						/>
+						{form.formState.errors.discNumber && (
+							<p className="mt-1 text-sm text-red-400">
+								{form.formState.errors.discNumber.message}
+							</p>
+						)}
+					</div>
+					<div>
+						<Label htmlFor={`type-${track.id}`} className="text-neutral-200">
+							Type
+						</Label>
+						<Select
+							value={form.watch("type")}
+							onValueChange={(value) =>
+								form.setValue("type", value as $Enums.TrackType)
+							}
+						>
+							<SelectTrigger
+								id={`type-${track.id}`}
+								className="mt-1 border-muted bg-neutral-900 text-white"
+							>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent className="border-muted bg-neutral-900">
+								{Object.values($Enums.TrackType).map((type) => (
+									<SelectItem key={type} value={type}>
+										{type}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+				</div>
+			</div>
+
+			<div className="flex gap-3 pt-4">
+				<Button type="submit" className="flex-1">
+					Save Changes
+				</Button>
+				<Button
+					type="button"
+					variant="outline"
+					onClick={onClose}
+					className="flex-1 border-neutral-600 text-neutral-200 hover:bg-neutral-800"
+				>
+					Cancel
+				</Button>
+			</div>
+		</form>
 	);
 }

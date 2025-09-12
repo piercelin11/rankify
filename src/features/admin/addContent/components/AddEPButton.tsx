@@ -1,17 +1,16 @@
 "use client";
 
-import ModalWrapper from "@/components/modals/ModalWrapper";
-import { useState } from "react";
 import ContentSelectionForm from "./ContentSelectionForm";
 import addAlbum from "@/features/admin/addContent/actions/addAlbum";
 import AddButton from "@/components/buttons/AddButton";
+import { useModal } from "@/lib/hooks/useModal";
 
 type AddEPButtonProps = {
 	artistId: string;
 };
 
 export default function AddEPButton({ artistId }: AddEPButtonProps) {
-	const [isOpen, setOpen] = useState(false);
+	const { showCustom, closeTop } = useModal();
 
 	function handleSubmit(EPId: string[], token: string) {
 		return addAlbum({ artistId, albumId: EPId, type: "EP", token });
@@ -19,19 +18,21 @@ export default function AddEPButton({ artistId }: AddEPButtonProps) {
 
 	return (
 		<>
-			<ModalWrapper
-				onRequestClose={() => setOpen(false)}
-				isRequestOpen={isOpen}
-			>
-				<ContentSelectionForm
-					artistId={artistId}
-					onCancel={() => setOpen(false)}
-					type="EP"
-					submitAction={handleSubmit}
-				/>
-			</ModalWrapper>
-
-			<AddButton onClick={() => setOpen(true)} />
+			<AddButton
+				onClick={() =>
+					showCustom({
+						title: "Add EP",
+						content: (
+							<ContentSelectionForm
+								artistId={artistId}
+								onCancel={closeTop}
+								type="EP"
+								submitAction={handleSubmit}
+							/>
+						),
+					})
+				}
+			/>
 		</>
 	);
 }

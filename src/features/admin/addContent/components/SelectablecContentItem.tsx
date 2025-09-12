@@ -23,24 +23,23 @@ export default function SelectablecContentItem({
 
 	return (
 		<div
-			className="flex select-none items-center gap-2 rounded sm:px-3 py-2 hover:bg-neutral-800"
+			className="flex select-none items-center gap-2 rounded py-2 hover:bg-neutral-800 sm:px-3"
 			onClick={() => handleClick(data.id)}
 		>
-			<Image
-				className="rounded"
-				src={isAlbum(data) ? data.images[2]?.url : data.album.images[2]?.url}
-				alt={data.name}
-				width={45}
-				height={45}
-			/>
+			<div className="relative aspect-square h-12 w-12 rounded">
+				<Image
+					className="rounded"
+					src={isAlbum(data) ? data.images[2]?.url : data.album.images[2]?.url}
+					alt={data.name}
+					fill
+					sizes="48px"
+				/>
+			</div>
 			<div className="overflow-hidden">
-				<p className="text-nowrap overflow-hidden text-ellipsis">{data.name}</p>
+				<p className="overflow-hidden text-ellipsis text-nowrap">{data.name}</p>
 				<p className="text-sm text-neutral-400">{type}</p>
 			</div>
-			<CheckBox
-				className="ml-auto"
-				checked={checked}
-			/>
+			<CheckBox className="ml-auto" checked={checked} />
 		</div>
 	);
 }

@@ -1,8 +1,5 @@
 "use client";
 
-import React, { useState } from "react";
-import ComfirmationModal from "@/components/modals/ComfirmationModal";
-import ModalWrapper from "@/components/modals/ModalWrapper";
 import { ArtistData } from "@/types/data";
 import deleteItem from "../actions/deleteItem";
 import fetchSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
@@ -14,18 +11,18 @@ import {
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
-import { Button } from "../../ui/button";
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import ArtistEditingForm from "./ArtistEditingForm";
 import { UpdateIcon } from "@radix-ui/react-icons";
+import { useModal } from "@/lib/hooks/useModal";
 
 type ArtistActionDropdownProps = { data: ArtistData };
 
 export default function ArtistActionDropdown({
 	data,
 }: ArtistActionDropdownProps) {
-	const [isEditOpen, setEditOpen] = useState(false);
-	const [isDeleteOpen, setDeleteOpen] = useState(false);
+	const { showCustom, showAlert, closeTop } = useModal();
 
 	const { id } = data;
 
@@ -44,7 +41,15 @@ export default function ArtistActionDropdown({
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
-					<DropdownMenuItem onClick={() => setEditOpen(true)}>
+					<DropdownMenuItem
+						onClick={() =>
+							showCustom({
+								content: <ArtistEditingForm data={data} onClose={closeTop} />,
+								title: "Edit Artist",
+								description: `Make changes to ${data.name}`,
+							})
+						}
+					>
 						<Edit className="mr-2 h-4 w-4" />
 						Edit
 					</DropdownMenuItem>
@@ -55,30 +60,21 @@ export default function ArtistActionDropdown({
 					<DropdownMenuSeparator />
 					<DropdownMenuItem
 						className="text-destructive"
-						onClick={() => setDeleteOpen(true)}
+						onClick={() =>
+							showAlert({
+								title: "Are You Sure?",
+								description: "This action cannot be undone.",
+								confirmText: "Delete",
+								onConfirm: () => deleteItem({ type: "artist", id }),
+								onCancel: () => closeTop(),
+							})
+						}
 					>
 						<Trash2 className="mr-2 h-4 w-4" />
 						Delete
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
-			<ComfirmationModal
-				onConfirm={() => deleteItem({ type: "artist", id })}
-				onCancel={() => setDeleteOpen(false)}
-				comfirmLabel="Delete"
-				cancelLabel="Cancel"
-				isOpen={isDeleteOpen}
-				setOpen={setDeleteOpen}
-				title="Are You Sure?"
-				description="This action cannot be undone."
-				warning="Warning: All associated data will also be removed."
-			/>
-			<ModalWrapper
-				onRequestClose={() => setEditOpen(false)}
-				isRequestOpen={isEditOpen}
-			>
-				<ArtistEditingForm data={data} setOpen={setEditOpen} />
-			</ModalWrapper>
 		</>
 	);
 }

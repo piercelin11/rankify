@@ -1,26 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
-import ComfirmationModal from "@/components/modals/ComfirmationModal";
-import ModalWrapper from "@/components/modals/ModalWrapper";
 import AlbumEditingForm from "./AlbumEditingForm";
 import { AlbumData } from "@/types/data";
 import deleteItem from "../actions/deleteItem";
-import { Button } from "@/features/admin/ui/button";
+import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@/features/admin/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { useModal } from "@/lib/hooks/useModal";
 
 type AlbumActionDropdownProps = { data: AlbumData };
 
 export default function AlbumActionDropdown({ data }: AlbumActionDropdownProps) {
-	const [isEditOpen, setEditOpen] = useState(false);
-	const [isDeleteOpen, setDeleteOpen] = useState(false);
+	const {showAlert, showCustom, closeTop} = useModal();
 
 	const { id } = data;
 
@@ -34,37 +31,30 @@ export default function AlbumActionDropdown({ data }: AlbumActionDropdownProps) 
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
-					<DropdownMenuItem onClick={() => setEditOpen(true)}>
+					<DropdownMenuItem onClick={() => showCustom({
+						content: <AlbumEditingForm data={data} onClose={closeTop} />,
+						title: "Edit Album",
+						description: `Make changes to ${data.name}`,
+					})}>
 						<Edit className="mr-2 h-4 w-4" />
 						Edit
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem
 						className="text-destructive"
-						onClick={() => setDeleteOpen(true)}
+						onClick={() => showAlert({
+							title: "Are You Sure?",
+							description: "This action cannot be undone.",
+							confirmText: "Delete",
+							variant: "destructive",
+							onConfirm: () => deleteItem({ type: "album", id }),
+						})}
 					>
 						<Trash2 className="mr-2 h-4 w-4" />
 						Delete
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
-			<ComfirmationModal
-				onConfirm={() => deleteItem({ type: "album", id })}
-				onCancel={() => setDeleteOpen(false)}
-				comfirmLabel="Delete"
-				cancelLabel="Cancel"
-				isOpen={isDeleteOpen}
-				setOpen={setDeleteOpen}
-				title="Are You Sure?"
-				description="This action cannot be undone."
-				warning="Warning: All associated data will also be removed."
-			/>
-			<ModalWrapper
-				onRequestClose={() => setEditOpen(false)}
-				isRequestOpen={isEditOpen}
-			>
-				<AlbumEditingForm data={data} setOpen={setEditOpen} />
-			</ModalWrapper>
 		</>
 	);
 }
