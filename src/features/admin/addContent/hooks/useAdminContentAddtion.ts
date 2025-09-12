@@ -1,7 +1,7 @@
 "use client";
 
 import { AppResponseType } from "@/types/response";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Album, Artist } from "spotify-types";
 import {
 	ContentSubmitActionType,
@@ -44,7 +44,7 @@ export default function useAdminContentAddtion(
 		}
 
 		fetchaDatas();
-	}, [artistId]);
+	}, [artistId, type]);
 
 	function handleCheckboxClick(projectId: string) {
 		setSelectedIds((prev) =>
@@ -60,7 +60,7 @@ export default function useAdminContentAddtion(
 		try {
 			const response = await submitAction(selectedIds, accessToken);
 			setResponse(response);
-			if (response.success) onCancel();
+			if (response.type === "success") onCancel();
 		} catch (error) {
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT") {

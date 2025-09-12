@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getDevInputTypeError } from "@/constants";
 import { toAcronym, capitalizeFirstLetter } from "../string.utils";
 

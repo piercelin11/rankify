@@ -1,9 +1,8 @@
 "use client";
 
 import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
-import React, { useMemo } from "react";
+import React from "react";
 import { AlbumData, ArtistData } from "@/types/data";
-import useMediaQuery from "@/lib/hooks/useMediaQuery";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import Image from "next/image";
@@ -45,11 +44,6 @@ export default function AllTrackOverviewRankingList({
 	} = useSortedAndFilteredRanking(tracksRankings, albums);
 	const { isScrolled, listRefCallback, handleRowClick, handleListScroll } =
 		useListScroll();
-
-	const albumsMap = useMemo(
-		() => new Map(albums.map((album) => [album.id, album])),
-		[albums]
-	);
 
 	const columns: Column<TrackStatsType>[] = [
 		{

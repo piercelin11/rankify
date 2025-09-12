@@ -31,7 +31,7 @@ export default function AddEPButton({ artistId }: AddEPButtonProps) {
 				/>
 			</ModalWrapper>
 
-			<AddButton variant="secondary" onClick={() => setOpen(true)} />
+			<AddButton onClick={() => setOpen(true)} />
 		</>
 	);
 }

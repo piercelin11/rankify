@@ -4,7 +4,7 @@ import { SCROLL_SESSION_KEY } from "@/features/ranking/display/hooks/useListScro
 import { cn } from "@/lib/utils";
 import { useAppSelector } from "@/store/hooks";
 import Link from "next/link";
-import React from "react";
+
 import Tooltip from "@/components/overlay/Tooltip";
 
 type SidebarMenuItemProps = {

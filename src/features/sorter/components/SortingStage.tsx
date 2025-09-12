@@ -121,7 +121,7 @@ export default function SortingStage({
 			document.removeEventListener("keydown", handleKeyDown);
 			document.removeEventListener("keyup", handleKeyUp);
 		};
-	}, [handleKeyUp]);
+	}, [handleKeyDown, handleKeyUp]);
 
 	return (
 		<section className="container select-none space-y-6">

@@ -5,10 +5,8 @@ import {
 	RankingDraft,
 	RankingSession,
 	Track,
-	User,
 } from "@prisma/client";
 import { RankingSettingsType } from "./schemas/settings";
-import { RankingResultData } from "@/features/sorter/components/SortingStage";
 
 export type AlbumData = Album & {
 	tracks?: TrackData[];

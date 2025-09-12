@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
 import Tabs from "../../../../../../components/navigation/Tabs";
 import { getArtistTabOptions } from "@/config/navData";
 import { usePathname } from "next/navigation";
 import ContentHeader from "../../../../../../components/presentation/ContentHeader";
 import { ArtistData } from "@/types/data";
+import React from "react";
 
 type ArtistHeaderProps = {
 	artistData: ArtistData;

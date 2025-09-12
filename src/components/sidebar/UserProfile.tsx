@@ -2,7 +2,7 @@ import { PLACEHOLDER_PIC } from "@/constants";
 import { ExtendedUser } from "@/types/auth";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
-import React from "react";
+
 
 type UserProfileProps = {
 	userSession: ExtendedUser;
@@ -10,7 +10,7 @@ type UserProfileProps = {
 
 export default function UserProfile({ userSession }: UserProfileProps) {
 	return (
-		<div className="flex items-center gap-4 rounded-xl border border-neutral-800 px-2.5 py-2 hover:bg-neutral-900">
+		<div className="flex items-center gap-4 rounded-xl border border-neutral-800 p-2 hover:bg-neutral-900">
 			<div className="relative min-h-12 min-w-12">
 				<Image
 					className="rounded-xl"

@@ -1,7 +1,7 @@
 import TopSongsCountpPolarAreaChart from "@/features/ranking/stats/charts/TopSongsCountpPolarAreaChart";
 import { AlbumHighlightsCard } from "@/features/ranking/stats/components/RankingHighlightsCard";
 import { getAlbumsRankingHistory } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
-import React from "react";
+
 
 
 type AlbumHistoryStatsSectionProps = {

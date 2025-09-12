@@ -318,7 +318,7 @@ export default function useSorter({
 			// 新開始 (對應原本的 initList + showImage)
 			setState(initializeSorterState(tracks));
 		}
-	}, [draft?.draft, tracks.length]); // 使用 tracks.length 而不是整個 tracks 陣列
+	}, [draft?.draft, tracks, tracks.length]); // 使用 tracks.length 而不是整個 tracks 陣列
 
 	// 當前比較的歌曲 (對應原本的 leftField, rightField)
 	const leftField = useMemo(() => {
@@ -329,7 +329,7 @@ export default function useSorter({
 		if (!trackName) return undefined;
 		
 		return tracks.find((track) => track.name === trackName);
-	}, [state?.currentLeftIndex, state?.namMember, tracks]);
+	}, [state, tracks]);
 
 	const rightField = useMemo(() => {
 		if (!state || typeof state.currentRightIndex !== 'number' || state.currentRightIndex < 0) return undefined;
@@ -339,7 +339,7 @@ export default function useSorter({
 		if (!trackName) return undefined;
 		
 		return tracks.find((track) => track.name === trackName);
-	}, [state?.currentRightIndex, state?.namMember, tracks]);
+	}, [state, tracks]);
 
 	// 儲存功能 (對應原本的 handleSave)
 	const handleSave = useCallback(async () => {
@@ -372,7 +372,6 @@ export default function useSorter({
 			startTransition(async () => {
 				dispatchRef.current(setSaveStatus("pending"));
 				try {
-					const result = await saveDraft(artistIdRef.current, JSON.stringify(stateRef.current));
 					dispatchRef.current(setSaveStatus("saved"));
 				} catch (error) {
 					console.error("Failed to save draft:", error);

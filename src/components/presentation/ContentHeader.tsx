@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import React, { ReactNode, useEffect } from "react";
+import React, { ReactNode } from "react";
 import { SpotifyIcon } from "../icons/LogoIcons";
 import { AlbumData, ArtistData, TrackData } from "@/types/data";
 import Image from "next/image";
@@ -23,7 +23,7 @@ const ContentHeader = React.memo(function ContentHeader({
 	rounded = false,
 	type,
 	color,
-	imageSize = 220,
+	imageSize: _imageSize = 220,
 	children,
 }: ContentHeaderProps) {
 	return (

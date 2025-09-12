@@ -1,6 +1,8 @@
 import React, { HTMLAttributes } from "react";
 import { RankingResultData } from "./SortingStage";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { PLACEHOLDER_PIC } from "@/constants";
 
 type ResultListItemProps = {
 	data: RankingResultData;
@@ -21,9 +23,9 @@ export default function ResultListItem({
 			<p className="mr-2 justify-self-end font-serif text-lg font-medium text-neutral-500">
 				{ranking}
 			</p>
-			<img
+			<Image
 				className="rounded"
-				src={data.img || undefined}
+				src={data.img || PLACEHOLDER_PIC}
 				alt={data.name}
 				width={70}
 				height={70}

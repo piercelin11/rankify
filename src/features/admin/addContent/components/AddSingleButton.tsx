@@ -3,8 +3,7 @@
 import ModalWrapper from "@/components/modals/ModalWrapper";
 import { useState } from "react";
 import ContentSelectionForm from "./ContentSelectionForm";
-import Button from "@/components/buttons/Button";
-import { PlusIcon } from "@radix-ui/react-icons";
+import { Button } from "../../ui/button";import { PlusIcon } from "@radix-ui/react-icons";
 import addSingle from "@/features/admin/addContent/actions/addSingle";
 
 type AddSingleButtonProps = {

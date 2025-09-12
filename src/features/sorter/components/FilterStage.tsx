@@ -10,6 +10,7 @@ import { FilterType, setExcluded, setPercentage } from "@/features/sorter/slices
 import { useAppDispatch } from "@/store/hooks";
 import { CurrentStage } from "./SorterPage";
 import { PLACEHOLDER_PIC } from "@/constants";
+import Image from "next/image";
 
 type FilterStageProps = {
 	albums: AlbumData[];
@@ -50,14 +51,14 @@ export default function FilterStage({ albums, tracks, setCurrentStage }: FilterS
 
 	useEffect(() => {
 		dispatch(setPercentage(0));
-	}, [])
+	}, [dispatch])
 
 	return (
 		<div className="space-y-6">
 			<div className="space-y-2">
 				<h3 className="text-center">Get Started</h3>
 				<p className="text-description text-center">
-					filter out the albums and singles you haven't listen to.
+					filter out the albums and singles you haven&apos;t listen to.
 				</p>
 			</div>
 			<div className="flex justify-center gap-4">
@@ -114,10 +115,11 @@ function FilterGalleryItem({
 	return (
 		<div className="relative min-w-40 max-w-40 space-y-2">
 			<CheckBox className="absolute left-2 top-2 z-10" checked={checked} />
-			<img
+			<Image
 				className={cn("opacity-100 transition-all", {
 					"opacity-25": !checked,
 				})}
+				alt={data.name}
 				src={data.img ?? PLACEHOLDER_PIC}
 				draggable={false}
 			/>

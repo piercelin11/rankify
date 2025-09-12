@@ -8,12 +8,6 @@ import LineChartFilter, {
 } from "../components/LineChartFilter";
 import { adjustColor } from "@/lib/utils/color.utils";
 
-type AlbumRankingLineChartData = {
-	ranking: number;
-	points: number;
-	date: Date;
-	dateId: string;
-}
 
 type AlbumRankingLineChart = {
 	defaultAlbumData: AlbumStatsType;

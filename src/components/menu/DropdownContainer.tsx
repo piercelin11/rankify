@@ -1,5 +1,5 @@
 import useMediaQuery from "@/lib/hooks/useMediaQuery";
-import React from "react";
+
 
 type DropdownContainerProps = {
 	children: React.ReactNode;

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+
 
 import ArtistSearchResultItem from "./ArtistSearchResultItem";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";

@@ -1,17 +1,17 @@
 import getArtistById from "@/lib/database/data/getArtistById";
 import { notFound } from "next/navigation";
-import React from "react";
+
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import getSinglesByArtist from "@/lib/database/data/getSinglesByArtist";
-import TrackListItem from "@/features/admin/editContent/components/TrackListItem";
+import TracksTable from "@/features/admin/editContent/components/TracksTable";
 import ContentWrapper from "@/components/layout/ContentWrapper";
 import AddAlbumButton from "@/features/admin/addContent/components/AddAlbumButton";
 import AddEPButton from "@/features/admin/addContent/components/AddEPButton";
 import AddSingleButton from "@/features/admin/addContent/components/AddSingleButton";
-import ArtistActionSection from "@/features/admin/editContent/components/ArtistActionSection";
-import ContentHeader from "@/components/presentation/ContentHeader";
+import ArtistActionDropdown from "@/features/admin/editContent/components/ArtistActionDropdown";
 import GalleryWrapper from "@/components/presentation/GalleryWrapper";
 import GalleryItem from "@/components/presentation/GalleryItem";
+import AdminContentHeader from "@/features/admin/editContent/components/AdminContentHeader";
 
 export default async function AdminArtistPage({
 	params,
@@ -35,14 +35,15 @@ export default async function AdminArtistPage({
 
 	return (
 		<>
-			<ContentHeader
+			<AdminContentHeader
 				data={artist}
 				subTitleContent={<p>{artist.spotifyFollowers} followers</p>}
 				rounded
-			/>
+			>
+				<ArtistActionDropdown data={artist} />
+			</AdminContentHeader>
 			<ContentWrapper>
 				<div className="mb-60 space-y-10">
-					<ArtistActionSection data={artist} />
 					<div>
 						<h2>Albums</h2>
 						<GalleryWrapper>
@@ -79,14 +80,7 @@ export default async function AdminArtistPage({
 							<h2>Singles</h2>
 							<AddSingleButton artistId={artistId} />
 						</div>
-						{singles.map((single, index) => (
-							<TrackListItem
-								key={single.id}
-								trackData={single}
-								number={index + 1}
-								albums={allAlbums}
-							/>
-						))}
+						<TracksTable albums={albums} tracks={singles} />
 					</div>
 				</div>
 			</ContentWrapper>

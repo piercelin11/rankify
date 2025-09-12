@@ -4,7 +4,7 @@ import {
 	CheckCircledIcon,
 	ExclamationTriangleIcon,
 } from "@radix-ui/react-icons";
-import React from "react";
+
 
 type ErrorMessageProps = {
 	message: string;

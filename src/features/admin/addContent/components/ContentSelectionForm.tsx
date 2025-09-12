@@ -1,4 +1,4 @@
-import React from "react";
+
 import SelectablecContentItem from "./SelectablecContentItem";
 import Button from "@/components/buttons/Button";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";

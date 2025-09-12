@@ -1,5 +1,5 @@
 import ProfileSettingsForm from "@/features/settings/components/ProfileSettingsForm";
-import React from "react";
+
 import { getUserSession } from "../../../../auth";
 import getUserById from "@/lib/database/user/getUserById";
 import { notFound } from "next/navigation";

@@ -1,4 +1,4 @@
-import React from "react";
+
 import { CubeIcon } from "@radix-ui/react-icons";
 
 export default function NoData() {

@@ -1,12 +1,10 @@
 "use client";
 
-import React from "react";
-import LogoDisplay from "@/components/sidebar/LogoDisplay";
+
 import { ArtistData } from "@/types/data";
 import { CheckIcon } from "@radix-ui/react-icons";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import { useAppSelector } from "@/store/hooks";
-import { PercentileBar } from "@/features/ranking/stats/components/PercentileBarsCard";
 
 type SorterHeaderProps = {
 	artist: ArtistData;
@@ -38,7 +36,7 @@ export default function SorterHeader({ artist }: SorterHeaderProps) {
 			</div>
 
 			<div className="hidden justify-self-center sm:block">
-				<p className="text-neutral-300">{artist.name}'s Sorter</p>
+				<p className="text-neutral-300">{artist.name}&apos;s Sorter</p>
 			</div>
 			<div className="mt-2 w-full justify-self-end sm:w-fit">
 				<div className="relative w-full sm:w-[150px] xl:w-[300px]">

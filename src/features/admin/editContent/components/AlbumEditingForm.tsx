@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import FormItem from "@/components/form/FormInput";
 import { Button } from "../../ui/button";
 import ColorSelector from "./ColorSelector";
 import { Controller, useForm } from "react-hook-form";
@@ -67,7 +66,7 @@ export default function AlbumEditingForm({
 
 	useEffect(() => {
 		setFocus("name");
-	}, []);
+	}, [setFocus]);
 
 	return (
 		<div className="space-y-6">

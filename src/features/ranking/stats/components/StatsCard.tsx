@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { adjustColor } from "@/lib/utils/color.utils";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode } from "react";
 
 type StatsCardProps = {
 	children: ReactNode;
@@ -17,7 +17,6 @@ export default function StatsCard({
 	subtitle,
 	color,
 }: StatsCardProps) {
-	const [isHover, setHover] = useState(false);
 	return (
 		<div
 			className={cn(
@@ -29,8 +28,6 @@ export default function StatsCard({
 					? `radial-gradient(ellipse farthest-corner at top left, transparent 30%,${adjustColor(color, 0.1)}80 45%, ${adjustColor(color, 0.3, 1.5)}E6 75%, ${adjustColor(color, 0.55, 1.5)} 125%), linear-gradient(to bottom, rgb(9 9 11 / 1), rgb(9 9 11 / 1))`
 					: "",
 			}}
-			onMouseEnter={() => setHover(true)}
-			onMouseLeave={() => setHover(false)}
 		>
 			<div
 				className={cn(

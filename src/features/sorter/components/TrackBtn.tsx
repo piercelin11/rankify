@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { TrackData } from "@/types/data";
 import { PLACEHOLDER_PIC } from "@/constants";
+import Image from "next/image";
 
 type TrackBtnProps = {
 	isPressed: boolean;
@@ -29,7 +30,7 @@ export default function TrackBtn({ isPressed, isSelected, onClick, data }: Track
 				height="80"
 				allow="autoplay; encrypted-media"
 			></iframe>
-			<img
+			<Image
 				className="rounded-lg"
 				src={data?.img || PLACEHOLDER_PIC}
 				alt="cover"

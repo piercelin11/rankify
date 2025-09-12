@@ -1,7 +1,7 @@
 "use client";
 
 import { getMainSidebarMenuItems } from "@/config/sidebarMenu";
-import React from "react";
+
 import SidebarMenuItem from "./SidebarMenuItem";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import { ArtistData } from "@/types/data";
@@ -21,7 +21,7 @@ export default function MainSidebar({
 	artistData,
 }: MainSidebarProps) {
 	const mainSidebarMenuItems = getMainSidebarMenuItems(userSession.role);
-	
+
 	const dispatch = useAppDispatch();
 
 	return (
@@ -34,7 +34,7 @@ export default function MainSidebar({
 					<HamburgerMenuIcon width={20} height={20} />
 				</button>
 			</div>
-			
+
 			<div>
 				{mainSidebarMenuItems.map((item) => (
 					<SidebarMenuItem
@@ -54,7 +54,9 @@ export default function MainSidebar({
 					<SidebarArtistItem key={artist.id} artistData={artist} />
 				))}
 			</div>
-            <UserProfile userSession={userSession} />
+			<div className="px-1">
+				<UserProfile userSession={userSession} />
+			</div>
 		</div>
 	);
 }

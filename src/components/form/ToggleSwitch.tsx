@@ -1,4 +1,4 @@
-import React from "react";
+
 import ToggleButton from "../buttons/ToggleButton";
 
 type ToggleSwitchProps = {

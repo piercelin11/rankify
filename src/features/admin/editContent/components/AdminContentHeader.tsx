@@ -2,8 +2,8 @@
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import React, { ReactNode, useEffect } from "react";
-import { AlbumData, ArtistData, TrackData } from "@/types/data";
+import React, { ReactNode } from "react";
+import { AlbumData, ArtistData } from "@/types/data";
 import Image from "next/image";
 import { SpotifyIcon } from "@/components/icons/LogoIcons";
 

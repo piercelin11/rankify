@@ -1,5 +1,5 @@
 import LineChartFilter, { MenuOptionType, ParentOptionType } from "@/features/ranking/display/components/LineChartFilter";
-import React from "react";
+
 import RankingLineChart from "./RankingLineChart";
 import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
 

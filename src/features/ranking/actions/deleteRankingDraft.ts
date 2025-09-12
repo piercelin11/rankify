@@ -9,8 +9,6 @@ export default async function deleteRankingDraft(
 	redirectPath?: string
 ) {
 	const { id: userId } = await getUserSession();
-	let isSuccess = false;
-
 	try {
 		await db.rankingDraft.deleteMany({
 			where: {
@@ -18,8 +16,6 @@ export default async function deleteRankingDraft(
 				userId,
 			},
 		});
-
-		isSuccess = true;
 	} catch (error) {
 		console.error("Failed to delete draft:", error);
 		return { type: "error", message: "Failed to delete draft" };

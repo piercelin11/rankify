@@ -20,7 +20,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
 		},
 	},
 	callbacks: {
-		async session({ session, token, trigger }) {
+		async session({ session, token, trigger: _trigger }) {
 			if (token.sub && session) {
 				session.user.id = token.sub;
 				session.user.role = token.role as $Enums.Role;
@@ -30,7 +30,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
 
 			return session;
 		},
-		async jwt({ token, trigger }) {
+		async jwt({ token, trigger: _trigger }) {
 			if (!token.sub) return token;
 			const existingUser = await db.user.findFirst({
 				where: {

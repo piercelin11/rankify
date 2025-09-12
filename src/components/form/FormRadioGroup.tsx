@@ -1,4 +1,4 @@
-import React from "react";
+
 import RadioItem from "./RadioItem";
 
 export type FormOptionType = {

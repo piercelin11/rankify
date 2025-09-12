@@ -75,6 +75,10 @@ export default function TrackEditingForm({
 			updates.album = selectedAlbum;
 		}
 
+		if (!data.album) {
+			updates.album = null;
+		}
+
 		if (data.trackNumber !== track.trackNumber) {
 			updates.trackNumber = data.trackNumber;
 		}

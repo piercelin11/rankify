@@ -5,7 +5,7 @@ import {
 	RankUpIcon,
 } from "@/components/icons/StatsIcons";
 import { cn } from "@/lib/utils";
-import React from "react";
+
 
 type RankChangeIconProps = {
 	rankChange?: number | null;

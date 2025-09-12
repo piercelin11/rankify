@@ -4,7 +4,7 @@ import {
 	ArrowDownRoundIcon,
 	ArrowUpRoundIcon,
 } from "@/components/icons/StatsIcons";
-import React from "react";
+
 import NoData from "@/components/feedback/NoData";
 import Link from "next/link";
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";
