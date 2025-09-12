@@ -48,7 +48,7 @@ export default function SorterHeader({ artist }: SorterHeaderProps) {
 					</p>
 					<div className="relative h-2 rounded-full bg-neutral-900">
 						<div
-							className="h-2 rounded-full bg-primary-500"
+							className="h-2 rounded-full bg-neutral-100-500"
 							style={{
 								width: percentage + "%",
 							}}

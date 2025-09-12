@@ -63,6 +63,7 @@ export default function useSortedAndFilteredRanking<
 					comparison = Number(valA) - Number(valB);
 				} else if (typeof valA === "string" && typeof valB === "string") {
 					comparison = valA.localeCompare(valB);
+				 
 				} else if (valA instanceof Date && valB instanceof Date) {
 					comparison = valA.getTime() - valB.getTime();
 				} else {

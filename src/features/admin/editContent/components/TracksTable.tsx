@@ -16,7 +16,7 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/features/admin/ui/table";
+} from "@/components/ui/table";
 
 import { AlbumData, TrackData } from "@/types/data";
 import { cn } from "@/lib/utils";
@@ -107,7 +107,9 @@ export default function TracksTable({
 					<Image
 						src={row.original.img || "/placeholder-album.png"}
 						alt={row.original.name}
-						className="h-10 w-10 rounded object-cover"
+						className="rounded"
+						width={40}
+						height={40}
 					/>
 				</div>
 			),

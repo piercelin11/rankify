@@ -18,12 +18,11 @@ import updateUserProfileImage from "../actions/updateUserProfileImage";
 import deleteUserImageOnS3 from "../actions/deleteUserImageOnS3";
 import { SETTINGS_MESSAGES } from "@/constants/messages";
 
-export default function useProfilePictureUpload(initialImgUrl: string | null) {
+export default function useProfilePictureUpload(initialImgUrl: string | null, onClose: () => void) {
 	const [optimisticImgUrl, setOptimisticImgUrl] = useState(initialImgUrl);
 	const [previewImgUrl, setPreviewImgUrl] = useState<string | null>(
 		initialImgUrl || PLACEHOLDER_PIC
 	);
-	const [isFormOpen, setFormOpen] = useState(false);
 	const [response, setResponse] = useState<AppResponseType | null>(null);
 
 	const abortControllerRef = useRef<AbortController | null>(null);
@@ -91,7 +90,7 @@ export default function useProfilePictureUpload(initialImgUrl: string | null) {
 				fileName: file.name,
 				fileType: file.type,
 			});
-			setFormOpen(false);
+			onClose();
 		} catch (err) {
 			console.error(SETTINGS_MESSAGES.FILE_UPLOAD.PRESIGNED_URL_FAILURE, err);
 			setResponse({
@@ -181,8 +180,6 @@ export default function useProfilePictureUpload(initialImgUrl: string | null) {
 		isSubmitting,
 		optimisticImgUrl,
 		response,
-		isFormOpen,
-		setFormOpen,
 		handleFileChange,
 		previewImgUrl,
 	};

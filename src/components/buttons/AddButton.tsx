@@ -1,4 +1,4 @@
-import { Button } from "@/features/admin/ui/button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PlusIcon } from "@radix-ui/react-icons";
 
@@ -14,10 +14,10 @@ export default function AddButton({
 	return (
 		<Button
 			className={cn(
-				"m-3 flex aspect-square w-full h-auto items-center justify-center gap-2 rounded-full bg-muted hover:bg-muted/50",
+				"m-3 flex aspect-square w-full h-auto items-center justify-center gap-2 rounded-full bg-neutral-800 hover:bg-neutral-800/50",
 				className,
 				{
-					"bg-muted/80 opacity-70": disabled,
+					"bg-neutral-800/80 opacity-70": disabled,
 				}
 			)}
 			disabled={disabled}

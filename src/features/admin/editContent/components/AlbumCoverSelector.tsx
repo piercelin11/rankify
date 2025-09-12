@@ -7,7 +7,8 @@ import { AlbumData } from "@/types/data";
 import { CheckIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import { Label } from "../../ui/label";
+import { Label } from "@/components/ui/label";
+
 
 type AlbumCoverSelectorProps = {
 	album: AlbumData;
@@ -59,7 +60,7 @@ export default function AlbumCoverSelector({
 							)}
 						>
 							{value === url && (
-								<div className="absolute left-1 top-1 rounded-full bg-primary-500 p-1">
+								<div className="absolute left-1 top-1 rounded-full bg-neutral-100-500 p-1">
 									<CheckIcon
 										className="text-neutral-950"
 										width={15}

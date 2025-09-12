@@ -28,7 +28,7 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/features/admin/ui/table";
+} from "@/components/ui/table";
 
 import { AlbumData, TrackData } from "@/types/data";
 import { cn } from "@/lib/utils";
@@ -297,7 +297,6 @@ function TracksTableContent({
 				<TrackActionDropdown
 					data={row.original}
 					albums={albums}
-					handleUpdateTrack={handleUpdateTrack}
 				/>
 			),
 			size: 80,

@@ -15,7 +15,6 @@ export default function useAdminContentAddtion(
 	type: ContentType,
 	artistId: string,
 	submitAction: ContentSubmitActionType,
-	onCancel: () => void
 ) {
 	const [albums, setAlbums] = useState<Album[] | null>(null);
 	const [artist, setArtist] = useState<Artist | null>(null);
@@ -60,7 +59,6 @@ export default function useAdminContentAddtion(
 		try {
 			const response = await submitAction(selectedIds, accessToken);
 			setResponse(response);
-			if (response.type === "success") onCancel();
 		} catch (error) {
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT") {

@@ -15,9 +15,9 @@ import deleteRankingDraft from "../../ranking/actions/deleteRankingDraft";
 import { cn } from "@/lib/utils";
 import saveDraftResult from "../../ranking/actions/saveDraftResult";
 import { RankingResultData } from "./SortingStage";
-import ComfirmationModal from "@/components/modals/ComfirmationModal";
 import { setPercentage } from "@/features/sorter/slices/sorterSlice";
 import { useAppDispatch } from "@/store/hooks";
+import { useModal } from "@/lib/hooks/useModal";
 
 type ResultStageProps = {
 	draft: RankingDraftData;
@@ -28,7 +28,7 @@ export default function ResultStage({ draft }: ResultStageProps) {
 	const result = draft.result! as RankingResultData[];
 	const dispatch = useAppDispatch();
 
-	const [isCancelOpen, setCancelOpen] = useState(false);
+	const { showAlert, closeTop } = useModal();
 
 	const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 	const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -104,24 +104,24 @@ export default function ResultStage({ draft }: ResultStageProps) {
 						>
 							<p className="w-full">Submit</p>
 						</Button>
-						<Button variant="secondary" onClick={() => setCancelOpen(true)}>
+						<Button
+							variant="secondary"
+							onClick={() =>
+								showAlert({
+									title: "Are You Sure?",
+									description: "This action cannot be undone.",
+									confirmText: "Delete Record",
+									onConfirm: () =>
+										deleteRankingDraft(
+											result[0].artistId,
+											`/artist/${result[0].artistId}/overview`
+										),
+									onCancel: () => closeTop(),
+								})
+							}
+						>
 							<p className="w-full">Delete</p>
 						</Button>
-						<ComfirmationModal
-							onConfirm={() => {
-								deleteRankingDraft(
-									result[0].artistId,
-									`/artist/${result[0].artistId}/overview`
-								);
-							}}
-							onCancel={() => setCancelOpen(false)}
-							isOpen={isCancelOpen}
-							setOpen={setCancelOpen}
-							cancelLabel="Cancel"
-							comfirmLabel="Delete Record"
-							description="You will delete your sorting record."
-							warning="Are you sure you want to delete it?"
-						/>
 					</div>
 				</div>
 				<div>

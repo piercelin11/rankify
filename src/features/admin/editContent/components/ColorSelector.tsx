@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import FormMessage from "@/components/form/FormMessage";
 import colorConvert from "color-convert";
-import { Label } from "../../ui/label";
-import { Input } from "../../ui/input";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 type ColorSelectorProps = {
 	data: { img: string | null };

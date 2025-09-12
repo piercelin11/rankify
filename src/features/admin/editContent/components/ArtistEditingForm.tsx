@@ -13,12 +13,12 @@ import { ADMIN_MESSAGES } from "@/constants/messages";
 
 type ArtistEditingFormProps = {
 	data: ArtistData;
-	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	onClose: () => void;
 };
 
 export default function ArtistEditingForm({
 	data,
-	setOpen,
+	onClose,
 }: ArtistEditingFormProps) {
 	const [response, setResponse] = useState<AppResponseType | null>(null);
 	const isMounted = useRef<HTMLFormElement | null>(null);
@@ -40,7 +40,7 @@ export default function ArtistEditingForm({
 			});
 			if (isMounted.current) setResponse(updateAlbumResponse);
 			if (updateAlbumResponse.type === "success" && isMounted.current)
-				setOpen(false);
+				onClose();
 		} catch (error) {
 			if (error instanceof Error) {
 				if (error.message !== "NEXT_REDIRECT" && isMounted.current) {
@@ -60,11 +60,6 @@ export default function ArtistEditingForm({
 
 	return (
 		<div className="space-y-8">
-			<div>
-				<h2>Edit Artist</h2>
-				<p className="text-description">edit artist name.</p>
-			</div>
-			<hr />
 			<form
 				ref={isMounted}
 				className="space-y-10"
@@ -80,7 +75,7 @@ export default function ArtistEditingForm({
 					<Button
 						variant="outline"
 						type="button"
-						onClick={() => setOpen(false)}
+						onClick={onClose}
 						disabled={isSubmitting}
 					>
 						Cancel

@@ -94,7 +94,7 @@ export default function Tabs({ options, activeId, color }: TabsProps) {
 				))}
 				{indicatorStyle && (
 					<div
-						className="absolute h-full w-full rounded-md bg-primary-500 transition-all duration-200 ease-in-out"
+						className="absolute h-full w-full rounded-md bg-neutral-100-500 transition-all duration-200 ease-in-out"
 						style={{
 							...indicatorStyle,
 							backgroundColor: color
