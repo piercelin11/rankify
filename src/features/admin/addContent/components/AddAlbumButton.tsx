@@ -31,7 +31,7 @@ export default function AddAlbumButton({ artistId }: AddAlbumButtonProps) {
 				/>
 			</ModalWrapper>
 
-			<AddButton variant="secondary" onClick={() => setOpen(true)} />
+			<AddButton onClick={() => setOpen(true)} />
 		</>
 	);
 }

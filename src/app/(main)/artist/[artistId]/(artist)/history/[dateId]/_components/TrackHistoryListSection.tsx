@@ -1,4 +1,4 @@
-import React from "react";
+
 import Link from "next/link";
 import Button from "@/components/buttons/Button";
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";

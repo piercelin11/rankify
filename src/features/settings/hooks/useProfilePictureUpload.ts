@@ -125,6 +125,7 @@ export default function useProfilePictureUpload(initialImgUrl: string | null) {
 					imageUrl: presignedResponse.finalImageUrl,
 				});
 				await deleteUserImageOnS3({ imageUrlToDelete: initialImgUrl });
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			} catch (err: any) {
 				const newImageUrl = presignedResponse.finalImageUrl;
 				setOptimisticImgUrl(initialImgUrl);

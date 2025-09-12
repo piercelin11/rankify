@@ -2,7 +2,6 @@
 
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import { cn } from "@/lib/utils";
-import getArtistById from "@/lib/database/data/getArtistById";
 import fetchSearchResults from "@/lib/spotify/fetchSearchResults";
 import { AlbumData } from "@/types/data";
 import { CheckIcon } from "@radix-ui/react-icons";
@@ -42,7 +41,7 @@ export default function AlbumCoverSelector({
 			]);
 		}
 		fetchCover();
-	}, []);
+	}, [album.artist?.name, album.img, album.name]);
 
 	return (
 		<div className="space-y-3">

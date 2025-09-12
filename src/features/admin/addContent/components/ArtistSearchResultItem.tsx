@@ -1,8 +1,8 @@
-import React from "react";
 import { Artist } from "spotify-api.js";
 import { ChevronRightIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
 import { PLACEHOLDER_PIC } from "@/constants";
+import Image from "next/image";
 
 type ArtistSearchResultItemProps = {
 	data: Omit<Artist, "externalURL" | "makeCodeImage">;
@@ -21,7 +21,7 @@ export default function ArtistSearchResultItem({
 			)}
 			{...props}
 		>
-			<img
+			<Image
 				className="rounded-full"
 				src={data.images?.[2]?.url || PLACEHOLDER_PIC}
 				alt={data.name}

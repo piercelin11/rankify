@@ -8,7 +8,6 @@ export default async function saveDraft(
 	draft: string
 ) {
 	const { id: userId } = await getUserSession();
-	let isSuccess = false;
 
 	const existingDraft = await db.rankingDraft.findFirst({
 		where: {
@@ -36,7 +35,6 @@ export default async function saveDraft(
 				},
 			});
 
-		isSuccess = true;
 	} catch (error) {
 		console.error("Failed to save draft:", error);
 		return { type: "error", message: "Failed to save draft" };

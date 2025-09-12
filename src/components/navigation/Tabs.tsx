@@ -114,8 +114,8 @@ type TabItemProps = {
 	onActiveId: () => void;
 };
 
-const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(
-	({ option, isActive, onActiveId }, ref) => {
+const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(function TabItem(
+	{ option, isActive, onActiveId }, ref) {
 		if (option.href)
 			return (
 				<Link

@@ -4,7 +4,7 @@ import { useAppSelector } from "@/store/hooks";
 import { ArtistData } from "@/types/data";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+
 import Tooltip from "../overlay/Tooltip";
 import { cn } from "@/lib/utils";
 import { PLACEHOLDER_PIC } from "@/constants";

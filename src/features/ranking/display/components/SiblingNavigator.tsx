@@ -3,7 +3,7 @@
 import Button from "@/components/buttons/Button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
-import React from "react";
+
 import { SCROLL_SESSION_KEY } from "../hooks/useListScroll";
 
 export default function SiblingNavigator({

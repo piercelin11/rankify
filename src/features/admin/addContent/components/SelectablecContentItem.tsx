@@ -1,6 +1,6 @@
-import React from "react";
 import { Album, SimplifiedAlbum, Track } from "spotify-types";
 import CheckBox from "@/components/form/CheckBox";
+import Image from "next/image";
 
 type SelectablecContentItemProps = {
 	data: Album | SimplifiedAlbum | Track;
@@ -26,7 +26,7 @@ export default function SelectablecContentItem({
 			className="flex select-none items-center gap-2 rounded sm:px-3 py-2 hover:bg-neutral-800"
 			onClick={() => handleClick(data.id)}
 		>
-			<img
+			<Image
 				className="rounded"
 				src={isAlbum(data) ? data.images[2]?.url : data.album.images[2]?.url}
 				alt={data.name}

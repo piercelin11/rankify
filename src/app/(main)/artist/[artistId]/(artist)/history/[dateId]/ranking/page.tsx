@@ -1,4 +1,4 @@
-import React from "react";
+
 import { getUserSession } from "@/../auth";
 import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";

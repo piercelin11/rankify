@@ -1,16 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useMemo } from "react";
-import {
-	DndContext,
-	closestCenter,
-} from "@dnd-kit/core";
-import {
-	SortableContext,
-	verticalListSortingStrategy,
-	useSortable,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import {
 	ColumnDef,
 	flexRender,
@@ -18,18 +8,7 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { useState, useEffect, useTransition } from "react";
-import { MoreHorizontal, Edit, Trash2, GripVertical } from "lucide-react";
 
-import { Button } from "@/features/admin/ui/button";
-import { Badge } from "@/features/admin/ui/badge";
-import { Input } from "@/features/admin/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/features/admin/ui/select";
 import {
 	Table,
 	TableBody,
@@ -38,156 +17,26 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/features/admin/ui/table";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/features/admin/ui/dropdown-menu";
 
 import { AlbumData, TrackData } from "@/types/data";
 import { cn } from "@/lib/utils";
 import { $Enums } from "@prisma/client";
 import updateTrack from "../actions/updateTrack";
-import TrackEditingForm from "./TrackEditingForm";
-import { useInlineEdit } from "../hooks/useInlineEdit";
-import { useInlineSelect } from "../hooks/useInlineSelect";
-import { useDragAndDrop } from "../hooks/useDragAndDrop";
+import { InlineEditCell, InlineSelectCell } from "./InlineEditor";
+import TrackActionDropdown from "./TrackActionDropdown";
+import Image from "next/image";
 
 type TracksTableProps = {
 	tracks: TrackData[];
-	albums: AlbumData[];
+    albums: AlbumData[]
 	className?: string;
-}
-
-// 拖曳手柄組件
-function DragHandle({ trackId }: { trackId: string }) {
-	const { attributes, listeners, setNodeRef } = useSortable({
-		id: trackId,
-	});
-
-	return (
-		<div
-			ref={setNodeRef}
-			{...attributes}
-			{...listeners}
-			className="flex cursor-grab items-center justify-center p-1 active:cursor-grabbing"
-		>
-			<GripVertical className="h-4 w-4 text-muted-foreground" />
-		</div>
-	);
-}
-
-
-// 可排序的表格行組件
-function SortableTableRow({
-	track,
-	table,
-}: {
-	track: TrackData;
-	table: any;
-}) {
-	const {
-		setNodeRef,
-		transform,
-		transition,
-		isDragging,
-	} = useSortable({
-		id: track.id,
-	});
-
-	const style = {
-		transform: CSS.Transform.toString(transform),
-		transition,
-	};
-
-	const row = table
-		.getRowModel()
-		.rows.find((r: any) => r.original.id === track.id);
-
-	return (
-		<TableRow
-			ref={setNodeRef}
-			style={style}
-			className={cn("relative", isDragging && "z-50 opacity-50")}
-			data-dragging={isDragging}
-		>
-			{row &&
-				row
-					.getVisibleCells()
-					.map((cell: any) => (
-						<TableCell key={cell.id}>
-							{flexRender(cell.column.columnDef.cell, cell.getContext())}
-						</TableCell>
-					))}
-		</TableRow>
-	);
 }
 
 export default function TracksTable({
 	tracks,
-	albums,
+    albums,
 	className,
 }: TracksTableProps) {
-	// 根據 discNumber 分組
-	const groupedByDisc = useMemo(() => {
-		const groups = tracks.reduce((acc, track) => {
-			const disc = track.discNumber || 1;
-			if (!acc[disc]) acc[disc] = [];
-			acc[disc].push(track);
-			return acc;
-		}, {} as Record<number, TrackData[]>);
-		return groups;
-	}, [tracks]);
-
-	const discNumbers = Object.keys(groupedByDisc).map(Number).sort();
-	const hasMultipleDiscs = discNumbers.length > 1;
-
-	// 條件渲染：多個 disc 分別顯示，單個 disc 直接顯示
-	if (hasMultipleDiscs) {
-		return (
-			<div className={cn("w-full space-y-6", className)}>
-				{discNumbers.map(discNumber => (
-					<div key={discNumber} className="space-y-3">
-						<h3 className="text-lg font-medium text-foreground pb-2">
-							Disc {discNumber}
-						</h3>
-						<TracksTableContent 
-							tracks={groupedByDisc[discNumber]} 
-							albums={albums}
-							discNumber={discNumber}
-						/>
-					</div>
-				))}
-			</div>
-		);
-	}
-
-	// 單個 disc 的情況，直接渲染表格
-	return (
-		<TracksTableContent 
-			tracks={tracks} 
-			albums={albums}
-			className={className}
-		/>
-	);
-}
-
-// TracksTableContent 子組件 - 處理單個 disc 的表格
-type TracksTableContentProps = {
-	tracks: TrackData[];
-	albums: AlbumData[];
-	className?: string;
-	discNumber?: number;
-}
-
-function TracksTableContent({
-	tracks,
-	albums,
-	className,
-	discNumber,
-}: TracksTableContentProps) {
 	const [data, setData] = useState(tracks);
 	const [, startTransition] = useTransition();
 
@@ -236,118 +85,30 @@ function TracksTableContent({
 		});
 	};
 
-	const { sensors, handleDragEnd } = useDragAndDrop({ data, setData, handleUpdateTrack });
-
-	// Inline 編輯組件
-	const InlineEditCell = ({
-		value,
-		onSave,
-		className,
-	}: {
-		value: string;
-		onSave: (value: string) => void;
-		className?: string;
-	}) => {
-		const {
-			isEditing,
-			editValue,
-			setEditValue,
-			startEdit,
-			cancelEdit,
-			saveEdit,
-		} = useInlineEdit(value);
-
-		const handleSave = () => saveEdit(onSave);
-
-		if (isEditing) {
-			return (
-				<Input
-					value={editValue}
-					onChange={(e) => setEditValue(e.target.value)}
-					onBlur={handleSave}
-					onKeyDown={(e) => {
-						if (e.key === "Enter") handleSave();
-						if (e.key === "Escape") cancelEdit();
-					}}
-					className={cn("h-8 w-full border-muted", className)}
-					autoFocus
-				/>
-			);
-		}
-
-		return (
-			<div
-				className={cn(
-					"flex h-8 w-full cursor-pointer items-center rounded px-2 py-1 hover:bg-muted/50",
-					className
-				)}
-				onClick={startEdit}
-			>
-				{value || "Click to edit"}
-			</div>
-		);
-	};
-
-	const InlineSelectCell = ({
-		value,
-		onSave,
-		options,
-	}: {
-		value: string;
-		onSave: (value: string) => void;
-		options: { value: string; label: string }[];
-	}) => {
-		const { isEditing, setIsEditing, startEdit, selectValue } = useInlineSelect();
-
-		if (isEditing) {
-			return (
-				<Select
-					value={value}
-					onValueChange={(newValue) => selectValue(newValue, onSave)}
-					open={isEditing}
-					onOpenChange={setIsEditing}
-				>
-					<SelectTrigger className="h-8 border-muted">
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						{options.map((option) => (
-							<SelectItem key={option.value} value={option.value}>
-								{option.label}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-			);
-		}
-
-		return (
-			<div
-				className="flex mr-4 h-8 w-full cursor-pointer items-center rounded px-2 py-1 hover:bg-muted/50"
-				onClick={startEdit}
-			>
-				<Badge variant="outline" className="text-xs">
-					{options.find((o) => o.value === value)?.label || value}
-				</Badge>
-			</div>
-		);
-	};
 
 	const columns: ColumnDef<TrackData>[] = [
-		{
-			id: "drag",
-			header: "",
-			cell: ({ row }) => <DragHandle trackId={row.original.id} />,
-			size: 50,
-			minSize: 50,
-			maxSize: 50,
-		},
 		{
 			accessorKey: "trackNumber",
 			header: "#",
 			cell: ({ row }) => (
 				<div className="w-8 text-center font-medium text-muted-foreground">
 					{row.original.trackNumber || "-"}
+				</div>
+			),
+			size: 60,
+			minSize: 60,
+			maxSize: 60,
+		},
+		{
+			accessorKey: "img",
+			header: "",
+			cell: ({ row }) => (
+				<div className="flex items-center justify-center">
+					<Image
+						src={row.original.img || "/placeholder-album.png"}
+						alt={row.original.name}
+						className="h-10 w-10 rounded object-cover"
+					/>
 				</div>
 			),
 			size: 60,
@@ -404,43 +165,13 @@ function TracksTableContent({
 		},
 		{
 			id: "actions",
-			cell: ({ row }) => {
-				const [isEditOpen, setEditOpen] = useState(false);
-
-				return (
-					<>
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="ghost" size="icon" className="h-8 w-8">
-									<MoreHorizontal className="h-4 w-4" />
-									<span className="sr-only">Open menu</span>
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								<DropdownMenuItem onClick={() => setEditOpen(true)}>
-									<Edit className="mr-2 h-4 w-4" />
-									Edit
-								</DropdownMenuItem>
-								<DropdownMenuSeparator />
-								<DropdownMenuItem className="text-destructive">
-									<Trash2 className="mr-2 h-4 w-4" />
-									Delete
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
-
-						<TrackEditingForm
-							track={row.original}
-							albums={albums}
-							isOpen={isEditOpen}
-							onOpenChange={setEditOpen}
-							onUpdateTrack={handleUpdateTrack}
-						>
-							<div />
-						</TrackEditingForm>
-					</>
-				);
-			},
+			cell: ({ row }) => (
+				<TrackActionDropdown
+					data={row.original}
+					albums={albums}
+					handleUpdateTrack={handleUpdateTrack}
+				/>
+			),
 			size: 80,
 			minSize: 80,
 			maxSize: 80,
@@ -460,68 +191,66 @@ function TracksTableContent({
 		},
 	});
 
-
 	return (
 		<div className={cn("w-full", className)}>
 			<div className="rounded-md border border-muted">
-				<DndContext
-					id={`tracks-table-disc-${discNumber || 'single'}`}
-					sensors={sensors}
-					collisionDetection={closestCenter}
-					onDragEnd={handleDragEnd}
-				>
-					<Table className="table-fixed">
-						<colgroup>
-							<col style={{ width: '50px' }} />
-							<col style={{ width: '60px' }} />
-							<col style={{ width: '300px' }} />
-							<col style={{ width: '200px' }} />
-							<col style={{ width: '120px' }} />
-							<col style={{ width: '80px' }} />
-						</colgroup>
-						<TableHeader>
-							{table.getHeaderGroups().map((headerGroup) => (
-								<TableRow key={headerGroup.id} className="border-muted">
-									{headerGroup.headers.map((header) => (
-										<TableHead key={header.id} className="border-muted">
-											{header.isPlaceholder
-												? null
-												: flexRender(
-														header.column.columnDef.header,
-														header.getContext()
-													)}
-										</TableHead>
-									))}
-								</TableRow>
-							))}
-						</TableHeader>
-						<TableBody>
-							<SortableContext
-								items={data.map((track) => track.id)}
-								strategy={verticalListSortingStrategy}
-							>
-								{data.length ? (
-									data.map((track) => (
-										<SortableTableRow
-											key={track.id}
-											track={track}
-											table={table}
-										/>
-									))
-								) : (
-									<TableRow>
-										<TableCell
-											colSpan={columns.length}
-											className="h-24 border-muted text-center"
-										>
-											No tracks found.
-										</TableCell>
+				<Table className="table-fixed">
+					<colgroup>
+						<col style={{ width: '60px' }} />
+						<col style={{ width: '60px' }} />
+						<col style={{ width: '300px' }} />
+						<col style={{ width: '200px' }} />
+						<col style={{ width: '120px' }} />
+						<col style={{ width: '80px' }} />
+					</colgroup>
+					<TableHeader>
+						{table.getHeaderGroups().map((headerGroup) => (
+							<TableRow key={headerGroup.id} className="border-muted">
+								{headerGroup.headers.map((header) => (
+									<TableHead key={header.id} className="border-muted">
+										{header.isPlaceholder
+											? null
+											: flexRender(
+													header.column.columnDef.header,
+													header.getContext()
+												)}
+									</TableHead>
+								))}
+							</TableRow>
+						))}
+					</TableHeader>
+					<TableBody>
+						{data.length ? (
+							data.map((track) => {
+								const row = table
+									.getRowModel()
+									.rows.find((r: any) => r.original.id === track.id);
+								
+								return (
+									<TableRow key={track.id}>
+										{row &&
+											row
+												.getVisibleCells()
+												.map((cell: any) => (
+													<TableCell key={cell.id}>
+														{flexRender(cell.column.columnDef.cell, cell.getContext())}
+													</TableCell>
+												))}
 									</TableRow>
-								)}
-							</SortableContext>
-						</TableBody>
-					</Table>
-				</DndContext>
+								);
+							})
+						) : (
+							<TableRow>
+								<TableCell
+									colSpan={columns.length}
+									className="h-24 border-muted text-center"
+								>
+									No tracks found.
+								</TableCell>
+							</TableRow>
+						)}
+					</TableBody>
+				</Table>
 			</div>
 		</div>
 	);

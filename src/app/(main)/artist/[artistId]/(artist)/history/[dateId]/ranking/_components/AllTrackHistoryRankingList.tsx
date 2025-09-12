@@ -2,7 +2,7 @@
 
 import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import { AlbumData, ArtistData } from "@/types/data";
-import React, { useMemo } from "react";
+import React from "react";
 import {
 	Column,
 	RankingHeader,
@@ -43,10 +43,6 @@ export default function AllTrackHistoryRankingList({
 	const { isScrolled, listRefCallback, handleRowClick, handleListScroll } =
 		useListScroll();
 
-	const albumsMap = useMemo(
-		() => new Map(albums.map((album) => [album.id, album])),
-		[albums]
-	);
 	const columns: Column<TrackHistoryType>[] = [
 		{
 			key: "peak",

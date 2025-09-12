@@ -19,7 +19,7 @@ interface UseDragAndDropProps {
 	handleUpdateTrack: (trackId: string, updates: Partial<TrackData>) => void;
 }
 
-export function useDragAndDrop({ data, setData, handleUpdateTrack }: UseDragAndDropProps) {
+export function useDragAndDrop({ data: _data, setData, handleUpdateTrack }: UseDragAndDropProps) {
 	const [pendingTrackUpdates, setPendingTrackUpdates] = useState<
 		Array<{ id: string; trackNumber: number }>
 	>([]);

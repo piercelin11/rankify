@@ -83,7 +83,7 @@ export default function ResultStage({ draft }: ResultStageProps) {
 
 	useEffect(() => {
 		dispatch(setPercentage(100));
-	}, []);
+	}, [dispatch]);
 
 	return (
 		<div className="flex items-center justify-center py-20 2xl:py-32">

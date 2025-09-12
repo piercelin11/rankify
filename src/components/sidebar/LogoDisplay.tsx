@@ -1,5 +1,5 @@
 import { StitchesLogoIcon } from "@radix-ui/react-icons";
-import React from "react";
+
 
 export default function LogoDisplay() {
 	return (

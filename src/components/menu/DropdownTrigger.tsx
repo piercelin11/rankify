@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
-import React, { HTMLAttributes, useState } from "react";
+import React, { HTMLAttributes } from "react";
 
 type DropdownTriggerProps = {
 	children: React.ReactNode;

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+
 import Button from "@/components/buttons/Button";
 import { GoogleIcon, SpotifyIcon } from "@/components/icons/LogoIcons";
 import handleOath from "@/features/auth/actions/handleOath";

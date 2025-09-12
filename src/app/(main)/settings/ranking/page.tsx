@@ -1,4 +1,4 @@
-import React from "react";
+
 import { getUserSession } from "../../../../../auth";
 import getUserPreference from "@/lib/database/user/getUserPreference";
 import RankingSettings from "@/features/settings/components/RankingSettingsForm";

@@ -1,5 +1,4 @@
 import { db } from "@/lib/prisma";
-import React from "react";
 
 export type CalculateTotalChartRunProps = {
 	artistId: string;

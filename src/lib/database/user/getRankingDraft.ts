@@ -1,5 +1,4 @@
 import { db } from "@/lib/prisma";
-import { auth } from "@/../auth";
 import { RankingDraftData } from "@/types/data";
 
 type getRankingDraftProps = {

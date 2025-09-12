@@ -56,7 +56,7 @@ export default function ArtistEditingForm({
 
 	useEffect(() => {
 		setFocus("name");
-	}, []);
+	}, [setFocus]);
 
 	return (
 		<div className="space-y-8">

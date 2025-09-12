@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import React from "react";
+
 import { getUserSession } from "@/../auth";
 import { getAlbumsStats } from "@/lib/database/ranking/overview/getAlbumsStats";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";

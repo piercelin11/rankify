@@ -2,9 +2,8 @@
 
 import { LineChart } from "@/components/charts/LineChart";
 import { dateToDashFormat } from "@/lib/utils";
-import { AlbumData } from "@/types/data";
 import { useSearchParams } from "next/navigation";
-import React from "react";
+
 
 type RankingLineChartProps<T> = {
 	defaultData: {
@@ -34,9 +33,9 @@ type RankingLineChartProps<T> = {
 export default function RankingLineChart<
 	T extends { date: Date; dateId: string },
 >({ defaultData, allRankings, dataKey, isReverse }: RankingLineChartProps<T>) {
-	if (!defaultData.rankings) return;
-
 	const searchParams = useSearchParams();
+	
+	if (!defaultData.rankings) return;
 	const selectedIds = searchParams.getAll("comparison");
 	const selectedIdSet = new Set(selectedIds);
 

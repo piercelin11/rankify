@@ -1,4 +1,6 @@
+import { PLACEHOLDER_PIC } from "@/constants";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import Link from "next/link";
 
 type GalleryItemProps = {
@@ -15,16 +17,19 @@ export default function GalleryItem({
 	subTitle,
 }: GalleryItemProps) {
 	return (
-		<div className="p-3 rounded-2xl hover:bg-neutral-900">
+		<div className="rounded-lg p-3 hover:bg-muted/50">
 			<Link href={href}>
-				<img
-					className={cn("mb-4 rounded", {
-						rounded: subTitle !== "Artist",
-						"rounded-full": subTitle === "Artist",
-					})}
-					src={img ?? undefined}
-					alt={title}
-				/>
+				<div className="relative mb-4 aspect-square h-auto w-full">
+					<Image
+						className={cn("rounded", {
+							rounded: subTitle !== "Artist",
+							"rounded-full": subTitle === "Artist",
+						})}
+						src={img ?? PLACEHOLDER_PIC}
+						alt={title}
+						fill
+					/>
+				</div>
 				<p className="line-clamp-2">{title}</p>
 				<p className="text-sm text-neutral-400">{subTitle}</p>
 			</Link>

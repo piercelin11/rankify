@@ -40,7 +40,7 @@ export default function useSpotifySearch<T extends keyof SpotifyTypeMap>(
 
 		const timer = setTimeout(fetchData, 1000);
 		return () => clearTimeout(timer);
-	}, [inputValue]);
+	}, [artistName, inputValue, searchFor]);
 
 	return {
 		inputValue,

@@ -51,7 +51,7 @@ function calculateTrackPoints({
 	const percentileRank =
 		(trackCount - trackRanking + 1) / trackCount;
 	// 計算分數
-	let score =
+	const score =
 		percentileRank > 0.75
 			? percentileRank * 1000
 			: percentileRank > 0.5
