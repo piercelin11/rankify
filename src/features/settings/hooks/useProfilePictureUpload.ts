@@ -182,5 +182,6 @@ export default function useProfilePictureUpload(initialImgUrl: string | null, on
 		response,
 		handleFileChange,
 		previewImgUrl,
+		setPreviewImgUrl
 	};
 }

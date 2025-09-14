@@ -1,6 +1,6 @@
 
 import SelectablecContentItem from "./SelectablecContentItem";
-import Button from "@/components/buttons/Button";
+import { Button } from "@/components/ui/button";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import FormMessage from "@/components/form/FormMessage";
 import { AppResponseType } from "@/types/response";
@@ -83,7 +83,7 @@ export default function ContentSelectionForm({
 				<Button variant="outline" onClick={onCancel} disabled={isPending}>
 					Cancel
 				</Button>
-				<Button variant="primary" onClick={handleSubmit} disabled={isPending}>
+				<Button variant="default" onClick={handleSubmit} disabled={isPending}>
 					Add {type}
 				</Button>
 				{isPending && (

@@ -1,6 +1,6 @@
 "use client";
 
-import Button from "@/components/buttons/Button";
+import { Button } from "@/components/ui/button";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import FormInput from "@/components/form/FormInput";
 import FormMessage from "@/components/form/FormMessage";
@@ -75,7 +75,7 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 					/>
 				</div>
 				<div className="flex items-center gap-4">
-					<Button variant="primary" type="submit" disabled={isSubmitting}>
+					<Button variant="default" type="submit" disabled={isSubmitting}>
 						Save
 					</Button>
 					{!isSubmitting && response && (

@@ -26,7 +26,7 @@ export default function RadioItem({
 		>
 			<span
 				className={cn("aspect-square w-3 rounded-full border", {
-					"bg-neutral-100-500": isChecked,
+					"bg-primary-500": isChecked,
 				})}
 			/>
 			<input

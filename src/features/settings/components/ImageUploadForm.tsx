@@ -2,19 +2,20 @@
 
 import { PLACEHOLDER_PIC } from "@/constants";
 import Image from "next/image";
-import Button from "@/components/buttons/Button";
-import { Pencil1Icon } from "@radix-ui/react-icons";
+import { Button } from "@/components/ui/button";
 import FormMessage from "@/components/form/FormMessage";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import useProfilePictureUpload from "../hooks/useProfilePictureUpload";
-import { useModal } from "@/lib/hooks/useModal";
+import { useRef, useState } from "react";
 
 type ImageUploadFormProps = {
 	img: string | null;
 };
 
 export default function ImageUploadForm({ img }: ImageUploadFormProps) {
-	const { showCustom, closeTop } = useModal();
+	const [isEditing, setIsEditing] = useState(false);
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	
 	const {
 		handleSubmit,
 		errors,
@@ -23,55 +24,31 @@ export default function ImageUploadForm({ img }: ImageUploadFormProps) {
 		response,
 		handleFileChange,
 		previewImgUrl,
-	} = useProfilePictureUpload(img, closeTop);
+		setPreviewImgUrl
+	} = useProfilePictureUpload(img, () => setIsEditing(false));
 
-	function Form() {
-		return (
-			<form
-				className="flex flex-col items-center justify-center space-y-8"
-				onSubmit={handleSubmit}
-			>
-				<div className="group relative h-44 w-44 rounded-full border border-neutral-600">
-					<label
-						htmlFor="image"
-						className="absolute z-10 hidden h-full w-full items-center justify-center rounded-full bg-neutral-950/50 group-hover:flex"
-					>
-						<input
-							id="image"
-							name="image"
-							type="file"
-							accept="image/*"
-							onChange={handleFileChange}
-							hidden
-						/>
-						<Pencil1Icon width={32} height={32} className="text-neutral-100" />
-					</label>
-					<Image
-						className="rounded-full object-cover p-1"
-						src={previewImgUrl || PLACEHOLDER_PIC}
-						fill
-						sizes="96px"
-						alt={"your profile picture"}
-					/>
-				</div>
-				{errors.image?.message && (
-					<FormMessage
-						message={errors.image?.message}
-						type="error"
-						border={false}
-					/>
-				)}
-				<div className="flex gap-2">
-					<Button variant="primary" type="submit">
-						Save
-					</Button>
-					<Button variant="secondary" onClick={closeTop}>
-						Cancel
-					</Button>
-				</div>
-			</form>
-		);
-	}
+	const handleEditClick = () => {
+		if (isEditing) {
+			// 如果正在編輯，執行保存
+			handleSubmit();
+		} else {
+			// 如果不在編輯，打開文件選擇器
+			fileInputRef.current?.click();
+		}
+	};
+
+	const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		handleFileChange(e);
+		setIsEditing(true); // 選擇文件後進入編輯模式
+	};
+
+	const handleCancel = () => {
+		setIsEditing(false);
+		setPreviewImgUrl(img)
+		if (fileInputRef.current) {
+			fileInputRef.current.value = "";
+		}
+	};
 
 	return (
 		<div className="flex items-center gap-4">
@@ -83,7 +60,7 @@ export default function ImageUploadForm({ img }: ImageUploadFormProps) {
 				)}
 				<Image
 					className="rounded-full object-cover"
-					src={optimisticImgUrl || PLACEHOLDER_PIC}
+					src={previewImgUrl || optimisticImgUrl || PLACEHOLDER_PIC}
 					fill
 					sizes="96px"
 					alt={"your profile picture"}
@@ -91,19 +68,39 @@ export default function ImageUploadForm({ img }: ImageUploadFormProps) {
 			</div>
 
 			<div className="flex items-center gap-2">
+				<input
+					ref={fileInputRef}
+					type="file"
+					accept="image/*"
+					onChange={onFileChange}
+					hidden
+				/>
+				
 				<Button
-					variant="secondary"
-					onClick={() =>
-						showCustom({
-							title: "Edit Picture",
-							description: "upload and change your profile picture.",
-							content: <Form />,
-						})
-					}
+					variant={isEditing ? "default" : "secondary"}
+					onClick={handleEditClick}
 					disabled={isSubmitting}
 				>
-					Edit picture
+					{isEditing ? "Save picture" : "Edit picture"}
 				</Button>
+				
+				{isEditing && (
+					<Button
+						variant="secondary"
+						onClick={handleCancel}
+						disabled={isSubmitting}
+					>
+						Cancel
+					</Button>
+				)}
+				
+				{errors.image?.message && (
+					<FormMessage
+						message={errors.image?.message}
+						type="error"
+					/>
+				)}
+				
 				{response && (
 					<FormMessage message={response.message} type={response.type} />
 				)}

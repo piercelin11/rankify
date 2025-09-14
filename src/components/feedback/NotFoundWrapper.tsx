@@ -1,4 +1,4 @@
-import Button from "@/components/buttons/Button";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 type NotFoundProps = {

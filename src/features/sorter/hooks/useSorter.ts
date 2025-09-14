@@ -3,7 +3,7 @@ import {
 	setPercentage,
 	setSaveStatus,
 } from "@/features/sorter/slices/sorterSlice";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch } from "@/store/hooks";
 import { RankingDraftData, TrackData } from "@/types/data";
 import React, { startTransition, useEffect, useCallback, useState, useMemo, useRef } from "react";
 import saveDraft from "../../ranking/actions/saveDraft";
@@ -293,7 +293,6 @@ export default function useSorter({
 	draft,
 	setCurrentStage,
 }: UseSorterProps): UseSorterReturn {
-	const saveStatus = useAppSelector((state) => state.sorter.saveStatus);
 	const dispatch = useAppDispatch();
 	const artistId = tracks[0].artistId;
 
@@ -318,7 +317,8 @@ export default function useSorter({
 			// 新開始 (對應原本的 initList + showImage)
 			setState(initializeSorterState(tracks));
 		}
-	}, [draft?.draft, tracks, tracks.length]); // 使用 tracks.length 而不是整個 tracks 陣列
+	// eslint-disable-next-line react-hooks/exhaustive-deps -- 故意不包含 tracks 避免無限循環
+	}, [draft?.draft, tracks.length]); // 使用 tracks.length 而不是整個 tracks 陣列
 
 	// 當前比較的歌曲 (對應原本的 leftField, rightField)
 	const leftField = useMemo(() => {
@@ -329,7 +329,8 @@ export default function useSorter({
 		if (!trackName) return undefined;
 		
 		return tracks.find((track) => track.name === trackName);
-	}, [state, tracks]);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [state?.currentLeftIndex, state?.namMember, tracks]);
 
 	const rightField = useMemo(() => {
 		if (!state || typeof state.currentRightIndex !== 'number' || state.currentRightIndex < 0) return undefined;
@@ -339,7 +340,8 @@ export default function useSorter({
 		if (!trackName) return undefined;
 		
 		return tracks.find((track) => track.name === trackName);
-	}, [state, tracks]);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [state?.currentRightIndex, state?.namMember, tracks]);
 
 	// 儲存功能 (對應原本的 handleSave)
 	const handleSave = useCallback(async () => {
@@ -354,13 +356,17 @@ export default function useSorter({
 	const stateRef = useRef(state);
 	const artistIdRef = useRef(artistId);
 	const dispatchRef = useRef(dispatch);
+	const tracksRef = useRef(tracks);
+	const setCurrentStageRef = useRef(setCurrentStage);
 	
 	// 更新 refs
 	useEffect(() => {
 		stateRef.current = state;
 		artistIdRef.current = artistId;
 		dispatchRef.current = dispatch;
-	}, [state, artistId, dispatch]);
+		tracksRef.current = tracks;
+		setCurrentStageRef.current = setCurrentStage;
+	}, [state, artistId, dispatch, tracks, setCurrentStage]);
 
 	// 創建穩定的 debounced 函數 (只創建一次)
 	const debouncedAutoSave = useMemo(
@@ -372,6 +378,7 @@ export default function useSorter({
 			startTransition(async () => {
 				dispatchRef.current(setSaveStatus("pending"));
 				try {
+					await saveDraft(artistIdRef.current, JSON.stringify(stateRef.current));
 					dispatchRef.current(setSaveStatus("saved"));
 				} catch (error) {
 					console.error("Failed to save draft:", error);
@@ -385,38 +392,42 @@ export default function useSorter({
 
 	// 核心排序函數 (完全對應原本的 sortList)
 	const sortList = useCallback((flag: number) => {
-		if (!state) return;
+		const currentState = stateRef.current;
+		const currentDispatch = dispatchRef.current;
+		const currentTracks = tracksRef.current;
+		const currentArtistId = artistIdRef.current;
+		const currentSetCurrentStage = setCurrentStageRef.current;
+		
+		if (!currentState) return;
 		
 		// 記錄歷史 (對應原本的 recordHistory)
-		setHistory(prev => [...prev, state]);
+		setHistory(prev => [...prev, currentState]);
 		
 		// 更新狀態
-		dispatch(setSaveStatus("idle"));
+		currentDispatch(setSaveStatus("idle"));
 		
 		try {
 			// 執行排序邏輯 (邏輯完全相同)
-			const newState = processSortChoice(state, flag as SortChoice);
+			const newState = processSortChoice(currentState, flag as SortChoice);
 			setState(newState);
 			
 			// 更新進度
-			dispatch(setPercentage(newState.percent));
+			currentDispatch(setPercentage(newState.percent));
 			
 			// 如果完成，跳到結果頁面
 			if (newState.finishFlag === 1) {
-				generateFinalResult(newState, tracks, artistId, setCurrentStage);
+				generateFinalResult(newState, currentTracks, currentArtistId, currentSetCurrentStage);
 			} else {
 				// 延遲執行自動儲存，避免同步狀態更新
 				setTimeout(() => {
-					console.log("⏰ Triggering auto save in setTimeout, saveStatus:", saveStatus);
-					if (saveStatus === "saved") dispatch(setSaveStatus("idle"));
 					debouncedAutoSave();
 				}, 0);
 			}
 		} catch (err) {
 			console.error(err);
-			dispatch(setError(true));
+			currentDispatch(setError(true));
 		}
-	}, [state, dispatch, tracks, artistId, setCurrentStage, saveStatus, debouncedAutoSave]);
+	}, [debouncedAutoSave]);
 
 	// 復原上一步 (對應原本的 restorePreviousState)
 	const restorePreviousState = useCallback(() => {

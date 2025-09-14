@@ -9,7 +9,7 @@ import {
 	setPercentage,
 	setSaveStatus,
 } from "@/features/sorter/slices/sorterSlice";
-import Button from "@/components/buttons/Button";
+import { Button } from "@/components/ui/button";
 import { CurrentStage } from "./SorterPage";
 import useSorter from "@/features/sorter/hooks/useSorter";
 import TrackBtn from "./TrackBtn";
@@ -158,13 +158,13 @@ export default function SortingStage({
 					</div>
 
 					<div className="flex justify-between gap-3">
-						<Button variant="neutral" onClick={restorePreviousState}>
+						<Button variant="outline" onClick={restorePreviousState}>
 							<ChevronLeftIcon />
 							<p>Previous</p>
 						</Button>
 
 						<div className="flex gap-3 xl:gap-6">
-							<Button variant="neutral" onClick={() => showAlert({
+							<Button variant="outline" onClick={() => showAlert({
 								title: "Are You Sure?",
 											description: "You will clear your sorting record.",
 											confirmText: "Clear and Restart",
@@ -174,7 +174,7 @@ export default function SortingStage({
 								Restart
 							</Button>
 							<Button
-								variant="neutral"
+								variant="outline"
 								onClick={() => {
 									if (saveStatus === "idle")
 										showAlert({

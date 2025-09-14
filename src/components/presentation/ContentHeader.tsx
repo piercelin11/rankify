@@ -26,6 +26,7 @@ const ContentHeader = React.memo(function ContentHeader({
 	imageSize: _imageSize = 220,
 	children,
 }: ContentHeaderProps) {
+
 	return (
 		<section>
 			<div
@@ -78,7 +79,7 @@ function ContentHeaderInfo({
 	data,
 	subTitleContent,
 	type,
-}: ContentHeaderProps) {
+}: Omit<ContentHeaderProps , "params">) {
 	return (
 		<div className={cn("space-y-2")}>
 			{type && <p>{type}</p>}

@@ -1,6 +1,6 @@
 "use client";
 
-import Button from "@/components/buttons/Button";
+import { Button } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 

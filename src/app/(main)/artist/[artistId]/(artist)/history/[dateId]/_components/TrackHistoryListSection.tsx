@@ -1,6 +1,6 @@
 
 import Link from "next/link";
-import Button from "@/components/buttons/Button";
+import { Button } from "@/components/ui/button";
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";
 import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import { RankingListItem } from "@/features/ranking/display/components/RankingList";
