@@ -9,7 +9,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserPreferenceData } from "@/types/data";
 import { AppResponseType } from "@/types/response";
-import Button from "@/components/buttons/Button";
+import { Button } from "@/components/ui/button";
 import FormMessage from "@/components/form/FormMessage";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import ToggleSwitch from "@/components/form/ToggleSwitch";
@@ -116,7 +116,7 @@ export default function RankingSettingsForm({
 				/>
 			</div>
 			<div className="flex items-center gap-4">
-				<Button variant="primary" type="submit" disabled={isSubmitting}>
+				<Button variant="default" type="submit" disabled={isSubmitting}>
 					Save
 				</Button>
 				{!isSubmitting && response && (

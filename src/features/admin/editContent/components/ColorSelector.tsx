@@ -1,5 +1,5 @@
 import useDominantColor from "@/lib/hooks/useDominantColor";
-import Button from "@/components/buttons/Button";
+import { Button } from "@/components/ui/button";
 import { InputHTMLAttributes, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Pencil1Icon } from "@radix-ui/react-icons";
@@ -73,7 +73,6 @@ export default function ColorSelector({
 					type="button"
 					variant="secondary"
 					onClick={() => setRadio((prev) => !prev)}
-					rounded
 				>
 					<Pencil1Icon width={16} height={16} />
 				</Button>

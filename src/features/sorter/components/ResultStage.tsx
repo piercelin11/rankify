@@ -8,7 +8,7 @@ import React, {
 	useState,
 } from "react";
 import SorterResultListItem from "./ResultListItem";
-import Button from "@/components/buttons/Button";
+import { Button } from "@/components/ui/button";
 import submitRanking from "../actions/submitRanking";
 import { notFound } from "next/navigation";
 import deleteRankingDraft from "../../ranking/actions/deleteRankingDraft";
@@ -92,7 +92,7 @@ export default function ResultStage({ draft }: ResultStageProps) {
 					<h3>Your ranking result</h3>
 					<div className="flex gap-5">
 						<Button
-							variant="primary"
+							variant="default"
 							onClick={() => {
 								submitRanking(
 									optimisticResult,

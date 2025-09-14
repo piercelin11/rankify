@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import FormItem from "@/components/form/FormInput";
-import Button from "@/components/buttons/Button";
+import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { updateArtistSchema, UpdateArtistType } from "@/types/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -80,7 +80,7 @@ export default function ArtistEditingForm({
 					>
 						Cancel
 					</Button>
-					<Button variant="primary" type="submit" disabled={isSubmitting}>
+					<Button variant="default" type="submit" disabled={isSubmitting}>
 						Save
 					</Button>
 					{isSubmitting && (

@@ -2,8 +2,6 @@ import TopSongsCountpPolarAreaChart from "@/features/ranking/stats/charts/TopSon
 import { AlbumHighlightsCard } from "@/features/ranking/stats/components/RankingHighlightsCard";
 import { getAlbumsRankingHistory } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
 
-
-
 type AlbumHistoryStatsSectionProps = {
 	artistId: string;
 	userId: string;

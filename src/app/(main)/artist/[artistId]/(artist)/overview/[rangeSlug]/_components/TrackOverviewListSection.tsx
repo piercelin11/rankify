@@ -1,7 +1,7 @@
 
 import { RankingListItem } from "../../../../../../../../features/ranking/display/components/RankingList";
 import Link from "next/link";
-import Button from "@/components/buttons/Button";
+import { Button } from "@/components/ui/button";
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";
 import getTracksStats, {
 	TimeFilterType,
@@ -46,7 +46,7 @@ export default async function TrackOverviewListSection({
 				<RankingListItem key={track.id} data={track} columns={[]} />
 			))}
 			<Link href={`/artist/${artistId}/overview/${rangeSlug}/ranking`}>
-				<Button variant="ghost" className="mx-auto">
+				<Button variant="link" className="mx-auto flex">
 					View All Rankings
 					<ArrowTopRightIcon />
 				</Button>

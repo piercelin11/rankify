@@ -4,9 +4,13 @@ import React, { useEffect, useState } from "react";
 import CheckBox from "@/components/form/CheckBox";
 import { AlbumData, TrackData } from "@/types/data";
 import { cn } from "@/lib/utils";
-import Button from "@/components/buttons/Button";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { FilterType, setExcluded, setPercentage } from "@/features/sorter/slices/sorterSlice";
+import {
+	FilterType,
+	setExcluded,
+	setPercentage,
+} from "@/features/sorter/slices/sorterSlice";
 import { useAppDispatch } from "@/store/hooks";
 import { CurrentStage } from "./SorterPage";
 import { PLACEHOLDER_PIC } from "@/constants";
@@ -15,17 +19,21 @@ import Image from "next/image";
 type FilterStageProps = {
 	albums: AlbumData[];
 	tracks?: TrackData[];
-	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>
+	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>;
 };
 
-export default function FilterStage({ albums, tracks, setCurrentStage }: FilterStageProps) {
+export default function FilterStage({
+	albums,
+	tracks,
+	setCurrentStage,
+}: FilterStageProps) {
 	const [excludedIds, setExcludedIds] = useState<FilterType>({
 		albums: [],
 		tracks: [],
 	});
 	const dispatch = useAppDispatch();
 
-	const singles = tracks?.filter(track => !track.albumId);
+	const singles = tracks?.filter((track) => !track.albumId);
 
 	function handleItemClick(id: string, type: "albums" | "tracks") {
 		setExcludedIds((prev) => {
@@ -51,7 +59,7 @@ export default function FilterStage({ albums, tracks, setCurrentStage }: FilterS
 
 	useEffect(() => {
 		dispatch(setPercentage(0));
-	}, [dispatch])
+	}, [dispatch]);
 
 	return (
 		<div className="space-y-6">
@@ -62,11 +70,11 @@ export default function FilterStage({ albums, tracks, setCurrentStage }: FilterS
 				</p>
 			</div>
 			<div className="flex justify-center gap-4">
-				<Button variant="primary" onClick={handleStart} rounded>
+				<Button variant="default" onClick={handleStart}>
 					Start Sorter
 				</Button>
 				<Link href={`/artist/${albums[0].artistId}/overview`}>
-					<Button variant="secondary" rounded>
+					<Button variant="secondary">
 						Quit Sorter
 					</Button>
 				</Link>
@@ -115,14 +123,18 @@ function FilterGalleryItem({
 	return (
 		<div className="relative min-w-40 max-w-40 space-y-2">
 			<CheckBox className="absolute left-2 top-2 z-10" checked={checked} />
-			<Image
-				className={cn("opacity-100 transition-all", {
-					"opacity-25": !checked,
-				})}
-				alt={data.name}
-				src={data.img ?? PLACEHOLDER_PIC}
-				draggable={false}
-			/>
+			<div className="relative aspect-square h-auto w-full rounded">
+				<Image
+					className={cn("opacity-100 transition-all", {
+						"opacity-25": !checked,
+					})}
+					alt={data.name}
+					src={data.img ?? PLACEHOLDER_PIC}
+					draggable={false}
+					sizes="160px"
+					fill
+				/>
+			</div>
 			<div>
 				<p className="line-clamp-2">{data.name}</p>
 				<p className="text-sm text-neutral-400">{subTitle}</p>

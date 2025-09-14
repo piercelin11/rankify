@@ -10,8 +10,8 @@ export default function BlurredImageBackground({
 }: BlurredImageBackgroundProps) {
 	return (
 		<>
-			<div className="fixed top-0 -z-10 h-[480px] w-full bg-gradient-dark 2xl:h-[840px]" />
-			<div className="fixed top-0 -z-20 h-[480px] w-full overflow-hidden 2xl:h-[840px]">
+			<div className="fixed top-0 -z-10 h-3/4 w-full bg-gradient-dark" />
+			<div className="fixed top-0 -z-20 h-3/4 w-full overflow-hidden">
 				<Image
 					className="object-cover blur-3xl"
 					fill
