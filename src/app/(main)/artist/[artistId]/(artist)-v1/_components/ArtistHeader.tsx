@@ -1,6 +1,6 @@
 "use client";
 
-import Tabs from "../../../../../../components/navigation/Tabs";
+import Tabs from "../../../../../../components/navigation/Tabs.old";
 import { getArtistTabOptions } from "@/config/navData";
 import { usePathname } from "next/navigation";
 import ContentHeader from "../../../../../../components/presentation/ContentHeader";

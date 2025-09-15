@@ -26,7 +26,11 @@ export function dateToDashFormat(input: Date) {
 	return formattedDate;
 }
 
-export function calculateDateRangeFromSlug(rangeSlug: string): Date | undefined {
+export function calculateDateRangeFromSlug(
+	rangeSlug: string | undefined
+): Date | undefined {
+	if (rangeSlug === undefined) return undefined;
+
 	if (typeof rangeSlug !== "string") {
 		throw new Error(getDevInputTypeError("Date", typeof rangeSlug));
 	}

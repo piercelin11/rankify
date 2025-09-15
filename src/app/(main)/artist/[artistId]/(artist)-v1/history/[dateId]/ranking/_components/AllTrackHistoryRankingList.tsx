@@ -1,39 +1,37 @@
 "use client";
 
-import { TrackStatsType } from "@/lib/database/ranking/overview/getTracksStats";
-import React from "react";
+import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import { AlbumData, ArtistData } from "@/types/data";
-import { FixedSizeList, ListChildComponentProps } from "react-window";
-import AutoSizer from "react-virtualized-auto-sizer";
-import Image from "next/image";
-import useSortedAndFilteredRanking from "@/features/ranking/display/hooks/useSortedAndFilteredRanking";
-import useListScroll from "@/features/ranking/display/hooks/useListScroll";
+import React from "react";
 import {
 	Column,
 	RankingHeader,
 	RankingListItem,
-} from "@/features/ranking/display/components/RankingList";
+} from "@/features/ranking/display/components/RankingList.old";
 import AchievementDisplay, {
 	AchievementType,
 } from "@/features/ranking/stats/components/AchievementDisplay";
+import useSortedAndFilteredRanking from "@/features/ranking/display/hooks/useSortedAndFilteredRanking";
 import RankingAlbumFilter from "@/features/ranking/display/components/RankingAlbumFilter";
+import { FixedSizeList, ListChildComponentProps } from "react-window";
+import AutoSizer from "react-virtualized-auto-sizer";
+import Image from "next/image";
+import useListScroll from "@/features/ranking/display/hooks/useListScroll";
 import { cn } from "@/lib/utils";
+import { ITEM_HEIGHT } from "@/app/(main)/artist/[artistId]/(artist)-v1/overview/[rangeSlug]/ranking/_components/AllTrackOverviewRankingList";
+import { dateToLong } from "@/lib/utils";
 
-type AllTrackOverviewRankingListProps = {
-	tracksRankings: TrackStatsType[];
+type TrackRankingListProps = {
+	tracksRankings: TrackHistoryType[];
 	albums: AlbumData[];
 	artist: ArtistData | null;
-	caption?: string;
 };
 
-export const ITEM_HEIGHT = 76;
-
-export default function AllTrackOverviewRankingList({
-	tracksRankings,
+export default function AllTrackHistoryRankingList({
 	albums,
+	tracksRankings,
 	artist,
-	caption,
-}: AllTrackOverviewRankingListProps) {
+}: TrackRankingListProps) {
 	const {
 		sortedAndFilteredRankings,
 		handleHeaderClick,
@@ -45,12 +43,7 @@ export default function AllTrackOverviewRankingList({
 	const { isScrolled, listRefCallback, handleRowClick, handleListScroll } =
 		useListScroll();
 
-	const columns: Column<TrackStatsType>[] = [
-		{
-			key: "averageRanking",
-			header: "avg",
-			onClick: () => handleHeaderClick("averageRanking"),
-		},
+	const columns: Column<TrackHistoryType>[] = [
 		{
 			key: "peak",
 			header: "peak",
@@ -69,14 +62,14 @@ export default function AllTrackOverviewRankingList({
 	];
 
 	return (
-		<>
-			<div className="flex items-center justify-between">
+		<div>
+			<div className="mb-10 flex items-center justify-between">
 				<RankingAlbumFilter
 					dropdownOptions={dropdownOptions}
 					selectedAlbums={selectedAlbumIds}
 				/>
 				{artist && (
-					<div className="flex items-center gap-2 rounded-full border border-neutral-600 bg-neutral-900/20 p-2">
+					<div className="flex items-center gap-2 rounded-full border border-neutral-600 bg-neutral-900/20 p-2 text-neutral-400">
 						<Image
 							className="rounded-full"
 							src={artist?.img || ""}
@@ -84,12 +77,8 @@ export default function AllTrackOverviewRankingList({
 							height={36}
 							alt={`${artist?.name}`}
 						/>
-						<p className="text-sm">{artist?.name}</p>
-						{caption && (
-							<>
-								•<p className="me-2 text-sm">{caption}</p>
-							</>
-						)}
+						<p className="text-sm">{artist?.name}</p>•
+						<p className="me-2 text-sm">{dateToLong(tracksRankings[0].date)}</p>
 					</div>
 				)}
 			</div>
@@ -99,7 +88,8 @@ export default function AllTrackOverviewRankingList({
 					selectedHeader={String(sortKey)}
 					sortOrder={sortOrder}
 				/>
-				<div className="h-virtualized-ranking relative w-full overflow-auto scrollbar-hidden">
+
+				<div className="h-virtualized-ranking relative w-full">
 					<AutoSizer>
 						{({ height, width }) => (
 							<FixedSizeList
@@ -127,13 +117,13 @@ export default function AllTrackOverviewRankingList({
 					</AutoSizer>
 				</div>
 			</section>
-		</>
+		</div>
 	);
 }
 
 type RowData = {
-	items: TrackStatsType[];
-	columns: Column<TrackStatsType>[];
+	items: TrackHistoryType[];
+	columns: Column<TrackHistoryType>[];
 	sortKey: string | null;
 	handleRowClick: () => void;
 };

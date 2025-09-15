@@ -1,0 +1,104 @@
+"use client";
+
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import React, { ReactNode } from "react";
+import { SpotifyIcon } from "../icons/LogoIcons";
+import { AlbumData, ArtistData, TrackData } from "@/types/data";
+import Image from "next/image";
+
+type ContentHeaderProps = {
+	data?: AlbumData | ArtistData | TrackData;
+	subTitleContent?: ReactNode;
+	rounded?: boolean;
+	type?: string;
+	color?: string | null;
+	imageSize?: number;
+	children?: ReactNode;
+};
+
+const ContentHeader = React.memo(function ContentHeader({
+	data,
+	subTitleContent,
+	rounded = false,
+	type,
+	color,
+	imageSize: _imageSize = 220,
+	children,
+}: ContentHeaderProps) {
+
+	return (
+		<section>
+			<div
+				className={cn("pt-20 2xl:pt-24", {
+					"pt-10 2xl:pt-12": children,
+				})}
+			>
+				<div
+					className={cn("px-8 py-8 2xl:px-14 2xl:py-14", {
+						"space-y-4": children,
+					})}
+				>
+					{children}
+					<div className="flex items-center gap-6">
+						<div
+							className={cn(
+								"relative min-h-[220px] min-w-[220px] overflow-hidden bg-neutral-900 drop-shadow-2xl lg:min-h-[260px] lg:min-w-[260px] 2xl:min-h-[300px] 2xl:min-w-[300px]",
+								{
+									"rounded-full": rounded,
+									"rounded-4xl": !rounded,
+								}
+							)}
+						>
+							{data?.img && (
+								<Image
+									fill
+									priority
+									src={data?.img}
+									alt={`${data?.name} profile`}
+									sizes="(min-width: 1536px) 300px, 220px"
+								/>
+							)}
+						</div>
+						{data && (
+							<ContentHeaderInfo
+								data={data}
+								subTitleContent={subTitleContent}
+								type={type}
+								color={color}
+							/>
+						)}
+					</div>
+				</div>
+			</div>
+		</section>
+	);
+});
+
+function ContentHeaderInfo({
+	data,
+	subTitleContent,
+	type,
+}: Omit<ContentHeaderProps , "params">) {
+	return (
+		<div className={cn("space-y-2")}>
+			{type && <p>{type}</p>}
+			<h1 className={cn("text-display")}>{data?.name}</h1>
+			<div
+				className={cn(
+					"group text-description mb-4 flex items-center gap-2 text-neutral-400"
+				)}
+			>
+				<Link href={data?.spotifyUrl || ""} className="inline-block">
+					<SpotifyIcon
+						className={cn("text-neutral-400 hover:text-spotify")}
+						size={30}
+					/>
+				</Link>
+				{subTitleContent}
+			</div>
+		</div>
+	);
+}
+
+export default ContentHeader;

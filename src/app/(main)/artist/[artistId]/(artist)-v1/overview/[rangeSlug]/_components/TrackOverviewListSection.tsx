@@ -1,5 +1,5 @@
 
-import { RankingListItem } from "../../../../../../../../features/ranking/display/components/RankingList";
+import { RankingListItem } from "../../../../../../../../features/ranking/display/components/RankingList.old";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";
