@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { RankingListDataTypeExtend } from "../components/RankingList";
+import { RankingListDataTypeExtend } from "../components/RankingList.old";
 import { AlbumData } from "@/types/data";
 
 export default function useSortedAndFilteredRanking<

@@ -2,7 +2,7 @@
 
 import PolarAreaChart from "@/components/charts/PolarAreaChart";
 import DropdownMenu from "@/components/menu/DropdownMenu";
-import Tabs from "@/components/navigation/Tabs";
+import Tabs from "@/components/navigation/Tabs.old";
 import { AlbumHistoryType } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
 import { AlbumStatsType } from "@/lib/database/ranking/overview/getAlbumsStats";
 import React, { useState } from "react";

@@ -2,7 +2,7 @@
 import { getUserSession } from "@/../auth";
 import { getTracksRankingHistory } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
-import AllTrackHistoryRankingList from "@/app/(main)/artist/[artistId]/(artist)/history/[dateId]/ranking/_components/AllTrackHistoryRankingList";
+import AllTrackHistoryRankingList from "@/app/(main)/artist/[artistId]/(artist)-v1/history/[dateId]/ranking/_components/AllTrackHistoryRankingList";
 import getArtistById from "@/lib/database/data/getArtistById";
 
 export default async function ArtistRankingPage({

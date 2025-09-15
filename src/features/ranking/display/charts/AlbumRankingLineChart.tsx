@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import RankingLineChart from "./RankingLineChart";
 import { AlbumStatsType } from "@/lib/database/ranking/overview/getAlbumsStats";
-import Tabs from "@/components/navigation/Tabs";
+import Tabs from "@/components/navigation/Tabs.old";
 import LineChartFilter, {
 	MenuOptionType,
 } from "../components/LineChartFilter";

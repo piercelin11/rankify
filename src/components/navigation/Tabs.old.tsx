@@ -2,21 +2,24 @@
 import { DEFAULT_COLOR } from "@/constants";
 import { cn } from "@/lib/utils";
 import { adjustColor } from "@/lib/utils/color.utils";
-import { throttle } from "@/lib/utils";
+import { throttle } from "@/lib/utils/performance.utils";
 import Link from "next/link";
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 export type TabOptionProps = {
 	label: string;
 	id: string;
 	href?: string;
 	onClick?: () => void;
+	query?: [string, string];
 };
 
 type TabsProps = {
 	options: TabOptionProps[];
 	activeId?: string;
 	color?: string | null;
+	className?: string;
 };
 
 type IndicatorStyleType = {
@@ -25,14 +28,24 @@ type IndicatorStyleType = {
 	opacity: number;
 };
 
-export default function Tabs({ options, activeId, color }: TabsProps) {
+export default function Tabs({ options, activeId, color, className }: TabsProps) {
 	const [pendingActiveId, setPendingActiveId] = useState<string | null>(null);
 	const [indicatorStyle, setIndicatorStyle] =
 		useState<IndicatorStyleType | null>(null);
 	const tabRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
 
 	function handlePendingActiveId(option: TabOptionProps) {
 		setPendingActiveId(option.id);
+
+		// 處理 query 參數更新
+		if (option.query) {
+			const params = new URLSearchParams(searchParams.toString());
+			params.set(option.query[0], option.query[1]);
+			router.push(`${pathname}?${params.toString()}`);
+		}
 	}
 
 	useEffect(() => {
@@ -54,11 +67,10 @@ export default function Tabs({ options, activeId, color }: TabsProps) {
 		}
 	}, [activeId, pendingActiveId]);
 
-	//讓 indicator 寬度隨螢幕 resize 改變
+	// 讓 indicator 寬度隨螢幕 resize 改變
 	useEffect(() => {
 		const recalculateIndicator = throttle(() => {
 			const activeTabRef = tabRefs.current.get(activeId || "");
-			console.log("recalculateIndicator");
 			if (activeTabRef) {
 				setIndicatorStyle({
 					left: activeTabRef.offsetLeft,
@@ -66,15 +78,17 @@ export default function Tabs({ options, activeId, color }: TabsProps) {
 					opacity: 1,
 				});
 			}
-		});
+		}, 100);
 
 		window.addEventListener("resize", recalculateIndicator);
-
 		return () => window.removeEventListener("resize", recalculateIndicator);
 	}, [activeId]);
 
 	return (
-		<div className="w-max select-none rounded-lg border border-neutral-600/60 bg-neutral-900/30 p-1">
+		<div className={cn(
+			"w-max select-none rounded-lg border border-neutral-600/60 bg-neutral-900/50 p-1",
+			className
+		)}>
 			<div className="relative flex">
 				{options.map((option) => (
 					<TabItem
@@ -94,7 +108,7 @@ export default function Tabs({ options, activeId, color }: TabsProps) {
 				))}
 				{indicatorStyle && (
 					<div
-						className="absolute h-full w-full rounded-md bg-primary-500 transition-all duration-200 ease-in-out"
+						className="absolute h-full rounded-md transition-all duration-200 ease-in-out"
 						style={{
 							...indicatorStyle,
 							backgroundColor: color
@@ -124,9 +138,9 @@ const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(function TabItem(
 				>
 					<button
 						className={cn(
-							"z-10 h-full justify-self-center rounded-lg px-3 py-2 text-neutral-400 xl:px-4 xl:py-3",
+							"z-10 h-full justify-self-center rounded-lg px-4 py-2 text-neutral-400 transition-all duration-200 ease-in-out",
 							{
-								"text-neutral-950": isActive,
+								"text-neutral-900": isActive,
 							}
 						)}
 						ref={ref}
@@ -142,7 +156,7 @@ const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(function TabItem(
 					className={cn(
 						"z-10 h-full justify-self-center rounded-lg px-3 py-2 text-neutral-400 xl:px-4 xl:py-3",
 						{
-							"text-neutral-950": isActive,
+							"text-neutral-900": isActive,
 						}
 					)}
 					ref={ref}

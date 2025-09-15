@@ -1,40 +1,42 @@
+import { SimpleDropdownOption } from "@/components/dropdown/SimpleDropdown";
+
 export const getArtistTabOptions = (artistId: string) => [
 	{
-		id:"overview",
-		label: "My Overview",
-		href: `/artist/${artistId}/overview`,
+		id: "history",
+		label: "My History",
+		href: `/artist/${artistId}/history`,
 	},
 	{
-		id:"history",
-		label: "Ranking History",
-		href: `/artist/${artistId}/history`,
+		id: "overview",
+		label: "Overview",
+		href: `/artist/${artistId}/overview`,
 	},
 ];
 
-export const getOverviewDropdownData = (artistId: string) => 
- [
-	{	id: "past-month",
-		label: "past month", 
-		href: `/artist/${artistId}/overview/past-month`,
+export const MY_OVERVIEW_DROPDOWN_OPTIONS: SimpleDropdownOption[] = [
+	{
+		value: "past-month",
+		label: "past month",
+		queryParam: ["range", "past-month"],
 	},
 	{
-		id: "past-6-months",
+		value: "past-6-months",
 		label: "past 6 months",
-		href: `/artist/${artistId}/overview/past-6-months`,
+		queryParam: ["range", "past-6-months"],
 	},
 	{
-		id: "past-year",
+		value: "past-year",
 		label: "past year",
-		href: `/artist/${artistId}/overview/past-year`,
+		queryParam: ["range", "past-year"],
 	},
 	{
-		id: "past-2-years",
+		value: "past-2-years",
 		label: "past 2 years",
-		href: `/artist/${artistId}/overview/past-2-years`,
+		queryParam: ["range", "past-2-years"],
 	},
 	{
-		id: "all-time",
+		value: "all-time",
 		label: "all time",
-		href: `/artist/${artistId}/overview/all-time`,
+		queryParam: ["range", "all-time"],
 	},
 ];
