@@ -31,6 +31,8 @@ export default function AdvancedRankingTable<
 	onFiltersChange,
 	onColumnsChange,
 	availableAlbums = [],
+	onRowClick,
+	getRowHref,
 }: AdvancedRankingTableProps<T>) {
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>({});
@@ -99,6 +101,8 @@ export default function AdvancedRankingTable<
 				advancedFilters={advancedFilters}
 				height={600}
 				isLoading={isLoading}
+				onRowClick={onRowClick}
+				getRowHref={getRowHref}
 			/>
 
 			{/* 狀態信息 */}

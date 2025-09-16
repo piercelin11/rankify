@@ -65,10 +65,10 @@ function ContentHeaderInfo({
 		<div className="space-y-2">
 			{type && <p>{type}</p>}
 			<h1 className="text-display">{data?.name}</h1>
-			<div className="text-description group mb-4 flex items-center gap-2 text-neutral-400">
+			<div className="text-description group mb-4 flex items-center gap-2 text-neutral-300">
 				<Link href={data?.spotifyUrl || ""} className="inline-block">
 					<SpotifyIcon
-						className="text-neutral-400 hover:text-spotify"
+						className="text-neutral-300 hover:text-spotify"
 						size={30}
 					/>
 				</Link>

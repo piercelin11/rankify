@@ -1,13 +1,13 @@
+import { getUserSession } from "../../../../../../../../auth";
+import { calculateDateRangeFromSlug } from "@/lib/utils";
+import getTracksStats from "@/services/track/getTracksStats";
+import { getLoggedAlbumNames } from "@/db/album";
+import ClientAdvancedRankingTable from "@/features/ranking/table/client/ClientAdvancedRankingTable";
+
 type pageProps = {
 	params: Promise<{ artistId: string }>;
 	searchParams: Promise<{ range: string }>;
 };
-
-import { getUserSession } from "../../../../../../../../auth";
-import { calculateDateRangeFromSlug } from "@/lib/utils";
-import getTracksStats from "@/services/track/getTracksStats";
-import AdvancedRankingTable from "@/features/ranking/table/advanced/AdvancedRankingTable";
-import { getLoggedAlbumNames } from "@/db/album";
 
 export default async function page({ params, searchParams }: pageProps) {
 	const { artistId } = await params;
@@ -23,27 +23,9 @@ export default async function page({ params, searchParams }: pageProps) {
 	const albums = await getLoggedAlbumNames(artistId, userId);
 
 	return (
-		<AdvancedRankingTable
-			data={trackRankings}
-			columnKey={[
-				"ranking",
-				"name",
-				"peak",
-				"worst",
-				"averageRanking",
-				"top50PercentCount",
-				"top25PercentCount",
-				"top5PercentCount",
-			]}
-			availableAlbums={albums.map((album) => album.name)}
-			features={{
-				sort: true,
-				search: true,
-				virtualization: true,
-				columnSelector: true,
-				advancedFilter: true,
-				header: true,
-			}}
+		<ClientAdvancedRankingTable
+			trackRankings={trackRankings}
+			albums={albums.map((album) => album.name)}
 		/>
 	);
 }

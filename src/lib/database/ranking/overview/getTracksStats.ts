@@ -202,7 +202,7 @@ export default async function getTracksStats({
 			where: {
 				userId,
 				artistId,
-				date: { date: { lt: latestSession?.date } },
+				rankingSession: { date: { lt: latestSession?.date } },
 			},
 			orderBy: [
 				{ _avg: { ranking: "asc" } },

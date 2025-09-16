@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import SegmentControl from "@/components/navigation/SegmentControl";
 import { OVERVIEW_SEGMENT_OPTIONS } from "@/config/segmentOptions";
 import Link from "next/link";
-import RankingTable from "@/features/ranking/table/RankingTable";
 import getTracksStats from "@/services/track/getTracksStats";
 import getAlbumsStats from "@/services/album/getAlbumsStats";
+import ClientRankingTable from "@/features/ranking/table/client/ClientRankingTable";
 
 type pageProps = {
 	params: Promise<{ artistId: string }>;
@@ -59,13 +59,7 @@ export default async function page({ params, searchParams }: pageProps) {
 			</div>
 			<div>
 				<h2 className="mb-4">Track Rankings</h2>
-				<RankingTable
-					className="mb-4 border-b border-neutral-800"
-					features={{
-						header: false,
-					}}
-					data={trackRankings}
-				/>
+				<ClientRankingTable trackRankings={trackRankings} />
 				<div className="flex">
 					<Link href={allRankingHref} className="mx-auto">
 						<Button variant="link">View all tracks ranking</Button>

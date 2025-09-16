@@ -35,14 +35,14 @@ export default async function getAlbumRankingSeries({
 			color: true,
 			albumRankings: {
 				select: {
-					date: {
+					rankingSession: {
 						select: { date: true, id: true },
 					},
 					points: true,
 					ranking: true,
 				},
 				orderBy: {
-					date: {
+					rankingSession: {
 						date: "asc",
 					},
 				},
@@ -54,8 +54,8 @@ export default async function getAlbumRankingSeries({
 		const rankings = album.albumRankings.map((data) => ({
 			ranking: data.ranking,
 			points: data.points,
-			date: data.date.date,
-			dateId: data.date.id,
+			date: data.rankingSession.date,
+			dateId: data.rankingSession.id,
 		}));
 		result.set(album.id, rankings);
 	}

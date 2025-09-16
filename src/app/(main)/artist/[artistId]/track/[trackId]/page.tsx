@@ -1,24 +1,12 @@
-import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
-import { notFound } from "next/navigation";
-
 import { getUserSession } from "@/../auth";
-import {
-	HeartFilledIcon,
-	MoveIcon,
-	StarFilledIcon,
-} from "@radix-ui/react-icons";
-import getLoggedTracks from "@/lib/database/user/getLoggedTracks";
-import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
-import { getPrevNextIndex } from "@/lib/utils";
-import TrackRankingLineChart from "@/features/ranking/display/charts/TrackRankingLineChart";
-import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";
-import PercentileBarsCard, {
-	BarData,
-} from "@/features/ranking/stats/components/PercentileBarsCard";
-import StatsCard from "@/features/ranking/stats/components/StatsCard";
-import calculateTotalChartRun from "@/lib/database/ranking/overview/calculateTotalChartRun";
-
-const iconSize = 22;
+import SegmentControl from "@/components/navigation/SegmentControl";
+import { Card } from "@/components/ui/card";
+import { TRACK_SEGMENT_OPTIONS } from "@/config/segmentOptions";
+import { getTrackRanking, getTrackComparisonOptions } from "@/db/track";
+import RankingLineChart from "@/features/ranking/chart/RankingLineChart";
+//import getTracksStats from "@/services/track/getTracksStats";
+import { notFound } from "next/navigation";
+import { getComparisonTracksData } from "./actions";
 
 export default async function page({
 	params,
@@ -29,110 +17,45 @@ export default async function page({
 	const artistId = (await params).artistId;
 	const { id: userId } = await getUserSession();
 
-	const trackStats = await getTracksStats({
-		artistId,
+	const defaultTrack = await getTrackRanking(userId, trackId);
+	const { menuOptions, parentOptions } = await getTrackComparisonOptions(
 		userId,
-		options: {
-			includeAllRankings: true,
-			includeRankChange: false,
-		},
-	});
-	const trackData = trackStats.find((trackStats) => trackStats.id === trackId);
-	if (!trackData) notFound();
-
-	const totalChartRun = await calculateTotalChartRun({artistId,userId, trackId});
-
-	const trackColor = trackData.album.color || trackData.color;
-
-	const menuOptions = (await getLoggedTracks({ artistId, userId })).map(
-		(track) => ({
-			...track,
-			parentId: track.albumId,
-			color: track.album?.color || null,
-		})
+		artistId
 	);
-	const parentOptions = await getLoggedAlbums({ artistId, userId });
 
-	const statsCardData = [
-		{
-			stats: "#" + trackData.ranking,
-			subtitle: "overall ranking",
-			color: trackColor,
-			icon: <HeartFilledIcon width={iconSize} height={iconSize} />,
-		},
-		{
-			stats: "#" + trackData.peak,
-			subtitle: "peak position",
-			icon: <StarFilledIcon width={iconSize} height={iconSize} />,
-		},
-		{
-			stats: totalChartRun,
-			subtitle: "total chart run",
-			icon: <MoveIcon width={iconSize} height={iconSize} />,
-		},
-	];
-
-	const { top50PercentCount, top25PercentCount, top5PercentCount, rankings } =
-		trackData;
-
-	const barData: BarData[] = [
-		{
-			width: top5PercentCount / rankings!.length,
-			label: "Times in top 5%",
-			stats: top5PercentCount,
-		},
-		{
-			width: top25PercentCount / rankings!.length,
-			label: "Times in top 25%",
-			stats: top25PercentCount,
-		},
-		{
-			width: top50PercentCount / rankings!.length,
-			label: "Times in top 50%",
-			stats: top50PercentCount,
-		},
-	];
-
-	const { previousIndex, nextIndex } = getPrevNextIndex({
-		items: trackStats,
-		targetItemId: trackId,
-	});
+	if (!defaultTrack) notFound();
 
 	return (
-		<>
-			<div className="grid grid-cols-2 gap-2 lg:grid-cols-2 lg:gap-6 xl:grid-cols-4">
-				{statsCardData.map((data) => (
-					<StatsCard
-						key={data.subtitle}
-						stats={data.stats}
-						subtitle={data.subtitle}
-						color={data.color}
+		<div className="space-y-16">
+			<SegmentControl
+				options={TRACK_SEGMENT_OPTIONS}
+				variant="simple"
+				defaultValue="artist"
+			/>
+			<div className="flex gap-4 [&>div]:flex-1 [&>div]:p-8">
+				{[1, 2, 3, 4].map((item) => (
+					<Card
+						key={item}
+						className="bg-gradient-to-b from-transparent to-neutral-950"
 					>
-						{data.icon}
-					</StatsCard>
+						<h3 className="text-base text-neutral-500">Album Rankings</h3>
+					</Card>
 				))}
-				<PercentileBarsCard
-					bars={barData}
-					color={trackColor}
-					className="hidden sm:flex"
+			</div>
+			<Card className="space-y-8 p-12">
+				<RankingLineChart
+					title="Track Ranking Trends"
+					defaultData={defaultTrack}
+					menuOptions={menuOptions}
+					parentOptions={parentOptions}
+					config={{
+						dataKey: "ranking",
+						isReverse: true,
+						hasToggle: false,
+					}}
+					onLoadComparisonData={getComparisonTracksData}
 				/>
-			</div>
-			<div className="sm:hidden">
-				<h3>Track Ranking Record</h3>
-				<PercentileBarsCard bars={barData} color={trackColor} />
-			</div>
-
-			<TrackRankingLineChart
-				defaultTrackData={trackData}
-				allTrackData={trackStats}
-				menuOptions={menuOptions}
-				parentOptions={parentOptions}
-			/>
-			<SiblingNavigator
-				type="track"
-				prevData={trackStats[previousIndex]}
-				nextData={trackStats[nextIndex]}
-			/>
-		</>
+			</Card>
+		</div>
 	);
 }

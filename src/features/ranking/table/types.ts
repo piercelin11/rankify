@@ -34,4 +34,6 @@ export type RankingTableProps<T> = {
 	features?: RankingTableFeatures;
 	appearance?: RankingTableAppearance;
 	className?: string;
+	onRowClick?: (item: T) => void;
+	getRowHref?: (item: T) => string;
 };

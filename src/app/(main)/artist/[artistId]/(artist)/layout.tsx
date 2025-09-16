@@ -57,22 +57,33 @@ async function SubHeader({ artist }: { artist: ArtistData }) {
 		},
 	]);
 
+	const isRakingPage = parsedPathname?.segments.includes("ranking");
+
 	return (
-		<div className="px-content pt-content space-y-4 md:flex md:justify-between">
+		<div className="space-y-4 px-content pt-content md:flex md:justify-between">
 			<SimpleBreadcrumb items={breadCrumbItems} />
 			<div className="flex gap-4">
-				<SegmentControl
-					variant="animated"
-					size="lg"
-					options={tabOptions.map(option => ({
-						...option,
-						value: option.id // 轉換 id 為 value
-					}))}
-					value={parsedPathname?.segments[2]}
-				/>
-				<Button size="icon" className="h-12 w-12 rounded-full">
-					<Plus className="text-neutral-900 h-8 w-8" />
-				</Button>
+				{!isRakingPage && (
+					<SegmentControl
+						variant="animated"
+						size="lg"
+						options={tabOptions.map((option) => ({
+							...option,
+							value: option.id,
+						}))}
+						value={parsedPathname?.segments[2]}
+					/>
+				)}
+				{isRakingPage ? (
+					<Button className="h-12">
+						<Plus className="h-8 w-8 text-neutral-900" />
+						Create Sorter
+					</Button>
+				) : (
+					<Button size="icon" className="h-12 w-12 rounded-full">
+						<Plus className="h-8 w-8 text-neutral-900" />
+					</Button>
+				)}
 			</div>
 		</div>
 	);

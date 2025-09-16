@@ -91,7 +91,7 @@ export async function getAlbumsRankingHistory({
 	let prevPointsMap: Map<string, number> | undefined;
 
 	if (options.includeChange) {
-		const currentDate = albumRanking[0].date.date;
+		const currentDate = albumRanking[0].rankingSession.date;
 
 		const prevDateId = (
 			await db.rankingSession.findFirst({
@@ -139,7 +139,7 @@ export async function getAlbumsRankingHistory({
 		return {
 			...data.album,
 			dateId,
-			date: data.date.date,
+			date: data.rankingSession.date,
 			ranking: data.ranking,
 			top25PercentCount: top25PercentMap.get(data.albumId) ?? 0,
 			top50PercentCount: top50PercentMap.get(data.albumId) ?? 0,
