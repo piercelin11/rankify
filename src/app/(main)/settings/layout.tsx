@@ -1,6 +1,6 @@
 import ContentWrapper from "@/components/layout/ContentWrapper";
 import { SettingsSidebarLayout } from "@/components/layout/SidebarLayout";
-import { settingsSidebarMenuItems } from "@/config/sidebarMenu";
+import { settingsSidebarMenuItems } from "@/config/sidebarOptions";
 import Link from "next/link";
 
 type SettingsLayoutProps = {

@@ -1,4 +1,4 @@
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import { AddArtistButton } from "@/features/admin/addContent/components/AddAristButton";
 import GalleryWrapper from "@/components/presentation/GalleryWrapper";
 import GalleryItem from "@/components/presentation/GalleryItem";

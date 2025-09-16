@@ -1,19 +1,6 @@
 import { SimpleDropdownOption } from "@/components/dropdown/SimpleDropdown";
 
-export const getArtistTabOptions = (artistId: string) => [
-	{
-		id: "history",
-		label: "My History",
-		href: `/artist/${artistId}/history`,
-	},
-	{
-		id: "overview",
-		label: "Overview",
-		href: `/artist/${artistId}/overview`,
-	},
-];
-
-export const MY_OVERVIEW_DROPDOWN_OPTIONS: SimpleDropdownOption[] = [
+export const TIME_RANGE_OPTIONS: SimpleDropdownOption[] = [
 	{
 		value: "past-month",
 		label: "past month",

@@ -14,7 +14,7 @@ import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
 import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";
 import PercentileBarsCard, { BarData } from "@/features/ranking/stats/components/PercentileBarsCard";
 import StatsCard from "@/features/ranking/stats/components/StatsCard";
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 
 const iconSize = 22;
 

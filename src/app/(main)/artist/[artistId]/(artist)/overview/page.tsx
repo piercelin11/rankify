@@ -1,18 +1,16 @@
 import SimpleDropdown from "@/components/dropdown/SimpleDropdown";
-import { MY_OVERVIEW_DROPDOWN_OPTIONS } from "@/config/navData";
-import { RankingTable } from "@/features/ranking/table";
-import getTracksStats, {
-	TimeFilterType,
-} from "@/lib/database/ranking/overview/getTracksStats";
+import { TIME_RANGE_OPTIONS } from "@/config/timeRangeOptions";
 import { calculateDateRangeFromSlug } from "@/lib/utils";
 import { getUserSession } from "../../../../../../../auth";
 import { Card } from "@/components/ui/card";
 import DoubleBarChart from "@/components/charts/DoubleBarChart";
-import { getAlbumsStats } from "@/lib/database/ranking/overview/getAlbumsStats";
 import { Button } from "@/components/ui/button";
-import SegmentControl, {
-	SegmentOption,
-} from "@/components/navigation/SegmentControl";
+import SegmentControl from "@/components/navigation/SegmentControl";
+import { OVERVIEW_SEGMENT_OPTIONS } from "@/config/segmentOptions";
+import Link from "next/link";
+import RankingTable from "@/features/ranking/table/RankingTable";
+import getTracksStats from "@/services/track/getTracksStats";
+import getAlbumsStats from "@/services/album/getAlbumsStats";
 
 type pageProps = {
 	params: Promise<{ artistId: string }>;
@@ -21,47 +19,27 @@ type pageProps = {
 
 export default async function page({ params, searchParams }: pageProps) {
 	const { artistId } = await params;
-	const { range } = await searchParams;
+	const resolvedSearchParams = await searchParams;
+	const { range } = resolvedSearchParams;
 	const { id: userId } = await getUserSession();
-	const startDate = calculateDateRangeFromSlug(range);
+	const dateRange = calculateDateRangeFromSlug(range);
 
-	const SegmentControlOptions: SegmentOption[] = [
-		{
-			label: "My Overview",
-			value: "my-overview",
-			queryParam: ["scope", "global"],
-		},
-		{
-			label: "Global Overview",
-			value: "global-overview",
-			queryParam: ["scope", "personal"],
-		},
-	];
-
-	const time: TimeFilterType | undefined = startDate
-		? {
-				threshold: startDate,
-				filter: "gte",
-			}
-		: undefined;
+	const queryString = new URLSearchParams(resolvedSearchParams).toString();
+	const allRankingHref = `/artist/${artistId}/overview/ranking${
+		queryString ? `?${queryString}` : ""
+	}`;
 
 	const trackRankings = await getTracksStats({
 		artistId,
 		userId,
-		time,
-        take: 5,
-		options: {
-			includeRankChange: false,
-			includeAllRankings: false,
-			includeAchievement: false,
-		},
+		dateRange,
+		take: 5,
 	});
-    console.log(trackRankings)
 
 	const albumRankings = await getAlbumsStats({
 		artistId,
 		userId,
-		time,
+		dateRange,
 	});
 
 	return (
@@ -69,13 +47,14 @@ export default async function page({ params, searchParams }: pageProps) {
 			<div className="flex items-center justify-between">
 				<SegmentControl
 					variant="simple"
-					options={SegmentControlOptions}
+					options={OVERVIEW_SEGMENT_OPTIONS}
 					defaultValue="my-overview"
 				/>
 				<SimpleDropdown
 					className="w-80"
 					size="lg"
-					options={MY_OVERVIEW_DROPDOWN_OPTIONS}
+					options={TIME_RANGE_OPTIONS}
+					defaultValue={range}
 				/>
 			</div>
 			<div>
@@ -88,10 +67,17 @@ export default async function page({ params, searchParams }: pageProps) {
 					data={trackRankings}
 				/>
 				<div className="flex">
-					<Button variant="link" className="mx-auto">
-						View all tracks ranking
-					</Button>
+					<Link href={allRankingHref} className="mx-auto">
+						<Button variant="link">View all tracks ranking</Button>
+					</Link>
 				</div>
+			</div>
+			<div className="flex gap-4 [&>div]:flex-1 [&>div]:p-8">
+				{[1, 2, 3, 4].map((item) => (
+					<Card key={item}>
+						<h3 className="text-base text-neutral-500">Album Rankings</h3>
+					</Card>
+				))}
 			</div>
 			<div>
 				<Card className="p-12">

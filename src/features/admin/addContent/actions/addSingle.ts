@@ -1,7 +1,7 @@
 "use server";
 
 import { ADMIN_MESSAGES } from "@/constants/messages";
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import fetchTracks from "@/lib/spotify/fetchTracks";
 import { AppResponseType } from "@/types/response";
 import { revalidatePath, revalidateTag } from "next/cache";

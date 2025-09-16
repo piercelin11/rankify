@@ -1,4 +1,4 @@
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 
 type getLoggedArtistsProps = {
     userId: string;

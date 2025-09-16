@@ -1,4 +1,4 @@
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import { TimeFilterType } from "../ranking/overview/getTracksStats";
 import { getUserRankingPreference } from "./getUserPreference";
 

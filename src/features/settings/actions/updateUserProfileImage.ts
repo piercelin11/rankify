@@ -2,7 +2,7 @@
 
 import { getUserSession } from "@/../auth";
 import { SETTINGS_MESSAGES } from "@/constants/messages";
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
 import { revalidatePath } from "next/cache";
 

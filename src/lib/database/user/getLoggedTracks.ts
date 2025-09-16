@@ -1,5 +1,5 @@
 import { TimeFilterType } from "../ranking/overview/getTracksStats";
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 
 type getLoggedTracksProps = {
 	artistId: string;

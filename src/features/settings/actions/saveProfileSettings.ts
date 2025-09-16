@@ -6,7 +6,7 @@ import {
 } from "@/types/schemas/settings";
 import { getUserSession } from "@/../auth";
 import { AppResponseType } from "@/types/response";
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { SETTINGS_MESSAGES } from "@/constants/messages";

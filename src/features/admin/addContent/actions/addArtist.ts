@@ -1,7 +1,7 @@
 "use server";
 
 import fetchArtist from "@/lib/spotify/fetchArtist";
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
 import { redirect } from "next/navigation";

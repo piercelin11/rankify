@@ -1,4 +1,4 @@
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 
 export type AlbumRankingSeriesType = Map<
 	string,
@@ -33,7 +33,7 @@ export default async function getAlbumRankingSeries({
 			id: true,
 			name: true,
 			color: true,
-			AlbumRanking: {
+			albumRankings: {
 				select: {
 					date: {
 						select: { date: true, id: true },
@@ -51,7 +51,7 @@ export default async function getAlbumRankingSeries({
 	});
 
 	for (const album of albumRanking) {
-		const rankings = album.AlbumRanking.map((data) => ({
+		const rankings = album.albumRankings.map((data) => ({
 			ranking: data.ranking,
 			points: data.points,
 			date: data.date.date,

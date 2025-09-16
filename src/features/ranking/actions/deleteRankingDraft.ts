@@ -1,7 +1,7 @@
 "use server";
 
 import { getUserSession } from "@/../auth";
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import { redirect } from "next/navigation";
 
 export default async function deleteRankingDraft(

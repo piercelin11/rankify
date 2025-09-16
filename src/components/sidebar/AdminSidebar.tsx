@@ -1,6 +1,6 @@
 "use client";
 
-import { adminSidebarMenuItems } from "@/config/sidebarMenu";
+import { adminSidebarMenuItems } from "@/config/sidebarOptions";
 
 import SidebarMenuItem from "./SidebarMenuItem";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";

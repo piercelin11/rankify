@@ -1,4 +1,3 @@
-import getArtistById from "@/lib/database/data/getArtistById";
 import { notFound } from "next/navigation";
 import { ReactNode } from "react";
 import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
@@ -6,13 +5,14 @@ import ContentHeader from "@/components/presentation/ContentHeader";
 import { parsePathnameFromHeaders } from "@/lib/utils";
 import { headers } from "next/headers";
 import SegmentControl from "@/components/navigation/SegmentControl";
-import { getArtistTabOptions } from "@/config/navData";
 import SimpleBreadcrumb, {
 	createBreadcrumbItems,
 } from "@/components/navigation/SimpleBreadcrumb";
 import { ArtistData } from "@/types/data";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { getArtistTabOptions } from "@/config/artistTabs";
+import getArtistById from "@/db/artsit";
 
 type LayoutProps = {
 	params: Promise<{ artistId: string }>;
