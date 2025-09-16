@@ -7,6 +7,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import TrackCell from "./TrackCell";
 import type { RankingListDataTypeExtend, RankingTableFeatures, RankingTableAppearance } from "../types";
 
@@ -14,12 +15,16 @@ type TabletTableProps<T> = {
 	table: Table<T>;
 	features: RankingTableFeatures;
 	appearance: RankingTableAppearance;
+	onRowClick?: (item: T) => void;
+	getRowHref?: (item: T) => string;
 };
 
 export default function TabletTable<T extends RankingListDataTypeExtend>({
 	table,
 	features,
 	appearance,
+	onRowClick,
+	getRowHref,
 }: TabletTableProps<T>) {
 	return (
 		<div className="hidden md:block lg:hidden">
@@ -38,7 +43,13 @@ export default function TabletTable<T extends RankingListDataTypeExtend>({
 					<TableBody>
 						{table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
-								<TableRow key={row.id}>
+								<TableRow
+									key={row.id}
+									className={cn(
+										(onRowClick || getRowHref) && "cursor-pointer hover:bg-muted/70"
+									)}
+									onClick={() => onRowClick?.(row.original)}
+								>
 									<TableCell className="font-mono px-4 text-right">
 										{row.original.ranking}
 									</TableCell>

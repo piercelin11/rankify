@@ -95,7 +95,7 @@ export async function getTracksRankingHistory({
 		).length;
 	}
 
-	const currentDate = rankings[0].date.date;
+	const currentDate = rankings[0].rankingSession.date;
 	const trackIds = rankings.map((ranking) => ranking.trackId);
 
 	const historicalPeak = await db.ranking.groupBy({

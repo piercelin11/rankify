@@ -34,13 +34,13 @@ export default async function getTrackRankingSeries({
             color: true,
             rankings: {
                 select: {
-                    date: {
+                    rankingSession: {
                         select: { date: true, id: true },
                     },
                     ranking: true,
                 },
                 orderBy: {
-                    date: {
+                    rankingSession: {
                         date: "asc",
                     },
                 },
@@ -51,8 +51,8 @@ export default async function getTrackRankingSeries({
     for (const track of trackRanking) {
         const rankings = track.rankings.map((data) => ({
             ranking: data.ranking,
-            date: data.date.date,
-            dateId: data.date.id,
+            date: data.rankingSession.date,
+            dateId: data.rankingSession.id,
         }));
         result.set(track.id, rankings);
     }

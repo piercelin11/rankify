@@ -16,6 +16,8 @@ export default function RankingTable<T extends RankingListDataTypeExtend>({
 	features = {},
 	appearance = {},
 	className,
+	onRowClick,
+	getRowHref,
 }: RankingTableProps<T>) {
 	const { table, tableColumns, globalFilter, setGlobalFilter } = useRankingTable({
 		data,
@@ -38,6 +40,8 @@ export default function RankingTable<T extends RankingListDataTypeExtend>({
 				table={table}
 				tableColumns={tableColumns}
 				features={features}
+				onRowClick={onRowClick}
+				getRowHref={getRowHref}
 			/>
 
 			{/* 平板版：簡化表格 */}
@@ -45,12 +49,16 @@ export default function RankingTable<T extends RankingListDataTypeExtend>({
 				table={table}
 				features={features}
 				appearance={appearance}
+				onRowClick={onRowClick}
+				getRowHref={getRowHref}
 			/>
 
 			{/* 手機版：卡片模式 */}
 			<MobileCards
 				table={table}
 				appearance={appearance}
+				onRowClick={onRowClick}
+				getRowHref={getRowHref}
 			/>
 
 			{/* Pagination */}

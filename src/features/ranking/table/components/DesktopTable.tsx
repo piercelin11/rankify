@@ -23,12 +23,16 @@ type DesktopTableProps<T> = {
 	table: Table<T>;
 	tableColumns: ColumnDef<T>[];
 	features: RankingTableFeatures;
+	onRowClick?: (item: T) => void;
+	getRowHref?: (item: T) => string;
 };
 
 export default function DesktopTable<T extends RankingListDataTypeExtend>({
 	table,
 	tableColumns,
 	features,
+	onRowClick,
+	getRowHref,
 }: DesktopTableProps<T>) {
 	return (
 		<div className="hidden lg:block">
@@ -97,6 +101,10 @@ export default function DesktopTable<T extends RankingListDataTypeExtend>({
 								<TableRow
 									key={row.id}
 									data-state={row.getIsSelected() && "selected"}
+									className={cn(
+										(onRowClick || getRowHref) && "cursor-pointer hover:bg-muted/70"
+									)}
+									onClick={() => onRowClick?.(row.original)}
 								>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell key={cell.id} className="px-4">

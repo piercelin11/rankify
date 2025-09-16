@@ -115,9 +115,9 @@ export default {
 			backgroundImage: {
 				glow: `radial-gradient(ellipse farthest-side at top, ${colors.neutral[800]}40, ${colors.neutral[950]}CC)`,
 			},
-			/* fontSize: {
-				xs: ["0.625rem", "1rem"], // 10px
-				sm: ["0.75rem", "1.25rem"], // 12px
+			fontSize: {
+				xs: ["0.725rem", "1.35rem"], // 有調整過
+				sm: ["0.825rem", "1.4rem"], // 有調整過
 				base: ["0.875rem", "1.5rem"], // 14px
 				lg: ["1rem", "1.75rem"], // 16px
 				xl: ["1.125rem", "1.75rem"], // 18px
@@ -129,7 +129,7 @@ export default {
 				"7xl": ["4.375rem", "1"], // 70px
 				"8xl": ["5.875rem", "1"], // 94px
 				"9xl": ["7.875rem", "1"], // 126px
-			}, */
+			},
 		},
 	},
 	plugins: [

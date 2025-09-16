@@ -47,6 +47,8 @@ export type AdvancedRankingTableProps<T extends RankingListDataTypeExtend> = {
 	onFiltersChange?: (filters: AdvancedFilters) => void;
 	onColumnsChange?: (columns: ColumnVisibility) => void;
 	availableAlbums?: string[];
+	onRowClick?: (item: T) => void;
+	getRowHref?: (item: T) => string;
 };
 
 export type VirtualizedTableProps<T> = {
@@ -56,4 +58,6 @@ export type VirtualizedTableProps<T> = {
 	estimateSize?: () => number;
 	overscan?: number;
 	isLoading?: boolean;
+	onRowClick?: (item: T) => void;
+	getRowHref?: (item: T) => string;
 };

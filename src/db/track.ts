@@ -1,0 +1,148 @@
+import { db } from "@/db/client";
+
+export async function getTrackForTrackPage(trackId: string) {
+	const album = await db.track.findFirst({
+		where: {
+			id: trackId,
+		},
+		include: {
+			artist: true,
+			album: true,
+		},
+	});
+
+	return album;
+}
+
+export async function getTracksRankings(userId: string, trackIds: string[]) {
+	const tracks = await db.track.findMany({
+		where: {
+			id: {
+				in: trackIds,
+			},
+			rankings: {
+				some: {
+					userId,
+				},
+			},
+		},
+		include: {
+			rankings: {
+				where: {
+					userId,
+				},
+				include: {
+					rankingSession: true,
+				},
+				orderBy: {
+					rankingSession: {
+						date: "asc",
+					},
+				},
+			},
+		},
+	});
+
+	return tracks.map((track) => ({
+		...track,
+		rankings: track.rankings.map((r) => ({
+			ranking: r.ranking,
+			rankPercentile: r.rankPercentile,
+			rankChange: r.rankChange,
+			date: r.rankingSession.date,
+			dateId: r.rankingSession.id,
+		})),
+	}));
+}
+
+export async function getTrackRanking(userId: string, trackId: string) {
+	const track = await db.track.findUnique({
+		where: {
+			id: trackId,
+		},
+		include: {
+			rankings: {
+				where: {
+					userId,
+				},
+				include: {
+					rankingSession: true,
+				},
+				orderBy: {
+					rankingSession: {
+						date: "asc",
+					},
+				},
+			},
+		},
+	});
+
+	if (!track) return null;
+
+	return {
+		...track,
+		rankings: track.rankings.map((r) => ({
+			ranking: r.ranking,
+			rankPercentile: r.rankPercentile,
+			rankChange: r.rankChange,
+			date: r.rankingSession.date,
+			dateId: r.rankingSession.id,
+		})),
+	};
+}
+
+export async function getTrackComparisonOptions(
+	userId: string,
+	artistId: string
+) {
+	// 獲取該藝人的所有專輯（有排名資料的）
+	const albums = await db.album.findMany({
+		where: {
+			artistId,
+			tracks: {
+				some: {
+					rankings: {
+						some: { userId },
+					},
+				},
+			},
+		},
+		select: {
+			id: true,
+			name: true,
+			color: true,
+		},
+		orderBy: { releaseDate: "asc" },
+	});
+
+	// 獲取該藝人的所有歌曲（有排名資料的）
+	const tracks = await db.track.findMany({
+		where: {
+			artistId,
+			rankings: {
+				some: { userId },
+			},
+		},
+		select: {
+			id: true,
+			name: true,
+			color: true,
+			albumId: true,
+		},
+		orderBy: [{ album: { releaseDate: "asc" } }, { trackNumber: "asc" }],
+	});
+
+	return {
+		parentOptions: albums.map((album) => ({
+			id: album.id,
+			name: album.name || "Unknown Album",
+			color: album.color,
+		})),
+		menuOptions: tracks.map((track) => ({
+			id: track.id,
+			name: track.name,
+			color: track.color,
+			parentId: track.albumId,
+		})),
+	};
+}

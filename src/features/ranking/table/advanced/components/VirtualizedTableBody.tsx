@@ -24,6 +24,8 @@ type VirtualizedTableBodyProps<T extends RankingListDataTypeExtend> = {
 	height?: number | string;
 	isLoading?: boolean;
 	className?: string;
+	onRowClick?: (item: T) => void;
+	getRowHref?: (item: T) => string;
 };
 
 export default function VirtualizedTableBody<
@@ -38,6 +40,8 @@ export default function VirtualizedTableBody<
 	height = 600,
 	isLoading = false,
 	className,
+	onRowClick,
+	getRowHref,
 }: VirtualizedTableBodyProps<T>) {
 	const { table, parentRef, visibleRows, paddingTop, paddingBottom } =
 		useVirtualizedTable({
@@ -151,7 +155,11 @@ export default function VirtualizedTableBody<
 								<TableRow
 									key={row.id}
 									data-state={row.getIsSelected() && "selected"}
-									className="hover:bg-neutral-900"
+									className={cn(
+										"hover:bg-neutral-900",
+										(onRowClick || getRowHref) && "cursor-pointer hover:bg-muted/70"
+									)}
+									onClick={() => onRowClick?.(row.original)}
 								>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell key={cell.id} className="px-4">

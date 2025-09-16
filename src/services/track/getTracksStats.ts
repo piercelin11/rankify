@@ -1,49 +1,21 @@
 import { db } from "@/db/client";
-import { TrackData } from "@/types/data";
-import getTracksMetrics from "./getTracksMetrics";
 import getUserPreference from "@/db/user";
 import { buildTrackQueryCondition } from "./buildTrackQueryCondition";
 import { defaultRankingSettings } from "@/features/settings/components/RankingSettingsForm";
 import { DateRange } from "@/types/general";
+import { Prisma } from "@prisma/client";
+import { TrackMetrics, TrackStatsType } from "./types";
 
-export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
-	ranking: number;
-	averageRanking: number | string;
-	peak: number;
-	worst: number;
-	gap: number | null;
-	album: {
-		name: string | null;
-		color: string | null;
-	};
-	top50PercentCount: number;
-	top25PercentCount: number;
-	top5PercentCount: number;
-};
-
-export type getTracksStatsProps = {
+type getTracksStatsProps = {
 	artistId: string;
 	userId: string;
 	take?: number;
 	dateRange?: DateRange;
 };
 
-type QueryConditions = {
-	userId: string;
-	artistId: string;
-	date?: {
-		date?: {
-			gte?: Date;
-			lte?: Date;
-		};
-	};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	track: any;
-};
-
 async function getPercentileCounts(
 	trackIds: string[],
-	conditions: QueryConditions
+	conditions: Prisma.RankingWhereInput
 ) {
 	const results = await db.ranking.findMany({
 		where: {
@@ -67,6 +39,79 @@ async function getPercentileCounts(
 	}, {} as Record<string, { top50: number; top25: number; top5: number }>);
 }
 
+async function getTracksMetrics(
+	artistId: string,
+	userId: string,
+	take?: number,
+	dateRange?: DateRange,
+	trackQueryConditions?: Prisma.TrackWhereInput
+) {
+
+	const rankingData = await db.ranking.groupBy({
+		by: ["trackId"],
+		where: {
+			userId,
+			artistId,
+			track: {
+				...trackQueryConditions,
+			},
+			rankingSession: {
+				type: "ARTIST",
+				...(dateRange && {
+					date: {
+						...(dateRange.from && { gte: dateRange.from }),
+						...(dateRange.to && { lte: dateRange.to }),
+					},
+				}),
+			},
+		},
+		_min: {
+			ranking: true,
+		},
+		_max: {
+			ranking: true,
+		},
+		_avg: {
+			ranking: true,
+		},
+		_count: {
+			_all: true,
+		},
+		orderBy: [
+			{
+				_avg: {
+					ranking: "asc",
+				},
+			},
+			{
+				_min: {
+					ranking: "asc",
+				},
+			},
+			{
+				_max: {
+					ranking: "asc",
+				},
+			},
+			{
+				trackId: "desc",
+			},
+		],
+		take,
+	});
+
+	return rankingData.map(
+		(item, index): TrackMetrics => ({
+			id: item.trackId,
+			ranking: index + 1,
+			peak: item._min.ranking ?? 0,
+			worst: item._max.ranking ?? 0,
+			count: item._count._all,
+			averageRanking: item._avg.ranking ?? 0,
+		})
+	);
+}
+
 export default async function getTracksStats({
 	artistId,
 	userId,
@@ -85,18 +130,19 @@ export default async function getTracksStats({
 		}
 	} : undefined;
 
-	const trackMetrics = await getTracksMetrics({
+	const trackMetrics = await getTracksMetrics(
 		artistId,
 		userId,
 		take,
-		dateRange
-	});
+		dateRange,
+		trackQueryConditions,
+	);
 	const trackIds = trackMetrics.map((track) => track.id);
 
-	const conditions: QueryConditions = {
+	const conditions: Prisma.RankingWhereInput = {
 		userId,
 		artistId,
-		date: dateFilter,
+		rankingSession: dateFilter,
 		track: trackQueryConditions,
 	};
 
