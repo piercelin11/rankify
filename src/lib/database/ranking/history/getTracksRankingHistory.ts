@@ -1,4 +1,4 @@
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import { TrackData } from "@/types/data";
 import { getUserRankingPreference } from "../../user/getUserPreference";
 import { AchievementType } from "@/features/ranking/stats/components/AchievementDisplay";

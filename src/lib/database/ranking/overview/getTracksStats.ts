@@ -1,6 +1,6 @@
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import { TrackData } from "@/types/data";
-import getTracksMetrics from "./getTracksMetrics";
+import getTracksMetrics, { TrackMetrics } from "./getTracksMetrics";
 import { getUserRankingPreference } from "../../user/getUserPreference";
 import getLatestRankingSession from "../../user/getLatestRankingSession";
 import getTrackRankingSeries, {
@@ -28,9 +28,9 @@ export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
 	achievement: AchievementType[];
 };
 
-export type TimeFilterType = {
-	threshold?: Date;
-	filter: "gte" | "lte" | "gt" | "lt" | "equals";
+export type DateRange = {
+	from?: Date;
+	to?: Date;
 };
 
 export type getTracksStatsProps = {
@@ -38,7 +38,7 @@ export type getTracksStatsProps = {
 	userId: string;
 	options?: getTracksStatsOptions;
 	take?: number;
-	time?: TimeFilterType;
+	dateRange?: DateRange;
 };
 
 type getTracksStatsOptions = {
@@ -53,82 +53,135 @@ const defaultOptions = {
 	includeAchievement: false,
 };
 
+type QueryConditions = {
+	userId: string;
+	artistId: string;
+	date?: {
+		date?: {
+			gte?: Date;
+			lte?: Date;
+		};
+	};
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	track: any;
+};
+
+async function getPercentileCounts(
+	trackIds: string[],
+	conditions: QueryConditions
+) {
+	const results = await db.ranking.findMany({
+		where: {
+			...conditions,
+			trackId: { in: trackIds },
+		},
+		select: {
+			trackId: true,
+			rankPercentile: true,
+		},
+	});
+
+	return trackIds.reduce((acc, trackId) => {
+		const trackRankings = results.filter(r => r.trackId === trackId);
+		acc[trackId] = {
+			top50: trackRankings.filter(r => r.rankPercentile <= 0.5).length,
+			top25: trackRankings.filter(r => r.rankPercentile <= 0.25).length,
+			top5: trackRankings.filter(r => r.rankPercentile <= 0.05).length,
+		};
+		return acc;
+	}, {} as Record<string, { top50: number; top25: number; top5: number }>);
+}
+
+async function getAchievements(
+	userId: string,
+	artistId: string,
+	trackMetrics: TrackMetrics[]
+) {
+	const hotStreakTrackIds = await getTracksWithHotStreak({
+		userId,
+		artistId,
+	});
+	const coldStreakTrackIds = await getTracksWithColdStreak({
+		userId,
+		artistId,
+	});
+	const burningStreakTrackIds = await getTracksWithHotStreak({
+		userId,
+		artistId,
+		streak: 5,
+	});
+	const freezingStreakTrackIds = await getTracksWithColdStreak({
+		userId,
+		artistId,
+		streak: 5,
+	});
+
+	return {
+		hotStreakTrackIds,
+		coldStreakTrackIds,
+		burningStreakTrackIds,
+		freezingStreakTrackIds,
+		calculateTrackAchievement: (trackId: string, worst: number, peak: number, count: number): AchievementType[] => {
+			const hasHotStreak = hotStreakTrackIds?.has(trackId);
+			const hasColdStreak = coldStreakTrackIds?.has(trackId);
+			const hasBurningStreak = burningStreakTrackIds?.has(trackId);
+			const hasFreezingStreak = freezingStreakTrackIds?.has(trackId);
+
+			const achievement: AchievementType[] = [];
+			if (hasBurningStreak) achievement.push("Surge");
+			else if (hasHotStreak) achievement.push("Ascent");
+
+			if (hasFreezingStreak) achievement.push("Plunge");
+			else if (hasColdStreak) achievement.push("Descent");
+
+			if (worst - peak > trackMetrics.length / 2 && count > 2)
+				achievement.push("Drifter");
+			if (worst - peak < trackMetrics.length / 8 && count > 3)
+				achievement.push("Anchor");
+
+			return achievement;
+		}
+	};
+}
+
 export default async function getTracksStats({
 	artistId,
 	userId,
 	options = defaultOptions,
 	take,
-	time,
+	dateRange,
 }: getTracksStatsProps): Promise<TrackStatsType[]> {
 	const trackConditions = await getUserRankingPreference({ userId });
-	const date = time
-		? {
-				[time.filter]: time.threshold,
-			}
-		: undefined;
 
-	const trackMetrics = await getTracksMetrics({ artistId, userId, take, time });
+	const dateFilter = dateRange ? {
+		date: {
+			...(dateRange.from && { gte: dateRange.from }),
+			...(dateRange.to && { lte: dateRange.to }),
+		}
+	} : undefined;
+
+	const trackMetrics = await getTracksMetrics({
+		artistId,
+		userId,
+		take,
+		dateRange
+	});
 	const trackIds = trackMetrics.map((track) => track.id);
 
-	const top50PercentCounts = await db.ranking.groupBy({
-		by: ["trackId"],
-		where: {
-			userId,
-			artistId,
-			date: { date },
-			rankPercentile: { lte: 0.5 },
-			trackId: { in: trackIds },
-			track: trackConditions,
-		},
-		_count: { _all: true },
-	});
-	const top50PercentMap = new Map(
-		top50PercentCounts.map((track) => [track.trackId, track._count._all])
-	);
+	const conditions: QueryConditions = {
+		userId,
+		artistId,
+		date: dateFilter,
+		track: trackConditions,
+	};
 
-	const top25PercentCounts = await db.ranking.groupBy({
-		by: ["trackId"],
-		where: {
-			userId,
-			artistId,
-			date: { date },
-			rankPercentile: { lte: 0.25 },
-			trackId: { in: trackIds },
-			track: trackConditions,
-		},
-		_count: { _all: true },
-	});
-	const top25PercentMap = new Map(
-		top25PercentCounts.map((track) => [track.trackId, track._count._all])
-	);
-
-	const top5PercentCounts = await db.ranking.groupBy({
-		by: ["trackId"],
-		where: {
-			userId,
-			artistId,
-			date: { date },
-			rankPercentile: { lte: 0.05 },
-			trackId: { in: trackIds },
-			track: trackConditions,
-		},
-		_count: { _all: true },
-	});
-	const top5PercentMap = new Map(
-		top5PercentCounts.map((track) => [track.trackId, track._count._all])
-	);
+	const percentileCounts = await getPercentileCounts(trackIds, conditions);
 
 	const allTracks = await db.track.findMany({
 		where: {
-			id: {
-				in: trackIds,
-			},
+			id: { in: trackIds },
 			artistId,
-			rankings: {
-				some: {
-					userId,
-				},
-			},
+			rankings: { some: { userId } },
 		},
 		include: {
 			album: {
@@ -141,40 +194,21 @@ export default async function getTracksStats({
 	});
 	const allTracksMap = new Map(allTracks.map((track) => [track.id, track]));
 
-	//依據 options 判斷是否獲取前次紀錄以及所有排名
 	let prevTrackRankingMap: Map<string, number> | undefined;
-	if (options.includeRankChange && !time) {
+	if (options.includeRankChange && !dateRange) {
 		const latestSession = await getLatestRankingSession({ userId, artistId });
 		const prevTrackRanking = await db.ranking.groupBy({
 			by: ["trackId"],
 			where: {
 				userId,
 				artistId,
-				date: {
-					date: {
-						lt: latestSession?.date,
-					},
-				},
+				date: { date: { lt: latestSession?.date } },
 			},
 			orderBy: [
-				{
-					_avg: {
-						ranking: "asc",
-					},
-				},
-				{
-					_min: {
-						ranking: "asc",
-					},
-				},
-				{
-					_max: {
-						ranking: "asc",
-					},
-				},
-				{
-					trackId: "desc",
-				},
+				{ _avg: { ranking: "asc" } },
+				{ _min: { ranking: "asc" } },
+				{ _max: { ranking: "asc" } },
+				{ trackId: "desc" },
 			],
 		});
 		prevTrackRankingMap = new Map(
@@ -183,77 +217,43 @@ export default async function getTracksStats({
 	}
 
 	let trackRankingsMap: TrackRankingSeriesType | undefined;
-
-	if (options.includeAllRankings && !time) {
+	if (options.includeAllRankings && !dateRange) {
 		trackRankingsMap = await getTrackRankingSeries({ artistId, userId });
 	}
 
-	//依據 options 判斷是否獲取連續上漲及下跌趨勢
-	let hotStreakTrackIds: Set<string> | undefined;
-	let coldStreakTrackIds: Set<string> | undefined;
-	let burningStreakTrackIds: Set<string> | undefined;
-	let freezingStreakTrackIds: Set<string> | undefined;
-	if (options.includeAchievement && !time) {
-		hotStreakTrackIds = await getTracksWithHotStreak({
-			userId,
-			artistId,
-		});
-		coldStreakTrackIds = await getTracksWithColdStreak({
-			userId,
-			artistId,
-		});
-		burningStreakTrackIds = await getTracksWithHotStreak({
-			userId,
-			artistId,
-			streak: 5,
-		});
-		freezingStreakTrackIds = await getTracksWithColdStreak({
-			userId,
-			artistId,
-			streak: 5,
-		});
+	let achievementHelper: Awaited<ReturnType<typeof getAchievements>> | undefined;
+	if (options.includeAchievement && !dateRange) {
+		achievementHelper = await getAchievements(userId, artistId, trackMetrics);
 	}
 
 	const result: TrackStatsType[] = trackMetrics.map((data) => {
-		const hasHotStreak = hotStreakTrackIds?.has(data.id);
-		const hasColdStreak = coldStreakTrackIds?.has(data.id);
-		const hasBurningStreak = burningStreakTrackIds?.has(data.id);
-		const hasFreezingStreak = freezingStreakTrackIds?.has(data.id);
-
-		const achievement: AchievementType[] = [];
-		if (hasBurningStreak) achievement.push("Surge");
-		else if (hasHotStreak) achievement.push("Ascent");
-
-		if (hasFreezingStreak) achievement.push("Plunge");
-		else if (hasColdStreak) achievement.push("Descent");
-
-		if (data.worst - data.peak > trackMetrics.length / 2 && data.count > 2)
-			achievement.push("Drifter");
-		if (data.worst - data.peak < trackMetrics.length / 8 && data.count > 3)
-			achievement.push("Anchor");
+		const track = allTracksMap.get(data.id)!;
+		const counts = percentileCounts[data.id] || { top50: 0, top25: 0, top5: 0 };
+		const achievement = achievementHelper
+			? achievementHelper.calculateTrackAchievement(data.id, data.worst, data.peak, data.count)
+			: [];
 
 		return {
-			...allTracksMap.get(data.id)!,
+			...track,
 			album: {
-				name: allTracksMap.get(data.id)?.album?.name ?? null,
-				color: allTracksMap.get(data.id)?.album?.color ?? null,
+				name: track.album?.name ?? null,
+				color: track.album?.color ?? null,
 			},
 			ranking: data.ranking,
 			averageRanking: data.averageRanking.toFixed(1),
 			peak: data.peak,
 			worst: data.worst,
 			gap: data.worst - data.peak,
-			top50PercentCount: top50PercentMap.get(data.id) ?? 0,
-			top25PercentCount: top25PercentMap.get(data.id) ?? 0,
-			top5PercentCount: top5PercentMap.get(data.id) ?? 0,
+			top50PercentCount: counts.top50,
+			top25PercentCount: counts.top25,
+			top5PercentCount: counts.top5,
 			rankings: trackRankingsMap?.get(data.id),
-			achievement: achievement,
-			rankChange:
-				options.includeRankChange && !time
-					? prevTrackRankingMap?.get(data.id)
-						? prevTrackRankingMap.get(data.id)! - data.ranking
-						: null
-					: undefined,
+			achievement,
+			rankChange: options.includeRankChange && !dateRange
+				? prevTrackRankingMap?.get(data.id)
+					? prevTrackRankingMap.get(data.id)! - data.ranking
+					: null
+				: undefined,
 		};
 	});
 

@@ -19,51 +19,46 @@ type SidebarMenuItemType = {
 
 const iconSize = 20;
 
-export const getMainSidebarMenuItems = (
-	role: $Enums.Role
-): SidebarMenuItemType[] => {
-	const sidebarItems = [
-		{
-			id: "home",
-			label: "Home",
-			icon: () => <HomeIcon width={iconSize} height={iconSize} />,
-			href: "/",
-		},
-		{
-			id: "settings",
-			label: "Settings",
-			icon: () => <GearIcon width={iconSize} height={iconSize} />,
-			href: "/settings",
-		},
-	];
-	if (role === "ADMIN")
-		sidebarItems.push({
-			id: "admin",
-			label: "Admin",
-			icon: () => <LockClosedIcon width={iconSize} height={iconSize} />,
-			href: "/admin/artist",
-		});
-	return [
-		...sidebarItems,
-		{
-			id: "signout",
-			label: "Sign Out",
-			icon: () => <ExitIcon width={iconSize} height={iconSize} />,
-			onClick: () => {
-				console.log("hi")
-				signOut()
-			},
-		},
-	];
-};
-
-export const adminSidebarMenuItems: SidebarMenuItemType[] = [
-	{
+const COMMON_ITEMS = {
+	home: {
 		id: "home",
 		label: "Home",
 		icon: () => <HomeIcon width={iconSize} height={iconSize} />,
 		href: "/",
 	},
+	settings: {
+		id: "settings",
+		label: "Settings",
+		icon: () => <GearIcon width={iconSize} height={iconSize} />,
+		href: "/settings",
+	},
+	signOut: {
+		id: "signout",
+		label: "Sign Out",
+		icon: () => <ExitIcon width={iconSize} height={iconSize} />,
+		onClick: () => signOut(),
+	},
+};
+
+export const getMainSidebarMenuItems = (
+	role: $Enums.Role
+): SidebarMenuItemType[] => {
+	const items = [COMMON_ITEMS.home, COMMON_ITEMS.settings];
+
+	if (role === "ADMIN") {
+		items.push({
+			id: "admin",
+			label: "Admin",
+			icon: () => <LockClosedIcon width={iconSize} height={iconSize} />,
+			href: "/admin/artist",
+		});
+	}
+
+	return [...items, COMMON_ITEMS.signOut];
+};
+
+export const getAdminSidebarMenuItems = (): SidebarMenuItemType[] => [
+	COMMON_ITEMS.home,
 	{
 		id: "artists",
 		label: "Artists",
@@ -84,7 +79,7 @@ export const adminSidebarMenuItems: SidebarMenuItemType[] = [
 	},
 ];
 
-export const settingsSidebarMenuItems: Omit<SidebarMenuItemType, "icon">[] = [
+export const getSettingsSidebarMenuItems = (): Omit<SidebarMenuItemType, "icon">[] => [
 	{
 		id: "profile",
 		label: "Profile",

@@ -1,5 +1,5 @@
 // 例如放在: src/features/ranking/data/getStreakAchievements.ts
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import { Prisma } from "@prisma/client";
 
 type StreakResult = {

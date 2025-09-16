@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import authConfig from "./auth.config";
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import { $Enums } from "@prisma/client";
 
 export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({

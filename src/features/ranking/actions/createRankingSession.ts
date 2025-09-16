@@ -1,4 +1,4 @@
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import { $Enums, Prisma, RankingSession } from "@prisma/client";
 import { PrismaClient } from "@prisma/client/extension";
 import { RankingResultData } from "../../sorter/components/SortingStage";

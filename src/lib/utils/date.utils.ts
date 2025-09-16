@@ -28,7 +28,7 @@ export function dateToDashFormat(input: Date) {
 
 export function calculateDateRangeFromSlug(
 	rangeSlug: string | undefined
-): Date | undefined {
+): { from: Date; to: Date } | undefined {
 	if (rangeSlug === undefined) return undefined;
 
 	if (typeof rangeSlug !== "string") {
@@ -72,5 +72,5 @@ export function calculateDateRangeFromSlug(
 		}
 	}
 
-	return startDate;
+	return startDate ? { from: startDate, to: now } : undefined;
 }

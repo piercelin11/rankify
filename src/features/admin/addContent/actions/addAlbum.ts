@@ -3,7 +3,7 @@
 import { ADMIN_MESSAGES } from "@/constants/messages";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import getTracksByArtist from "@/lib/database/data/getTracksByArtist";
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
 import { AppResponseType } from "@/types/response";

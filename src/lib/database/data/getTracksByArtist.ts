@@ -1,4 +1,4 @@
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 
 export default async function getTracksByArtist(artistId: string, take?: number) {
 

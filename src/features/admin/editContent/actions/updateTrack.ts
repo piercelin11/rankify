@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
 import { AlbumData, TrackData } from "@/types/data";
 import { updateTrackSchema, UpdateTrackType } from "@/types/schemas/admin";

@@ -1,4 +1,4 @@
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 
 type getLoggedArtistsProps = {
 	userId: string;
@@ -21,7 +21,7 @@ export default async function getLoggedArtists({
 			}
 		},
 		include: {
-			dates: {
+			rankingSessions: {
 				where: {
 					userId
 				}
@@ -29,5 +29,5 @@ export default async function getLoggedArtists({
 		}
 	});
 
-	return artists.sort((a, b) => b.dates.length - a.dates.length);
+	return artists.sort((a, b) => b.rankingSessions.length - a.rankingSessions.length);
 }

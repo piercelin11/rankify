@@ -9,22 +9,22 @@ datasource db {
 }
 
 model User {
-  id             String           @id @default(cuid())
-  name           String
-  username       String?          @unique
-  email          String?          @unique
-  password       String?
-  emailVerified  DateTime?
-  image          String?
-  role           Role             @default(USER)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  accounts       Account[]
-  rankings       Ranking[]
-  dates          RankingSession[]
-  RankingDraft   RankingDraft[]
-  UserPreference UserPreference[]
-  AlbumRanking   AlbumRanking[]
+  id              String           @id @default(cuid())
+  name            String
+  username        String?          @unique
+  email           String?          @unique
+  password        String?
+  emailVerified   DateTime?
+  image           String?
+  role            Role             @default(USER)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  accounts        Account[]
+  rankings        Ranking[]
+  rankingSessions RankingSession[]
+  rankingDrafts   RankingDraft[]
+  userPreferences UserPreference[]
+  albumRankings   AlbumRanking[]
 }
 
 model UserPreference {
@@ -63,25 +63,25 @@ model Artist {
   userId           String?
   albums           Album[]
   rankings         Ranking[]
-  dates            RankingSession[]
+  rankingSessions  RankingSession[]
   tracks           Track[]
   rankingDrafts    RankingDraft[]
-  AlbumRanking     AlbumRanking[]
+  albumRankings    AlbumRanking[]
 }
 
 model Album {
-  id           String         @id
-  name         String
-  artistId     String
-  spotifyUrl   String         @unique
-  color        String?
-  img          String?
-  releaseDate  DateTime
-  type         AlbumType
-  artist       Artist         @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  rankings     Ranking[]
-  tracks       Track[]
-  AlbumRanking AlbumRanking[]
+  id            String         @id
+  name          String
+  artistId      String
+  spotifyUrl    String         @unique
+  color         String?
+  img           String?
+  releaseDate   DateTime
+  type          AlbumType
+  artist        Artist         @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  rankings      Ranking[]
+  tracks        Track[]
+  albumRankings AlbumRanking[]
 
   @@unique([name, artistId])
   @@index([artistId])
@@ -150,15 +150,15 @@ model AlbumRanking {
 }
 
 model RankingSession {
-  id           String         @id @default(uuid())
-  date         DateTime       @default(now())
-  userId       String
-  artistId     String
-  type         RankingType?
-  rankings     Ranking[]
-  artist       Artist         @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  user         User           @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  AlbumRanking AlbumRanking[]
+  id            String         @id @default(uuid())
+  date          DateTime       @default(now())
+  userId        String
+  artistId      String
+  type          RankingType?
+  rankings      Ranking[]
+  artist        Artist         @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  user          User           @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  albumRankings AlbumRanking[]
 
   @@index([date])
 }

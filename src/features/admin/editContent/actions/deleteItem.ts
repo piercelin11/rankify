@@ -1,7 +1,7 @@
 "use server";
 
 import { ADMIN_MESSAGES } from "@/constants/messages";
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";

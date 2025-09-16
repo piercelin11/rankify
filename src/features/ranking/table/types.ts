@@ -1,3 +1,9 @@
+import type { ColumnDef } from "@tanstack/react-table";
+import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
+import { TrackStatsType } from "@/services/track/getTracksStats";
+
+export type RankingListDataTypeExtend = TrackHistoryType | TrackStatsType;
+
 export type RankingTableFeatures = {
 	sort?: boolean;
 	search?: boolean | {
@@ -19,4 +25,13 @@ export type RankingTableAppearance = {
 	showImages?: boolean;
 	showRankChange?: boolean;
 	density?: 'comfortable' | 'compact' | 'spacious';
+};
+
+export type RankingTableProps<T> = {
+	data: T[];
+	columnKey?: (keyof T)[];
+	columns?: ColumnDef<T>[];
+	features?: RankingTableFeatures;
+	appearance?: RankingTableAppearance;
+	className?: string;
 };

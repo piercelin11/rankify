@@ -1,6 +1,6 @@
-import { TimeFilterType } from "./getTracksStats";
+import { DateRange } from "./getTracksStats";
 import { AlbumData } from "@/types/data";
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import getAlbumRankingSeries, {
 	AlbumRankingSeriesType,
 } from "./getAlbumRankingSeries";
@@ -29,24 +29,64 @@ type getAlbumsStatsProps = {
 	artistId: string;
 	userId: string;
 	options?: getAlbumsStatsOptions;
-	time?: TimeFilterType;
+	dateRange?: DateRange;
 };
 
 const defaultOptions = {
 	includeAllRankings: false,
 };
+
+type AlbumQueryConditions = {
+	albumId: { not: null };
+	artistId: string;
+	userId: string;
+	date?: {
+		date?: {
+			gte?: Date;
+			lte?: Date;
+		};
+	};
+};
+
+async function getAlbumPercentileCounts(
+	albumIds: string[],
+	conditions: AlbumQueryConditions
+) {
+	const results = await db.ranking.findMany({
+		where: {
+			...conditions,
+			albumId: { in: albumIds },
+		},
+		select: {
+			albumId: true,
+			rankPercentile: true,
+		},
+	});
+
+	return albumIds.reduce((acc, albumId) => {
+		const albumRankings = results.filter(r => r.albumId === albumId);
+		acc[albumId] = {
+			top5: albumRankings.filter(r => r.rankPercentile <= 0.05).length,
+			top10: albumRankings.filter(r => r.rankPercentile <= 0.1).length,
+			top25: albumRankings.filter(r => r.rankPercentile <= 0.25).length,
+			top50: albumRankings.filter(r => r.rankPercentile <= 0.5).length,
+		};
+		return acc;
+	}, {} as Record<string, { top5: number; top10: number; top25: number; top50: number }>);
+}
  
-export async function getAlbumsStats({
+export default async function getAlbumsStats({
 	artistId,
 	userId,
 	options = defaultOptions,
-	time,
+	dateRange,
 }: getAlbumsStatsProps): Promise<AlbumStatsType[]> {
-	const date = time
-		? {
-				[time.filter]: time.threshold,
-			}
-		: undefined;
+	const dateFilter = dateRange ? {
+		date: {
+			...(dateRange.from && { gte: dateRange.from }),
+			...(dateRange.to && { lte: dateRange.to }),
+		}
+	} : undefined;
 
 	const albumData = await db.album.findMany({
 		where: {
@@ -60,98 +100,12 @@ export async function getAlbumsStats({
 	});
 	const albumDataMap = new Map(albumData.map((album) => [album.id, album]));
 
-	const top5PercentCount = await db.ranking.groupBy({
-		by: ["albumId"],
-		where: {
-			albumId: { not: null },
-			artistId,
-			userId,
-			date: {
-				date,
-			},
-			rankPercentile: {
-				lte: 0.05,
-			},
-		},
-		_count: {
-			_all: true,
-		},
-	});
-	const top5PercentMap = new Map(
-		top5PercentCount.map((data) => [data.albumId, data._count._all])
-	);
-
-	const top10PercentCount = await db.ranking.groupBy({
-		by: ["albumId"],
-		where: {
-			albumId: { not: null },
-			artistId,
-			userId,
-			date: {
-				date,
-			},
-			rankPercentile: {
-				lte: 0.1,
-			},
-		},
-		_count: {
-			_all: true,
-		},
-	});
-	const top10PercentMap = new Map(
-		top10PercentCount.map((data) => [data.albumId, data._count._all])
-	);
-
-	const top25PercentCount = await db.ranking.groupBy({
-		by: ["albumId"],
-		where: {
-			albumId: { not: null },
-			artistId,
-			userId,
-			date: {
-				date,
-			},
-			rankPercentile: {
-				lte: 0.25,
-			},
-		},
-		_count: {
-			_all: true,
-		},
-	});
-	const top25PercentMap = new Map(
-		top25PercentCount.map((data) => [data.albumId, data._count._all])
-	);
-
-	const top50PercentCount = await db.ranking.groupBy({
-		by: ["albumId"],
-		where: {
-			albumId: { not: null },
-			artistId,
-			userId,
-			date: {
-				date,
-			},
-			rankPercentile: {
-				lte: 0.5,
-			},
-		},
-		_count: {
-			_all: true,
-		},
-	});
-	const top50PercentMap = new Map(
-		top50PercentCount.map((data) => [data.albumId, data._count._all])
-	);
-
 	const albumPoints = await db.albumRanking.groupBy({
 		by: ["albumId"],
 		where: {
 			artistId,
 			userId,
-			date: {
-				date,
-			},
+			date: dateFilter,
 		},
 		_avg: {
 			points: true,
@@ -164,25 +118,40 @@ export async function getAlbumsStats({
 		},
 	});
 
-	let albumRankingsMap: AlbumRankingSeriesType | undefined;
+	const albumIds = albumPoints.map(data => data.albumId);
 
-	if (options.includeAllRankings && !time) {
+	const conditions: AlbumQueryConditions = {
+		albumId: { not: null },
+		artistId,
+		userId,
+		date: dateFilter,
+	};
+
+	const percentileCounts = await getAlbumPercentileCounts(albumIds, conditions);
+
+	let albumRankingsMap: AlbumRankingSeriesType | undefined;
+	if (options.includeAllRankings && !dateRange) {
 		albumRankingsMap = await getAlbumRankingSeries({ artistId, userId });
 	}
 
-	const result = albumPoints.map((data, index) => ({
-		...albumDataMap.get(data.albumId)!,
-		ranking: index + 1,
-		top5PercentCount: top5PercentMap.get(data.albumId) ?? 0,
-		top10PercentCount: top10PercentMap.get(data.albumId) ?? 0,
-		top25PercentCount: top25PercentMap.get(data.albumId) ?? 0,
-		top50PercentCount: top50PercentMap.get(data.albumId) ?? 0,
-		avgPoints: data._avg.points ? Math.round(data._avg.points) : 0,
-		avgBasePoints: data._avg.basePoints ? Math.round(data._avg.basePoints) : 0,
-		rankings: options.includeAllRankings
-			? albumRankingsMap?.get(data.albumId)
-			: undefined,
-	}));
+	const result = albumPoints.map((data, index) => {
+		const album = albumDataMap.get(data.albumId)!;
+		const counts = percentileCounts[data.albumId] || { top5: 0, top10: 0, top25: 0, top50: 0 };
+
+		return {
+			...album,
+			ranking: index + 1,
+			top5PercentCount: counts.top5,
+			top10PercentCount: counts.top10,
+			top25PercentCount: counts.top25,
+			top50PercentCount: counts.top50,
+			avgPoints: data._avg.points ? Math.round(data._avg.points) : 0,
+			avgBasePoints: data._avg.basePoints ? Math.round(data._avg.basePoints) : 0,
+			rankings: options.includeAllRankings
+				? albumRankingsMap?.get(data.albumId)
+				: undefined,
+		};
+	});
 
 	return result;
 }

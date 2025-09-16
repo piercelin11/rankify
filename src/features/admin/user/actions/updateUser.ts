@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
 import { Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";

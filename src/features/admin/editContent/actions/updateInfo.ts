@@ -1,7 +1,7 @@
 "use server";
 
 import { ADMIN_MESSAGES } from "@/constants/messages";
-import { db } from "@/lib/prisma";
+import { db } from "@/db/client";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchArtist from "@/lib/spotify/fetchArtist";
 import { AppResponseType } from "@/types/response";
