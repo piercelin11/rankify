@@ -83,7 +83,7 @@ export default function ContentSelectionForm({
 				<Button variant="outline" onClick={onCancel} disabled={isPending}>
 					Cancel
 				</Button>
-				<Button variant="default" onClick={handleSubmit} disabled={isPending}>
+				<Button onClick={handleSubmit} disabled={isPending}>
 					Add {type}
 				</Button>
 				{isPending && (

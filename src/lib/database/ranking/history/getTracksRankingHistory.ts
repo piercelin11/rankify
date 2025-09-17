@@ -61,7 +61,7 @@ export async function getTracksRankingHistory({
 			rankPercentile: true,
 			trackId: true,
 			track: true,
-			date: {
+			rankingSession: {
 				select: {
 					date: true,
 				},
@@ -104,7 +104,7 @@ export async function getTracksRankingHistory({
 			trackId: { in: trackIds },
 			userId,
 			artistId,
-			date: { date: { lt: currentDate } },
+			rankingSession: { date: { lt: currentDate } },
 		},
 		_min: {
 			ranking: true,

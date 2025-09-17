@@ -105,7 +105,7 @@ export default async function getAlbumsStats({
 		where: {
 			artistId,
 			userId,
-			date: dateFilter,
+			rankingSession: dateFilter,
 		},
 		_avg: {
 			points: true,

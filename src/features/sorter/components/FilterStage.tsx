@@ -70,7 +70,7 @@ export default function FilterStage({
 				</p>
 			</div>
 			<div className="flex justify-center gap-4">
-				<Button variant="default" onClick={handleStart}>
+				<Button onClick={handleStart}>
 					Start Sorter
 				</Button>
 				<Link href={`/artist/${albums[0].artistId}/overview`}>

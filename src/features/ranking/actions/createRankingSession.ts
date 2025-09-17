@@ -23,7 +23,7 @@ export default async function createRankingSession(
 		},
 		distinct: ["trackId"],
 		orderBy: {
-			date: { date: "desc" },
+			rankingSession: { date: "desc" },
 		},
 		select: { trackId: true, ranking: true, artistId: true },
 	});

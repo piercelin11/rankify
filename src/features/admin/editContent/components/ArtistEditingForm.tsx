@@ -80,7 +80,7 @@ export default function ArtistEditingForm({
 					>
 						Cancel
 					</Button>
-					<Button variant="default" type="submit" disabled={isSubmitting}>
+					<Button type="submit" disabled={isSubmitting}>
 						Save
 					</Button>
 					{isSubmitting && (

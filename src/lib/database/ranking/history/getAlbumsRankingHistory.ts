@@ -42,7 +42,7 @@ export async function getAlbumsRankingHistory({
 		},
 		include: {
 			album: true,
-			date: {
+			rankingSession: {
 				select: {
 					date: true,
 				},

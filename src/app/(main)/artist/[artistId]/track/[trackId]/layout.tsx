@@ -10,7 +10,6 @@ import { getTrackForTrackPage } from "@/db/track";
 import Image from "next/image";
 import Link from "next/link";
 import { Track } from "@prisma/client";
-import Scroll from "@/components/layout/Scroll";
 
 type LayoutProps = {
 	params: Promise<{ trackId: string }>;
@@ -24,7 +23,6 @@ export default async function MainLayout({ params, children }: LayoutProps) {
 	if (!track) notFound();
 	return (
 		<>
-			<Scroll />
 			<SubHeader track={track} />
 			<ContentHeader
 				data={track}

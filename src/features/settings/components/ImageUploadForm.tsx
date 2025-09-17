@@ -77,7 +77,7 @@ export default function ImageUploadForm({ img }: ImageUploadFormProps) {
 				/>
 				
 				<Button
-					variant={isEditing ? "default" : "secondary"}
+					variant={isEditing ? "primary" : "secondary"}
 					onClick={handleEditClick}
 					disabled={isSubmitting}
 				>
