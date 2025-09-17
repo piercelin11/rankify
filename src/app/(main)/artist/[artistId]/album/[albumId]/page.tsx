@@ -1,24 +1,21 @@
-import { notFound } from "next/navigation";
-
 import { getUserSession } from "@/../auth";
-import { getAlbumsStats } from "@/lib/database/ranking/overview/getAlbumsStats";
-import getLoggedAlbums from "@/lib/database/user/getLoggedAlbums";
-import {
-	DiscIcon,
-	HeartFilledIcon,
-	StarFilledIcon,
-} from "@radix-ui/react-icons";
-import { getPrevNextIndex } from "@/lib/utils";
-import AlbumRankingLineChart from "@/features/ranking/display/charts/AlbumRankingLineChart";
-import getTracksStats from "@/lib/database/ranking/overview/getTracksStats";
-import SiblingNavigator from "@/features/ranking/display/components/SiblingNavigator";
-import PercentileBarsCard, { BarData } from "@/features/ranking/stats/components/PercentileBarsCard";
-import StatsCard from "@/features/ranking/stats/components/StatsCard";
-import { db } from "@/db/client";
+import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
+import { Card } from "@/components/ui/card";
+import { ALBUM_SEGMENT_OPTIONS } from "@/config/segmentOptions";
+import { getAlbumRanking, getAlbumComparisonOptions } from "@/db/album";
+import RankingLineChart from "@/features/ranking/chart/RankingLineChart";
+import { notFound } from "next/navigation";
+import { getComparisonAlbumsData } from "./actions";
+import StatsCard from "@/components/card/StatsCard";
+import getAlbumsStats from "@/services/album/getAlbumsStats";
+import { getScoreLabel } from "@/lib/utils/score.utils";
+import { AnimatedProgress } from "@/components/ui/animated-progress";
+import getTracksStats from "@/services/track/getTracksStats";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
-const iconSize = 22;
-
-export default async function TrackPage({
+export default async function page({
 	params,
 }: {
 	params: Promise<{ albumId: string; artistId: string }>;
@@ -27,118 +24,128 @@ export default async function TrackPage({
 	const artistId = (await params).artistId;
 	const { id: userId } = await getUserSession();
 
-	const albumStats = await getAlbumsStats({
-		artistId,
-		userId,
-		options: {
-			includeAllRankings: true
-		}
-	});
-	const topTrack = (
-		await getTracksStats({
-			artistId,
-			userId,
-		})
-	).find((track) => track.albumId === albumId);
-	const albumData = albumStats.find((album) => album.id === albumId);
-	if (!albumData) notFound();
+	const defaultAlbum = await getAlbumRanking(userId, albumId);
+	const { menuOptions } = await getAlbumComparisonOptions(userId, artistId);
 
-	const trackLength = (await db.track.findMany({
-		where: {
-			albumId,
-			artistId,
-			rankings: {
-				some: {
-					userId
-				}
-			}
-		},
-		select: {
-			id: true
-		}
-	})).length;
+	if (!defaultAlbum) notFound();
 
-	const menuOptions = await getLoggedAlbums({ artistId, userId });
+	const albums = await getAlbumsStats({ userId, artistId });
+	const albumStats = albums.find((album) => album.id === albumId);
 
-	const statsBoxData = [
+	if (!albumStats) notFound();
+	
+	const albumTracks = (await getTracksStats({ userId, artistId })).filter((track) => track.albumId === albumId);
+
+	const statsCardItems = [
 		{
-			stats: "#" + albumData.ranking,
-			subtitle: "overall ranking",
-			color: albumData.color,
-			icon: <HeartFilledIcon width={iconSize} height={iconSize} />,
+			title: "Overall Ranking",
+			value: `#${albumStats.ranking}`,
+			subtitle: `Avg. ranking is ${albumStats.averageRanking}`,
+			badge: {
+				text: `Top ${((albumStats.ranking / albums.length) * 100).toFixed(0)}%`,
+			},
 		},
 		{
-			stats: albumData.avgPoints,
-			subtitle: "average album points",
-			icon: <StarFilledIcon width={iconSize} height={iconSize} />,
+			title: "Album Points",
+			value: `${albumStats.avgPoints}`,
+			subtitle: `Avg. points per track is ${(albumStats.avgPoints / albumTracks.length).toFixed(1)}`,
+			badge: {
+				text: getScoreLabel(albumStats.avgPoints),
+			},
 		},
 		{
-			stats: String(topTrack?.name),
-			subtitle: "is your favorite track",
-			icon: <DiscIcon width={iconSize} height={iconSize} />,
+			title: "Favorite Track",
+			value: `${albumTracks[0].name}`,
+			subtitle: `Peak at #${albumTracks[0].peak}`,
+			badge: {
+				text: `#${albumTracks[0].ranking}`,
+			},
 		},
 	];
 
-	const { top10PercentCount, top25PercentCount, top50PercentCount, rankings } =
-		albumData;
-
-	const barData: BarData[] = [
-		{
-			width: (top10PercentCount / Number(rankings?.length)) / trackLength,
-			label: "Tracks in top 10%",
-			stats: Math.ceil(top10PercentCount / Number(rankings?.length)),
-		},
-		{
-			width: (top25PercentCount / Number(rankings?.length)) / trackLength,
-			label: "Tracks in top 25%",
-			stats: Math.ceil(top25PercentCount / Number(rankings?.length)),
-		},
-		{
-			width: (top50PercentCount / Number(rankings?.length)) / trackLength,
-			label: "Tracks in top 50%",
-			stats: Math.ceil(top50PercentCount / Number(rankings?.length)),
-		},
-	];
-
-	const { previousIndex, nextIndex } = getPrevNextIndex({
-		items: albumStats,
-		targetItemId: albumId,
-	});
+	const currentIndex = albums.findIndex((album) => album.id === albumId);
+	const prevAlbum = albums[currentIndex - 1] || albums[albums.length - 1]; // 如果是第一首，取最後一首
+	const nextAlbum = albums[currentIndex + 1] || albums[0]; // 如果是最後一首，取第一首
 
 	return (
-		<>
-			<div className="grid grid-cols-2 gap-2 lg:grid-cols-2 lg:gap-6 xl:grid-cols-4">
-				{statsBoxData.map((data) => (
+		<div className="space-y-10">
+			<SimpleSegmentControl
+				options={ALBUM_SEGMENT_OPTIONS}
+				defaultValue="artist"
+				variant="primary"
+			/>
+			<div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+				{statsCardItems.map((item) => (
 					<StatsCard
-						key={data.subtitle}
-						stats={data.stats}
-						subtitle={data.subtitle}
-						color={data.color}
-					>
-						{data.icon}
-					</StatsCard>
+						key={item.title}
+						title={item.title}
+						value={item.value}
+						subtitle={item.subtitle}
+						badge={item.badge}
+					/>
 				))}
-				<PercentileBarsCard
-					bars={barData}
-					color={albumData.color}
-					className="hidden sm:flex"
+				<StatsCard>
+					<div className="space-y-4">
+						<AnimatedProgress
+							value={
+								(albumStats.top10PercentCount / albumStats.sessionCount / albumTracks.length) * 100
+							}
+							label="Tracks in top 10% Rate"
+						/>
+						<AnimatedProgress
+							value={
+								(albumStats.top25PercentCount / albumStats.sessionCount / albumTracks.length) * 100
+							}
+							label="Tracks in top 25% Rate"
+						/>
+						<AnimatedProgress
+							value={
+								(albumStats.top50PercentCount / albumStats.sessionCount / albumTracks.length) * 100
+							}
+							label="Tracks in top 50% Rate"
+						/>
+					</div>
+				</StatsCard>
+			</div>
+			<Card className="space-y-8 p-12">
+				<RankingLineChart
+					title="Album Trends"
+					defaultData={defaultAlbum}
+					menuOptions={menuOptions}
+					config={{
+						dataKey: "ranking",
+						isReverse: true,
+						hasToggle: true,
+						toggleOptions: [
+							{
+								label: "Album Ranking",
+								value: "ranking",
+								dataKey: "ranking",
+								isReverse: true,
+							},
+							{
+								label: "Album Points",
+								value: "points",
+								dataKey: "points",
+								isReverse: false,
+							},
+						],
+					}}
+					onLoadComparisonData={getComparisonAlbumsData}
 				/>
+			</Card>
+			<div className="flex justify-between">
+				<Link href={`/artist/${artistId}/album/${prevAlbum.id}`}>
+					<Button variant="outline" size="xl">
+						<ArrowLeft /> {prevAlbum.name}
+					</Button>
+				</Link>
+				<Link href={`/artist/${artistId}/album/${nextAlbum.id}`}>
+					<Button variant="outline" size="xl">
+						{nextAlbum.name} <ArrowRight />
+					</Button>
+				</Link>
 			</div>
-			<div className="sm:hidden">
-				<h3>Track Ranking Record</h3>
-				<PercentileBarsCard bars={barData} color={albumData.color} />
-			</div>
-
-			<AlbumRankingLineChart
-				defaultAlbumData={albumData}
-				allAlbumData={albumStats}
-				menuOptions={menuOptions}
-			/>
-			<SiblingNavigator
-				type="album"
-				prevData={albumStats[previousIndex]}
-				nextData={albumStats[nextIndex]}
-			/>
-		</>
+		</div>
 	);
 }

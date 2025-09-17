@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { throttle } from "@/lib/utils";
+import { useThrottle } from "@/lib/hooks/useDebounceAndThrottle";
 
 type MediaQueryType = "min" | "max";
 
@@ -21,13 +21,14 @@ export default function useMediaQuery(
         }
     }, [queryType, breackpoint])
 
+    const throttledCheckWidth = useThrottle(checkWidth, 200);
+
 	useEffect(() => {
         checkWidth();
-        const throttleCheck = throttle(checkWidth, 200)
-		window.addEventListener("resize", throttleCheck);
+		window.addEventListener("resize", throttledCheckWidth);
 
-		return () => window.removeEventListener("resize", throttleCheck);
-	}, [checkWidth]);
+		return () => window.removeEventListener("resize", throttledCheckWidth);
+	}, [checkWidth, throttledCheckWidth]);
 
     return result;
 }

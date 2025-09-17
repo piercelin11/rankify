@@ -57,7 +57,7 @@ export const getMainSidebarMenuItems = (
 	return [...items, COMMON_ITEMS.signOut];
 };
 
-export const getAdminSidebarMenuItems = (): SidebarMenuItemType[] => [
+export const adminSidebarMenuItems: SidebarMenuItemType[] = [
 	COMMON_ITEMS.home,
 	{
 		id: "artists",
@@ -79,7 +79,10 @@ export const getAdminSidebarMenuItems = (): SidebarMenuItemType[] => [
 	},
 ];
 
-export const getSettingsSidebarMenuItems = (): Omit<SidebarMenuItemType, "icon">[] => [
+export const getSettingsSidebarMenuItems = (): Omit<
+	SidebarMenuItemType,
+	"icon"
+>[] => [
 	{
 		id: "profile",
 		label: "Profile",

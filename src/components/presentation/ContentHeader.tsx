@@ -31,7 +31,7 @@ export default function ContentHeader({
 							"relative h-[220px] w-[220px] overflow-hidden bg-neutral-900 drop-shadow-2xl",
 							{
 								"rounded-full": rounded,
-								"rounded-4xl": !rounded,
+								"rounded-xl": !rounded,
 							}
 						)}
 					>

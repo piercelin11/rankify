@@ -1,6 +1,6 @@
 "use client";
 
-import { TrackStatsType } from "@/services/track/types";
+import type { TrackStatsType } from "@/services/track/types";
 import { useRouter } from "next/navigation";
 import RankingTable from "../RankingTable";
 

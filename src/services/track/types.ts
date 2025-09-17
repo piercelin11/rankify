@@ -22,4 +22,5 @@ export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
     top50PercentCount: number;
     top25PercentCount: number;
     top5PercentCount: number;
+    sessionCount: number;
 };

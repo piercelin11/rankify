@@ -1,81 +1,80 @@
-import ContentHeader from "@/components/presentation/ContentHeader";
-import ContentWrapper from "@/components/layout/ContentWrapper";
-import getAlbumById from "@/lib/database/data/getAlbumById";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
-import Image from "next/image";
+import { ReactNode } from "react";
 import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
-import { AlbumData, ArtistData } from "@/types/data";
+import ContentHeader from "@/components/presentation/ContentHeader";
+import SimpleBreadcrumb, {
+	createBreadcrumbItems,
+} from "@/components/navigation/SimpleBreadcrumb";
+import { ArtistData } from "@/types/data";
+import Image from "next/image";
 import Link from "next/link";
-import LoadingAnimation from "@/components/feedback/LoadingAnimation";
+import { Album } from "@prisma/client";
 import Scroll from "@/components/layout/Scroll";
+import getAlbumForAlbumPage from "@/db/album";
 
 type LayoutProps = {
 	params: Promise<{ albumId: string }>;
-	children: React.ReactNode;
+	children: ReactNode;
 };
 
-export default async function AlbumPageLayout({
-	params,
-	children,
-}: LayoutProps) {
+export default async function MainLayout({ params, children }: LayoutProps) {
+	const albumId = (await params).albumId;
+	const album = await getAlbumForAlbumPage(albumId);
+
+	if (!album) notFound();
+
 	return (
 		<>
 			<Scroll />
-			<Suspense fallback={<ContentHeader />}>
-				<Header params={params} />
-			</Suspense>
-			<Suspense fallback={<LoadingAnimation />}>
-				<ContentWrapper className="space-y-10 2xl:space-y-20">
-					{children}
-				</ContentWrapper>
-			</Suspense>
-		</>
-	);
-}
-
-async function Header({ params }: Omit<LayoutProps, "children">) {
-	const albumId = (await params).albumId;
-	const albumData = await getAlbumById(albumId);
-
-	if (!albumData) notFound();
-
-	return (
-		<>
+			<SubHeader album={album} />
 			<ContentHeader
-				data={albumData}
-				subTitleContent={<AlbumPageSubtitleContent albumData={albumData} />}
-				type="Album"
-				color={albumData.color}
+				data={album}
+				subTitleContent={
+					<>
+						<div className="flex items-center gap-1">
+							<Image
+								className="rounded-full"
+								width={30}
+								height={30}
+								src={album.artist.img ?? ""}
+								alt={album.artist.name}
+								priority
+							/>
+							<Link
+								className="font-semibold hover:text-neutral-100 hover:underline"
+								href={`/artist/${album.artist.id}`}
+							>
+								{album.artist.name}
+							</Link>
+						</div>
+					</>
+				}
+				type="Artist"
 			/>
-			<BlurredImageBackground src={albumData.img ?? ""} />
+			<BlurredImageBackground src={album.img || ""} />
+			<div className="p-content">{children}</div>
 		</>
 	);
 }
 
-function AlbumPageSubtitleContent({
-	albumData,
-}: {
-	albumData: AlbumData & { artist: ArtistData };
-}) {
+async function SubHeader({ album }: { album: Album & { artist: ArtistData } }) {
+	const breadCrumbItems = createBreadcrumbItems([
+		{
+			label: "Home",
+			href: "/",
+		},
+		{
+			label: album.artist.name,
+			href: `/artist/${album.artist.id}/overview`,
+		},
+		{
+			label: album.name,
+		},
+	]);
+
 	return (
-		<>
-			<div className="flex items-center gap-1">
-				<Image
-					className="rounded-full"
-					width={30}
-					height={30}
-					src={albumData.artist.img ?? ""}
-					alt={albumData.artist.name}
-					sizes="30px"
-				/>
-				<Link
-					className="font-bold hover:underline"
-					href={`/artist/${albumData.artist.id}`}
-				>
-					{albumData.artist.name}
-				</Link>
-			</div>
-		</>
+		<div className="space-y-4 px-content pt-content md:flex md:justify-between">
+			<SimpleBreadcrumb items={breadCrumbItems} />
+		</div>
 	);
 }

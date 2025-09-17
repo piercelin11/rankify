@@ -47,7 +47,7 @@ export default async function getTracksMetrics({
 			track: {
 				...trackConditions,
 			},
-			date: {
+			rankingSession: {
 				type: "ARTIST",
 				...(dateRange && {
 					date: {

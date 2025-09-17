@@ -12,7 +12,10 @@ export async function getComparisonTracksData(trackIds: string[]) {
 
 	try {
 		const tracks = await getTracksRankings(userId, trackIds);
-		return tracks;
+		return tracks.map(track => ({
+			...track,
+			type: 'track' as const,
+		}));
 	} catch (error) {
 		console.error("Failed to fetch comparison tracks:", error);
 		return [];

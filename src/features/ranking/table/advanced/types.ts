@@ -1,4 +1,3 @@
-import type { ColumnDef } from "@tanstack/react-table";
 import type {
 	RankingListDataTypeExtend,
 	RankingTableFeatures,
@@ -47,17 +46,6 @@ export type AdvancedRankingTableProps<T extends RankingListDataTypeExtend> = {
 	onFiltersChange?: (filters: AdvancedFilters) => void;
 	onColumnsChange?: (columns: ColumnVisibility) => void;
 	availableAlbums?: string[];
-	onRowClick?: (item: T) => void;
-	getRowHref?: (item: T) => string;
-};
-
-export type VirtualizedTableProps<T> = {
-	data: T[];
-	columns: ColumnDef<T>[];
-	height: number;
-	estimateSize?: () => number;
-	overscan?: number;
-	isLoading?: boolean;
 	onRowClick?: (item: T) => void;
 	getRowHref?: (item: T) => string;
 };

@@ -28,7 +28,7 @@ export default function GalleryItem({
 						src={img ?? PLACEHOLDER_PIC}
 						alt={title}
 						fill
-						sizes="100px"
+						sizes="500px"
 					/>
 				</div>
 				<p className="line-clamp-2">{title}</p>
