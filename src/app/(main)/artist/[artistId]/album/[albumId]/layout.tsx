@@ -9,7 +9,6 @@ import { ArtistData } from "@/types/data";
 import Image from "next/image";
 import Link from "next/link";
 import { Album } from "@prisma/client";
-import Scroll from "@/components/layout/Scroll";
 import getAlbumForAlbumPage from "@/db/album";
 
 type LayoutProps = {
@@ -25,7 +24,6 @@ export default async function MainLayout({ params, children }: LayoutProps) {
 
 	return (
 		<>
-			<Scroll />
 			<SubHeader album={album} />
 			<ContentHeader
 				data={album}

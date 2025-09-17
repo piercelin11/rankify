@@ -75,7 +75,7 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 					/>
 				</div>
 				<div className="flex items-center gap-4">
-					<Button variant="default" type="submit" disabled={isSubmitting}>
+					<Button type="submit" disabled={isSubmitting}>
 						Save
 					</Button>
 					{!isSubmitting && response && (

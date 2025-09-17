@@ -24,7 +24,7 @@ export function useRankingTable<T extends RankingListDataTypeExtend>({
 	const [globalFilter, setGlobalFilter] = useState("");
 
 	// 使用自定義欄位或根據 columnKey 創建欄位
-	const tableColumns = columns || (() => {
+	const tableColumns: ColumnDef<T>[] = columns || (() => {
 		// 確保 ranking 和 name 欄位總是存在
 		const requiredColumns: (keyof typeof COLUMN_CONFIGS)[] = ["ranking", "name"];
 		const validColumnKeys = columnKey.filter(key =>
@@ -36,7 +36,7 @@ export function useRankingTable<T extends RankingListDataTypeExtend>({
 			...validColumnKeys.filter(key => !requiredColumns.includes(key))
 		];
 
-		return createColumns(selectedColumns);
+		return createColumns(selectedColumns) as ColumnDef<T>[];
 	})();
 
 	// React Table 設定

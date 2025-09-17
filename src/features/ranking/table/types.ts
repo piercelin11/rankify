@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
-import { TrackStatsType } from "@/services/track/getTracksStats";
+import { TrackStatsType } from "@/services/track/types";
 
 export type RankingListDataTypeExtend = TrackHistoryType | TrackStatsType;
 

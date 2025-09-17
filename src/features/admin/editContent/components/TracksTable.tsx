@@ -171,7 +171,6 @@ export default function TracksTable({
 				<TrackActionDropdown
 					data={row.original}
 					albums={albums}
-					handleUpdateTrack={handleUpdateTrack}
 				/>
 			),
 			size: 80,

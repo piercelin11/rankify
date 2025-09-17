@@ -52,7 +52,7 @@ export default function AdvancedRankingTable<
 		toggleColumn,
 		setAllColumns,
 		resetColumns,
-	} = useColumnSelector(
+	} = useColumnSelector<T>(
 		defaultColumns,
 		undefined, // 使用預設可見性
 		onColumnsChange

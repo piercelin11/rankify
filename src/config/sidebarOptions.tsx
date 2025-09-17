@@ -79,10 +79,7 @@ export const adminSidebarMenuItems: SidebarMenuItemType[] = [
 	},
 ];
 
-export const getSettingsSidebarMenuItems = (): Omit<
-	SidebarMenuItemType,
-	"icon"
->[] => [
+export const settingsSidebarMenuItems = [
 	{
 		id: "profile",
 		label: "Profile",

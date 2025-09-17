@@ -4,7 +4,6 @@ import { LineChart } from "@/components/charts/LineChart";
 import { dateToDashFormat } from "@/lib/utils";
 import { useState } from "react";
 import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
-import { adjustColor } from "@/lib/utils/color.utils";
 import LineChartFilter from "./components/LineChartFilter";
 import { transformComparisonDataToDataset, extractDateInfo, transformTrackToDataset } from "./utils/dataTransform";
 import type {

@@ -92,7 +92,6 @@ export default function ResultStage({ draft }: ResultStageProps) {
 					<h3>Your ranking result</h3>
 					<div className="flex gap-5">
 						<Button
-							variant="default"
 							onClick={() => {
 								submitRanking(
 									optimisticResult,
