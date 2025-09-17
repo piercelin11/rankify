@@ -10,7 +10,7 @@ import saveDraft from "../../ranking/actions/saveDraft";
 import { RankingResultData } from "../components/SortingStage";
 import saveDraftResult from "../../ranking/actions/saveDraftResult";
 import { CurrentStage } from "../components/SorterPage";
-import { debounce } from "@/lib/utils/performance.utils";
+import { useDebounce } from "@/lib/hooks/useDebounceAndThrottle";
 
 // 使用 type 慣例定義狀態
 type SorterState = {
@@ -368,26 +368,23 @@ export default function useSorter({
 		setCurrentStageRef.current = setCurrentStage;
 	}, [state, artistId, dispatch, tracks, setCurrentStage]);
 
-	// 創建穩定的 debounced 函數 (只創建一次)
-	const debouncedAutoSave = useMemo(
-		() => debounce(async () => {
-			if (!stateRef.current) {
-				return;
+	// 創建穩定的 debounced 函數
+	const debouncedAutoSave = useDebounce(async () => {
+		if (!stateRef.current) {
+			return;
+		}
+
+		startTransition(async () => {
+			dispatchRef.current(setSaveStatus("pending"));
+			try {
+				await saveDraft(artistIdRef.current, JSON.stringify(stateRef.current));
+				dispatchRef.current(setSaveStatus("saved"));
+			} catch (error) {
+				console.error("Failed to save draft:", error);
+				dispatchRef.current(setSaveStatus("idle"));
 			}
-			
-			startTransition(async () => {
-				dispatchRef.current(setSaveStatus("pending"));
-				try {
-					await saveDraft(artistIdRef.current, JSON.stringify(stateRef.current));
-					dispatchRef.current(setSaveStatus("saved"));
-				} catch (error) {
-					console.error("Failed to save draft:", error);
-					dispatchRef.current(setSaveStatus("idle"));
-				}
-			});
-		}, 1000 * autoSaveCounter),
-		[] // 空依賴數組，只創建一次
-	);
+		});
+	}, 1000 * autoSaveCounter);
 
 
 	// 核心排序函數 (完全對應原本的 sortList)

@@ -4,7 +4,7 @@ import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackgro
 import ContentHeader from "@/components/presentation/ContentHeader";
 import { parsePathnameFromHeaders } from "@/lib/utils";
 import { headers } from "next/headers";
-import SegmentControl from "@/components/navigation/SegmentControl";
+import AnimatedSegmentControl from "@/components/navigation/AnimatedSegmentControl";
 import SimpleBreadcrumb, {
 	createBreadcrumbItems,
 } from "@/components/navigation/SimpleBreadcrumb";
@@ -12,7 +12,7 @@ import { ArtistData } from "@/types/data";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { getArtistTabOptions } from "@/config/artistTabs";
-import getArtistById from "@/db/artsit";
+import getArtistById from "@/db/artist";
 
 type LayoutProps = {
 	params: Promise<{ artistId: string }>;
@@ -57,15 +57,14 @@ async function SubHeader({ artist }: { artist: ArtistData }) {
 		},
 	]);
 
-	const isRakingPage = parsedPathname?.segments.includes("ranking");
+	const isRankingPage = parsedPathname?.segments.includes("ranking");
 
 	return (
 		<div className="space-y-4 px-content pt-content md:flex md:justify-between">
 			<SimpleBreadcrumb items={breadCrumbItems} />
 			<div className="flex gap-4">
-				{!isRakingPage && (
-					<SegmentControl
-						variant="animated"
+				{!isRankingPage && (
+					<AnimatedSegmentControl
 						size="lg"
 						options={tabOptions.map((option) => ({
 							...option,
@@ -74,7 +73,7 @@ async function SubHeader({ artist }: { artist: ArtistData }) {
 						value={parsedPathname?.segments[2]}
 					/>
 				)}
-				{isRakingPage ? (
+				{isRankingPage ? (
 					<Button className="h-12">
 						<Plus className="h-8 w-8 text-neutral-900" />
 						Create Sorter

@@ -1,11 +1,11 @@
 import SimpleDropdown from "@/components/dropdown/SimpleDropdown";
 import { TIME_RANGE_OPTIONS } from "@/config/timeRangeOptions";
 import { calculateDateRangeFromSlug } from "@/lib/utils";
-import { getUserSession } from "../../../../../../../auth";
+import { getUserSession } from "@/../auth";
 import { Card } from "@/components/ui/card";
 import DoubleBarChart from "@/components/charts/DoubleBarChart";
 import { Button } from "@/components/ui/button";
-import SegmentControl from "@/components/navigation/SegmentControl";
+import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
 import { OVERVIEW_SEGMENT_OPTIONS } from "@/config/segmentOptions";
 import Link from "next/link";
 import getTracksStats from "@/services/track/getTracksStats";
@@ -17,7 +17,7 @@ type pageProps = {
 	searchParams: Promise<{ range: string }>;
 };
 
-export default async function page({ params, searchParams }: pageProps) {
+export default async function OverviewPage({ params, searchParams }: pageProps) {
 	const { artistId } = await params;
 	const resolvedSearchParams = await searchParams;
 	const { range } = resolvedSearchParams;
@@ -25,9 +25,7 @@ export default async function page({ params, searchParams }: pageProps) {
 	const dateRange = calculateDateRangeFromSlug(range);
 
 	const queryString = new URLSearchParams(resolvedSearchParams).toString();
-	const allRankingHref = `/artist/${artistId}/overview/ranking${
-		queryString ? `?${queryString}` : ""
-	}`;
+	const allRankingHref = `/artist/${artistId}/overview/ranking${queryString ? `?${queryString}` : ""}`;
 
 	const trackRankings = await getTracksStats({
 		artistId,
@@ -45,8 +43,7 @@ export default async function page({ params, searchParams }: pageProps) {
 	return (
 		<div className="space-y-16">
 			<div className="flex items-center justify-between">
-				<SegmentControl
-					variant="simple"
+				<SimpleSegmentControl
 					options={OVERVIEW_SEGMENT_OPTIONS}
 					defaultValue="my-overview"
 				/>
@@ -66,12 +63,21 @@ export default async function page({ params, searchParams }: pageProps) {
 					</Link>
 				</div>
 			</div>
-			<div className="flex gap-4 [&>div]:flex-1 [&>div]:p-8">
-				{[1, 2, 3, 4].map((item) => (
-					<Card key={item}>
-						<h3 className="text-base text-neutral-500">Album Rankings</h3>
-					</Card>
-				))}
+			<div>
+				<h2 className="mb-4">Album Rankings</h2>
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+					{albumRankings.map((album) => (
+						<Card key={album.name} className="p-6">
+							<h3 className="text-base text-neutral-500 mb-2">{album.name}</h3>
+							<div className="space-y-1">
+								<p className="text-2xl font-bold">{album.avgPoints.toFixed(1)}</p>
+								<p className="text-sm text-neutral-400">
+									Base: {album.avgBasePoints.toFixed(1)}
+								</p>
+							</div>
+						</Card>
+					))}
+				</div>
 			</div>
 			<div>
 				<Card className="p-12">

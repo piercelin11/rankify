@@ -7,13 +7,8 @@ import {
 	type ColumnDef,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import {
-	ArrowUp,
-	ArrowDown,
-} from "lucide-react";
-import Image from "next/image";
-import { cn } from "@/lib/utils";
 import type { RankingListDataTypeExtend, RankingTableFeatures } from "../types";
+import { createColumns, COLUMN_CONFIGS } from "../utils/columnFactory";
 
 export function useRankingTable<T extends RankingListDataTypeExtend>({
 	data,
@@ -28,126 +23,21 @@ export function useRankingTable<T extends RankingListDataTypeExtend>({
 }) {
 	const [globalFilter, setGlobalFilter] = useState("");
 
-	// 預設欄位定義
-	const defaultColumns: ColumnDef<T>[] = [
-		{
-			accessorKey: "ranking",
-			header: () => "#",
-			size: 20,
-		},
-		{
-			accessorKey: "name",
-			header: "Track",
-			cell: ({ row }) => (
-				<div className="flex items-center gap-3">
-					{row.original.img && (
-						<div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg">
-							<Image
-								src={row.original.img}
-								alt={row.original.name}
-								fill
-								sizes="48px"
-								className="object-cover"
-							/>
-						</div>
-					)}
-					<div className="min-w-0 flex-1">
-						<p className="truncate font-medium">{row.original.name}</p>
-						{row.original.album?.name && (
-							<p className="truncate text-sm text-muted-foreground">
-								{row.original.album.name}
-							</p>
-						)}
-					</div>
-				</div>
-			),
-		},
-		{
-			accessorKey: "rankChange",
-			header: () => <div className="text-right">Change</div>,
-			cell: ({ getValue }) => {
-				const change = getValue() as number;
-				if (change === undefined || change === 0)
-					return <div className="text-right">-</div>;
+	// 使用自定義欄位或根據 columnKey 創建欄位
+	const tableColumns = columns || (() => {
+		// 確保 ranking 和 name 欄位總是存在
+		const requiredColumns: (keyof typeof COLUMN_CONFIGS)[] = ["ranking", "name"];
+		const validColumnKeys = columnKey.filter(key =>
+			COLUMN_CONFIGS[key as keyof typeof COLUMN_CONFIGS]
+		) as (keyof typeof COLUMN_CONFIGS)[];
 
-				return (
-					<div
-						className={cn("flex items-center justify-end gap-1", {
-							"text-green-500": change > 0,
-							"text-red-500": change < 0,
-						})}
-					>
-						{change > 0 ? (
-							<ArrowUp className="h-3 w-3" />
-						) : (
-							<ArrowDown className="h-3 w-3" />
-						)}
-						<span className="font-mono text-sm">{Math.abs(change)}</span>
-					</div>
-				);
-			},
-			size: 140,
-		},
-		{
-			accessorKey: "peak",
-			header: () => <div className="text-right">Peak</div>,
-			cell: ({ getValue }) => (
-				<div className="font-mono text-right">{getValue() as number}</div>
-			),
-			size: 140,
-		},
-		{
-			accessorKey: "worst",
-			header: () => <div className="text-right">Worst</div>,
-			cell: ({ getValue }) => (
-				<div className="font-mono text-right">{getValue() as number}</div>
-			),
-			size: 140,
-		},
-		{
-			accessorKey: "averageRanking",
-			header: () => <div className="text-right">Avg.</div>,
-			cell: ({ getValue }) => (
-				<div className="font-mono text-right">{getValue() as number}</div>
-			),
-			size: 140,
-		},
-		{
-			accessorKey: "top50PercentCount",
-			header: () => <div className="text-right">Top 50%</div>,
-			cell: ({ getValue }) => (
-				<div className="font-mono text-right">{getValue() as number}</div>
-			),
-			size: 140,
-		},
-		{
-			accessorKey: "top25PercentCount",
-			header: () => <div className="text-right">Top 25%</div>,
-			cell: ({ getValue }) => (
-				<div className="font-mono text-right">{getValue() as number}</div>
-			),
-			size: 140,
-		},
-		{
-			accessorKey: "top5PercentCount",
-			header: () => <div className="text-right">Top 5%</div>,
-			cell: ({ getValue }) => (
-				<div className="font-mono text-right">{getValue() as number}</div>
-			),
-			size: 140,
-		},
-	];
+		const selectedColumns = [
+			...requiredColumns,
+			...validColumnKeys.filter(key => !requiredColumns.includes(key))
+		];
 
-	// 使用自定義欄位或預設欄位
-	const tableColumns =
-		columns ||
-		defaultColumns.filter((column) => {
-			if (!("accessorKey" in column)) return 1;
-			if (column.accessorKey === "ranking" || column.accessorKey === "name") {
-				return 1;
-			}
-			return columnKey.includes(column.accessorKey as keyof T);
-		});
+		return createColumns(selectedColumns);
+	})();
 
 	// React Table 設定
 	const table = useReactTable({

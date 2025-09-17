@@ -59,6 +59,7 @@ export default async function updateAlbum({
 				},
 				data: {
 					img: album.img,
+					color: validatedData.color,
 				},
 			});
 		});

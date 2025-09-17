@@ -18,6 +18,7 @@ export default function UserProfile({ userSession }: UserProfileProps) {
 					src={userSession.image || PLACEHOLDER_PIC}
 					alt="user profile"
 					sizes="48px"
+					priority
 				/>
 			</div>
 			<div className="overflow-hidden">

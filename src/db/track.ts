@@ -1,7 +1,7 @@
 import { db } from "@/db/client";
 
 export async function getTrackForTrackPage(trackId: string) {
-	const album = await db.track.findFirst({
+	const track = await db.track.findFirst({
 		where: {
 			id: trackId,
 		},
@@ -11,7 +11,7 @@ export async function getTrackForTrackPage(trackId: string) {
 		},
 	});
 
-	return album;
+	return track;
 }
 
 export async function getTracksRankings(userId: string, trackIds: string[]) {
@@ -91,6 +91,12 @@ export async function getTrackRanking(userId: string, trackId: string) {
 	};
 }
 
+/**
+ * 獲取歌曲比較選項，用於歌曲排名線圖下拉選單
+ * @param userId
+ * @param artistId
+ * @returns
+ */
 export async function getTrackComparisonOptions(
 	userId: string,
 	artistId: string

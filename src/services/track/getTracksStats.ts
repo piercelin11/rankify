@@ -183,6 +183,7 @@ export default async function getTracksStats({
 			top50PercentCount: counts.top50,
 			top25PercentCount: counts.top25,
 			top5PercentCount: counts.top5,
+			sessionCount: data.count,
 		};
 	});
 

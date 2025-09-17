@@ -8,7 +8,7 @@ import VirtualizedTableBody from "./components/VirtualizedTableBody";
 import ColumnSelectorPanel from "./components/ColumnSelectorPanel";
 import FilterToolbar from "./components/FilterToolbar";
 import type { AdvancedRankingTableProps, AdvancedFilters } from "./types";
-import { RankingListDataTypeExtend } from "../types";
+import type { RankingListDataTypeExtend } from "../types";
 
 const defaultFeatures = {
 	sort: true,

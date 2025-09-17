@@ -1,39 +1,44 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useState, useCallback, useTransition } from "react";
-
-export type FilterTag = {
-	id: string;
-	name: string;
-	color: string | null;
-};
-
-export type DynamicTrackData = {
-	id: string;
-	name: string;
-	color: string | null;
-	rankings?: Array<{
-		ranking: number;
-		rankPercentile: number;
-		rankChange: number | null;
-		date: Date;
-		dateId: string;
-	}>;
-};
+import { useState, useCallback, useTransition, useEffect } from "react";
+import type { FilterTag, ComparisonData, LineChartFilterState } from "../types";
+import { useUrlState } from "./useUrlState";
 
 export default function useLineChartFilter(
 	defaultTag: FilterTag,
-	onLoadComparisonData?: (trackIds: string[]) => Promise<DynamicTrackData[]>
-) {
+	onLoadComparisonData?: (ids: string[]) => Promise<ComparisonData[]>
+): LineChartFilterState {
 	const [isOpen, setOpen] = useState(false);
 	const [filteredParentId, setFilterParentId] = useState<string | null>(null);
-	const [comparisonData, setComparisonData] = useState<DynamicTrackData[]>([]);
+	const [comparisonData, setComparisonData] = useState<ComparisonData[]>([]);
 	const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
 	const [isPending, startTransition] = useTransition();
+	const [isInitialized, setIsInitialized] = useState(false);
 
-	const searchParams = useSearchParams();
-	const comparisonQuery = searchParams.getAll("comparison");
+	const { addToArray, removeFromArray, clearArray, getArray } = useUrlState();
+	const comparisonQuery = getArray("comparison");
+
+	// 初始化時檢查 URL params 並載入對應資料
+	useEffect(() => {
+		if (comparisonQuery.length > 0 && onLoadComparisonData && !isInitialized) {
+			setIsInitialized(true);
+			setLoadingIds(new Set(comparisonQuery));
+
+			startTransition(async () => {
+				try {
+					const data = await onLoadComparisonData(comparisonQuery);
+					setComparisonData(data);
+				} catch (error) {
+					console.error("Failed to load initial comparison data:", error);
+				} finally {
+					setLoadingIds(new Set());
+				}
+			});
+		} else if (comparisonQuery.length === 0 && !isInitialized) {
+			setComparisonData([]);
+			setIsInitialized(true);
+		}
+	}, [onLoadComparisonData, isInitialized, comparisonQuery]);
 
 	const handleAlbumFilter = useCallback((parentId: string) => {
 		if (parentId === filteredParentId) {
@@ -44,14 +49,12 @@ export default function useLineChartFilter(
 	}, [filteredParentId]);
 
 	const handleMenuItemClick = useCallback((menuId: string) => {
-		const params = new URLSearchParams(searchParams);
-
 		// 防止重複選擇
 		if (comparisonQuery.includes(menuId) || menuId === defaultTag.id) {
 			return;
 		}
 
-		params.append("comparison", menuId);
+		addToArray("comparison", menuId);
 		setOpen(false);
 
 		// 載入資料（如果提供了載入函式）
@@ -76,34 +79,21 @@ export default function useLineChartFilter(
 				}
 			});
 		}
-
-		window.history.replaceState(null, "", `?${params.toString()}`);
-	}, [searchParams, comparisonQuery, defaultTag.id, onLoadComparisonData, comparisonData]);
+	}, [addToArray, comparisonQuery, defaultTag.id, onLoadComparisonData, comparisonData]);
 
 	const handleTagDelete = useCallback((menuId: string) => {
-		const params = new URLSearchParams(searchParams);
-		const newQuery = comparisonQuery.filter((query) => query !== menuId);
-
-		params.delete("comparison");
-		for (const query of newQuery) {
-			params.append("comparison", query);
-		}
+		removeFromArray("comparison", menuId);
 
 		// 移除對應的資料
 		setComparisonData(prev => prev.filter(d => d.id !== menuId));
-
-		window.history.replaceState(null, "", `?${params.toString()}`);
-	}, [searchParams, comparisonQuery]);
+	}, [removeFromArray]);
 
 	const handleClearAll = useCallback(() => {
-		const params = new URLSearchParams(searchParams);
-		params.delete("comparison");
+		clearArray("comparison");
 
 		// 清空所有比較資料
 		setComparisonData([]);
-
-		window.history.replaceState(null, "", `?${params.toString()}`);
-	}, [searchParams]);
+	}, [clearArray]);
 
 	return {
 		isOpen,

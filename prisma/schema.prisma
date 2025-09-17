@@ -143,7 +143,7 @@ model AlbumRanking {
   userId              String
   album               Album          @relation(fields: [albumId], references: [id], onUpdate: Cascade, onDelete: Restrict)
   artist              Artist         @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  date                RankingSession @relation(fields: [dateId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+  rankingSession      RankingSession @relation(fields: [dateId], references: [id], onUpdate: Cascade, onDelete: Restrict)
   user                User           @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@unique([userId, dateId, albumId])

@@ -1,7 +1,7 @@
 "use client";
 
 import AdvancedRankingTable from "@/features/ranking/table/advanced/AdvancedRankingTable";
-import { TrackStatsType } from "@/services/track/types";
+import type { TrackStatsType } from "@/services/track/types";
 import { useRouter } from "next/navigation";
 
 type ClientAdvancedRankingTableProps = {
@@ -23,8 +23,6 @@ export default function ClientAdvancedRankingTable({
 			data={trackRankings}
 			onRowClick={handleRowClick}
 			columnKey={[
-				"ranking",
-				"name",
 				"peak",
 				"worst",
 				"averageRanking",

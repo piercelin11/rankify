@@ -3,44 +3,17 @@
 import { LineChart } from "@/components/charts/LineChart";
 import { dateToDashFormat } from "@/lib/utils";
 import { useState } from "react";
-import Tabs from "@/components/navigation/Tabs.old";
+import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
 import { adjustColor } from "@/lib/utils/color.utils";
-import { LineChartFilter } from "./components/LineChartFilter";
-import type { DynamicTrackData } from "./hooks/useLineChartFilter";
-
-// 統一的配置類型
-export type LineChartConfig = {
-	dataKey: string;
-	isReverse: boolean;
-	hasToggle?: boolean;
-	toggleOptions?: Array<{ label: string; value: string; dataKey: string; isReverse: boolean }>;
-};
-
-// 統一的資料類型
-export type UnifiedRankingData = {
-	id: string;
-	name: string;
-	color: string | null;
-	album?: {
-		name: string | null;
-		color: string | null;
-	} | null;
-	rankings?: Array<{ date: Date; dateId: string; [key: string]: unknown }>;
-};
-
-// 選單選項類型
-export type MenuOptionType = {
-	id: string;
-	name: string;
-	color: string | null;
-	parentId?: string | null;
-};
-
-export type ParentOptionType = {
-	id: string;
-	color: string | null;
-	name: string;
-};
+import LineChartFilter from "./components/LineChartFilter";
+import { transformComparisonDataToDataset, extractDateInfo, transformTrackToDataset } from "./utils/dataTransform";
+import type {
+	ComparisonData,
+	LineChartConfig,
+	UnifiedRankingData,
+	MenuOptionType,
+	ParentOptionType,
+} from "./types";
 
 type RankingLineChartProps = {
 	title?: string;
@@ -49,7 +22,7 @@ type RankingLineChartProps = {
 	parentOptions?: ParentOptionType[];
 	config: LineChartConfig;
 	className?: string;
-	onLoadComparisonData?: (trackIds: string[]) => Promise<DynamicTrackData[]>;
+	onLoadComparisonData?: (ids: string[]) => Promise<ComparisonData[]>;
 };
 
 export default function RankingLineChart({
@@ -62,35 +35,19 @@ export default function RankingLineChart({
 }: RankingLineChartProps) {
 	const [currentDataKey, setCurrentDataKey] = useState(config.dataKey);
 	const [currentIsReverse, setCurrentIsReverse] = useState(config.isReverse);
-	const [comparisonData, setComparisonData] = useState<DynamicTrackData[]>([]);
+	const [comparisonData, setComparisonData] = useState<ComparisonData[]>([]);
 
 	if (!defaultData.rankings) return null;
 
-	const dates = defaultData.rankings.map((item) => dateToDashFormat(item.date));
-	const dateIds = defaultData.rankings.map((item) => item.dateId) ?? [];
+	const { dates: rawDates, dateIds } = extractDateInfo(defaultData.rankings);
+	const dates = rawDates.map((date) => dateToDashFormat(date));
 
 	// 建立比較資料集
-	const selectedDataset = comparisonData.map((data) => {
-		const stats: (number | null)[] = [];
-		const rankingsMap = new Map(
-			data.rankings?.map((ranking) => [ranking.dateId, ranking]) || []
-		);
-
-		for (const dateId of dateIds) {
-			const findRankingData = rankingsMap.get(dateId);
-			if (findRankingData && findRankingData[currentDataKey as keyof typeof findRankingData] !== undefined) {
-				stats.push(Number(findRankingData[currentDataKey as keyof typeof findRankingData]));
-			} else {
-				stats.push(null);
-			}
-		}
-
-		return {
-			name: data.name,
-			color: data.color,
-			datas: stats,
-		};
-	});
+	const selectedDataset = transformComparisonDataToDataset(
+		comparisonData,
+		dateIds,
+		currentDataKey
+	);
 
 	// 處理 Tab 切換
 	const handleTabChange = (value: string) => {
@@ -107,14 +64,13 @@ export default function RankingLineChart({
 		<>
 			<div className="flex justify-between gap-4 sm:flex-row sm:items-start">
 				{config.hasToggle && config.toggleOptions ? (
-					<Tabs
+					<SimpleSegmentControl
 						options={config.toggleOptions.map(opt => ({
 							label: opt.label,
-							id: opt.value,
+							value: opt.value,
 							onClick: () => handleTabChange(opt.value)
 						}))}
-						color={defaultColor ? adjustColor(defaultColor, 0.8) : null}
-						activeId={config.toggleOptions.find(opt =>
+						value={config.toggleOptions.find(opt =>
 							opt.dataKey === currentDataKey && opt.isReverse === currentIsReverse
 						)?.value || config.toggleOptions[0].value}
 					/>
@@ -130,7 +86,7 @@ export default function RankingLineChart({
 					menuOptions={menuOptions}
 					parentOptions={parentOptions}
 					onLoadComparisonData={onLoadComparisonData}
-					onComparisonDataChange={(newData) => setComparisonData(newData)}
+					onComparisonDataChange={setComparisonData}
 				/>
 			</div>
 
@@ -138,14 +94,14 @@ export default function RankingLineChart({
 				data={{
 					date: dates,
 					dataset: [
-						{
-							name: defaultData.name,
-							color: defaultColor,
-							datas:
-								defaultData.rankings.map((item) =>
-									item[currentDataKey] ? Number(item[currentDataKey]) : null
-								) ?? [],
-						},
+						transformTrackToDataset(
+							{
+								name: defaultData.name,
+								color: defaultColor,
+								rankings: defaultData.rankings,
+							},
+							currentDataKey
+						),
 						...selectedDataset,
 					],
 				}}

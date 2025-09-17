@@ -2,7 +2,7 @@
 import { DEFAULT_COLOR } from "@/constants";
 import { cn } from "@/lib/utils";
 import { adjustColor } from "@/lib/utils/color.utils";
-import { throttle } from "@/lib/utils/performance.utils";
+import { useThrottle } from "@/lib/hooks/useDebounceAndThrottle";
 import Link from "next/link";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
@@ -68,21 +68,21 @@ export default function Tabs({ options, activeId, color, className }: TabsProps)
 	}, [activeId, pendingActiveId]);
 
 	// 讓 indicator 寬度隨螢幕 resize 改變
-	useEffect(() => {
-		const recalculateIndicator = throttle(() => {
-			const activeTabRef = tabRefs.current.get(activeId || "");
-			if (activeTabRef) {
-				setIndicatorStyle({
-					left: activeTabRef.offsetLeft,
-					width: activeTabRef.offsetWidth,
-					opacity: 1,
-				});
-			}
-		}, 100);
+	const throttledRecalculateIndicator = useThrottle(() => {
+		const activeTabRef = tabRefs.current.get(activeId || "");
+		if (activeTabRef) {
+			setIndicatorStyle({
+				left: activeTabRef.offsetLeft,
+				width: activeTabRef.offsetWidth,
+				opacity: 1,
+			});
+		}
+	}, 100);
 
-		window.addEventListener("resize", recalculateIndicator);
-		return () => window.removeEventListener("resize", recalculateIndicator);
-	}, [activeId]);
+	useEffect(() => {
+		window.addEventListener("resize", throttledRecalculateIndicator);
+		return () => window.removeEventListener("resize", throttledRecalculateIndicator);
+	}, [throttledRecalculateIndicator]);
 
 	return (
 		<div className={cn(

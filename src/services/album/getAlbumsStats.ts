@@ -1,6 +1,7 @@
 import { db } from "@/db/client";
 import { DateRange } from "@/types/general";
 import { AlbumStatsType } from "./types";
+import { Prisma } from "@prisma/client";
 
 type getAlbumsStatsProps = {
 	artistId: string;
@@ -8,21 +9,10 @@ type getAlbumsStatsProps = {
 	dateRange?: DateRange;
 };
 
-type AlbumQueryConditions = {
-	albumId: { not: null };
-	artistId: string;
-	userId: string;
-	date?: {
-		date?: {
-			gte?: Date;
-			lte?: Date;
-		};
-	};
-};
 
 async function getAlbumPercentileCounts(
 	albumIds: string[],
-	conditions: AlbumQueryConditions
+	conditions: Prisma.RankingWhereInput
 ) {
 	const results = await db.ranking.findMany({
 		where: {
@@ -76,11 +66,15 @@ export default async function getAlbumsStats({
 		where: {
 			artistId,
 			userId,
-			date: dateFilter,
+			rankingSession: dateFilter,
 		},
 		_avg: {
 			points: true,
 			basePoints: true,
+			ranking: true,
+		},
+		_count: {
+			ranking: true,
 		},
 		orderBy: {
 			_avg: {
@@ -91,11 +85,11 @@ export default async function getAlbumsStats({
 
 	const albumIds = albumPoints.map(data => data.albumId);
 
-	const conditions: AlbumQueryConditions = {
+	const conditions: Prisma.RankingWhereInput = {
 		albumId: { not: null },
 		artistId,
 		userId,
-		date: dateFilter,
+		rankingSession: dateFilter,
 	};
 
 	const percentileCounts = await getAlbumPercentileCounts(albumIds, conditions);
@@ -107,12 +101,14 @@ export default async function getAlbumsStats({
 		return {
 			...album,
 			ranking: index + 1,
+			averageRanking: data._avg.ranking ? data._avg.ranking.toFixed(1) : 0,
 			top5PercentCount: counts.top5,
 			top10PercentCount: counts.top10,
 			top25PercentCount: counts.top25,
 			top50PercentCount: counts.top50,
 			avgPoints: data._avg.points ? Math.round(data._avg.points) : 0,
 			avgBasePoints: data._avg.basePoints ? Math.round(data._avg.basePoints) : 0,
+			sessionCount: data._count.ranking,
 		};
 	});
 
