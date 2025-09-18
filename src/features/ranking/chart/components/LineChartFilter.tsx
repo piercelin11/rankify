@@ -65,12 +65,12 @@ export function LineChartFilter({
 	return (
 		<DropdownMenu open={isOpen} onOpenChange={setOpen}>
 			<DropdownMenuTrigger asChild>
-				<div className="flex min-w-[550px] cursor-pointer items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-950/50 p-2.5 focus:border-neutral-700 focus:outline-none">
-					<div className="flex flex-1 items-center gap-2">
+				<div className="flex cursor-pointer items-center gap-3   pb-2 focus:outline-none">
+					<div className="flex flex-1 items-center gap-1">
 						{selectedCount === 0 ? (
 							<>
 								<TrackTag tag={defaultTag} isDefault />
-								<span className="select-none text-sm text-neutral-500">
+								<span className="select-none text-sm text-muted-foreground">
 									+ Compare
 								</span>
 							</>
@@ -90,7 +90,7 @@ export function LineChartFilter({
 										);
 									})}
 									{selectedCount > 2 && (
-										<Badge variant="secondary" className="text-sm font-normal">
+										<Badge variant="secondary" className="text-sm font-normal text-nowrap">
 											+{selectedCount - 2} more
 										</Badge>
 									)}
@@ -100,7 +100,7 @@ export function LineChartFilter({
 					</div>
 					<ChevronDownIcon
 						className={cn(
-							"h-4 w-4 text-neutral-500 transition-transform",
+							"h-4 w-4 text-secondary-foreground transition-transform",
 							isOpen && "rotate-180"
 						)}
 					/>
@@ -108,7 +108,7 @@ export function LineChartFilter({
 			</DropdownMenuTrigger>
 
 			<DropdownMenuContent
-				className="mt-1 max-h-[450px] w-[550px] overflow-y-auto rounded-lg p-3"
+				className="mt-1 max-h-[450px] w-[450px] overflow-y-auto flex flex-col rounded-lg p-3"
 				align="end"
 			>
 				{/* 專輯篩選區 */}
@@ -124,7 +124,7 @@ export function LineChartFilter({
 										e.stopPropagation();
 										handleClearAll();
 									}}
-									className="text-sm text-primary-500 hover:text-neutral-100"
+									className="text-sm text-primary-500 hover:text-foreground"
 								>
 									Clear all
 								</button>

@@ -110,7 +110,7 @@ export default function AnimatedSegmentControl({
 
 	return (
 		<div className={cn(
-			"select-none rounded-lg overflow-hidden w-max border border-neutral-600/60 bg-neutral-900/50 p-1",
+			"select-none rounded-lg overflow-hidden w-max border bg-field p-1",
 			sizeClasses[size],
 			className
 		)}>
@@ -160,9 +160,9 @@ const SegmentButton = forwardRef<HTMLButtonElement, SegmentButtonProps>(
 		};
 
 		const baseClasses = cn(
-			"z-10 h-full justify-self-center rounded-lg text-neutral-400 transition-all duration-200 ease-in-out",
+			"z-10 h-full justify-self-center rounded-lg text-secondary-foreground transition-all duration-200 ease-in-out",
 			paddingClasses[size],
-			isActive && "text-neutral-900",
+			isActive && "text-primary-foreground",
 			option.disabled && "cursor-not-allowed opacity-40"
 		);
 

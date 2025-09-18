@@ -102,7 +102,7 @@ export default function DesktopTable<T extends RankingListDataTypeExtend>({
 									key={row.id}
 									data-state={row.getIsSelected() && "selected"}
 									className={cn(
-										(onRowClick || getRowHref) && "cursor-pointer hover:bg-muted/70"
+										(onRowClick || getRowHref) && "cursor-pointer hover:bg-accent"
 									)}
 									onClick={() => onRowClick?.(row.original)}
 								>

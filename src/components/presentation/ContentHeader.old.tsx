@@ -83,15 +83,15 @@ function ContentHeaderInfo({
 	return (
 		<div className={cn("space-y-2")}>
 			{type && <p>{type}</p>}
-			<h1 className={cn("text-display")}>{data?.name}</h1>
+			<h1 className={cn("")}>{data?.name}</h1>
 			<div
 				className={cn(
-					"group text-description mb-4 flex items-center gap-2 text-neutral-400"
+					"group text-description mb-4 flex items-center gap-2 text-secondary-foreground"
 				)}
 			>
 				<Link href={data?.spotifyUrl || ""} className="inline-block">
 					<SpotifyIcon
-						className={cn("text-neutral-400 hover:text-spotify")}
+						className={cn("text-secondary-foreground hover:text-spotify")}
 						size={30}
 					/>
 				</Link>

@@ -30,10 +30,10 @@ export default function ArtistSearchResultItem({
 			/>
 			<div className="overflow-hidden">
 				<p className="overflow-hidden text-ellipsis text-nowrap">{data.name}</p>
-				<p className="text-sm text-neutral-400">Artist</p>
+				<p className="text-sm text-secondary-foreground">Artist</p>
 			</div>
 			<ChevronRightIcon
-				className="ml-auto justify-self-end text-neutral-500"
+				className="ml-auto justify-self-end text-muted-foreground"
 				width={20}
 				height={20}
 			/>

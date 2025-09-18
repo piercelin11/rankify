@@ -55,7 +55,7 @@ export function InlineEditCell({
 	return (
 		<div
 			className={cn(
-				"flex h-8 w-full cursor-pointer items-center rounded px-2 py-1 hover:bg-neutral-800/50",
+				"flex h-8 w-full cursor-pointer items-center rounded px-2 py-1 hover:bg-accent",
 				className
 			)}
 			onClick={startEdit}
@@ -102,7 +102,7 @@ export function InlineSelectCell({
 
 	return (
 		<div
-			className="flex mr-4 h-8 w-full cursor-pointer items-center rounded px-2 py-1 hover:bg-neutral-800/50"
+			className="flex mr-4 h-8 w-full cursor-pointer items-center rounded px-2 py-1 hover:bg-accent"
 			onClick={startEdit}
 		>
 			<Badge variant="outline" className="text-xs">

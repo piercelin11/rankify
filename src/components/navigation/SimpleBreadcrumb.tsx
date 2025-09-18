@@ -29,7 +29,7 @@ export default function SimpleBreadcrumb({
 			<BreadcrumbList>
 				{items.map((item, index) => (
 					<Fragment key={`${item.label}-${index}`}>
-						<BreadcrumbItem className="text-neutral-300">
+						<BreadcrumbItem className="text-secondary-foreground">
 							{item.isCurrentPage ? (
 								<BreadcrumbPage className="text-base">{item.label}</BreadcrumbPage>
 							) : (
@@ -38,7 +38,7 @@ export default function SimpleBreadcrumb({
 								</BreadcrumbLink>
 							)}
 						</BreadcrumbItem>
-						{index < items.length - 1 && <BreadcrumbSeparator className="text-neutral-300" />}
+						{index < items.length - 1 && <BreadcrumbSeparator className="text-secondary-foreground" />}
 					</Fragment>
 				))}
 			</BreadcrumbList>

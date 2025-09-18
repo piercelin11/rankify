@@ -28,7 +28,7 @@ export default function ContentHeader({
 				<div className="flex items-center gap-6">
 					<div
 						className={cn(
-							"relative h-[220px] w-[220px] overflow-hidden bg-neutral-900 drop-shadow-2xl",
+							"relative min-h-[220px] min-w-[220px] overflow-hidden drop-shadow-2xl",
 							{
 								"rounded-full": rounded,
 								"rounded-xl": !rounded,
@@ -64,11 +64,11 @@ function ContentHeaderInfo({
 	return (
 		<div className="space-y-2">
 			{type && <p>{type}</p>}
-			<h1 className="text-display">{data?.name}</h1>
-			<div className="text-description group mb-4 flex items-center gap-2 text-neutral-300">
+			<h1 className="">{data?.name}</h1>
+			<div className="text-description group mb-4 flex items-center gap-2 text-secondary-foreground">
 				<Link href={data?.spotifyUrl || ""} className="inline-block">
 					<SpotifyIcon
-						className="text-neutral-300 hover:text-spotify"
+						className="hover:text-spotify"
 						size={30}
 					/>
 				</Link>

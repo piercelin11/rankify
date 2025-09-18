@@ -42,7 +42,7 @@ export default function StatsCard({
 			<div className="mt-auto space-y-2 overflow-hidden">
 				<p
 					className={
-						"text-highlight flex items-center gap-1 font-numeric font-black"
+						" flex items-center gap-1 font-numeric font-black"
 					}
 				>
 					{stats ?? "no data"}

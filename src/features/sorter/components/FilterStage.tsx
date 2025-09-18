@@ -137,7 +137,7 @@ function FilterGalleryItem({
 			</div>
 			<div>
 				<p className="line-clamp-2">{data.name}</p>
-				<p className="text-sm text-neutral-400">{subTitle}</p>
+				<p className="text-sm text-secondary-foreground">{subTitle}</p>
 			</div>
 		</div>
 	);

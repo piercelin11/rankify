@@ -68,10 +68,10 @@ export default async function OverviewPage({ params, searchParams }: pageProps) 
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 					{albumRankings.map((album) => (
 						<Card key={album.name} className="p-6">
-							<h3 className="text-base text-neutral-500 mb-2">{album.name}</h3>
+							<h3 className="text-base text-muted-foreground mb-2">{album.name}</h3>
 							<div className="space-y-1">
 								<p className="text-2xl font-bold">{album.avgPoints.toFixed(1)}</p>
-								<p className="text-sm text-neutral-400">
+								<p className="text-sm text-secondary-foreground">
 									Base: {album.avgBasePoints.toFixed(1)}
 								</p>
 							</div>

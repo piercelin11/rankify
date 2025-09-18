@@ -38,7 +38,7 @@ export default async function MainLayout({ params, children }: LayoutProps) {
 								alt={track.artist.name}
 							/>
 							<Link
-								className="font-semibold hover:text-neutral-100 hover:underline"
+								className="font-semibold hover:text-foreground hover:underline"
 								href={`/artist/${track.artist.id}`}
 								//onClick={handleClick}
 							>
@@ -49,7 +49,7 @@ export default async function MainLayout({ params, children }: LayoutProps) {
 							<>
 								•
 								<Link
-									className="hover:text-neutral-100 hover:underline"
+									className="hover:text-foreground hover:underline"
 									href={`/artist/${track.artist.id}/album/${track.albumId}`}
 									//onClick={handleClick}
 								>

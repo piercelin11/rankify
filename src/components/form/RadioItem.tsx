@@ -20,8 +20,8 @@ export default function RadioItem({
 }: RadioItemProps) {
 	return (
 		<label
-			className={cn("flex items-center gap-2 text-neutral-500", {
-				"text-neutral-100": isChecked,
+			className={cn("flex items-center gap-2 text-muted-foreground", {
+				"text-foreground": isChecked,
 			})}
 		>
 			<span

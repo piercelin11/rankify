@@ -18,7 +18,7 @@ export default function ClientRankingTable({
 
 	return (
 		<RankingTable
-			className="mb-4 border-b border-neutral-800"
+			className="mb-4 border-b "
 			features={{
 				header: false,
 			}}
