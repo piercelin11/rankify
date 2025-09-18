@@ -86,7 +86,7 @@ export default function Tabs({ options, activeId, color, className }: TabsProps)
 
 	return (
 		<div className={cn(
-			"w-max select-none rounded-lg border border-neutral-600/60 bg-neutral-900/50 p-1",
+			"w-max select-none rounded-lg border /60 bg-neutral-900/50 p-1",
 			className
 		)}>
 			<div className="relative flex">
@@ -138,9 +138,9 @@ const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(function TabItem(
 				>
 					<button
 						className={cn(
-							"z-10 h-full justify-self-center rounded-lg px-4 py-2 text-neutral-400 transition-all duration-200 ease-in-out",
+							"z-10 h-full justify-self-center rounded-lg px-4 py-2 text-secondary-foreground transition-all duration-200 ease-in-out",
 							{
-								"text-neutral-900": isActive,
+								"text-primary-foreground": isActive,
 							}
 						)}
 						ref={ref}
@@ -154,9 +154,9 @@ const TabItem = forwardRef<HTMLButtonElement, TabItemProps>(function TabItem(
 			return (
 				<button
 					className={cn(
-						"z-10 h-full justify-self-center rounded-lg px-3 py-2 text-neutral-400 xl:px-4 xl:py-3",
+						"z-10 h-full justify-self-center rounded-lg px-3 py-2 text-secondary-foreground xl:px-4 xl:py-3",
 						{
-							"text-neutral-900": isActive,
+							"text-primary-foreground": isActive,
 						}
 					)}
 					ref={ref}

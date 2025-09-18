@@ -88,7 +88,7 @@ export default function SimpleDropdown({
 		>
 			<SelectTrigger
 				className={cn(
-					"border-neutral-700 bg-neutral-900 text-neutral-400 hover:text-neutral-100 focus:text-neutral-100",
+					" bg-field text-secondary-foreground hover:text-foreground focus:text-foreground",
 					sizeClasses[size],
 					className
 				)}

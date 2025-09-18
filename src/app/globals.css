@@ -3,131 +3,155 @@
 @tailwind utilities;
 
 @layer components {
-	.text-display {
-		@apply text-4xl font-extrabold leading-snug 2xl:text-5xl;
-	}
-
-	.text-highlight {
-		@apply text-3xl font-extrabold text-neutral-100 2xl:text-4xl;
-	}
-
-	.text-body-big {
-		@apply text-xl font-bold text-neutral-100;
-	}
-
-	.text-description {
-		@apply text-base font-normal leading-tight text-neutral-500;
-	}
-
-	.text-caption {
-		@apply text-sm font-normal leading-tight text-neutral-600;
-	}
-
-	.text-label {
-		@apply text-sm font-normal leading-tight xl:text-base;
-	}
-
-	.stats-card {
-		@apply rounded-3xl p-8 shadow-stats-card 2xl:p-10;
-	}
-
 	.bg-gradient-dark {
-		background: linear-gradient(to bottom, #09090b80, #09090bCC, #09090bE5, #09090b);
+		background: linear-gradient(
+			to bottom,
+			#09090b80,
+			#09090bcc,
+			#09090be5,
+			#09090b
+		);
 	}
-
-	.bg-gradient-neutral {
-		background: linear-gradient(to bottom, transparent, #18181b90, #18181bE6, #18181b);
-	}
-
-	.h-virtualized-ranking {
-		@apply h-[calc(100vh-180px)] 2xl:h-[calc(100vh-220px)];
-	}
-
-	.grid-ranking-list {
-		@apply grid grid-cols-[30px,_1fr] md:grid-cols-[45px,_2fr,_3fr];
+	.text-description {
+		@apply text-base font-normal leading-tight text-muted;
 	}
 }
 
-:root {
-	font-size: 16px;
-	font-weight: 500;
-	
-	--background: 0 0% 4%; /* #09090b */
-	--foreground: 0 0% 98%; /* #fafafa */
-	--card: 0 0% 4%; /* #09090b */
-	--card-foreground: 0 0% 98%; /* #fafafa */
-	--popover: 0 0% 4%; /* #09090b */
-	--popover-foreground: 0 0% 98%; /* #fafafa */
-	--primary: 0 0% 98%; /* #fafafa */
-	--primary-foreground: 0 0% 9%; /* #171717 */
-	--secondary: 0 0% 15%; /* #262626 */
-	--secondary-foreground: 0 0% 98%; /* #fafafa */
-	--muted: 0 0% 15%; /* #262626 */
-	--muted-foreground: 0 0% 64%; /* #a3a3a3 */
-	--accent: 0 0% 15%; /* #262626 */
-	--accent-foreground: 0 0% 98%; /* #fafafa */
-	--destructive: 0 84% 60%; /* #ef4444 */
-	--destructive-foreground: 0 0% 98%; /* #fafafa */
-	--border: 0 0% 15%; /* #262626 */
-	--input: 0 0% 15%; /* #262626 */
-	--ring: 0 0% 83%; /* #d4d4d4 */
-	--chart-1: 12 76% 61%; /* #e88c30 */
-	--chart-2: 173 58% 39%; /* #3b82a0 */
-	--chart-3: 197 37% 24%; /* #264756 */
-	--chart-4: 43 74% 66%; /* #e1c340 */
-	--chart-5: 27 87% 67%; /* #f97316 */
-	--radius: 0.5rem;
-}
-
-@media (min-width: 768px) {
+@layer base {
 	:root {
 		font-size: 16px;
+
+		--background: 240, 5%, 97%;
+		--foreground: 240, 5%, 4%;
+
+		--primary: 0 0% 98%; /* #fafafa */
+		--primary-foreground: 0 0% 9%; /* #171717 */
+
+		--secondary: 0 0% 15%; /* #262626 */
+		--secondary-foreground: 0 0% 98%; /* #fafafa */
+
+		--muted: 0 0% 15%; /* #262626 */
+		--muted-foreground: 0 0% 64%; /* #a3a3a3 */
+
+		--card: 0 0% 4%; /* #09090b */
+		--card-foreground: 0 0% 98%; /* #fafafa */
+
+		--popover: 0 0% 4%; /* #09090b */
+		--popover-foreground: 0 0% 98%; /* #fafafa */
+
+		--secondary: 0 0% 15%; /* #262626 */
+		--secondary-foreground: 0 0% 98%; /* #fafafa */
+
+		--muted: 0 0% 15%; /* #262626 */
+		--muted-foreground: 0 0% 64%; /* #a3a3a3 */
+
+		--accent: 0 0% 15%; /* #262626 */
+		--accent-foreground: 0 0% 98%; /* #fafafa */
+
+		--destructive: 0 84% 60%; /* #ef4444 */
+		--destructive-foreground: 0 0% 98%; /* #fafafa */
+
+		--border: 0 0% 15%; /* #262626 */
+		--input: 0 0% 15%; /* #262626 */
+		--ring: 0 0% 83%; /* #d4d4d4 */
+		--chart-1: 12 76% 61%; /* #e88c30 */
+		--chart-2: 173 58% 39%; /* #3b82a0 */
+		--chart-3: 197 37% 24%; /* #264756 */
+		--chart-4: 43 74% 66%; /* #e1c340 */
+		--chart-5: 27 87% 67%; /* #f97316 */
+		--radius: 0.5rem;
+
+		--sidebar-background: 0 0% 98%;
+		--sidebar-foreground: 240 5.3% 26.1%;
+		--sidebar-accent: 240 4.8% 95.9%;
+		--sidebar-accent-foreground: 240 5.9% 10%;
+		--sidebar-border: 220 13% 91%;
+
+		--font-size-xs: 0.725rem;
+		--font-size-sm: clamp(0.825rem, 0.81rem + 0.08vw, 0.875rem);
+		--font-size-base: 0.875rem;
+		--font-size-lg: 1rem;
+		--font-size-xl: 1.125rem;
+		--font-size-2xl: 1.375rem;
+		--font-size-3xl: clamp(1.75rem, 1.5rem + 1.3vw, 2.125rem);
+		--font-size-4xl: clamp(2.125rem, 1.6rem + 2.73vw, 2.875rem);
 	}
-}
+	.dark {
+		--background: 240, 5%, 4%;
+		--foreground: 240, 5%, 97%;
 
-body {
-	@apply bg-neutral-950;
-	@apply text-neutral-100;
-	@apply font-sans;
-	pointer-events: auto !important;
-}
+		--primary: 81, 91%, 67%;
+		--primary-foreground: 240, 5%, 4%; 
 
-h1 {
-	@apply text-3xl font-bold leading-relaxed;
-}
+		--secondary: 240, 4%, 16%;
+		--secondary-foreground: 240, 6%, 70%;
 
-h2 {
-	@apply text-xl font-bold leading-relaxed;
-}
+		--muted: 240, 4%, 16%; 
+		--muted-foreground: 240, 3%, 40%; 
 
-h3 {
-	@apply text-xl font-semibold leading-relaxed;
-}
+		--accent: 240, 5%, 10%; 
+		--accent-foreground: 240, 8%, 90%;
 
-h4 {
-	@apply font-medium leading-relaxed;
-}
+		--field: hsl(240 4% 4% / 0.45);
 
-p {
-	@apply text-base leading-tight;
-}
+		--border: 240, 4%, 20%;
 
-hr {
-	@apply border-neutral-800;
-}
+		--sidebar-background: 240, 5%, 8%;
+		--sidebar-foreground: 240, 5%, 70%;
+		--sidebar-accent: 240 3.7% 10%;
+		--sidebar-accent-foreground: 240 4.8% 95.9%;
+		--sidebar-border: 240, 4%, 15%;
+		--sidebar-ring: 240, 4%, 40%;
+	}
 
-button {
-	@apply select-none;
-}
+	* {
+		@apply border-border;
+	}
+	body {
+		@apply font-sans;
+		font-weight: 500;
+		line-height: 1.6;
+		color: hsl(var(--foreground));
+		background-color: hsl(var(--background));
+		pointer-events: auto !important;
+	}
+	h1 {
+		font-size: var(--font-size-3xl);
+		font-weight: 700;
+		line-height: 1.625;
+	}
+	h2 {
+		font-size: var(--font-size-xl);
+		font-weight: 700;
+		line-height: 1.625;
+	}
+	h3 {
+		font-size: var(--font-size-xl);
+		font-weight: 600;
+		line-height: 1.625;
+	}
+	h4 {
+		font-size: var(--font-size-base);
+		font-weight: 500;
+		line-height: 1.625;
+	}
+	p {
+		font-size: var(--font-size-base);
+		line-height: 1.25;
+	}
+	button {
+		@apply select-none;
+	}
 
-::-webkit-scrollbar {
-	@apply h-1 w-1 rounded-full bg-neutral-800;
-}
+	::-webkit-scrollbar {
+		@apply h-1 w-1 rounded-full;
+	}
 
-::-webkit-scrollbar-thumb {
-	@apply h-1 w-1 rounded-full bg-neutral-700;
-}
+	::-webkit-scrollbar-thumb {
+		@apply h-1 w-1 rounded-full bg-muted;
+	}
 
-::-webkit-scrollbar-button {
-	display: none;
+	::-webkit-scrollbar-button {
+		display: none;
+	}
 }

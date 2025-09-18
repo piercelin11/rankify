@@ -30,7 +30,7 @@ export default function VirtualizedMenuItems({
 
 	if (options.length === 0) {
 		return (
-			<div className="py-4 text-center text-sm text-neutral-500">
+			<div className="py-4 text-center text-sm text-muted-foreground">
 				No tracks found
 			</div>
 		);
@@ -39,7 +39,7 @@ export default function VirtualizedMenuItems({
 	return (
 		<div
 			ref={parentRef}
-			className="max-h-[240px] overflow-y-auto"
+			className="flex-1 overflow-y-auto"
 		>
 			<div
 				style={{
@@ -78,7 +78,7 @@ export default function VirtualizedMenuItems({
 							<span className="truncate text-sm">{option.name}</span>
 							<div className="flex items-center gap-2">
 								{isLoading && (
-									<div className="h-3 w-3 animate-spin rounded-full border-2 border-neutral-400 border-t-transparent" />
+									<div className="h-3 w-3 animate-spin rounded-full border-2 border-secondary-foreground border-t-transparent" />
 								)}
 								{(isSelected || isDefault) && (
 									<Badge variant="secondary" className="text-xs">

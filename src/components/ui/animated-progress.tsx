@@ -41,7 +41,7 @@ export function AnimatedProgress({
 	return (
 		<div className="space-y-2">
 			<div className="flex justify-between text-sm">
-				<span className="text-neutral-500">{label}</span>
+				<span className="text-muted-foreground">{label}</span>
 				<span className="font-semibold">{currentValue}%</span>
 			</div>
 			<Progress className="h-1.5" value={currentValue} />

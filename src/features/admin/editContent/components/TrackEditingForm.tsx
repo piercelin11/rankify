@@ -194,7 +194,7 @@ export default function TrackEditingForm({
 					type="button"
 					variant="outline"
 					onClick={onClose}
-					className="flex-1 border-neutral-600 text-neutral-200 hover:bg-neutral-800"
+					className="flex-1  text-neutral-200 hover:bg-neutral-800"
 				>
 					Cancel
 				</Button>

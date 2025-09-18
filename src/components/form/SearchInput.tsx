@@ -5,11 +5,11 @@ type SearchInputProps = {} & React.InputHTMLAttributes<HTMLInputElement>;
 
 export default function SearchInput({ className, ...props }: SearchInputProps) {
     return (
-        <div className="flex w-full items-center gap-2 rounded border border-neutral-700 bg-neutral-950 px-3 py-2">
-            <MagnifyingGlassIcon className="text-neutral-500" width={20} height={20} />
+        <div className="flex w-full items-center gap-2 rounded border  bg-neutral-950 px-3 py-2">
+            <MagnifyingGlassIcon className="text-muted-foreground" width={20} height={20} />
             <input
                 className={cn(
-                    "bg-transparent w-full text-neutral-500 placeholder:text-neutral-500 focus:outline-none",
+                    "bg-transparent w-full text-muted-foreground placeholder:text-muted-foreground focus:outline-none",
                     className
                 )}
                 autoComplete="off"

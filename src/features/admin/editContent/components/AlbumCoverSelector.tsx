@@ -53,7 +53,7 @@ export default function AlbumCoverSelector({
 						<label
 							key={url}
 							className={cn(
-								"relative flex items-center gap-2 overflow-hidden rounded text-neutral-500",
+								"relative flex items-center gap-2 overflow-hidden rounded text-muted-foreground",
 								{
 									"outline outline-2 outline-primary-500": value === url,
 								}

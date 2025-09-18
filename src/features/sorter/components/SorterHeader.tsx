@@ -15,10 +15,10 @@ export default function SorterHeader({ artist }: SorterHeaderProps) {
 	const saveStatus = useAppSelector((state) => state.sorter.saveStatus);
 
 	return (
-		<div className="grid items-center border-b border-neutral-800 px-4 py-8 sm:grid-cols-3">
+		<div className="grid items-center border-b  px-4 py-8 sm:grid-cols-3">
 			<div className="flex items-center gap-2 justify-self-center sm:justify-self-auto">
 				{/* <LogoDisplay /> */}
-				<div className="hidden h-5 justify-end text-neutral-500 lg:flex">
+				<div className="hidden h-5 justify-end text-muted-foreground lg:flex">
 					{saveStatus === "saved" ? (
 						<div className="flex items-center gap-1">
 							<CheckIcon />
@@ -36,12 +36,12 @@ export default function SorterHeader({ artist }: SorterHeaderProps) {
 			</div>
 
 			<div className="hidden justify-self-center sm:block">
-				<p className="text-neutral-300">{artist.name}&apos;s Sorter</p>
+				<p className="text-secondary-foreground">{artist.name}&apos;s Sorter</p>
 			</div>
 			<div className="mt-2 w-full justify-self-end sm:w-fit">
 				<div className="relative w-full sm:w-[150px] xl:w-[300px]">
 					<p
-						className="absolute -top-5 text-right text-sm text-neutral-500 -translate-x-full"
+						className="absolute -top-5 text-right text-sm text-muted-foreground -translate-x-full"
 						style={{ left: `${percentage}%` }}
 					>
 						{percentage}%

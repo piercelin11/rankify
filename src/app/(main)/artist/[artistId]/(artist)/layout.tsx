@@ -30,7 +30,7 @@ export default async function MainLayout({ params, children }: LayoutProps) {
 			<ContentHeader
 				data={artist}
 				subTitleContent={
-					<p className="text-description text-neutral-300/40">
+					<p>
 						{artist.spotifyFollowers} followers
 					</p>
 				}
@@ -60,7 +60,7 @@ async function SubHeader({ artist }: { artist: ArtistData }) {
 	const isRankingPage = parsedPathname?.segments.includes("ranking");
 
 	return (
-		<div className="space-y-4 px-content pt-content md:flex md:justify-between">
+		<div className="px-content pt-content md:flex md:justify-between">
 			<SimpleBreadcrumb items={breadCrumbItems} />
 			<div className="flex gap-4">
 				{!isRankingPage && (
@@ -75,12 +75,12 @@ async function SubHeader({ artist }: { artist: ArtistData }) {
 				)}
 				{isRankingPage ? (
 					<Button className="h-12">
-						<Plus className="h-8 w-8 text-neutral-900" />
+						<Plus className="h-8 w-8 text-primary-foreground" />
 						Create Sorter
 					</Button>
 				) : (
 					<Button size="icon" className="h-12 w-12 rounded-full">
-						<Plus className="h-8 w-8 text-neutral-900" />
+						<Plus className="h-8 w-8 text-primary-foreground" />
 					</Button>
 				)}
 			</div>

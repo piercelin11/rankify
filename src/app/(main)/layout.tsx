@@ -1,20 +1,26 @@
-import SidebarLayout from "@/components/layout/SidebarLayout";
 import { getUserSession } from "../../../auth";
 import getLoggedArtists from "@/lib/database/user/getLoggedArtists";
-import MainSidebar from "@/components/sidebar/MainSidebar";
+import { AppSidebarProvider } from "@/components/sidebar/AppSidebarProvider";
+import { SimpleSidebar } from "@/components/sidebar/Sidebar";
+import { ResponsiveLayout } from "@/components/sidebar/ResponsiveLayout";
 
 type AdminLayoutProps = {
 	children: React.ReactNode;
 };
 
 export default async function MainLayout({ children }: AdminLayoutProps) {
-	const userSession = await getUserSession();
-	const loggedArtists = await getLoggedArtists({ userId: userSession.id });
+	const user = await getUserSession();
+	const loggedArtists = await getLoggedArtists({ userId: user.id });
 
 	return (
-		<SidebarLayout>
-			<MainSidebar userSession={userSession} artistData={loggedArtists} />
-			<div>{children}</div>
-		</SidebarLayout>
+		<>
+			<AppSidebarProvider>
+				<ResponsiveLayout
+					sidebar={<SimpleSidebar user={user} artists={loggedArtists} />}
+				>
+					{children}
+				</ResponsiveLayout>
+			</AppSidebarProvider>
+		</>
 	);
 }

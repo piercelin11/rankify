@@ -26,7 +26,7 @@ export default function StatsCard({
 	return (
 		<Card
 			className={cn(
-				"flex flex-col justify-between space-y-6 bg-gradient-to-b from-transparent to-neutral-950 p-8",
+				"flex flex-col justify-between space-y-6 bg-gradient-to-b from-transparent to-background p-8",
 				className
 			)}
 		>
@@ -34,11 +34,11 @@ export default function StatsCard({
 				<>
 					<div className="space-y-3">
 						<div className="flex items-center justify-between">
-							<h3 className="text-base text-neutral-500">{title}</h3>
+							<h3 className="text-base font-semibold">{title}</h3>
 							{badge && (
 								<Badge
 									variant={badge.variant || "outline"}
-									className="border-neutral-600"
+									className=""
 								>
 									{badge.text}
 								</Badge>
@@ -46,7 +46,7 @@ export default function StatsCard({
 						</div>
 						<p className="text-3xl font-bold">{value}</p>
 					</div>
-					{subtitle && <p className="mt-auto text-neutral-300">{subtitle}</p>}
+					{subtitle && <p className="mt-auto text-muted-foreground">{subtitle}</p>}
 				</>
 			)}
 		</Card>

@@ -82,7 +82,7 @@ export default function VirtualizedTableBody<
 															"flex items-center gap-2",
 															isFirstTwoColumns ? "" : "justify-end",
 															header.column.getCanSort() &&
-																"-m-1 cursor-pointer select-none rounded p-1 hover:text-neutral-100"
+																"-m-1 cursor-pointer select-none rounded p-1 hover:text-foreground"
 														)}
 														onClick={header.column.getToggleSortingHandler()}
 													>

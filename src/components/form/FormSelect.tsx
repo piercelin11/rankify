@@ -13,9 +13,9 @@ export default function FormSelect({
 }: FormSelectProps) {
 	return (
 		<div className="space-y-3">
-			<p className="text-sm text-neutral-500">{title}</p>
+			<p className="text-sm text-muted-foreground">{title}</p>
 			<select
-				className="w-full rounded-md border border-neutral-600 bg-neutral-950 p-2 focus:outline-none"
+				className="w-full rounded-md border  bg-neutral-950 p-2 focus:outline-none"
 				{...props}
 			>
 				{options.map((option) => (

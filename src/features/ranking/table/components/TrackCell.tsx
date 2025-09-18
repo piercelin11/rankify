@@ -35,7 +35,7 @@ export default function TrackCell({
 				</div>
 			)}
 			<div className="min-w-0 flex-1">
-				<p className="truncate font-medium">{item.name}</p>
+				<p className="truncate font-semibold">{item.name}</p>
 				{item.album?.name && (
 					<p className="truncate text-sm text-muted-foreground">
 						{item.album.name}

@@ -14,28 +14,28 @@ const styles: Record<string, Record<"default" | "disabled", string>> = {
 	},
 	secondary: {
 		default:
-			"bg-neutral-800/80 text-neutral-400 hover:bg-neutral-900 hover:text-neutral-100",
-		disabled: "bg-neutral-800/80 text-neutral-100",
+			"bg-neutral-800/80 text-secondary-foreground hover:bg-neutral-900 hover:text-foreground",
+		disabled: "bg-neutral-800/80 text-foreground",
 	},
 	neutral: {
 		default:
-			"bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100 border border-neutral-800",
-		disabled: "bg-neutral-900 text-neutral-100 border border-neutral-800",
+			"bg-neutral-900 text-secondary-foreground hover:bg-neutral-800 hover:text-foreground border ",
+		disabled: "bg-neutral-900 text-foreground border ",
 	},
 	outline: {
 		default:
-			"bg-transparent text-neutral-400 hover:text-neutral-100 border border-neutral-400/50 hover:border-neutral-100",
-		disabled: "bg-transparent text-neutral-400 border border-neutral-500",
+			"bg-transparent text-secondary-foreground hover:text-foreground border border-neutral-400/50 hover:border-neutral-100",
+		disabled: "bg-transparent text-secondary-foreground border ",
 	},
 	ghost: {
-		default: "bg-transparent text-neutral-500 hover:text-neutral-100",
-		disabled: "bg-transparent text-neutral-300",
+		default: "bg-transparent text-muted-foreground hover:text-foreground",
+		disabled: "bg-transparent text-secondary-foreground",
 	},
 	menu: {
 		default:
-			"w-full text-lg bg-transparent text-neutral-300 hover:text-neutral-100 hover:bg-neutral-900 justify-center lg:justify-normal",
+			"w-full text-lg bg-transparent text-secondary-foreground hover:text-foreground hover:bg-neutral-900 justify-center lg:justify-normal",
 		disabled:
-			"w-full text-lg bg-transparent text-neutral-300 justify-center lg:justify-normal",
+			"w-full text-lg bg-transparent text-secondary-foreground justify-center lg:justify-normal",
 	},
 };
 
@@ -51,7 +51,7 @@ export default function Button({
 	return (
 		<button
 			className={cn(
-				`text-label flex items-center gap-1 px-6 py-4 ${disabled ? styles[variant].disabled : styles[variant].default}`,
+				` flex items-center gap-1 px-6 py-4 ${disabled ? styles[variant].disabled : styles[variant].default}`,
 				className,
 				{
 					"opacity-70": disabled,

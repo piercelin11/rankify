@@ -15,7 +15,7 @@ export default function FormInput({
 }: FormItemProps) {
 	return (
 		<div className="space-y-4">
-			<p className="text-sm text-neutral-500">{label}</p>
+			<p className="text-sm text-muted-foreground">{label}</p>
 			<Input className={className} {...props} />
 			{message && (
 				<FormMessage message={message} type="error" border={false} />
@@ -28,7 +28,7 @@ export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInp
 	return (
 		<input
 			className={cn(
-				"w-full rounded-xl border border-neutral-700 bg-neutral-950 p-4 focus:outline-none focus:border-neutral-100",
+				"w-full rounded-xl border  bg-neutral-950 p-4 focus:outline-none focus:border-neutral-100",
 				className
 			)}
 			autoComplete="off"

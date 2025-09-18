@@ -2,7 +2,8 @@ import type { Config } from "tailwindcss";
 import { PluginAPI } from "tailwindcss/types/config";
 import colors from "tailwindcss/colors";
 
-export default { 
+export default {
+	darkMode: ["class"],
 	content: [
 		"./src/components/**/*.{js,ts,jsx,tsx,mdx}",
 		"./src/app/**/*.{js,ts,jsx,tsx,mdx}",
@@ -25,6 +26,11 @@ export default {
 				ring: "hsl(var(--ring))",
 				background: "hsl(var(--background))",
 				foreground: "hsl(var(--foreground))",
+				field: "var(--field)",
+				primary: {
+					DEFAULT: "hsl(var(--primary))",
+					foreground: "hsl(var(--primary-foreground))",
+				},
 				secondary: {
 					DEFAULT: "hsl(var(--secondary))",
 					foreground: "hsl(var(--secondary-foreground))",
@@ -49,86 +55,52 @@ export default {
 					DEFAULT: "hsl(var(--card))",
 					foreground: "hsl(var(--card-foreground))",
 				},
-				// 保留原有的自定義調色板以供前台使用
-				primary: {
-					50: "#F2FFE1",
-					100: "#E0FFBF",
-					200: "#C9FF94",
-					300: "#A9F56C",
-					400: "#83E845",
-					500: "#C3F75F",
-					600: "#9FC040",
-					700: "#7C972E",
-					800: "#5E7022",
-					900: "#3B4511",
-					DEFAULT: "hsl(var(--primary))",
-					foreground: "hsl(var(--primary-foreground))",
-				},
-				/* primary: {
-					50: "#FFF7ED",
-					100: "#FFEDD5",
-					200: "#FED7AA",
-					300: "#FDBA74",
-					400: "#FB923C",
-					500: "#E88C00",
-					600: "#EA580C",
-					700: "#C2410C",
-					800: "#9A3412",
-					900: "#7C2D12",
-					DEFAULT: "hsl(var(--primary))",
-					foreground: "hsl(var(--primary-foreground))",
-				}, */
-				lavender: {
-					50: "#F7F9FA",
-					100: "#F0F3F5",
-					200: "#DDE5E9",
-					300: "#C7D3DB",
-					400: "#B0BCC6",
-					500: "#90A4AE",
-					600: "#748892",
-					700: "#59676E",
-					800: "#424E54",
-					900: "#2C3437",
-				},
-				neutral: colors.zinc,
+				neutral: colors.purple,
 				success: colors.green,
 				warning: colors.yellow,
 				danger: colors.red,
 				spotify: "#1ed760",
+				sidebar: {
+					DEFAULT: "hsl(var(--sidebar-background))",
+					foreground: "hsl(var(--sidebar-foreground))",
+					primary: "hsl(var(--sidebar-primary))",
+					"primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+					accent: "hsl(var(--sidebar-accent))",
+					"accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+					border: "hsl(var(--sidebar-border))",
+					ring: "hsl(var(--sidebar-ring))",
+				},
 			},
 			boxShadow: {
-				dent: `inset -2px 2px 8px 0 ${colors.neutral[950]}AA`,
-				"stats-card": `inset -1px 1px 0 0 ${colors.neutral[600]},inset 1px -1px 0 0 ${colors.neutral[600]}40`,
-				button: `inset -1px 1px 2px 0 ${colors.neutral[500]},inset 1.5px -1.5px 2px 0 ${colors.neutral[800]}`,
+				dent: "`inset -2px 2px 8px 0 ${colors.neutral[950]}AA`",
+				"stats-card":
+					"`inset -1px 1px 0 0 ${colors.neutral[600]},inset 1px -1px 0 0 ${colors.neutral[600]}40`",
+				button:
+					"`inset -1px 1px 2px 0 ${colors.neutral[500]},inset 1.5px -1.5px 2px 0 ${colors.neutral[800]}`",
 			},
 			borderRadius: {
 				"4xl": "2rem",
 				"5xl": "2.5rem",
 			},
 			spacing: {
+				"22": "5.5rem",
 				"sidebar-sm": "80px",
 				"sidebar-lg": "260px",
 				"sidebar-xl": "300px",
-				"22": "5.5rem",
-				content: "2rem"
+				content: "2rem",
 			},
 			backgroundImage: {
-				glow: `radial-gradient(ellipse farthest-side at top, ${colors.neutral[800]}40, ${colors.neutral[950]}CC)`,
+				glow: "`radial-gradient(ellipse farthest-side at top, ${colors.neutral[800]}40, ${colors.neutral[950]}CC)`",
 			},
 			fontSize: {
-				xs: ["0.725rem", "1.35rem"], // 有調整過
-				sm: ["0.825rem", "1.4rem"], // 有調整過
-				base: ["0.875rem", "1.5rem"], // 14px
-				lg: ["1rem", "1.75rem"], // 16px
-				xl: ["1.125rem", "1.75rem"], // 18px
-				"2xl": ["1.375rem", "2rem"], // 22px
-				"3xl": ["1.75rem", "2.25rem"], // 28px
-				"4xl": ["2.125rem", "2.5rem"], // 34px
-				"5xl": ["2.875rem", "1"], // 46px
-				"6xl": ["3.625rem", "1"], // 58px
-				"7xl": ["4.375rem", "1"], // 70px
-				"8xl": ["5.875rem", "1"], // 94px
-				"9xl": ["7.875rem", "1"], // 126px
+				xs: ["var(--font-size-xs)", { lineHeight: "1.35rem" }],
+				sm: ["var(--font-size-sm)", { lineHeight: "1.4rem" }],
+				base: ["var(--font-size-base)", { lineHeight: "1.5rem" }],
+				lg: ["var(--font-size-lg)", { lineHeight: "1.75rem" }],
+				xl: ["var(--font-size-xl)", { lineHeight: "1.75rem" }],
+				"2xl": ["var(--font-size-2xl)", { lineHeight: "2rem" }],
+				"3xl": ["var(--font-size-3xl)", { lineHeight: "2.25rem" }],
+				"4xl": ["var(--font-size-4xl)", { lineHeight: "1.2" }],
 			},
 		},
 	},

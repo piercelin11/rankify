@@ -37,7 +37,7 @@ export default function SelectablecContentItem({
 			</div>
 			<div className="overflow-hidden">
 				<p className="overflow-hidden text-ellipsis text-nowrap">{data.name}</p>
-				<p className="text-sm text-neutral-400">{type}</p>
+				<p className="text-sm text-secondary-foreground">{type}</p>
 			</div>
 			<CheckBox className="ml-auto" checked={checked} />
 		</div>

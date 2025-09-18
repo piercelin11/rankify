@@ -40,7 +40,7 @@ export default function ColorSelector({
 								key={`${name}-${colorOption}`}
 								htmlFor={`${name}-${colorOption}`}
 								className={cn(
-									"aspect-square w-8 rounded-full border border-neutral-800 lg:w-10",
+									"aspect-square w-8 rounded-full border  lg:w-10",
 									{
 										"border-2 border-neutral-200": value === colorOption,
 									}

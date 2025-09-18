@@ -49,11 +49,11 @@ const AdminContentHeader = React.memo(function ContentHeader({
 					{data && (
 						<div className="space-y-1">
 							{type && <p>{type}</p>}
-							<h1 className="text-display">{data?.name}</h1>
-							<div className="text-description group mb-4 flex items-center gap-2 text-neutral-400">
+							<h1 className="">{data?.name}</h1>
+							<div className="text-description group mb-4 flex items-center gap-2 text-secondary-foreground">
 								<Link href={data?.spotifyUrl || ""} className="inline-block">
 									<SpotifyIcon
-										className={"text-neutral-400 hover:text-spotify"}
+										className={"text-secondary-foreground hover:text-spotify"}
 										size={30}
 									/>
 								</Link>
