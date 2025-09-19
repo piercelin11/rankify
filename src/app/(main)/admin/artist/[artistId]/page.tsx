@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import getSinglesByArtist from "@/lib/database/data/getSinglesByArtist";
 import TracksTable from "@/features/admin/editContent/components/TracksTable";
-import ContentWrapper from "@/components/layout/ContentWrapper";
+import { PageContainer } from "@/components/layout/PageContainer";
 import AddAlbumButton from "@/features/admin/addContent/components/AddAlbumButton";
 import AddEPButton from "@/features/admin/addContent/components/AddEPButton";
 import AddSingleButton from "@/features/admin/addContent/components/AddSingleButton";
@@ -42,7 +42,7 @@ export default async function AdminArtistPage({
 			>
 				<ArtistActionDropdown data={artist} />
 			</AdminContentHeader>
-			<ContentWrapper>
+			<PageContainer>
 				<div className="mb-60 space-y-10">
 					<div>
 						<h2>Albums</h2>
@@ -83,7 +83,7 @@ export default async function AdminArtistPage({
 						<TracksTable albums={albums} tracks={singles} />
 					</div>
 				</div>
-			</ContentWrapper>
+			</PageContainer>
 		</>
 	);
 }

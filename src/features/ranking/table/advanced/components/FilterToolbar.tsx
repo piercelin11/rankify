@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import type { AdvancedFilters } from "../types";
 import SearchInput from "../../components/SearchInput";
+import { Separator } from "@/components/ui/separator";
 
 type FilterToolbarProps = {
 	globalFilter: string;
@@ -69,7 +70,7 @@ export default function FilterToolbar({
 						<Button
 							variant="outline"
 							size="lg"
-							className="items-center gap-2 px-4"
+							className="items-center gap-1 text-sm"
 						>
 							<Filter className="h-4 w-4" />
 							Albums
@@ -81,21 +82,22 @@ export default function FilterToolbar({
 						</Button>
 					</PopoverTrigger>
 					<PopoverContent className="w-72" align="start">
-						<div className="space-y-6">
+						<div className="space-y-4">
 							{/* Header */}
 							<div className="flex items-center justify-between">
-								<h4 className="font-semibold">Filter by Albums</h4>
+								<h4 className="font-semibold text-md">Filter by Albums</h4>
 								<Button
 									variant="ghost"
 									onClick={clearFilters}
-									className="h-6 px-2 text-sm text-primary-500"
+									className="h-6 px-2 text-sm text-secondary-foreground"
 								>
 									Clear All
 								</Button>
 							</div>
+							<Separator/>
 
 							{/* Album List */}
-							<div className="max-h-64 space-y-3 overflow-auto pr-4 scrollbar-hidden">
+							<div className="max-h-64 space-y-2 overflow-auto pr-4 scrollbar-hidden">
 								{availableAlbums.map((albumName) => (
 									<div
 										key={albumName}
@@ -110,7 +112,7 @@ export default function FilterToolbar({
 										/>
 										<label
 											htmlFor={albumName}
-											className="flex-1 cursor-pointer select-none overflow-hidden text-ellipsis text-nowrap leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+											className="flex-1 text-sm cursor-pointer select-none overflow-hidden text-ellipsis text-nowrap leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 										>
 											{albumName}
 										</label>

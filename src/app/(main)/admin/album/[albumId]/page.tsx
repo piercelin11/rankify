@@ -6,7 +6,7 @@ import getTracksByAlbum from "@/lib/database/data/getTracksByAlbum";
 import { dateToLong } from "@/lib/utils";
 import TracksTable from "@/features/admin/editContent/components/SortableTracksTable";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
-import ContentWrapper from "@/components/layout/ContentWrapper";
+import { PageContainer } from "@/components/layout/PageContainer";
 import AlbumActionDropdown from "@/features/admin/editContent/components/AlbumActionDropdown";
 import AdminContentHeader from "@/features/admin/editContent/components/AdminContentHeader";
 
@@ -32,9 +32,9 @@ export default async function AdminAlbumPage({
 			>
 				<AlbumActionDropdown data={album} />
 			</AdminContentHeader>
-			<ContentWrapper>
+			<PageContainer>
 				<TracksTable tracks={tracks} albums={albums} />
-			</ContentWrapper>
+			</PageContainer>
 		</>
 	);
 }
