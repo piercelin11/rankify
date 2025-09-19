@@ -63,9 +63,12 @@
 
 		--sidebar-background: 0 0% 98%;
 		--sidebar-foreground: 240 5.3% 26.1%;
+		--sidebar-primary: 240 5.9% 10%;
+		--sidebar-primary-foreground: 0 0% 98%;
 		--sidebar-accent: 240 4.8% 95.9%;
 		--sidebar-accent-foreground: 240 5.9% 10%;
 		--sidebar-border: 220 13% 91%;
+		--sidebar-ring: 217.2 91.2% 59.8%;
 
 		--font-size-xs: 0.725rem;
 		--font-size-sm: clamp(0.825rem, 0.81rem + 0.08vw, 0.875rem);
@@ -77,31 +80,36 @@
 		--font-size-4xl: clamp(2.125rem, 1.6rem + 2.73vw, 2.875rem);
 	}
 	.dark {
-		--background: 240, 5%, 4%;
-		--foreground: 240, 5%, 97%;
+		--background: 240 5% 4%;
+		--foreground: 240 5% 97%;
 
-		--primary: 81, 91%, 67%;
-		--primary-foreground: 240, 5%, 4%; 
+		--primary: 81 91% 67%;
+		--primary-foreground: 240 5% 4%;
 
-		--secondary: 240, 4%, 16%;
-		--secondary-foreground: 240, 6%, 70%;
+		--secondary: 240 4% 16%;
+		--secondary-foreground: 240 6% 70%;
 
-		--muted: 240, 4%, 16%; 
-		--muted-foreground: 240, 3%, 40%; 
+		--muted: 240 4% 16%;
+		--muted-foreground: 240 3% 40%;
 
-		--accent: 240, 5%, 10%; 
-		--accent-foreground: 240, 8%, 90%;
+		--accent: 240 5% 10%;
+		--accent-foreground: 240 8% 90%;
 
-		--field: hsl(240 4% 4% / 0.45);
+		--field: 240 4% 4% / 0.45;
 
-		--border: 240, 4%, 20%;
+		--popover: 240 5% 7%;
+		--popover-foreground: 240 5% 97%;
 
-		--sidebar-background: 240, 5%, 8%;
-		--sidebar-foreground: 240, 5%, 70%;
+		--border: 240 4% 20%;
+
+		--sidebar-background: 240 5% 4%;
+		--sidebar-foreground: 240 5% 70%;
+		--sidebar-primary: 224.3 76.3% 48%;
+		--sidebar-primary-foreground: 0 0% 100%;
 		--sidebar-accent: 240 3.7% 10%;
 		--sidebar-accent-foreground: 240 4.8% 95.9%;
-		--sidebar-border: 240, 4%, 15%;
-		--sidebar-ring: 240, 4%, 40%;
+		--sidebar-border: 240 4% 15%;
+		--sidebar-ring: 217.2 91.2% 59.8%;
 	}
 
 	* {

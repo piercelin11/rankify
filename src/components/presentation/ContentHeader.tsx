@@ -24,11 +24,11 @@ export default function ContentHeader({
 	color,
 }: ContentHeaderProps) {
 	return (
-			<section className="p-content">
+			<section className="px-content pt-content">
 				<div className="flex items-center gap-6">
 					<div
 						className={cn(
-							"relative min-h-[220px] min-w-[220px] overflow-hidden drop-shadow-2xl",
+							"relative size-[200px] flex-shrink-0 overflow-hidden drop-shadow-2xl",
 							{
 								"rounded-full": rounded,
 								"rounded-xl": !rounded,
@@ -40,7 +40,7 @@ export default function ContentHeader({
 							priority
 							src={data?.img || PLACEHOLDER_PIC}
 							alt={`${data?.name} profile`}
-							sizes="(min-width: 1536px) 300px, 220px"
+							sizes="200px"
 						/>
 					</div>
 					{data && (

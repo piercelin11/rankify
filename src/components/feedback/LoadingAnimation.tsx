@@ -15,7 +15,7 @@ export default function LoadingAnimation({
 
 	return (
 		<div
-			className={` ${styles} ${isFull ? "mx-auto" : ""} animate-spin rounded-full border-t-neutral-800`}
+			className={` ${styles} ${isFull ? "mx-auto" : ""} animate-spin rounded-full border-t-secondary-foreground`}
 		></div>
 	);
 }

@@ -68,7 +68,7 @@ export default async function page({
 	const nextAlbum = albums[currentIndex + 1] || albums[0]; // 如果是最後一首，取第一首
 
 	return (
-		<div className="space-y-10">
+		<div className="space-y-8">
 			<SimpleSegmentControl
 				options={ALBUM_SEGMENT_OPTIONS}
 				defaultValue="artist"

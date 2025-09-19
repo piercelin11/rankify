@@ -46,7 +46,9 @@ export default function AnimatedSegmentControl({
 		value || defaultValue || options[0]?.value || ""
 	);
 	const [pendingValue, setPendingValue] = useState<string | null>(null);
-	const [indicatorStyle, setIndicatorStyle] = useState<IndicatorStyle | null>(null);
+	const [indicatorStyle, setIndicatorStyle] = useState<IndicatorStyle | null>(
+		null
+	);
 	const segmentRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
 	const router = useRouter();
 	const pathname = usePathname();
@@ -55,24 +57,27 @@ export default function AnimatedSegmentControl({
 	const currentValue = value !== undefined ? value : internalValue;
 	const displayValue = pendingValue ? pendingValue : currentValue;
 
-	const handleValueChange = useCallback((option: SegmentOption) => {
-		setPendingValue(option.value);
+	const handleValueChange = useCallback(
+		(option: SegmentOption) => {
+			setPendingValue(option.value);
 
-		if (value === undefined) {
-			setInternalValue(option.value);
-		}
-		onValueChange?.(option.value);
+			if (value === undefined) {
+				setInternalValue(option.value);
+			}
+			onValueChange?.(option.value);
 
-		if (option.queryParam) {
-			const params = new URLSearchParams(searchParams.toString());
-			params.set(option.queryParam[0], option.queryParam[1]);
-			router.push(`${pathname}?${params.toString()}`);
-		}
+			if (option.queryParam) {
+				const params = new URLSearchParams(searchParams.toString());
+				params.set(option.queryParam[0], option.queryParam[1]);
+				router.push(`${pathname}?${params.toString()}`);
+			}
 
-		if (option.onClick) {
-			option.onClick();
-		}
-	}, [value, onValueChange, router, pathname, searchParams]);
+			if (option.onClick) {
+				option.onClick();
+			}
+		},
+		[value, onValueChange, router, pathname, searchParams]
+	);
 
 	const updateIndicator = useCallback(() => {
 		const activeSegmentRef = segmentRefs.current.get(displayValue);
@@ -103,17 +108,18 @@ export default function AnimatedSegmentControl({
 
 	const sizeClasses = {
 		sm: "h-8 text-sm",
-		md: "h-10 text-base",
+		md: "h-10 text-sm",
 		lg: "h-12 text-base",
 	};
 
-
 	return (
-		<div className={cn(
-			"select-none rounded-lg overflow-hidden w-max border bg-field p-1",
-			sizeClasses[size],
-			className
-		)}>
+		<div
+			className={cn(
+				"bg-field w-max select-none overflow-hidden rounded-lg border",
+				sizeClasses[size],
+				className
+			)}
+		>
 			<div className="relative flex">
 				{options.map((option) => (
 					<SegmentButton
@@ -133,9 +139,7 @@ export default function AnimatedSegmentControl({
 						className="absolute h-full rounded-md transition-all duration-200 ease-in-out"
 						style={{
 							...indicatorStyle,
-							backgroundColor: color
-								? adjustColor(color, 0.5)
-								: DEFAULT_COLOR,
+							backgroundColor: color ? adjustColor(color, 0.5) : DEFAULT_COLOR,
 						}}
 					/>
 				)}
@@ -154,13 +158,13 @@ type SegmentButtonProps = {
 const SegmentButton = forwardRef<HTMLButtonElement, SegmentButtonProps>(
 	function SegmentButton({ option, isActive, onClick, size }, ref) {
 		const paddingClasses = {
-			sm: "px-3 py-2",
+			sm: "px-3 py-1",
 			md: "px-4 py-2",
 			lg: "px-4 py-2",
 		};
 
 		const baseClasses = cn(
-			"z-10 h-full justify-self-center rounded-lg text-secondary-foreground transition-all duration-200 ease-in-out",
+			"z-10 justify-self-center rounded-lg text-secondary-foreground hover:text-foreground transition-all duration-200 ease-in-out",
 			paddingClasses[size],
 			isActive && "text-primary-foreground",
 			option.disabled && "cursor-not-allowed opacity-40"
@@ -173,10 +177,7 @@ const SegmentButton = forwardRef<HTMLButtonElement, SegmentButtonProps>(
 					className={cn("z-10", isActive && "pointer-events-none")}
 					onClick={() => !option.disabled && onClick()}
 				>
-					<button
-						ref={ref}
-						className={baseClasses}
-					>
+					<button ref={ref} className={baseClasses}>
 						{option.label}
 					</button>
 				</Link>

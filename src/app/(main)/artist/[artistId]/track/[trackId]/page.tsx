@@ -74,7 +74,7 @@ export default async function page({
 	];
 
 	return (
-		<div className="space-y-10">
+		<div className="space-y-8">
 			<SimpleSegmentControl
 				options={TRACK_SEGMENT_OPTIONS}
 				defaultValue="artist"

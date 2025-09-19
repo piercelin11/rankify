@@ -14,7 +14,7 @@ import ClientRankingTable from "@/features/ranking/table/client/ClientRankingTab
 
 type pageProps = {
 	params: Promise<{ artistId: string }>;
-	searchParams: Promise<{ range: string }>;
+	searchParams: Promise<{ range: string, scope: string }>;
 };
 
 export default async function OverviewPage({ params, searchParams }: pageProps) {
@@ -41,7 +41,7 @@ export default async function OverviewPage({ params, searchParams }: pageProps) 
 	});
 
 	return (
-		<div className="space-y-16">
+		<div className="space-y-8">
 			<div className="flex items-center justify-between">
 				<SimpleSegmentControl
 					options={OVERVIEW_SEGMENT_OPTIONS}

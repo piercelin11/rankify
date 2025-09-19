@@ -1,8 +1,8 @@
 import { getUserSession } from "../../../auth";
-import getLoggedArtists from "@/lib/database/user/getLoggedArtists";
 import { AppSidebarProvider } from "@/components/sidebar/AppSidebarProvider";
 import { SimpleSidebar } from "@/components/sidebar/Sidebar";
 import { ResponsiveLayout } from "@/components/sidebar/ResponsiveLayout";
+import { getLoggedArtists } from "@/db/artist";
 
 type AdminLayoutProps = {
 	children: React.ReactNode;
@@ -10,7 +10,7 @@ type AdminLayoutProps = {
 
 export default async function MainLayout({ children }: AdminLayoutProps) {
 	const user = await getUserSession();
-	const loggedArtists = await getLoggedArtists({ userId: user.id });
+	const loggedArtists = await getLoggedArtists(user.id);
 
 	return (
 		<>

@@ -65,7 +65,7 @@ export function getFooterMenuItems(): MenuItem[] {
     {
       id: "signout",
       label: "Sign Out",
-      icon: <ExitIcon width={ICON_SIZE} height={ICON_SIZE} />,
+      icon: <ExitIcon width={ICON_SIZE - 4} height={ICON_SIZE - 4} />,
       action: () => signOut(),
     },
   ];
