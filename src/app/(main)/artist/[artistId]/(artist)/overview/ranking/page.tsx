@@ -4,12 +4,16 @@ import getTracksStats from "@/services/track/getTracksStats";
 import { getLoggedAlbumNames } from "@/db/album";
 import ClientAdvancedRankingTable from "@/features/ranking/table/client/ClientAdvancedRankingTable";
 
+
 type pageProps = {
 	params: Promise<{ artistId: string }>;
 	searchParams: Promise<{ range: string }>;
 };
 
-export default async function OverviewRankingPage({ params, searchParams }: pageProps) {
+export default async function OverviewRankingPage({
+	params,
+	searchParams,
+}: pageProps) {
 	const { artistId } = await params;
 	const { range } = await searchParams;
 	const { id: userId } = await getUserSession();

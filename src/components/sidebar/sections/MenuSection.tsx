@@ -43,9 +43,11 @@ export function MenuSection({ items }: MenuSectionProps) {
 }
 
 function CollapsibleMenuItem({ item }: { item: MenuItem }) {
+  const defaultOpen = item.id !== "admin";
+
   return (
     <>
-      <Collapsible defaultOpen className="group/collapsible group-data-[collapsible=icon]:hidden">
+      <Collapsible defaultOpen={defaultOpen} className="group/collapsible group-data-[collapsible=icon]:hidden">
         <CollapsibleTrigger asChild>
           <SidebarMenuButton>
             {item.icon}
@@ -72,7 +74,7 @@ function CollapsibleMenuItem({ item }: { item: MenuItem }) {
       <div className="group-data-[collapsible=icon]:block hidden">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton>
+            <SidebarMenuButton >
               {item.icon}
             </SidebarMenuButton>
           </DropdownMenuTrigger>

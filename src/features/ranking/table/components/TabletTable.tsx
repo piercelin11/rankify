@@ -29,7 +29,10 @@ export default function TabletTable<T extends RankingListDataTypeExtend>({
 	return (
 		<div className="hidden md:block lg:hidden">
 			<div className="rounded-md">
-				<UITable>
+				<UITable className="table-fixed">
+					<colgroup>
+						<col style={{ width: "50px" }} />
+					</colgroup>
 					{features.header !== false && (
 						<TableHeader>
 							<TableRow>

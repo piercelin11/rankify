@@ -4,7 +4,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useRankingTable } from "../hooks/useRankingTable";
 import { useColumnSelector } from "./hooks/useColumnSelector";
-import VirtualizedTableBody from "./components/VirtualizedTableBody";
+import WindowVirtualizedTable from "./components/WindowVirtualizedTable";
 import ColumnSelectorPanel from "./components/ColumnSelectorPanel";
 import FilterToolbar from "./components/FilterToolbar";
 import type { AdvancedRankingTableProps, AdvancedFilters } from "./types";
@@ -26,25 +26,19 @@ export default function AdvancedRankingTable<
 	columnKey,
 	isLoading = false,
 	features = defaultFeatures,
-	//appearance = {},
 	className,
-	onFiltersChange,
-	onColumnsChange,
 	availableAlbums = [],
 	onRowClick,
-	getRowHref,
 }: AdvancedRankingTableProps<T>) {
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>({});
 
-	// 使用基礎的 ranking table hook 來獲取預設欄位
 	const { tableColumns: defaultColumns } = useRankingTable({
 		data,
 		columnKey,
 		features,
 	});
 
-	// 欄位選擇器
 	const {
 		visibleColumns,
 		columnOptions,
@@ -52,22 +46,15 @@ export default function AdvancedRankingTable<
 		toggleColumn,
 		setAllColumns,
 		resetColumns,
-	} = useColumnSelector<T>(
-		defaultColumns,
-		undefined, // 使用預設可見性
-		onColumnsChange
-	);
+	} = useColumnSelector<T>(defaultColumns, undefined, undefined);
 
-	// 處理過濾器變更
 	const handleFiltersChange = (filters: AdvancedFilters) => {
 		setAdvancedFilters(filters);
-		onFiltersChange?.(filters);
 	};
 
 	return (
 		<div className={cn("space-y-4", className)}>
 			<div className="flex items-center justify-between gap-4">
-				{/* 搜尋和過濾 */}
 				<FilterToolbar
 					globalFilter={globalFilter}
 					onGlobalFilterChange={setGlobalFilter}
@@ -76,11 +63,6 @@ export default function AdvancedRankingTable<
 					showAdvancedFilters={features.advancedFilter}
 					availableAlbums={availableAlbums}
 				/>
-				{/* {totalCount !== undefined && (
-					<div className="text-sm text-muted-foreground">
-						{data.length} of {totalCount} tracks
-					</div>
-				)} */}
 				{features.columnSelector && (
 					<ColumnSelectorPanel
 						columnOptions={columnOptions}
@@ -92,20 +74,17 @@ export default function AdvancedRankingTable<
 				)}
 			</div>
 
-			<VirtualizedTableBody
+			<WindowVirtualizedTable
 				data={data}
 				columns={visibleColumns}
 				features={features}
 				globalFilter={globalFilter}
 				onGlobalFilterChange={setGlobalFilter}
 				advancedFilters={advancedFilters}
-				height={600}
 				isLoading={isLoading}
 				onRowClick={onRowClick}
-				getRowHref={getRowHref}
 			/>
 
-			{/* 狀態信息 */}
 			{!isLoading && data.length === 0 && (
 				<div className="py-8 text-center text-muted-foreground">
 					No tracks found
@@ -121,4 +100,5 @@ export type {
 	AdvancedTableFeatures,
 	AdvancedFilters,
 	ColumnVisibility,
+	ScrollMode,
 } from "./types";

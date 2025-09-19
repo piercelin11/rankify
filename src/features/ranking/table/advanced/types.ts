@@ -36,6 +36,9 @@ export type AdvancedFilters = {
 	albums?: string[]; // 選中的專輯名稱陣列
 };
 
+// ScrollMode 已簡化為只支援 window 滾動
+export type ScrollMode = 'window';
+
 export type AdvancedRankingTableProps<T extends RankingListDataTypeExtend> = {
 	data: T[];
 	columnKey: (keyof T)[];
@@ -43,9 +46,6 @@ export type AdvancedRankingTableProps<T extends RankingListDataTypeExtend> = {
 	features?: AdvancedTableFeatures;
 	appearance?: RankingTableAppearance;
 	className?: string;
-	onFiltersChange?: (filters: AdvancedFilters) => void;
-	onColumnsChange?: (columns: ColumnVisibility) => void;
 	availableAlbums?: string[];
 	onRowClick?: (item: T) => void;
-	getRowHref?: (item: T) => string;
 };

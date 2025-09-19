@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Search, Filter, X } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -10,6 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import type { AdvancedFilters } from "../types";
+import SearchInput from "../../components/SearchInput";
 
 type FilterToolbarProps = {
 	globalFilter: string;
@@ -51,38 +51,26 @@ export default function FilterToolbar({
 		onFiltersChange?.(newFilters);
 	};
 
-	const clearGlobalFilter = () => {
-		onGlobalFilterChange("");
-	};
-
 	return (
 		<div className="flex items-center gap-4">
 			{/* Global Search */}
-			<div className="relative max-w-sm flex-1">
-				<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
-				<Input
-					placeholder="Search tracks..."
-					value={globalFilter}
-					onChange={(e) => onGlobalFilterChange(e.target.value)}
-					className="h-10 bg-neutral-900/50 pl-10 pr-10"
-				/>
-				{globalFilter && (
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={clearGlobalFilter}
-						className="absolute right-2 top-1/2 h-6 w-6 -translate-y-1/2 transform p-0"
-					>
-						<X className="h-2 w-2" />
-					</Button>
-				)}
-			</div>
+			<SearchInput
+				globalFilter={globalFilter}
+				setGlobalFilter={onGlobalFilterChange}
+				features={{
+					search: true,
+				}}
+			/>
 
 			{/* Album Filters */}
 			{showAdvancedFilters && availableAlbums.length > 0 && (
 				<Popover>
 					<PopoverTrigger asChild>
-						<Button variant="outline" size="lg" className="items-center gap-2 px-4">
+						<Button
+							variant="outline"
+							size="lg"
+							className="items-center gap-2 px-4"
+						>
 							<Filter className="h-4 w-4" />
 							Albums
 							{activeFilterCount > 0 && (
@@ -129,7 +117,6 @@ export default function FilterToolbar({
 									</div>
 								))}
 							</div>
-
 						</div>
 					</PopoverContent>
 				</Popover>

@@ -1,11 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from "@radix-ui/react-collapsible";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -17,13 +11,11 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	SidebarMenuSub,
-	SidebarMenuSubButton,
-	SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { ExtendedUser } from "@/types/auth";
 import { MenuItem } from "../types";
 import { PLACEHOLDER_PIC } from "@/constants";
+import { MoreHorizontal } from "lucide-react";
 
 interface UserSectionProps {
 	user: ExtendedUser;
@@ -54,50 +46,53 @@ function UserMenu({ user, footerItems }: UserSectionProps) {
 					sizes="32px"
 				/>
 			</div>
-			<div className="grid overflow-hidden text-left leading-tight">
+			<div className="grid gap-0 overflow-hidden text-left leading-tight">
 				<span className="truncate font-semibold">{user.name}</span>
-				{/* <span className="truncate text-sm text-muted-foreground">
-          {user.role}
-        </span> */}
+				<span className="truncate text-xs text-muted-foreground">
+					{user.role}
+				</span>
 			</div>
 		</div>
 	);
 
 	return (
 		<>
-			<Collapsible className="group/collapsible group-data-[collapsible=icon]:hidden">
-				<CollapsibleContent>
-					<SidebarMenuSub>
+			{/* 展開狀態：使用 DropdownMenu 向上懸浮 */}
+			<div className="relative group-data-[collapsible=icon]:hidden">
+				<DropdownMenu modal={false}>
+					<DropdownMenuTrigger asChild>
+						<SidebarMenuButton className="h-12 p-1.5">
+							{userInfo}
+							<MoreHorizontal className="ml-auto size-4" />
+						</SidebarMenuButton>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent side="top" align="start" className="w-60" avoidCollisions={true}>
 						{footerItems.map((item) => (
-							<SidebarMenuSubItem key={item.id}>
+							<DropdownMenuItem key={item.id} asChild={!!item.href}>
 								{item.href ? (
-									<SidebarMenuSubButton asChild>
-										<Link href={item.href}>
-											{item.icon}
-											<span>{item.label}</span>
-										</Link>
-									</SidebarMenuSubButton>
-								) : (
-									<SidebarMenuSubButton onClick={item.action}>
+									<Link href={item.href} className="flex items-center gap-2">
 										{item.icon}
 										<span>{item.label}</span>
-									</SidebarMenuSubButton>
+									</Link>
+								) : (
+									<button
+										onClick={item.action}
+										className="flex w-full items-center gap-2"
+									>
+										{item.icon}
+										<span>{item.label}</span>
+									</button>
 								)}
-							</SidebarMenuSubItem>
+							</DropdownMenuItem>
 						))}
-					</SidebarMenuSub>
-				</CollapsibleContent>
-				<CollapsibleTrigger asChild>
-					<SidebarMenuButton className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground h-12 p-1.5">
-						{userInfo}
-						<ChevronDownIcon className="ml-auto size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
-					</SidebarMenuButton>
-				</CollapsibleTrigger>
-			</Collapsible>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			</div>
 
+			{/* 收起狀態：使用 DropdownMenu 向右懸浮 */}
 			<div className="hidden group-data-[collapsible=icon]:block">
 				<div className="px-1.5 py-2">
-					<DropdownMenu>
+					<DropdownMenu modal={false}>
 						<DropdownMenuTrigger asChild>
 							<SidebarMenuButton size="lg" className="justify-center">
 								<div className="relative size-8 flex-shrink-0">
@@ -111,10 +106,7 @@ function UserMenu({ user, footerItems }: UserSectionProps) {
 								</div>
 							</SidebarMenuButton>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent side="right" align="end">
-							<div className="flex items-center gap-2 border-b p-2">
-								{userInfo}
-							</div>
+						<DropdownMenuContent side="right" align="end" avoidCollisions={true}>
 							{footerItems.map((item) => (
 								<DropdownMenuItem key={item.id} asChild={!!item.href}>
 									{item.href ? (
