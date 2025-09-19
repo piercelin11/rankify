@@ -1,15 +1,8 @@
 "use client";
 
-//import AdvancedRankingTable from "@/features/ranking/table/advanced/AdvancedRankingTable";
+import AdvancedRankingTable from "@/features/ranking/table/advanced/AdvancedRankingTable";
 import type { TrackStatsType } from "@/services/track/types";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-
-
-const AdvancedRankingTable = dynamic(
-	() => import("@/features/ranking/table/advanced/AdvancedRankingTable"), // 請確保路徑正確
-	{ ssr: false }
-);
 
 type ClientAdvancedRankingTableProps = {
 	trackRankings: TrackStatsType[];

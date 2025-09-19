@@ -4,6 +4,7 @@ import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackgro
 import ContentHeader from "@/components/presentation/ContentHeader";
 import { getArtistById } from "@/db/artist";
 import ArtistSubHeader from "@/components/layout/ArtistSubHeader";
+import { PageContainer } from "@/components/layout/PageContainer";
 
 type LayoutProps = {
 	params: Promise<{ artistId: string }>;
@@ -25,7 +26,9 @@ export default async function MainLayout({ params, children }: LayoutProps) {
 				type="Artist"
 			/>
 			<BlurredImageBackground src={artist.img || ""} />
-			<div className="p-content">{children}</div>
+			<PageContainer>
+				{children}
+			</PageContainer>
 		</>
 	);
 }

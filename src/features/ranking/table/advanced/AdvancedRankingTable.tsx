@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import { useRankingTable } from "../hooks/useRankingTable";
 import { useColumnSelector } from "./hooks/useColumnSelector";
 import WindowVirtualizedTable from "./components/WindowVirtualizedTable";
@@ -53,8 +52,8 @@ export default function AdvancedRankingTable<
 	};
 
 	return (
-		<div className={cn("space-y-4", className)}>
-			<div className="flex items-center justify-between gap-4">
+		<div className={className}>
+			<div className="px-content pt-content pb-4 flex items-center justify-between gap-4">
 				<FilterToolbar
 					globalFilter={globalFilter}
 					onGlobalFilterChange={setGlobalFilter}

@@ -1,4 +1,4 @@
-import ContentWrapper from "@/components/layout/ContentWrapper";
+import { PageContainer } from "@/components/layout/PageContainer";
 import getUnloggedArtists from "@/lib/database/user/getUnloggedArtists";
 import { getUserSession } from "@/../auth";
 import GalleryItem from "@/components/presentation/GalleryItem";
@@ -10,7 +10,7 @@ export default async function HomePage() {
 	
 
 	return (
-		<ContentWrapper>
+		<PageContainer>
 			<div className="space-y-8">
 				<h2>Artists you might like</h2>
 				<GalleryWrapper>
@@ -25,6 +25,6 @@ export default async function HomePage() {
 					))}
 				</GalleryWrapper>
 			</div>
-		</ContentWrapper>
+		</PageContainer>
 	);
 }

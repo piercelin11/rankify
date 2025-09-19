@@ -73,6 +73,7 @@
 		--font-size-xs: 0.725rem;
 		--font-size-sm: clamp(0.825rem, 0.81rem + 0.08vw, 0.875rem);
 		--font-size-base: 0.875rem;
+		--font-size-md: 0.9rem;
 		--font-size-lg: 1rem;
 		--font-size-xl: 1.125rem;
 		--font-size-2xl: 1.375rem;

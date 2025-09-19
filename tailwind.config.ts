@@ -12,7 +12,7 @@ export default {
 	],
 	theme: {
 		fontFamily: {
-			sans: "var(--font-geist)",
+			sans: "var(--font-poppins)",
 			serif: "var(--font-geist-mono)",
 			numeric: "var(--font-raleway)",
 		},
@@ -96,6 +96,7 @@ export default {
 				xs: ["var(--font-size-xs)", { lineHeight: "1.35rem" }],
 				sm: ["var(--font-size-sm)", { lineHeight: "1.4rem" }],
 				base: ["var(--font-size-base)", { lineHeight: "1.5rem" }],
+				md: ["var(--font-size-md)", { lineHeight: "1.65rem" }],
 				lg: ["var(--font-size-lg)", { lineHeight: "1.75rem" }],
 				xl: ["var(--font-size-xl)", { lineHeight: "1.75rem" }],
 				"2xl": ["var(--font-size-2xl)", { lineHeight: "2rem" }],

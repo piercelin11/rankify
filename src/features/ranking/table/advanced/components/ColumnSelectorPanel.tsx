@@ -36,7 +36,7 @@ export default function ColumnSelectorPanel({
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
-				<Button variant="outline" size="lg" className="gap-2 px-4">
+				<Button variant="outline" size="lg" className="gap-1 text-sm">
 					<Settings className="h-4 w-4" />
 					Columns
 					<Badge variant="secondary" className="px-2">
@@ -48,11 +48,11 @@ export default function ColumnSelectorPanel({
 				<div className="space-y-3">
 					{/* Header */}
 					<div className="flex items-center justify-between">
-						<h4 className="font-semibold">Toggle Columns</h4>
+						<h4 className="text-md font-semibold">Toggle Columns</h4>
 						<Button
 							variant="ghost"
 							onClick={onResetColumns}
-							className="h-6 px-2 text-sm text-primary-500"
+							className="h-6 px-2 text-sm text-secondary-foreground"
 						>
 							Reset
 						</Button>
@@ -83,7 +83,7 @@ export default function ColumnSelectorPanel({
 					<Separator />
 
 					{/* Column List */}
-					<div className="max-h-64 space-y-2 overflow-auto pr-2 scrollbar-hidden">
+					<div className="max-h-64 space-y-1 overflow-auto pr-2 scrollbar-hidden">
 						{columnOptions.map((column) => (
 							<div
 								key={column.key}
@@ -96,7 +96,7 @@ export default function ColumnSelectorPanel({
 								/>
 								<label
 									htmlFor={column.key}
-									className="flex-1 cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+									className="flex-1 cursor-pointer text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 								>
 									{column.label}
 								</label>

@@ -20,7 +20,7 @@ export function SimpleSidebar({ user, artists }: SidebarProps) {
   const recentArtists = getRecentArtists(artists);
 
   return (
-    <Sidebar collapsible="icon" variant="floating">
+    <Sidebar collapsible="icon" variant="sidebar" className="overscroll-none overflow-auto">
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center justify-start p-2">
           <SidebarTrigger className="h-8 w-8" />
