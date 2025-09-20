@@ -22,6 +22,9 @@ interface UserSectionProps {
 	footerItems: MenuItem[];
 }
 
+const ICON_SIZE = "size-4"
+
+
 export function UserSection({ user, footerItems }: UserSectionProps) {
 	return (
 		<SidebarFooter>
@@ -37,13 +40,13 @@ export function UserSection({ user, footerItems }: UserSectionProps) {
 function UserMenu({ user, footerItems }: UserSectionProps) {
 	const userInfo = (
 		<div className="flex items-center gap-2">
-			<div className="relative size-8 flex-shrink-0">
+			<div className="relative size-10 flex-shrink-0">
 				<Image
 					src={user.image || PLACEHOLDER_PIC}
 					alt={user.name || "User"}
 					fill
 					className="rounded-full object-cover"
-					sizes="32px"
+					sizes="40px"
 				/>
 			</div>
 			<div className="grid gap-0 overflow-hidden text-left leading-tight">
@@ -61,17 +64,22 @@ function UserMenu({ user, footerItems }: UserSectionProps) {
 			<div className="relative group-data-[collapsible=icon]:hidden">
 				<DropdownMenu modal={false}>
 					<DropdownMenuTrigger asChild>
-						<SidebarMenuButton className="h-12 p-1.5">
+						<SidebarMenuButton className="h-12">
 							{userInfo}
 							<MoreHorizontal className="ml-auto size-4" />
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
-					<DropdownMenuContent side="top" align="start" className="w-60" avoidCollisions={true}>
+					<DropdownMenuContent
+						side="top"
+						align="start"
+						className="w-60"
+						avoidCollisions={true}
+					>
 						{footerItems.map((item) => (
 							<DropdownMenuItem key={item.id} asChild={!!item.href}>
 								{item.href ? (
 									<Link href={item.href} className="flex items-center gap-2">
-										{item.icon}
+										<item.icon className={ICON_SIZE} />
 										<span>{item.label}</span>
 									</Link>
 								) : (
@@ -79,7 +87,7 @@ function UserMenu({ user, footerItems }: UserSectionProps) {
 										onClick={item.action}
 										className="flex w-full items-center gap-2"
 									>
-										{item.icon}
+										<item.icon className={ICON_SIZE} />
 										<span>{item.label}</span>
 									</button>
 								)}
@@ -91,27 +99,31 @@ function UserMenu({ user, footerItems }: UserSectionProps) {
 
 			{/* 收起狀態：使用 DropdownMenu 向右懸浮 */}
 			<div className="hidden group-data-[collapsible=icon]:block">
-				<div className="px-1.5 py-2">
+				<div>
 					<DropdownMenu modal={false}>
 						<DropdownMenuTrigger asChild>
-							<SidebarMenuButton size="lg" className="justify-center">
-								<div className="relative size-8 flex-shrink-0">
+							<SidebarMenuButton className="h-12 group-data-[collapsible=icon]:!size-12 group-data-[collapsible=icon]:hover:bg-transparent">
+								<div className="relative size-10 flex-shrink-0">
 									<Image
 										src={user.image || PLACEHOLDER_PIC}
 										alt={user.name || "User"}
 										fill
 										className="rounded-full object-cover"
-										sizes="32px"
+										sizes="40px"
 									/>
 								</div>
 							</SidebarMenuButton>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent side="right" align="end" avoidCollisions={true}>
+						<DropdownMenuContent
+							side="right"
+							align="end"
+							avoidCollisions={true}
+						>
 							{footerItems.map((item) => (
-								<DropdownMenuItem key={item.id} asChild={!!item.href}>
+								<DropdownMenuItem key={item.id} asChild={!!item.href} >
 									{item.href ? (
 										<Link href={item.href} className="flex items-center gap-2">
-											{item.icon}
+											<item.icon className={ICON_SIZE} />
 											<span>{item.label}</span>
 										</Link>
 									) : (
@@ -119,7 +131,7 @@ function UserMenu({ user, footerItems }: UserSectionProps) {
 											onClick={item.action}
 											className="flex w-full items-center gap-2"
 										>
-											{item.icon}
+											<item.icon className={ICON_SIZE} />
 											<span>{item.label}</span>
 										</button>
 									)}

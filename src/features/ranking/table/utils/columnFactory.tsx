@@ -18,13 +18,13 @@ export type ColumnConfig = {
 export const COLUMN_CONFIGS: Record<string, ColumnConfig> = {
 	ranking: { key: "ranking", header: "#", type: "ranking", size: 20 },
 	name: { key: "name", header: "Track", type: "track" },
-	rankChange: { key: "rankChange", header: "Change", type: "change", size: 140 },
-	peak: { key: "peak", header: "Peak", type: "number", size: 140 },
-	worst: { key: "worst", header: "Worst", type: "number", size: 140 },
-	averageRanking: { key: "averageRanking", header: "Avg.", type: "number", size: 140 },
-	top50PercentCount: { key: "top50PercentCount", header: "Top 50%", type: "number", size: 140 },
-	top25PercentCount: { key: "top25PercentCount", header: "Top 25%", type: "number", size: 140 },
-	top5PercentCount: { key: "top5PercentCount", header: "Top 5%", type: "number", size: 140 },
+	rankChange: { key: "rankChange", header: "Change", type: "change", size: 100 },
+	peak: { key: "peak", header: "Peak", type: "number", size: 100 },
+	worst: { key: "worst", header: "Worst", type: "number", size: 100 },
+	averageRanking: { key: "averageRanking", header: "Avg.", type: "number", size: 100 },
+	top50PercentCount: { key: "top50PercentCount", header: "Top 50%", type: "number", size: 100 },
+	top25PercentCount: { key: "top25PercentCount", header: "Top 25%", type: "number", size: 100 },
+	top5PercentCount: { key: "top5PercentCount", header: "Top 5%", type: "number", size: 100 },
 };
 
 // 欄位工廠函數

@@ -1,29 +1,36 @@
 "use client";
 
+import RankingTable from "@/features/ranking/table/RankingTable";
 import type { TrackStatsType } from "@/services/track/types";
 import { useRouter } from "next/navigation";
-import RankingTable from "../RankingTable";
 
 type ClientRankingTableProps = {
 	trackRankings: TrackStatsType[];
+	albums: string[];
 };
 
 export default function ClientRankingTable({
 	trackRankings,
+	albums,
 }: ClientRankingTableProps) {
-	const router = useRouter();
-	function handleRowClick(item: TrackStatsType) {
-		router.push(`/artist/${item.artistId}/track/${item.id}`);
-	}
+    const router = useRouter();
+    function handleRowClick(item: TrackStatsType) {
+        router.push(`/artist/${item.artistId}/track/${item.id}`);
+    }
 
 	return (
 		<RankingTable
-			className="mb-4 border-b "
-			features={{
-				header: false,
-			}}
 			data={trackRankings}
 			onRowClick={handleRowClick}
+			columnKey={[
+				"peak",
+				"worst",
+				"averageRanking",
+				"top50PercentCount",
+				"top25PercentCount",
+				"top5PercentCount",
+			]}
+			availableAlbums={albums}
 		/>
 	);
 }

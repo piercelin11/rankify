@@ -1,7 +1,7 @@
 import { getUserSession } from "../../../auth";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { SimpleSidebar } from "@/components/sidebar/SimpleSidebar";
-import { ResponsiveLayout } from "@/components/sidebar/ResponsiveLayout";
+import { AppHeader } from "@/components/layout/AppHeader";
 import { getLoggedArtists } from "@/db/artist";
 
 type AdminLayoutProps = {
@@ -14,11 +14,11 @@ export default async function MainLayout({ children }: AdminLayoutProps) {
 
 	return (
 		<SidebarProvider defaultOpen={true}>
-			<ResponsiveLayout
-				sidebar={<SimpleSidebar user={user} artists={loggedArtists} />}
-			>
+			<SimpleSidebar user={user} artists={loggedArtists} />
+			<SidebarInset>
+				<AppHeader />
 				{children}
-			</ResponsiveLayout>
+			</SidebarInset>
 		</SidebarProvider>
 	);
 }

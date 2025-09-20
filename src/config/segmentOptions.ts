@@ -1,15 +1,15 @@
 import { SegmentOption } from "@/components/navigation/SimpleSegmentControl";
 
-export const OVERVIEW_SEGMENT_OPTIONS: SegmentOption[] = [
+export const VIEW_SEGMENT_OPTIONS = [
 	{
-		label: "My Overview",
-		value: "my-overview",
-		queryParam: ["scope", "global"],
+		label: "Ranking List",
+		value: "list",
+		queryParam: ["view", "list"] as [string, string],
 	},
 	{
-		label: "Global Overview",
-		value: "global-overview",
-		queryParam: ["scope", "personal"],
+		label: "Stats Charts",
+		value: "charts",
+		queryParam: ["view", "charts"] as [string, string],
 	},
 ];
 

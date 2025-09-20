@@ -27,17 +27,17 @@ export function ArtistSection({ artists }: ArtistSectionProps) {
 						<SidebarMenuItem key={artist.id}>
 							<SidebarMenuButton
 								asChild
-								className="group-data-[collapsible=icon]:hover:bg-transparent"
+								className="h-12 group-data-[collapsible=icon]:!size-12 group-data-[collapsible=icon]:hover:bg-transparent"
 								tooltip={artist.name}
 							>
 								<Link href={`/artist/${artist.id}`}>
-									<div className="relative size-6 flex-shrink-0">
+									<div className="relative size-10 flex-shrink-0">
 										<Image
 											src={artist.img || PLACEHOLDER_PIC}
 											alt={artist.name}
 											fill
 											className="rounded-md object-cover"
-											sizes="24px"
+											sizes="48px"
 										/>
 									</div>
 									<span className="truncate">{artist.name}</span>

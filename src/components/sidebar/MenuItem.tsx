@@ -10,7 +10,7 @@ interface MenuItemProps {
 export function MenuItemComponent({ item, className }: MenuItemProps) {
   const content = (
     <>
-      {item.icon}
+      <item.icon />
       <span>{item.label}</span>
     </>
   );

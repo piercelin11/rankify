@@ -2,7 +2,7 @@ import { getUserSession } from "@/../auth";
 import { calculateDateRangeFromSlug } from "@/lib/utils";
 import getTracksStats from "@/services/track/getTracksStats";
 import { getLoggedAlbumNames } from "@/db/album";
-import ClientAdvancedRankingTable from "@/features/ranking/table/client/ClientAdvancedRankingTable";
+import ClientAdvancedRankingTable from "@/features/ranking/table/client/ClientRankingTable";
 
 
 type pageProps = {

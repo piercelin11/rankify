@@ -17,7 +17,7 @@ import { useStickyState } from "@/lib/hooks/useStickyState";
 import { useVirtualizedTable } from "../hooks/useVirtualizedTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AdvancedTableFeatures, AdvancedFilters } from "../types";
-import { RankingListDataTypeExtend } from "../../types";
+import { RankingListDataTypeExtend } from "../types";
 
 const ROW_HEIGHT = 70;
 const OVERSCAN = 5;
@@ -130,12 +130,12 @@ export default function WindowVirtualizedTable<
 					<div ref={sentinelRef} className="h-0" />
 					<div
 						className={cn(
-							"px-content sticky top-0 z-10 transition-colors duration-200",
-							isStuck ? "bg-background/90 border-b" : ""
+							"sticky top-0 z-10 px-content transition-colors duration-200",
+							isStuck ? "border-b bg-background" : ""
 						)}
 					>
-						<Table>
-							<TableHeader>
+						<Table >
+							<TableHeader className={cn({ "border-b": !isStuck })}>
 								{table.getHeaderGroups().map((headerGroup) => (
 									<TableRow
 										key={headerGroup.id}
@@ -151,9 +151,7 @@ export default function WindowVirtualizedTable<
 											return (
 												<TableHead
 													key={header.id}
-													className={cn(
-														"px-4 bg-transparent",
-													)}
+													className={cn("bg-transparent px-4")}
 													style={
 														header.getSize() !== 150
 															? { width: header.getSize() }
@@ -200,7 +198,7 @@ export default function WindowVirtualizedTable<
 				</>
 			)}
 
-			<div ref={listRef} className="px-content">
+			<div ref={listRef} className="px-content mt-4">
 				<div
 					style={{
 						height: virtualizer.getTotalSize(),

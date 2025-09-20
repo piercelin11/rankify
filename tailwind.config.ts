@@ -84,9 +84,6 @@ export default {
 			},
 			spacing: {
 				"22": "5.5rem",
-				"sidebar-sm": "80px",
-				"sidebar-lg": "260px",
-				"sidebar-xl": "300px",
 				content: "2rem",
 			},
 			backgroundImage: {
