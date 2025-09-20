@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { ColumnVisibility } from "../types";
-import type { RankingListDataTypeExtend } from "../../types";
+import type { RankingListDataTypeExtend } from "../types";
 
 const DEFAULT_VISIBLE_COLUMNS: ColumnVisibility = {
 	ranking: true,

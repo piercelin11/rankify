@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import type { AdvancedFilters } from "../types";
-import SearchInput from "../../components/SearchInput";
+import SearchInput from "./SearchInput";
 import { Separator } from "@/components/ui/separator";
 
 type FilterToolbarProps = {

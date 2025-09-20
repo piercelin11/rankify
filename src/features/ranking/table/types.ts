@@ -1,4 +1,3 @@
-import type { ColumnDef } from "@tanstack/react-table";
 import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
 import { TrackStatsType } from "@/services/track/types";
 
@@ -6,34 +5,49 @@ export type RankingListDataTypeExtend = TrackHistoryType | TrackStatsType;
 
 export type RankingTableFeatures = {
 	sort?: boolean;
-	search?: boolean | {
-		placeholder?: string;
-		fields?: string[];
-	};
-	filter?: boolean | {
-		fields?: string[];
-	};
+	search?: boolean;
+	header?: boolean;
 	pagination?: boolean | {
 		pageSize?: number;
 		showPageSizeSelector?: boolean;
 	};
-	header?: boolean;
 };
 
 export type RankingTableAppearance = {
-	variant?: 'default' | 'compact' | 'detailed';
 	showImages?: boolean;
-	showRankChange?: boolean;
-	density?: 'comfortable' | 'compact' | 'spacious';
 };
 
-export type RankingTableProps<T> = {
-	data: T[];
-	columnKey?: (keyof T)[];
-	columns?: ColumnDef<T>[];
-	features?: RankingTableFeatures;
-	appearance?: RankingTableAppearance;
-	className?: string;
-	onRowClick?: (item: T) => void;
-	getRowHref?: (item: T) => string;
+// Advanced table types (merged from advanced/types.ts)
+export type AdvancedTableFeatures = RankingTableFeatures & {
+	virtualization?: boolean;
+	columnSelector?: boolean;
+	advancedFilter?: boolean;
 };
+
+export type ColumnVisibility = {
+	ranking: boolean;
+	name: boolean;
+	rankChange: boolean;
+	peak: boolean;
+	worst: boolean;
+	averageRanking: boolean;
+	top50PercentCount: boolean;
+	top25PercentCount: boolean;
+	top5PercentCount: boolean;
+};
+
+export type AdvancedFilters = {
+	search?: string;
+	albums?: string[];
+};
+
+export type RankingTableProps<T extends RankingListDataTypeExtend> = {
+	data: T[];
+	columnKey: (keyof T)[];
+	isLoading?: boolean;
+	features?: AdvancedTableFeatures;
+	className?: string;
+	availableAlbums?: string[];
+	onRowClick?: (item: T) => void;
+};
+

@@ -3,8 +3,8 @@ import { ReactNode } from "react";
 import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
 import ContentHeader from "@/components/presentation/ContentHeader";
 import { getArtistById } from "@/db/artist";
-import ArtistSubHeader from "@/components/layout/ArtistSubHeader";
 import { PageContainer } from "@/components/layout/PageContainer";
+import ArtistNavigationHeader from "@/components/layout/ArtistNavigationHeader";
 
 type LayoutProps = {
 	params: Promise<{ artistId: string }>;
@@ -18,7 +18,7 @@ export default async function MainLayout({ params, children }: LayoutProps) {
 	if (!artist) notFound();
 	return (
 		<>
-			<ArtistSubHeader artist={artist} />
+			<ArtistNavigationHeader artist={artist} />
 			<ContentHeader
 				data={artist}
 				subTitleContent={<p>{artist.spotifyFollowers} followers</p>}
@@ -26,9 +26,7 @@ export default async function MainLayout({ params, children }: LayoutProps) {
 				type="Artist"
 			/>
 			<BlurredImageBackground src={artist.img || ""} />
-			<PageContainer>
-				{children}
-			</PageContainer>
+			<PageContainer>{children}</PageContainer>
 		</>
 	);
 }

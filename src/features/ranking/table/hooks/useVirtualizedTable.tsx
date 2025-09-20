@@ -7,7 +7,7 @@ import {
 	useReactTable,
 	type ColumnDef,
 } from "@tanstack/react-table";
-import type { RankingListDataTypeExtend } from "../../types";
+import type { RankingListDataTypeExtend } from "../types";
 import type { AdvancedTableFeatures, AdvancedFilters } from "../types";
 
 export function useVirtualizedTable<T extends RankingListDataTypeExtend>({

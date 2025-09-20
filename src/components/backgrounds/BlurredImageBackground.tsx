@@ -13,7 +13,7 @@ export default function BlurredImageBackground({
 	priority = false,
 }: BlurredImageBackgroundProps) {
 	return (
-		<div className={`fixed left-0 top-0 -z-50 w-full overflow-hidden ${height}`}>
+		<div className={`fixed left-0 top-0 -z-10 w-full overflow-hidden ${height}`}>
 			<div className="absolute inset-0 -z-40 bg-gradient-dark" />
 			<Image
 				className="object-cover -z-50 blur-3xl"

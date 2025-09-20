@@ -9,8 +9,10 @@ interface PageContainerProps {
 
 export function PageContainer({ children }: PageContainerProps) {
 	const pathname = usePathname();
+	/* const searchParams = useSearchParams();
+	const view = searchParams.get("view"); */
 
-	const shouldRemovePadding = pathname.includes("/ranking");
+	const shouldRemovePadding = pathname.includes("/overview");
 
 	return (
 		<div className={cn(shouldRemovePadding ? "" : "p-content")}>{children}</div>

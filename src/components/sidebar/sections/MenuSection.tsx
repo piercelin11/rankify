@@ -26,9 +26,11 @@ interface MenuSectionProps {
   items: MenuItem[];
 }
 
+const ICON_SIZE = "size-8"
+
 export function MenuSection({ items }: MenuSectionProps) {
   return (
-    <SidebarMenu className="px-2">
+    <SidebarMenu className="px-3">
       {items.map((item) => (
         <SidebarMenuItem key={item.id}>
           {item.children ? (
@@ -50,7 +52,7 @@ function CollapsibleMenuItem({ item }: { item: MenuItem }) {
       <Collapsible defaultOpen={defaultOpen} className="group/collapsible group-data-[collapsible=icon]:hidden">
         <CollapsibleTrigger asChild>
           <SidebarMenuButton>
-            {item.icon}
+            <item.icon className={ICON_SIZE} />
             <span>{item.label}</span>
             <ChevronDownIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
           </SidebarMenuButton>
@@ -61,7 +63,7 @@ function CollapsibleMenuItem({ item }: { item: MenuItem }) {
               <SidebarMenuSubItem key={child.id}>
                 <SidebarMenuSubButton asChild>
                   <Link href={child.href || "#"}>
-                    {child.icon}
+                    <child.icon className={ICON_SIZE} />
                     <span>{child.label}</span>
                   </Link>
                 </SidebarMenuSubButton>
@@ -75,14 +77,14 @@ function CollapsibleMenuItem({ item }: { item: MenuItem }) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton >
-              {item.icon}
+              <item.icon className={ICON_SIZE} />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent side="right" align="start">
             {item.children?.map((child) => (
               <DropdownMenuItem key={child.id} asChild>
                 <Link href={child.href || "#"} className="flex items-center gap-2">
-                  {child.icon}
+                  <child.icon className={ICON_SIZE} />
                   <span>{child.label}</span>
                 </Link>
               </DropdownMenuItem>
