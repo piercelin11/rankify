@@ -15,6 +15,7 @@ const defaultFeatures = {
 	sort: true,
 	search: true,
 	virtualization: true,
+	timeRangeSelector: true,
 	columnSelector: false,
 	advancedFilter: true,
 	header: true,
@@ -76,11 +77,11 @@ export default function RankingTable<
 						onResetColumns={resetColumns}
 					/>
 				)}
-				<SimpleDropdown
+				{features.timeRangeSelector && <SimpleDropdown
 					className="w-40"
 					options={TIME_RANGE_OPTIONS}
 					defaultValue={range || "all-time"}
-				/>
+				/>}
 			</div>
 
 			<WindowVirtualizedTable

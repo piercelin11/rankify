@@ -22,6 +22,7 @@ export type AdvancedTableFeatures = RankingTableFeatures & {
 	virtualization?: boolean;
 	columnSelector?: boolean;
 	advancedFilter?: boolean;
+	timeRangeSelector?: boolean
 };
 
 export type ColumnVisibility = {

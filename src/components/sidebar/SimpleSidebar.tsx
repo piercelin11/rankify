@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import {
 	Sidebar,
 	SidebarContent,
@@ -19,15 +20,17 @@ import { ArtistSection } from "./sections/ArtistSection";
 import { UserSection } from "./sections/UserSection";
 
 export function SimpleSidebar({ user, artists }: SidebarProps) {
+	const sidebarRef = useRef<HTMLDivElement>(null);
 	const mainItems = getMainMenuItems(user.role);
 	const footerItems = getFooterMenuItems();
 	const recentArtists = getRecentArtists(artists);
 
 	return (
 		<Sidebar
+			ref={sidebarRef}
 			collapsible="icon"
 			variant="sidebar"
-			className="overflow-y-auto overscroll-y-none"
+			className="overflow-hidden"
 		>
 			<SidebarHeader className="border-b border-sidebar-border">
 				<div className="flex items-center justify-start p-3">
@@ -35,12 +38,14 @@ export function SimpleSidebar({ user, artists }: SidebarProps) {
 				</div>
 			</SidebarHeader>
 
-			<SidebarContent>
-				<SidebarGroup>
-					<MenuSection items={mainItems} />
-				</SidebarGroup>
-				<ArtistSection artists={recentArtists} />
-			</SidebarContent>
+			<div className="flex-1 overflow-y-auto overscroll-contain scroll-smooth">
+				<SidebarContent className="!overflow-visible">
+					<SidebarGroup>
+						<MenuSection items={mainItems} />
+					</SidebarGroup>
+					<ArtistSection artists={recentArtists} />
+				</SidebarContent>
+			</div>
 
 			<UserSection user={user} footerItems={footerItems} />
 			{/* <SidebarRail/> */}

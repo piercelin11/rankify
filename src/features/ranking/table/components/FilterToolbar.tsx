@@ -53,7 +53,7 @@ export default function FilterToolbar({
 	};
 
 	return (
-		<div className="flex items-center gap-4">
+		<div className="flex items-center gap-2">
 			{/* Global Search */}
 			<SearchInput
 				globalFilter={globalFilter}
@@ -70,10 +70,9 @@ export default function FilterToolbar({
 						<Button
 							variant="outline"
 							size="lg"
-							className="items-center gap-1 text-sm"
+							className="items-center size-10 gap-1 text-sm"
 						>
-							<Filter className="h-4 w-4" />
-							Albums
+							<Filter className="size-10"/>
 							{activeFilterCount > 0 && (
 								<Badge variant="secondary" className="px-2">
 									{activeFilterCount}

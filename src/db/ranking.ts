@@ -26,3 +26,22 @@ export async function getPeakRankings(peak: number, trackId: string, userId: str
         date: session.rankingSession.date,
     }))
 }
+
+export async function getLatestArtistRankingSession(artistId: string, userId: string) {
+    const latestSession = await db.rankingSession.findFirst({
+        where: {
+            artistId,
+            userId,
+            type: "ARTIST",
+        },
+        orderBy: {
+            date: "desc",
+        },
+        select: {
+            id: true,
+            date: true,
+        },
+    });
+
+    return latestSession;
+}

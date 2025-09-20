@@ -28,7 +28,7 @@ export default function ArtistNavigationHeader({ artist }: ArtistNavigationHeade
 	]);
 
 	const isRankingPage = pathname.includes("/ranking");
-	const currentTab = pathname.split("/").pop();
+	const currentTab = pathname.split("/")[3];
 
 	return (
 		<div className="px-content pt-content md:flex md:justify-between">

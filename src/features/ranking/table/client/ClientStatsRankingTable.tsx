@@ -1,18 +1,20 @@
 "use client";
 
-import RankingTable from "@/features/ranking/table/RankingTable";
+import RankingTable, { AdvancedTableFeatures } from "@/features/ranking/table/RankingTable";
 import type { TrackStatsType } from "@/services/track/types";
 import { useRouter } from "next/navigation";
 
-type ClientRankingTableProps = {
+type ClientStatsRankingTableProps = {
 	trackRankings: TrackStatsType[];
 	albums: string[];
+	features?: AdvancedTableFeatures
 };
 
-export default function ClientRankingTable({
+export default function ClientStatsRankingTable({
 	trackRankings,
 	albums,
-}: ClientRankingTableProps) {
+	features
+}: ClientStatsRankingTableProps) {
     const router = useRouter();
     function handleRowClick(item: TrackStatsType) {
         router.push(`/artist/${item.artistId}/track/${item.id}`);
@@ -31,6 +33,7 @@ export default function ClientRankingTable({
 				"top5PercentCount",
 			]}
 			availableAlbums={albums}
+			features={features}
 		/>
 	);
 }

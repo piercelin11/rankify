@@ -3,7 +3,6 @@ import { ReactNode } from "react";
 import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
 import ContentHeader from "@/components/presentation/ContentHeader";
 import { getArtistById } from "@/db/artist";
-import { PageContainer } from "@/components/layout/PageContainer";
 import ArtistNavigationHeader from "@/components/layout/ArtistNavigationHeader";
 
 type LayoutProps = {
@@ -26,7 +25,7 @@ export default async function MainLayout({ params, children }: LayoutProps) {
 				type="Artist"
 			/>
 			<BlurredImageBackground src={artist.img || ""} />
-			<PageContainer>{children}</PageContainer>
+			{children}
 		</>
 	);
 }
