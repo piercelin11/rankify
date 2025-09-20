@@ -28,15 +28,18 @@ async function getPercentileCounts(
 		},
 	});
 
-	return trackIds.reduce((acc, trackId) => {
-		const trackRankings = results.filter(r => r.trackId === trackId);
-		acc[trackId] = {
-			top50: trackRankings.filter(r => r.rankPercentile <= 0.5).length,
-			top25: trackRankings.filter(r => r.rankPercentile <= 0.25).length,
-			top5: trackRankings.filter(r => r.rankPercentile <= 0.05).length,
-		};
-		return acc;
-	}, {} as Record<string, { top50: number; top25: number; top5: number }>);
+	return trackIds.reduce(
+		(acc, trackId) => {
+			const trackRankings = results.filter((r) => r.trackId === trackId);
+			acc[trackId] = {
+				top50: trackRankings.filter((r) => r.rankPercentile <= 0.5).length,
+				top25: trackRankings.filter((r) => r.rankPercentile <= 0.25).length,
+				top5: trackRankings.filter((r) => r.rankPercentile <= 0.05).length,
+			};
+			return acc;
+		},
+		{} as Record<string, { top50: number; top25: number; top5: number }>
+	);
 }
 
 async function getTracksMetrics(
@@ -46,7 +49,6 @@ async function getTracksMetrics(
 	dateRange?: DateRange,
 	trackQueryConditions?: Prisma.TrackWhereInput
 ) {
-
 	const rankingData = await db.ranking.groupBy({
 		by: ["trackId"],
 		where: {
@@ -119,23 +121,25 @@ export default async function getTracksStats({
 	dateRange,
 }: getTracksStatsProps): Promise<TrackStatsType[]> {
 	const userPreference = await getUserPreference(userId);
-		const trackQueryConditions = buildTrackQueryCondition(
-			userPreference?.rankingSettings || defaultRankingSettings
-		);
+	const trackQueryConditions = buildTrackQueryCondition(
+		userPreference?.rankingSettings || defaultRankingSettings
+	);
 
-	const dateFilter = dateRange ? {
-		date: {
-			...(dateRange.from && { gte: dateRange.from }),
-			...(dateRange.to && { lte: dateRange.to }),
-		}
-	} : undefined;
+	const dateFilter = dateRange
+		? {
+				date: {
+					...(dateRange.from && { gte: dateRange.from }),
+					...(dateRange.to && { lte: dateRange.to }),
+				},
+			}
+		: undefined;
 
 	const trackMetrics = await getTracksMetrics(
 		artistId,
 		userId,
 		take,
 		dateRange,
-		trackQueryConditions,
+		trackQueryConditions
 	);
 	const trackIds = trackMetrics.map((track) => track.id);
 

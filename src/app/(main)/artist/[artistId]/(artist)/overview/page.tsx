@@ -6,7 +6,7 @@ import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
 import getTracksStats from "@/services/track/getTracksStats";
 import getAlbumsStats from "@/services/album/getAlbumsStats";
 import { VIEW_SEGMENT_OPTIONS } from "@/config/segmentOptions";
-import ClientRankingTable from "@/features/ranking/table/client/ClientRankingTable";
+import ClientStatsRankingTable from "@/features/ranking/table/client/ClientStatsRankingTable";
 import { getLoggedAlbumNames } from "@/db/album";
 
 type pageProps = {
@@ -50,7 +50,7 @@ export default async function OverviewPage({
 			</div>
 
 			{currentView === "list" ? (
-				<ClientRankingTable
+				<ClientStatsRankingTable
 					trackRankings={trackRankings}
 					albums={albums.map((album) => album.name)}
 				/>
