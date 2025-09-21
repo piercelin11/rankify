@@ -45,3 +45,22 @@ export async function getLatestArtistRankingSession(artistId: string, userId: st
 
     return latestSession;
 }
+
+export async function getArtistRankingSessions(artistId: string, userId: string) {
+    const sessions = await db.rankingSession.findMany({
+        where: {
+            artistId,
+            userId,
+            type: "ARTIST",
+        },
+        orderBy: {
+            date: "desc",
+        },
+        select: {
+            id: true,
+            date: true,
+        },
+    });
+
+    return sessions;
+}

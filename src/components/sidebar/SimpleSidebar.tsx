@@ -6,7 +6,6 @@ import {
 	SidebarContent,
 	SidebarGroup,
 	SidebarHeader,
-	//SidebarRail,
 	SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { SidebarProps } from "./types";
@@ -30,7 +29,7 @@ export function SimpleSidebar({ user, artists }: SidebarProps) {
 			ref={sidebarRef}
 			collapsible="icon"
 			variant="sidebar"
-			className="overflow-hidden"
+			className="overflow-y-auto overscroll-y-contain"
 		>
 			<SidebarHeader className="border-b border-sidebar-border">
 				<div className="flex items-center justify-start p-3">
@@ -38,17 +37,14 @@ export function SimpleSidebar({ user, artists }: SidebarProps) {
 				</div>
 			</SidebarHeader>
 
-			<div className="flex-1 overflow-y-auto overscroll-contain scroll-smooth">
-				<SidebarContent className="!overflow-visible">
-					<SidebarGroup>
-						<MenuSection items={mainItems} />
-					</SidebarGroup>
-					<ArtistSection artists={recentArtists} />
-				</SidebarContent>
-			</div>
+			<SidebarContent>
+				<SidebarGroup>
+					<MenuSection items={mainItems} />
+				</SidebarGroup>
+				<ArtistSection artists={recentArtists} />
+			</SidebarContent>
 
 			<UserSection user={user} footerItems={footerItems} />
-			{/* <SidebarRail/> */}
 		</Sidebar>
 	);
 }

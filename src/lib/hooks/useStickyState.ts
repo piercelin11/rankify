@@ -2,11 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/**
- * Hook to detect when a sticky element is actually "stuck" to the viewport
- * Uses Intersection Observer to monitor a sentinel element
- * @returns Object containing isStuck boolean and sentinelRef for the sentinel element
- */
 export function useStickyState() {
   const [isStuck, setIsStuck] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
