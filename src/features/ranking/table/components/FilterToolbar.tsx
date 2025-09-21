@@ -70,11 +70,11 @@ export default function FilterToolbar({
 						<Button
 							variant="outline"
 							size="lg"
-							className="items-center size-10 gap-1 text-sm"
+							className="items-center gap-1 px-3"
 						>
 							<Filter className="size-10"/>
 							{activeFilterCount > 0 && (
-								<Badge variant="secondary" className="px-2">
+								<Badge variant="secondary">
 									{activeFilterCount}
 								</Badge>
 							)}

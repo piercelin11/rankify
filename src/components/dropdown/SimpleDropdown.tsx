@@ -95,7 +95,7 @@ export default function SimpleDropdown({
 			>
 				<SelectValue placeholder={placeholder} />
 			</SelectTrigger>
-			<SelectContent className="text-base">
+			<SelectContent className="text-base max-h-80">
 				{options.map((option) => (
 					<SelectItem
 						className="text-base"
