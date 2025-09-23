@@ -4,18 +4,23 @@ import { getUserSession } from "@/../auth";
 import { db } from "@/db/client";
 import { RankingResultData } from "@/features/sorter/components/SortingStage";
 import { revalidatePath } from "next/cache";
+import { $Enums } from "@prisma/client";
 
 export default async function saveDraftResult(
     artistId: string,
     result: RankingResultData[],
+    type: $Enums.RankingType,
+    albumId?: string,
     draft?: string,
 ) {
     const { id: userId } = await getUserSession();
 
     const existingDraft = await db.rankingDraft.findFirst({
-        where: { 
+        where: {
             artistId,
             userId,
+            type,
+            albumId: albumId || null,
         },
     });
 
@@ -26,7 +31,9 @@ export default async function saveDraftResult(
                     userId,
                     artistId,
                     result,
-                    draft
+                    draft,
+                    type,
+                    albumId: albumId || null,
                 },
             });
         else

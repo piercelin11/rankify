@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import CheckBox from "@/components/form/CheckBox";
+import { Checkbox } from "@/components/ui/checkbox";
 import { AlbumData, TrackData } from "@/types/data";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
 	FilterType,
 	setExcluded,
@@ -20,41 +21,80 @@ type FilterStageProps = {
 	albums: AlbumData[];
 	tracks?: TrackData[];
 	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>;
+	rankingType?: "artist" | "album";
+	albumId?: string;
 };
 
 export default function FilterStage({
 	albums,
 	tracks,
 	setCurrentStage,
+	rankingType = "artist",
+	albumId,
 }: FilterStageProps) {
-	const [excludedIds, setExcludedIds] = useState<FilterType>({
-		albums: [],
-		tracks: [],
+	const [excludedIds, setExcludedIds] = useState<FilterType>(() => {
+		if (rankingType === "album") {
+			// 專輯排名模式：預設全不選（所有專輯都在 excluded 中）
+			return {
+				albums: albums.map(album => album.id),
+				tracks: [],
+			};
+		} else {
+			// 歌手排名模式：預設全選（excluded 為空）
+			return {
+				albums: [],
+				tracks: [],
+			};
+		}
 	});
 	const dispatch = useAppDispatch();
+	const router = useRouter();
 
 	const singles = tracks?.filter((track) => !track.albumId);
 
 	function handleItemClick(id: string, type: "albums" | "tracks") {
 		setExcludedIds((prev) => {
-			if (prev[type].includes(id)) {
-				return { ...prev, [type]: prev[type].filter((item) => item !== id) };
-			} else {
-				return { ...prev, [type]: [...prev[type], id] };
-			}
+			const newExcludedIds = prev[type].includes(id)
+				? { ...prev, [type]: prev[type].filter((item) => item !== id) }
+				: { ...prev, [type]: [...prev[type], id] };
+
+			return newExcludedIds;
 		});
+
+		// 專輯排名模式：當選擇專輯時，更新 URL 包含 albumId（在 setState 外部執行）
+		if (rankingType === "album" && type === "albums") {
+			const isCurrentlyExcluded = excludedIds.albums.includes(id);
+			const willBeSelected = isCurrentlyExcluded; // 如果目前被排除，點擊後會被選中
+
+			if (willBeSelected) {
+				const currentUrl = new URL(window.location.href);
+				currentUrl.searchParams.set("albumId", id);
+				router.replace(currentUrl.toString());
+			}
+		}
 	}
 
 	function handleStart() {
-		const filteredAlbums = albums.filter(
-			(album) => !excludedIds.albums.includes(album.id)
-		);
-		if (filteredAlbums.length < 2) {
-			alert("You need to at least select 2 albums.");
+		if (rankingType === "album") {
+			const selectedAlbums = albums.filter(
+				(album) => !excludedIds.albums.includes(album.id)
+			);
+			if (selectedAlbums.length !== 1) {
+				alert("請選擇一張專輯進行排名。");
+				return;
+			}
 		} else {
-			dispatch(setExcluded(excludedIds));
-			setCurrentStage("sorting");
+			const filteredAlbums = albums.filter(
+				(album) => !excludedIds.albums.includes(album.id)
+			);
+			if (filteredAlbums.length < 2) {
+				alert("You need to at least select 2 albums.");
+				return;
+			}
 		}
+
+		dispatch(setExcluded(excludedIds));
+		setCurrentStage("sorting");
 	}
 
 	useEffect(() => {
@@ -66,7 +106,10 @@ export default function FilterStage({
 			<div className="space-y-2">
 				<h3 className="text-center">Get Started</h3>
 				<p className="text-description text-center">
-					filter out the albums and singles you haven&apos;t listen to.
+					{rankingType === "album"
+						? "選擇一張專輯進行歌曲排名。"
+						: "filter out the albums and singles you haven't listen to."
+					}
 				</p>
 			</div>
 			<div className="flex justify-center gap-4">
@@ -93,7 +136,7 @@ export default function FilterStage({
 							/>
 						</div>
 					))}
-					{singles?.map((single) => (
+					{rankingType === "artist" && singles?.map((single) => (
 						<div
 							key={single.id}
 							onClick={() => handleItemClick(single.id, "tracks")}
@@ -122,7 +165,7 @@ function FilterGalleryItem({
 }) {
 	return (
 		<div className="relative min-w-40 max-w-40 space-y-2">
-			<CheckBox className="absolute left-2 top-2 z-10" checked={checked} />
+			<Checkbox className="absolute left-2 top-2 z-10" checked={checked} />
 			<div className="relative aspect-square h-auto w-full rounded">
 				<Image
 					className={cn("opacity-100 transition-all", {

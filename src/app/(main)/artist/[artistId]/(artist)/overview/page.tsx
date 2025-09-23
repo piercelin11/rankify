@@ -7,7 +7,8 @@ import getTracksStats from "@/services/track/getTracksStats";
 import getAlbumsStats from "@/services/album/getAlbumsStats";
 import { VIEW_SEGMENT_OPTIONS } from "@/config/segmentOptions";
 import ClientStatsRankingTable from "@/features/ranking/table/client/ClientStatsRankingTable";
-import { getLoggedAlbumNames } from "@/db/album";
+import { getLoggedAlbumNames, getAlbumRankingSessions } from "@/db/album";
+import AlbumRankingBoard from "@/components/ranking/AlbumRankingBoard";
 
 type pageProps = {
 	params: Promise<{ artistId: string }>;
@@ -39,6 +40,7 @@ export default async function OverviewPage({
 	});
 
 	const albums = await getLoggedAlbumNames(artistId, userId);
+	const albumSessions = await getAlbumRankingSessions(userId, artistId);
 
 	return (
 		<div>
@@ -57,24 +59,8 @@ export default async function OverviewPage({
 			) : (
 				<div className="space-y-6 p-content">
 					<div>
-						<h2 className="mb-4">Album Rankings</h2>
-						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-							{albumRankings.map((album) => (
-								<Card key={album.name} className="p-6">
-									<h3 className="mb-2 text-base text-muted-foreground">
-										{album.name}
-									</h3>
-									<div className="space-y-1">
-										<p className="text-2xl font-bold">
-											{album.avgPoints.toFixed(1)}
-										</p>
-										<p className="text-sm text-secondary-foreground">
-											Base: {album.avgBasePoints.toFixed(1)}
-										</p>
-									</div>
-								</Card>
-							))}
-						</div>
+						<h2 className="mb-4 text-2xl font-bold">專輯儀表板</h2>
+						<AlbumRankingBoard albums={albumSessions} artistId={artistId} />
 					</div>
 					<div>
 						<Card className="p-12">

@@ -24,6 +24,8 @@ type SortingStageProps = {
 	data: TrackData[];
 	draft: RankingDraftData | null;
 	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>;
+	rankingType?: "artist" | "album";
+	albumId?: string;
 };
 
 type PressedKeyType = "ArrowLeft" | "ArrowRight" | "ArrowDown" | "ArrowUp";
@@ -40,6 +42,8 @@ export default function SortingStage({
 	data,
 	draft,
 	setCurrentStage,
+	rankingType = "artist",
+	albumId,
 }: SortingStageProps) {
 	const excluded = useAppSelector((state) => state.sorter.excluded);
 	const saveStatus = useAppSelector((state) => state.sorter.saveStatus);
@@ -52,11 +56,26 @@ export default function SortingStage({
 
 	const tracks = excluded
 		? data.filter(
-				(data) =>
-					!excluded.albums.includes(data.albumId as string) &&
-					!excluded.tracks.includes(data.id)
+				(track) => {
+					// 基本過濾：不在 excluded 清單中
+					const notExcluded = !excluded.albums.includes(track.albumId as string) &&
+						!excluded.tracks.includes(track.id);
+
+					// 專輯排名模式：額外排除沒有 albumId 的單曲
+					if (rankingType === "album") {
+						return notExcluded && track.albumId;
+					}
+
+					return notExcluded;
+				}
 			)
-		: data;
+		: data.filter(track => {
+				// 沒有 excluded 但在專輯排名模式時，仍需排除單曲
+				if (rankingType === "album") {
+					return track.albumId;
+				}
+				return true;
+			});
 	const artistId = tracks[0].artistId;
 	const router = useRouter();
 
@@ -67,11 +86,15 @@ export default function SortingStage({
 		sortList,
 		handleSave,
 		restorePreviousState,
-	} = useSorter({ tracks, draft, setCurrentStage });
+	} = useSorter({ tracks, draft, setCurrentStage, rankingType, albumId });
 
 	//清除排名紀錄並重新開始
 	function handleClear() {
-		deleteRankingDraft(artistId);
+		deleteRankingDraft(
+			artistId,
+			rankingType === "album" ? "ALBUM" : "ARTIST",
+			albumId
+		);
 		dispatch(setPercentage(0));
 		dispatch(setSaveStatus("idle"));
 		setCurrentStage("filter");

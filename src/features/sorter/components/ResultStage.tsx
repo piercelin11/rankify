@@ -21,9 +21,11 @@ import { useModal } from "@/lib/hooks/useModal";
 
 type ResultStageProps = {
 	draft: RankingDraftData;
+	rankingType?: "artist" | "album";
+	albumId?: string;
 };
 
-export default function ResultStage({ draft }: ResultStageProps) {
+export default function ResultStage({ draft, rankingType = "artist", albumId }: ResultStageProps) {
 	if (!draft.result) notFound();
 	const result = draft.result! as RankingResultData[];
 	const dispatch = useAppDispatch();
@@ -97,7 +99,7 @@ export default function ResultStage({ draft }: ResultStageProps) {
 									optimisticResult,
 									draft.artistId,
 									draft.id,
-									"ARTIST"
+									rankingType === "album" ? "ALBUM" : "ARTIST"
 								);
 							}}
 						>
@@ -113,6 +115,8 @@ export default function ResultStage({ draft }: ResultStageProps) {
 									onConfirm: () =>
 										deleteRankingDraft(
 											result[0].artistId,
+											rankingType === "album" ? "ALBUM" : "ARTIST",
+											albumId,
 											`/artist/${result[0].artistId}/overview`
 										),
 									onCancel: () => closeTop(),

@@ -1,9 +1,7 @@
 import { notFound } from "next/navigation";
 import { ReactNode } from "react";
-import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
-import ContentHeader from "@/components/presentation/ContentHeader";
 import { getArtistById } from "@/db/artist";
-import ArtistNavigationHeader from "@/components/layout/ArtistNavigationHeader";
+import CollapsibleArtistHeader from "@/components/layout/CollapsibleArtistHeader";
 
 type LayoutProps = {
 	params: Promise<{ artistId: string }>;
@@ -16,16 +14,8 @@ export default async function MainLayout({ params, children }: LayoutProps) {
 
 	if (!artist) notFound();
 	return (
-		<>
-			<ArtistNavigationHeader artist={artist} />
-			<ContentHeader
-				data={artist}
-				subTitleContent={<p>{artist.spotifyFollowers} followers</p>}
-				rounded
-				type="Artist"
-			/>
-			<BlurredImageBackground src={artist.img || ""} />
+		<CollapsibleArtistHeader artist={artist}>
 			{children}
-		</>
+		</CollapsibleArtistHeader>
 	);
 }

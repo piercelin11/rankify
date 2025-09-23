@@ -13,9 +13,11 @@ type SorterPageProps = {
 	albums: AlbumData[];
 	tracks: TrackData[];
 	draft: RankingDraftData | null;
+	rankingType?: "artist" | "album";
+	albumId?: string;
 };
 
-export default function SorterPage({ albums, tracks, draft }: SorterPageProps) {
+export default function SorterPage({ albums, tracks, draft, rankingType = "artist", albumId }: SorterPageProps) {
 	const [currentStage, setCurrentStage] = useState<CurrentStage | null>(null);
  
 	useEffect(() => {
@@ -30,6 +32,8 @@ export default function SorterPage({ albums, tracks, draft }: SorterPageProps) {
 				albums={albums}
 				tracks={tracks}
 				setCurrentStage={setCurrentStage}
+				rankingType={rankingType}
+				albumId={albumId}
 			/>
 		);
 	else if (currentStage === "sorting")
@@ -38,9 +42,11 @@ export default function SorterPage({ albums, tracks, draft }: SorterPageProps) {
 				data={tracks}
 				draft={draft}
 				setCurrentStage={setCurrentStage}
+				rankingType={rankingType}
+				albumId={albumId}
 			/>
 		);
 	else if (currentStage === "result" && draft?.result)
-		return <ResultStage draft={draft} />;
+		return <ResultStage draft={draft} rankingType={rankingType} albumId={albumId} />;
 	else return <LoadingAnimation />;
 }

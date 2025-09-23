@@ -87,6 +87,48 @@ export async function getAlbumRanking(userId: string, albumId: string) {
 	};
 }
 
+export async function getAlbumRankingSessions(
+	userId: string,
+	artistId: string,
+) {
+
+	const albums = await db.album.findMany({
+		where: {
+			artistId,
+			rankings: {
+				some: {
+					userId,
+				},
+			},
+		},
+		include: {
+			rankings: {
+				where: {
+					userId,
+					rankingSession: {
+						type: "ALBUM",
+					},
+				},
+				select: {
+					rankingSession: {
+						select: {
+							id: true,
+						},
+					},
+				},
+			},
+		},
+		orderBy: {
+			releaseDate: "desc",
+		},
+	});
+
+	return albums.map((album) => ({
+		...album,
+		sessionCount: album.rankings.length,
+	}));
+}
+
 export async function getAlbumComparisonOptions(
 	userId: string,
 	artistId: string

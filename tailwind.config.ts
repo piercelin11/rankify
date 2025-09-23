@@ -83,6 +83,7 @@ export default {
 				"5xl": "2.5rem",
 			},
 			spacing: {
+				"18": "4.5rem",
 				"22": "5.5rem",
 				content: "2rem",
 			},
