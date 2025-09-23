@@ -5,6 +5,7 @@ import { ArtistData } from "@/types/data";
 import { CheckIcon } from "@radix-ui/react-icons";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import { useAppSelector } from "@/store/hooks";
+import { Progress } from "@/components/ui/progress";
 
 type SorterHeaderProps = {
 	artist: ArtistData;
@@ -46,14 +47,7 @@ export default function SorterHeader({ artist }: SorterHeaderProps) {
 					>
 						{percentage}%
 					</p>
-					<div className="relative h-2 rounded-full bg-neutral-900">
-						<div
-							className="h-2 rounded-full bg-primary-500"
-							style={{
-								width: percentage + "%",
-							}}
-						></div>
-					</div>
+					<Progress value={percentage} className="h-2" />
 				</div>
 			</div>
 		</div>

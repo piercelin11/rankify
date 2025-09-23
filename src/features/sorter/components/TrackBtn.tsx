@@ -19,9 +19,9 @@ export default function TrackBtn({
 	return (
 		<button
 			className={cn(
-				"col-span-2 row-span-1 flex cursor-pointer select-none gap-2 rounded-xl border  bg-neutral-900 p-2 outline-none transition-all duration-150 ease-out hover:bg-neutral-800 hover:shadow-lg sm:col-span-1 sm:row-span-2 sm:inline lg:p-5",
+				"col-span-2 row-span-1 flex cursor-pointer select-none gap-2 rounded-xl border bg-secondary p-2 outline-none transition-all duration-150 ease-out hover:bg-accent hover:shadow-lg sm:col-span-1 sm:row-span-2 sm:inline lg:p-5",
 				{
-					"scale-95 bg-neutral-800 shadow-md": isPressed,
+					"scale-95 bg-accent shadow-md": isPressed,
 					"border-green-500 bg-green-900/30": isSelected,
 				}
 			)}

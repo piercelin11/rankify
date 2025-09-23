@@ -18,7 +18,7 @@ export default async function MainLayout({ children }: AdminLayoutProps) {
 			<ScrollIsolationWrapper>
 				<SimpleSidebar user={user} artists={loggedArtists} />
 			</ScrollIsolationWrapper>
-			<SidebarInset className="w-ful h-full">
+			<SidebarInset className="h-full overflow-hidden">
 				<AppHeader />
 				{children}
 			</SidebarInset>

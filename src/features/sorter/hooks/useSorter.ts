@@ -43,6 +43,8 @@ type UseSorterProps = {
 	tracks: TrackData[];
 	draft: RankingDraftData | null;
 	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>;
+	rankingType?: "artist" | "album";
+	albumId?: string;
 };
 
 type UseSorterReturn = {
@@ -252,7 +254,9 @@ async function generateFinalResult(
 	state: SorterState,
 	tracks: TrackData[],
 	artistId: string,
-	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>
+	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>,
+	rankingType: "artist" | "album",
+	albumId?: string
 ): Promise<void> {
 	let rankingNum = 1;
 	let sameRank = 1;
@@ -279,7 +283,13 @@ async function generateFinalResult(
 	}
 
 	try {
-		await saveDraftResult(artistId, resultArray, JSON.stringify(state));
+		await saveDraftResult(
+			artistId,
+			resultArray,
+			rankingType === "album" ? "ALBUM" : "ARTIST",
+			albumId,
+			JSON.stringify(state)
+		);
 	} catch (err) {
 		console.error("Error saving sorter result:", err);
 	} finally {
@@ -292,6 +302,8 @@ export default function useSorter({
 	tracks,
 	draft,
 	setCurrentStage,
+	rankingType = "artist",
+	albumId,
 }: UseSorterProps): UseSorterReturn {
 	const dispatch = useAppDispatch();
 	const artistId = tracks[0].artistId;
@@ -348,7 +360,12 @@ export default function useSorter({
 		if (!state) {
 			return { type: "error", message: "No state to save" };
 		}
-		const result = await saveDraft(artistId, JSON.stringify(state));
+		const result = await saveDraft(
+			artistId,
+			JSON.stringify(state),
+			rankingType === "album" ? "ALBUM" : "ARTIST",
+			albumId
+		);
 		return result;
 	}, [state, artistId]);
 
@@ -377,7 +394,12 @@ export default function useSorter({
 		startTransition(async () => {
 			dispatchRef.current(setSaveStatus("pending"));
 			try {
-				await saveDraft(artistIdRef.current, JSON.stringify(stateRef.current));
+				await saveDraft(
+					artistIdRef.current,
+					JSON.stringify(stateRef.current),
+					rankingType === "album" ? "ALBUM" : "ARTIST",
+					albumId
+				);
 				dispatchRef.current(setSaveStatus("saved"));
 			} catch (error) {
 				console.error("Failed to save draft:", error);
@@ -413,7 +435,7 @@ export default function useSorter({
 			
 			// 如果完成，跳到結果頁面
 			if (newState.finishFlag === 1) {
-				generateFinalResult(newState, currentTracks, currentArtistId, currentSetCurrentStage);
+				generateFinalResult(newState, currentTracks, currentArtistId, currentSetCurrentStage, rankingType, albumId);
 			} else {
 				// 延遲執行自動儲存，避免同步狀態更新
 				setTimeout(() => {

@@ -2,44 +2,48 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export function useStickyState() {
-  const [isStuck, setIsStuck] = useState(false);
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
+interface UseStickyStateOptions {
+	rootMargin?: string;
+	threshold?: number;
+}
 
-  useEffect(() => {
-    const initObserver = () => {
-      const sentinel = sentinelRef.current;
+export function useStickyState(options: UseStickyStateOptions = {}) {
+	const { rootMargin = "0px", threshold = 0 } = options;
+	const [isStuck, setIsStuck] = useState(false);
+	const sentinelRef = useRef<HTMLDivElement>(null);
+	const observerRef = useRef<IntersectionObserver | null>(null);
 
-      if (!sentinel) {
-        // 如果元素還沒渲染，重試
-        setTimeout(initObserver, 10);
-        return;
-      }
+	useEffect(() => {
+		const initObserver = () => {
+			const sentinel = sentinelRef.current;
 
-      observerRef.current = new IntersectionObserver(
-        ([entry]) => {
-          // When sentinel is NOT intersecting (out of view), header is stuck
-          setIsStuck(!entry.isIntersecting);
-        },
-        {
-          root: null, // Use viewport as root
-          rootMargin: "0px",
-          threshold: 0,
-        }
-      );
+			if (!sentinel) {
+				setTimeout(initObserver, 10);
+				return;
+			}
 
-      observerRef.current.observe(sentinel);
-    };
+			observerRef.current = new IntersectionObserver(
+				([entry]) => {
+					setIsStuck(!entry.isIntersecting);
+				},
+				{
+					root: null,
+					rootMargin,
+					threshold,
+				}
+			);
 
-    initObserver();
+			observerRef.current.observe(sentinel);
+		};
 
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, []);
+		initObserver();
 
-  return { isStuck, sentinelRef };
+		return () => {
+			if (observerRef.current) {
+				observerRef.current.disconnect();
+			}
+		};
+	}, [rootMargin, threshold]);
+
+	return { isStuck, sentinelRef };
 }

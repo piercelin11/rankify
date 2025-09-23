@@ -21,17 +21,22 @@ export default async function submitRanking(
 
 	try {
 		await db.$transaction(async (tx) => {
-			const session = await createRankingSession({trackRankings, userId, type}, tx);
-
-			await createAlbumRanking(
-				{
-					dateId: session.id,
-					artistId: artistId,
-					userId,
-					trackRankings,
-				},
+			const session = await createRankingSession(
+				{ trackRankings, userId, type },
 				tx
 			);
+
+			if (type === "ARTIST") {
+				await createAlbumRanking(
+					{
+						dateId: session.id,
+						artistId: artistId,
+						userId,
+						trackRankings,
+					},
+					tx
+				);
+			}
 
 			await tx.rankingDraft.deleteMany({
 				where: {
@@ -51,5 +56,8 @@ export default async function submitRanking(
 		redirect(`/artist/${trackRankings[0].artistId}/history`);
 	}
 
-	return { type: "success", message: "You successfully submitted the rankings." };
+	return {
+		type: "success",
+		message: "You successfully submitted the rankings.",
+	};
 }

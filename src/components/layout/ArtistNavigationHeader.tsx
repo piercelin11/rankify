@@ -12,9 +12,13 @@ import { getArtistTabOptions } from "@/config/artistTabs";
 
 type ArtistNavigationHeaderProps = {
 	artist: ArtistData;
+	onCreateClick: () => void;
 };
 
-export default function ArtistNavigationHeader({ artist }: ArtistNavigationHeaderProps) {
+export default function ArtistNavigationHeader({
+	artist,
+	onCreateClick,
+}: ArtistNavigationHeaderProps) {
 	const pathname = usePathname();
 	const tabOptions = getArtistTabOptions(artist.id);
 	const breadCrumbItems = createBreadcrumbItems([
@@ -43,12 +47,16 @@ export default function ArtistNavigationHeader({ artist }: ArtistNavigationHeade
 					value={currentTab}
 				/>
 				{isRankingPage ? (
-					<Button className="h-10 rounded-full text-sm">
+					<Button className="h-10 rounded-full text-sm" onClick={onCreateClick}>
 						<Plus className="h-8 w-8 text-primary-foreground" />
 						Create
 					</Button>
 				) : (
-					<Button size="icon" className="size-10 rounded-full">
+					<Button
+						size="icon"
+						className="size-10 rounded-full"
+						onClick={onCreateClick}
+					>
 						<Plus className="h-8 w-8 text-primary-foreground" />
 					</Button>
 				)}

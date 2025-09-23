@@ -47,7 +47,10 @@ export default function WindowVirtualizedTable<
 }: WindowVirtualizedTableProps<T>) {
 	const [isClient, setIsClient] = useState(false);
 	const listRef = useRef<HTMLDivElement>(null);
-	const { isStuck, sentinelRef } = useStickyState();
+	const { isStuck, sentinelRef } = useStickyState({
+		rootMargin: "-100px",
+		threshold: 0,
+	});
 
 	useEffect(() => {
 		setIsClient(true);
@@ -130,11 +133,11 @@ export default function WindowVirtualizedTable<
 					<div ref={sentinelRef} className="h-0" />
 					<div
 						className={cn(
-							"sticky top-0 z-10 px-content transition-colors duration-200",
-							isStuck ? "border-b bg-background" : ""
+							"sticky top-[72px] z-10 px-content",
+							isStuck ? "border-b bg-background/85 backdrop-blur" : ""
 						)}
 					>
-						<Table >
+						<Table>
 							<TableHeader className={cn({ "border-b": !isStuck })}>
 								{table.getHeaderGroups().map((headerGroup) => (
 									<TableRow
@@ -198,7 +201,7 @@ export default function WindowVirtualizedTable<
 				</>
 			)}
 
-			<div ref={listRef} className="px-content mt-4">
+			<div ref={listRef} className="mt-4 px-content">
 				<div
 					style={{
 						height: virtualizer.getTotalSize(),

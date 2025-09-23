@@ -1,11 +1,14 @@
-"use server"; 
+"use server";
 
 import { getUserSession } from "@/../auth";
 import { db } from "@/db/client";
+import { $Enums } from "@prisma/client";
 
 export default async function saveDraft(
 	artistId: string,
-	draft: string
+	draft: string,
+	type: $Enums.RankingType,
+	albumId?: string
 ) {
 	const { id: userId } = await getUserSession();
 
@@ -13,6 +16,8 @@ export default async function saveDraft(
 		where: {
 			artistId,
 			userId,
+			type,
+			albumId: albumId || null,
 		},
 	});
 
@@ -23,6 +28,8 @@ export default async function saveDraft(
 					userId,
 					artistId,
 					draft,
+					type,
+					albumId: albumId || null,
 				},
 			});
 		else
