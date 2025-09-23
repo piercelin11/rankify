@@ -28,11 +28,11 @@ export async function getComparisonAlbumsData(albumIds: string[]) {
 						userId,
 					},
 					include: {
-						rankingSession: true,
+						submission: true,
 					},
 					orderBy: {
-						rankingSession: {
-							date: "asc",
+						submission: {
+							completedAt: "asc",
 						},
 					},
 				},
@@ -44,12 +44,14 @@ export async function getComparisonAlbumsData(albumIds: string[]) {
 			id: album.id,
 			name: album.name || "Unknown Album",
 			color: album.color,
-			rankings: album.albumRankings.map((r) => ({
-				ranking: r.ranking,
-				points: r.points,
-				date: r.rankingSession.date,
-				dateId: r.rankingSession.id,
-			})),
+			rankings: album.albumRankings
+				.filter((r) => r.submission.completedAt !== null)
+				.map((r) => ({
+					ranking: r.ranking,
+					points: r.points,
+					date: r.submission.completedAt!,
+					dateId: r.submission.id,
+				})),
 		}));
 	} catch (error) {
 		console.error("Failed to fetch comparison albums:", error);

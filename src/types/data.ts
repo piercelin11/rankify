@@ -1,9 +1,8 @@
 import {
 	Album,
 	Artist,
-	Ranking,
-	RankingDraft,
-	RankingSession,
+	RankingSubmission,
+	TrackRanking,
 	Track,
 } from "@prisma/client";
 import { RankingSettingsType } from "./schemas/settings";
@@ -20,10 +19,35 @@ export type TrackData = Track & {
 	album?: AlbumData | null;
 };
 
-export type RankingData = Ranking & {
+// 這些舊類型已移除，請使用新的類型定義
+
+// 新的類型定義
+export type RankingSubmissionData = RankingSubmission & {
 	artist?: ArtistData;
-	album?: AlbumData | null;
 	user?: UserData;
+	album?: AlbumData | null;
+	trackRanks?: TrackRankingData[];
+	albumRanks?: AlbumRankingData[];
+};
+
+export type TrackRankingData = TrackRanking & {
+	track?: TrackData;
+	submission?: RankingSubmissionData;
+};
+
+export type AlbumRankingData = {
+	id: string;
+	ranking: number;
+	points: number;
+	basePoints: number;
+	averageTrackRanking: number;
+	albumId: string;
+	artistId: string;
+	userId: string;
+	album?: AlbumData;
+	artist?: ArtistData;
+	user?: UserData;
+	submission?: RankingSubmissionData;
 };
 
 export type UserData = {
@@ -32,13 +56,6 @@ export type UserData = {
 	username: string | null;
 	image: string | null;
 };
-
-export type RankingSessionData = RankingSession & {
-	artist?: ArtistData;
-	user?: UserData;
-};
-
-export type RankingDraftData = RankingDraft;
 
 export type UserPreferenceData = {
 	id: string;

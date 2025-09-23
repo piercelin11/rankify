@@ -8,28 +8,33 @@ import { db } from "@/db/client";
 import { redirect } from "next/navigation";
 import { revalidateTag } from "next/cache";
 import createAlbumRanking from "@/features/ranking/actions/createAlbumRanking";
-import createRankingSession from "../../ranking/actions/createRankingSession";
+import createRankingSubmission from "../../ranking/actions/createRankingSubmission";
 
 export default async function submitRanking(
 	trackRankings: RankingResultData[],
 	artistId: string,
 	draftId: string,
-	type: $Enums.RankingType
+	type: $Enums.SubmissionType
 ): Promise<AppResponseType> {
 	const { id: userId } = await getUserSession();
 	let isSuccess = false;
 
 	try {
 		await db.$transaction(async (tx) => {
-			const session = await createRankingSession(
-				{ trackRankings, userId, type },
+			const submission = await createRankingSubmission(
+				{
+					trackRankings,
+					userId,
+					type,
+					albumId: type === "ALBUM" ? (trackRankings[0]?.albumId || undefined) : undefined
+				},
 				tx
 			);
 
 			if (type === "ARTIST") {
 				await createAlbumRanking(
 					{
-						dateId: session.id,
+						submissionId: submission.id,
 						artistId: artistId,
 						userId,
 						trackRankings,
@@ -38,9 +43,14 @@ export default async function submitRanking(
 				);
 			}
 
-			await tx.rankingDraft.deleteMany({
+			// 更新 RankingSubmission 狀態為已完成
+			await tx.rankingSubmission.update({
 				where: {
 					id: draftId,
+				},
+				data: {
+					status: "COMPLETED",
+					completedAt: new Date(),
 				},
 			});
 		});

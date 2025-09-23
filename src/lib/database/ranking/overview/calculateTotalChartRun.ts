@@ -12,11 +12,12 @@ export default async function calculateTotalChartRun({
 	trackId,
 }: CalculateTotalChartRunProps) {
 	let totalChartRun = 0;
-	const rankings = await db.ranking.findMany({
+	const rankings = await db.trackRanking.findMany({
 		where: {
 			artistId,
 			userId,
 			trackId,
+			submission: { status: "COMPLETED" },
 		},
 		select: {
 			rankChange: true,

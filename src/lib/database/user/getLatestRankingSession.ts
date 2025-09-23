@@ -10,19 +10,24 @@ export default async function getLatestRankingSession({
     userId,
 }: getLatestRankingSessionProps) {
 
-    const rankingSessions = await db.rankingSession.findFirst({
+    const latestSubmission = await db.rankingSubmission.findFirst({
         where: {
             artistId,
             userId,
+            status: "COMPLETED",
         },
         include: {
             artist: true,
-            rankings: true,
+            trackRanks: true,
         },
         orderBy: {
-            date: "desc",
+            createdAt: "desc",
         },
     });
 
-    return rankingSessions;
+    return latestSubmission ? {
+        ...latestSubmission,
+        date: latestSubmission.createdAt,
+        rankings: latestSubmission.trackRanks,
+    } : null;
 }

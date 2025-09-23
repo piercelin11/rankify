@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeftIcon } from "@radix-ui/react-icons";
-import { RankingDraftData, TrackData } from "@/types/data";
+import { RankingSubmissionData, TrackData } from "@/types/data";
 import deleteRankingDraft from "../../ranking/actions/deleteRankingDraft";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -22,7 +22,7 @@ export type RankingResultData = TrackData & {
 
 type SortingStageProps = {
 	data: TrackData[];
-	draft: RankingDraftData | null;
+	draft: RankingSubmissionData | null;
 	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>;
 	rankingType?: "artist" | "album";
 	albumId?: string;

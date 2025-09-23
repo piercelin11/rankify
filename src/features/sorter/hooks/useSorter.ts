@@ -4,7 +4,7 @@ import {
 	setSaveStatus,
 } from "@/features/sorter/slices/sorterSlice";
 import { useAppDispatch } from "@/store/hooks";
-import { RankingDraftData, TrackData } from "@/types/data";
+import { RankingSubmissionData, TrackData } from "@/types/data";
 import React, { startTransition, useEffect, useCallback, useState, useMemo, useRef } from "react";
 import saveDraft from "../../ranking/actions/saveDraft";
 import { RankingResultData } from "../components/SortingStage";
@@ -41,7 +41,7 @@ type SortChoice = -1 | 0 | 1;
 
 type UseSorterProps = {
 	tracks: TrackData[];
-	draft: RankingDraftData | null;
+	draft: RankingSubmissionData | null;
 	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>;
 	rankingType?: "artist" | "album";
 	albumId?: string;
@@ -316,10 +316,11 @@ export default function useSorter({
 	useEffect(() => {
 		if (tracks.length === 0) return;
 		
-		if (draft?.draft) {
+		const rankingState = draft?.rankingState ? JSON.parse(draft.rankingState as string) : null;
+		if (rankingState?.draft) {
 			// 載入存檔狀態 (與原本邏輯相同)
 			try {
-				const loadedState = JSON.parse(draft.draft);
+				const loadedState = JSON.parse(rankingState.draft);
 				setState(loadedState);
 			} catch (error) {
 				console.error("Failed to load draft state:", error);
@@ -330,7 +331,7 @@ export default function useSorter({
 			setState(initializeSorterState(tracks));
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- 故意不包含 tracks 避免無限循環
-	}, [draft?.draft, tracks.length]); // 使用 tracks.length 而不是整個 tracks 陣列
+	}, [draft?.rankingState, tracks.length]); // 使用 tracks.length 而不是整個 tracks 陣列
 
 	// 當前比較的歌曲 (對應原本的 leftField, rightField)
 	const leftField = useMemo(() => {

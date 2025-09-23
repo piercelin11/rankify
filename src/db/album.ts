@@ -21,21 +21,22 @@ export async function getLoggedAlbumNames(
     dateRange?: DateRange,
 ) {
     const dateFilter = dateRange ? {
-		date: {
+		createdAt: {
 			...(dateRange.from && { gte: dateRange.from }),
 			...(dateRange.to && { lte: dateRange.to }),
-		}
-	} : undefined;
+		},
+		status: "COMPLETED" as const,
+	} : { status: "COMPLETED" as const };
 
     const albums = await db.album.findMany({
         where: {
             artistId,
             tracks: {
                 some: {
-                    rankings: {
+                    trackRanks: {
                         some: {
                             userId,
-                            rankingSession: dateFilter,
+                            submission: dateFilter,
                         },
                     },
                 },
@@ -63,11 +64,11 @@ export async function getAlbumRanking(userId: string, albumId: string) {
 					userId,
 				},
 				include: {
-					rankingSession: true,
+					submission: true,
 				},
 				orderBy: {
-					rankingSession: {
-						date: "asc",
+					submission: {
+						createdAt: "asc",
 					},
 				},
 			},
@@ -81,8 +82,8 @@ export async function getAlbumRanking(userId: string, albumId: string) {
 		rankings: album.albumRankings.map((r) => ({
 			ranking: r.ranking,
 			points: r.points,
-			date: r.rankingSession.date,
-			dateId: r.rankingSession.id,
+			date: r.submission?.createdAt || new Date(),
+			dateId: r.submission?.id || r.submissionId || "",
 		})),
 	};
 }
@@ -95,25 +96,39 @@ export async function getAlbumRankingSessions(
 	const albums = await db.album.findMany({
 		where: {
 			artistId,
-			rankings: {
+			tracks: {
 				some: {
-					userId,
+					trackRanks: {
+						some: {
+							userId,
+							submission: {
+								type: "ALBUM",
+								status: "COMPLETED",
+							},
+						},
+					},
 				},
 			},
 		},
 		include: {
-			rankings: {
-				where: {
-					userId,
-					rankingSession: {
-						type: "ALBUM",
-					},
-				},
-				select: {
-					rankingSession: {
-						select: {
-							id: true,
+			tracks: {
+				include: {
+					trackRanks: {
+						where: {
+							userId,
+							submission: {
+								type: "ALBUM",
+								status: "COMPLETED",
+							},
 						},
+						select: {
+							submission: {
+								select: {
+									id: true,
+								},
+							},
+						},
+						distinct: ['submissionId'],
 					},
 				},
 			},
@@ -123,10 +138,16 @@ export async function getAlbumRankingSessions(
 		},
 	});
 
-	return albums.map((album) => ({
-		...album,
-		sessionCount: album.rankings.length,
-	}));
+	return albums.map((album) => {
+		// 收集所有 tracks 的 trackRanks
+		const allTrackRanks = album.tracks.flatMap(track => track.trackRanks);
+
+		return {
+			...album,
+			sessionCount: allTrackRanks.length,
+			trackRanks: allTrackRanks,
+		};
+	});
 }
 
 export async function getAlbumComparisonOptions(

@@ -16,8 +16,8 @@ export type AlbumStatsType = Omit<AlbumData, "tracks"> & {
 	rankings?: {
 		ranking: number;
 		points: number;
-		date: Date;
-		dateId: string;
+		createdAt: Date;
+		submissionId: string;
 	}[];
 };
 
@@ -37,14 +37,14 @@ const defaultOptions = {
 };
 
 type AlbumQueryConditions = {
-	albumId: { not: null };
 	artistId: string;
 	userId: string;
-	date?: {
-		date?: {
+	submission?: {
+		createdAt?: {
 			gte?: Date;
 			lte?: Date;
 		};
+		status?: string;
 	};
 };
 
@@ -52,19 +52,26 @@ async function getAlbumPercentileCounts(
 	albumIds: string[],
 	conditions: AlbumQueryConditions
 ) {
-	const results = await db.ranking.findMany({
+	const results = await db.trackRanking.findMany({
 		where: {
 			...conditions,
-			albumId: { in: albumIds },
+			track: {
+				albumId: { in: albumIds },
+			},
+			submission: { status: "COMPLETED" },
 		},
 		select: {
-			albumId: true,
+			track: {
+				select: {
+					albumId: true,
+				},
+			},
 			rankPercentile: true,
 		},
 	});
 
 	return albumIds.reduce((acc, albumId) => {
-		const albumRankings = results.filter(r => r.albumId === albumId);
+		const albumRankings = results.filter(r => r.track.albumId === albumId);
 		acc[albumId] = {
 			top5: albumRankings.filter(r => r.rankPercentile <= 0.05).length,
 			top10: albumRankings.filter(r => r.rankPercentile <= 0.1).length,
@@ -82,18 +89,23 @@ export default async function getAlbumsStats({
 	dateRange,
 }: getAlbumsStatsProps): Promise<AlbumStatsType[]> {
 	const dateFilter = dateRange ? {
-		date: {
+		createdAt: {
 			...(dateRange.from && { gte: dateRange.from }),
 			...(dateRange.to && { lte: dateRange.to }),
-		}
-	} : undefined;
+		},
+		status: "COMPLETED" as const
+	} : { status: "COMPLETED" as const };
 
 	const albumData = await db.album.findMany({
 		where: {
 			artistId,
-			rankings: {
+			tracks: {
 				some: {
-					userId,
+					trackRanks: {
+						some: {
+							userId,
+						},
+					},
 				},
 			},
 		}
@@ -105,7 +117,7 @@ export default async function getAlbumsStats({
 		where: {
 			artistId,
 			userId,
-			rankingSession: dateFilter,
+			submission: dateFilter,
 		},
 		_avg: {
 			points: true,
@@ -121,10 +133,9 @@ export default async function getAlbumsStats({
 	const albumIds = albumPoints.map(data => data.albumId);
 
 	const conditions: AlbumQueryConditions = {
-		albumId: { not: null },
 		artistId,
 		userId,
-		date: dateFilter,
+		submission: dateFilter,
 	};
 
 	const percentileCounts = await getAlbumPercentileCounts(albumIds, conditions);

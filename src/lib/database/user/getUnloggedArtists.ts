@@ -12,7 +12,7 @@ export default async function getUnloggedArtists({
         where: {
             tracks: {
                 none: {
-                    rankings: {
+                    trackRanks: {
                         some: {
                             userId
                         }

@@ -12,14 +12,15 @@ export async function getArtistById(artistId: string) {
 export async function getLoggedArtists(userId: string) {
 	const artists = await db.artist.findMany({
 		where: {
-			albumRankings: {
+			submissions: {
 				some: {
 					userId,
+					status: "COMPLETED",
 				},
 			},
 		},
 		orderBy: {
-			albumRankings: {
+			submissions: {
 				_count: "desc",
 			},
 		},

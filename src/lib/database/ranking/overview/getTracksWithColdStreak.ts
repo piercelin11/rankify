@@ -30,28 +30,28 @@ export async function getTracksWithColdStreak({
         WITH LaggedRankings AS (
             SELECT
                 r."trackId",
-                r.ranking,
-                s.date, -- 用於排序
+                r.rank,
+                s."createdAt", -- 用於排序
                 -- 獲取上一次排名 (按日期升序，所以 lag(1) 是上一筆)
-                LAG(r.ranking, 1) OVER (PARTITION BY r."trackId" ORDER BY s.date ASC) as prev_ranking_1,
+                LAG(r.rank, 1) OVER (PARTITION BY r."trackId" ORDER BY s."createdAt" ASC) as prev_ranking_1,
                 -- 獲取上上次排名
-                LAG(r.ranking, 2) OVER (PARTITION BY r."trackId" ORDER BY s.date ASC) as prev_ranking_2,
+                LAG(r.rank, 2) OVER (PARTITION BY r."trackId" ORDER BY s."createdAt" ASC) as prev_ranking_2,
                 -- 獲取上上次排名
-                LAG(r.ranking, 3) OVER (PARTITION BY r."trackId" ORDER BY s.date ASC) as prev_ranking_3,
+                LAG(r.rank, 3) OVER (PARTITION BY r."trackId" ORDER BY s."createdAt" ASC) as prev_ranking_3,
                 -- 標識每個 track 的最新記錄 (按日期降序，最新的是 1)
-                ROW_NUMBER() OVER (PARTITION BY r."trackId" ORDER BY s.date DESC) as rn
-            FROM "Ranking" r
-            INNER JOIN "RankingSession" s ON r."dateId" = s.id -- 需要 JOIN Session 來獲取日期
-            WHERE r."userId" = ${userId} AND r."artistId" = ${artistId} -- 應用篩選條件
+                ROW_NUMBER() OVER (PARTITION BY r."trackId" ORDER BY s."createdAt" DESC) as rn
+            FROM "TrackRanking" r
+            INNER JOIN "RankingSubmission" s ON r."submissionId" = s.id -- 需要 JOIN Submission 來獲取日期
+            WHERE r."userId" = ${userId} AND r."artistId" = ${artistId} AND s.status = 'COMPLETED' -- 應用篩選條件
         )
         SELECT
             lr."trackId"
         FROM LaggedRankings lr
         WHERE lr.rn = 1 -- 只關心每個 track 的最新一筆記錄
-          AND lr.ranking IS NOT NULL       -- 確保排名有效
+          AND lr.rank IS NOT NULL       -- 確保排名有效
           AND lr.prev_ranking_1 IS NOT NULL
           AND lr.prev_ranking_2 IS NOT NULL
-          AND lr.ranking > lr.prev_ranking_1  -- 本次排名優於上次
+          AND lr.rank > lr.prev_ranking_1  -- 本次排名優於上次
           AND lr.prev_ranking_1 > lr.prev_ranking_2  -- 上次排名優於上上次
           AND lr.prev_ranking_2 > lr.prev_ranking_3; -- 上上次排名優於上上上次
     `;
@@ -60,29 +60,29 @@ export async function getTracksWithColdStreak({
     WITH LaggedRankings AS (
         SELECT
             r."trackId",
-            r.ranking,
-            s.date,
-            LAG(r.ranking, 1) OVER (PARTITION BY r."trackId" ORDER BY s.date ASC) as prev_ranking_1,
-            LAG(r.ranking, 2) OVER (PARTITION BY r."trackId" ORDER BY s.date ASC) as prev_ranking_2,
-            LAG(r.ranking, 3) OVER (PARTITION BY r."trackId" ORDER BY s.date ASC) as prev_ranking_3,
-            LAG(r.ranking, 4) OVER (PARTITION BY r."trackId" ORDER BY s.date ASC) as prev_ranking_4,
-            LAG(r.ranking, 5) OVER (PARTITION BY r."trackId" ORDER BY s.date ASC) as prev_ranking_5,
-            ROW_NUMBER() OVER (PARTITION BY r."trackId" ORDER BY s.date DESC) as rn
-        FROM "Ranking" r
-        INNER JOIN "RankingSession" s ON r."dateId" = s.id -- 需要 JOIN Session 來獲取日期
-        WHERE r."userId" = ${userId} AND r."artistId" = ${artistId} -- 應用篩選條件
+            r.rank,
+            s."createdAt",
+            LAG(r.rank, 1) OVER (PARTITION BY r."trackId" ORDER BY s."createdAt" ASC) as prev_ranking_1,
+            LAG(r.rank, 2) OVER (PARTITION BY r."trackId" ORDER BY s."createdAt" ASC) as prev_ranking_2,
+            LAG(r.rank, 3) OVER (PARTITION BY r."trackId" ORDER BY s."createdAt" ASC) as prev_ranking_3,
+            LAG(r.rank, 4) OVER (PARTITION BY r."trackId" ORDER BY s."createdAt" ASC) as prev_ranking_4,
+            LAG(r.rank, 5) OVER (PARTITION BY r."trackId" ORDER BY s."createdAt" ASC) as prev_ranking_5,
+            ROW_NUMBER() OVER (PARTITION BY r."trackId" ORDER BY s."createdAt" DESC) as rn
+        FROM "TrackRanking" r
+        INNER JOIN "RankingSubmission" s ON r."submissionId" = s.id -- 需要 JOIN Submission 來獲取日期
+        WHERE r."userId" = ${userId} AND r."artistId" = ${artistId} AND s.status = 'COMPLETED' -- 應用篩選條件
     )
     SELECT
         lr."trackId"
     FROM LaggedRankings lr
     WHERE lr.rn = 1 -- 只關心每個 track 的最新一筆記錄
-      AND lr.ranking IS NOT NULL       -- 確保排名有效
+      AND lr.rank IS NOT NULL       -- 確保排名有效
       AND lr.prev_ranking_1 IS NOT NULL
       AND lr.prev_ranking_2 IS NOT NULL
-      AND lr.ranking > lr.prev_ranking_1 
-      AND lr.prev_ranking_1 > lr.prev_ranking_2 
-      AND lr.prev_ranking_2 > lr.prev_ranking_3 
-      AND lr.prev_ranking_3 > lr.prev_ranking_4 
+      AND lr.rank > lr.prev_ranking_1
+      AND lr.prev_ranking_1 > lr.prev_ranking_2
+      AND lr.prev_ranking_2 > lr.prev_ranking_3
+      AND lr.prev_ranking_3 > lr.prev_ranking_4
       AND lr.prev_ranking_4 > lr.prev_ranking_5; 
 `;
 

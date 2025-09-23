@@ -10,8 +10,8 @@ import type { Album } from "@prisma/client";
 
 type AlbumWithSessions = Album & {
 	sessionCount: number;
-	rankings: {
-		rankingSession: {
+	trackRanks: {
+		submission: {
 			id: string;
 		};
 	}[];

@@ -23,7 +23,7 @@ export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
 	top50PercentCount: number;
 	top25PercentCount: number;
 	top5PercentCount: number;
-	rankings?: { ranking: number; date: Date; dateId: string }[];
+	rankings?: { rank: number; createdAt: Date; submissionId: string }[];
 	rankChange?: number | null;
 	achievement: AchievementType[];
 };
@@ -70,10 +70,11 @@ async function getPercentileCounts(
 	trackIds: string[],
 	conditions: QueryConditions
 ) {
-	const results = await db.ranking.findMany({
+	const results = await db.trackRanking.findMany({
 		where: {
 			...conditions,
 			trackId: { in: trackIds },
+			submission: { status: "COMPLETED" },
 		},
 		select: {
 			trackId: true,
@@ -181,7 +182,7 @@ export default async function getTracksStats({
 		where: {
 			id: { in: trackIds },
 			artistId,
-			rankings: { some: { userId } },
+			trackRanks: { some: { userId } },
 		},
 		include: {
 			album: {
@@ -197,17 +198,20 @@ export default async function getTracksStats({
 	let prevTrackRankingMap: Map<string, number> | undefined;
 	if (options.includeRankChange && !dateRange) {
 		const latestSession = await getLatestRankingSession({ userId, artistId });
-		const prevTrackRanking = await db.ranking.groupBy({
+		const prevTrackRanking = await db.trackRanking.groupBy({
 			by: ["trackId"],
 			where: {
 				userId,
 				artistId,
-				rankingSession: { date: { lt: latestSession?.date } },
+				submission: {
+					createdAt: { lt: latestSession?.createdAt },
+					status: "COMPLETED"
+				},
 			},
 			orderBy: [
-				{ _avg: { ranking: "asc" } },
-				{ _min: { ranking: "asc" } },
-				{ _max: { ranking: "asc" } },
+				{ _avg: { rank: "asc" } },
+				{ _min: { rank: "asc" } },
+				{ _max: { rank: "asc" } },
 				{ trackId: "desc" },
 			],
 		});

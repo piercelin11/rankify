@@ -12,21 +12,27 @@ type getAlbumsStatsProps = {
 
 async function getAlbumPercentileCounts(
 	albumIds: string[],
-	conditions: Prisma.RankingWhereInput
+	conditions: Prisma.TrackRankingWhereInput
 ) {
-	const results = await db.ranking.findMany({
+	const results = await db.trackRanking.findMany({
 		where: {
 			...conditions,
-			albumId: { in: albumIds },
+			track: {
+				albumId: { in: albumIds },
+			},
 		},
 		select: {
-			albumId: true,
+			track: {
+				select: {
+					albumId: true,
+				},
+			},
 			rankPercentile: true,
 		},
 	});
 
 	return albumIds.reduce((acc, albumId) => {
-		const albumRankings = results.filter(r => r.albumId === albumId);
+		const albumRankings = results.filter(r => r.track.albumId === albumId);
 		acc[albumId] = {
 			top5: albumRankings.filter(r => r.rankPercentile <= 0.05).length,
 			top10: albumRankings.filter(r => r.rankPercentile <= 0.1).length,
@@ -43,18 +49,23 @@ export default async function getAlbumsStats({
 	dateRange,
 }: getAlbumsStatsProps): Promise<AlbumStatsType[]> {
 	const dateFilter = dateRange ? {
-		date: {
+		createdAt: {
 			...(dateRange.from && { gte: dateRange.from }),
 			...(dateRange.to && { lte: dateRange.to }),
-		}
-	} : undefined;
+		},
+		status: "COMPLETED" as const,
+	} : { status: "COMPLETED" as const };
 
 	const albumData = await db.album.findMany({
 		where: {
 			artistId,
-			rankings: {
+			tracks: {
 				some: {
-					userId,
+					trackRanks: {
+						some: {
+							userId,
+						},
+					},
 				},
 			},
 		}
@@ -66,7 +77,7 @@ export default async function getAlbumsStats({
 		where: {
 			artistId,
 			userId,
-			rankingSession: dateFilter,
+			submission: dateFilter,
 		},
 		_avg: {
 			points: true,
@@ -85,11 +96,13 @@ export default async function getAlbumsStats({
 
 	const albumIds = albumPoints.map(data => data.albumId);
 
-	const conditions: Prisma.RankingWhereInput = {
-		albumId: { not: null },
+	const conditions: Prisma.TrackRankingWhereInput = {
+		track: {
+			albumId: { not: null },
+		},
 		artistId,
 		userId,
-		rankingSession: dateFilter,
+		submission: dateFilter,
 	};
 
 	const percentileCounts = await getAlbumPercentileCounts(albumIds, conditions);
