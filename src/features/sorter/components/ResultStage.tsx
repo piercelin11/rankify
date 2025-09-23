@@ -1,6 +1,6 @@
 "use client";
 
-import { RankingDraftData } from "@/types/data";
+import { RankingSubmissionData } from "@/types/data";
 import React, {
 	startTransition,
 	useEffect,
@@ -20,14 +20,15 @@ import { useAppDispatch } from "@/store/hooks";
 import { useModal } from "@/lib/hooks/useModal";
 
 type ResultStageProps = {
-	draft: RankingDraftData;
+	draft: RankingSubmissionData;
 	rankingType?: "artist" | "album";
 	albumId?: string;
 };
 
 export default function ResultStage({ draft, rankingType = "artist", albumId }: ResultStageProps) {
-	if (!draft.result) notFound();
-	const result = draft.result! as RankingResultData[];
+	const rankingState = draft.rankingState ? JSON.parse(draft.rankingState as string) : null;
+	if (!rankingState?.result) notFound();
+	const result = rankingState.result as RankingResultData[];
 	const dispatch = useAppDispatch();
 
 	const { showAlert, closeTop } = useModal();
@@ -72,7 +73,7 @@ export default function ResultStage({ draft, rankingType = "artist", albumId }: 
 		startTransition(async () => {
 			setOptimisticResult(updatedRankings);
 			try {
-				await saveDraftResult(draft.artistId, updatedRankings);
+				await saveDraftResult(draft.artistId, updatedRankings, rankingType.toUpperCase() as any, albumId);
 			} catch (error) {
 				console.error("Sometimg went wrong:", error);
 				setOptimisticResult(previousRankings);

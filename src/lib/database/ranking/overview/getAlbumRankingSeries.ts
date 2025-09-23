@@ -5,8 +5,8 @@ export type AlbumRankingSeriesType = Map<
 	{
 		ranking: number;
 		points: number;
-		date: Date;
-		dateId: string;
+		createdAt: Date;
+		submissionId: string;
 	}[]
 >;
 
@@ -23,9 +23,13 @@ export default async function getAlbumRankingSeries({
 	const albumRanking = await db.album.findMany({
 		where: {
 			artistId,
-			rankings: {
+			tracks: {
 				some: {
-					userId,
+					trackRanks: {
+						some: {
+							userId,
+						},
+					},
 				},
 			},
 		},
@@ -34,16 +38,19 @@ export default async function getAlbumRankingSeries({
 			name: true,
 			color: true,
 			albumRankings: {
+				where: {
+					submission: { status: "COMPLETED" },
+				},
 				select: {
-					rankingSession: {
-						select: { date: true, id: true },
+					submission: {
+						select: { createdAt: true, id: true },
 					},
 					points: true,
 					ranking: true,
 				},
 				orderBy: {
-					rankingSession: {
-						date: "asc",
+					submission: {
+						createdAt: "asc",
 					},
 				},
 			},
@@ -54,8 +61,8 @@ export default async function getAlbumRankingSeries({
 		const rankings = album.albumRankings.map((data) => ({
 			ranking: data.ranking,
 			points: data.points,
-			date: data.rankingSession.date,
-			dateId: data.rankingSession.id,
+			createdAt: data.submission?.createdAt || new Date(),
+			submissionId: data.submission?.id || "",
 		}));
 		result.set(album.id, rankings);
 	}

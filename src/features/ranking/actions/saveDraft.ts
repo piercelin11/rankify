@@ -7,38 +7,40 @@ import { $Enums } from "@prisma/client";
 export default async function saveDraft(
 	artistId: string,
 	draft: string,
-	type: $Enums.RankingType,
+	type: $Enums.SubmissionType,
 	albumId?: string
 ) {
 	const { id: userId } = await getUserSession();
 
-	const existingDraft = await db.rankingDraft.findFirst({
+	const existingDraft = await db.rankingSubmission.findFirst({
 		where: {
 			artistId,
 			userId,
 			type,
 			albumId: albumId || null,
+			status: "DRAFT",
 		},
 	});
 
 	try {
 		if (!existingDraft)
-			await db.rankingDraft.create({
+			await db.rankingSubmission.create({
 				data: {
 					userId,
 					artistId,
-					draft,
+					rankingState: draft,
 					type,
 					albumId: albumId || null,
+					status: "DRAFT",
 				},
 			});
 		else
-			await db.rankingDraft.update({
+			await db.rankingSubmission.update({
 				where: {
 					id: existingDraft.id,
 				},
 				data: {
-					draft,
+					rankingState: draft,
 				},
 			});
 

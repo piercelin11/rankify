@@ -9,6 +9,8 @@ import { defaultRankingSettings } from "@/features/settings/components/RankingSe
 export type TrackHistoryType = Omit<TrackData, "artist" | "album"> & {
 	dateId: string;
 	date: Date;
+	submissionId: string;
+	createdAt: Date;
 	album: {
 		name: string;
 		color: string | null;
@@ -43,32 +45,37 @@ export async function getTracksHistory({
 		userPreference?.rankingSettings || defaultRankingSettings
 	);
 
-	const rankings = await db.ranking.findMany({
+	const rankings = await db.trackRanking.findMany({
 		where: {
 			artistId,
 			userId,
-			dateId,
+			submissionId: dateId,
 			track: trackQueryConditions,
 		},
 		orderBy: {
-			ranking: "asc",
+			rank: "asc",
 		},
 		select: {
 			id: true,
-			ranking: true,
+			rank: true,
 			rankChange: true,
 			rankPercentile: true,
 			trackId: true,
-			track: true,
-			rankingSession: {
-				select: {
-					date: true,
+			submissionId: true,
+			track: {
+				include: {
+					album: {
+						select: {
+							name: true,
+							color: true,
+						},
+					},
 				},
 			},
-			album: {
+			submission: {
 				select: {
-					name: true,
-					color: true,
+					id: true,
+					createdAt: true,
 				},
 			},
 		},
@@ -77,10 +84,10 @@ export async function getTracksHistory({
 
 	if (rankings.length === 0) notFound();
 
-	const currentDate = rankings[0].rankingSession.date;
+	const currentDate = rankings[0].submission.createdAt;
 	const trackIds = rankings.map((ranking) => ranking.trackId);
 
-	const historicalPeak = await db.ranking.groupBy({
+	const historicalPeak = await db.trackRanking.groupBy({
 		by: ["trackId"],
 		where: {
 			trackId: { in: trackIds },
@@ -88,35 +95,37 @@ export async function getTracksHistory({
 			artistId,
 				},
 		_min: {
-			ranking: true,
+			rank: true,
 		},
 		_max: {
-			ranking: true,
+			rank: true,
 		},
 	});
 
 	const historicalMap = new Map(
 		historicalPeak.map((data) => [
 			data.trackId,
-			{ peak: data._min.ranking },
+			{ peak: data._min.rank },
 		])
 	);
 
 	const result = rankings.map((data) => {
 		const historicalBest = historicalMap.get(data.trackId)?.peak;
-		const isNewPeak = !historicalBest || data.ranking < historicalBest;
+		const isNewPeak = !historicalBest || data.rank < historicalBest;
 
 		return {
 			...data.track,
-			ranking: data.ranking,
+			ranking: data.rank,
 			rankPercentile: data.rankPercentile,
 			rankChange: data.rankChange,
 			dateId,
 			date: currentDate,
-			peak: isNewPeak ? data.ranking : historicalBest,
+			submissionId: data.submissionId,
+			createdAt: currentDate,
+			peak: isNewPeak ? data.rank : historicalBest,
 			countSongs: rankings.length,
 			achievement: isNewPeak ? ["New Peak" as AchievementType] : [],
-			album: data.album,
+			album: data.track.album,
 		};
 	});
 

@@ -1,35 +1,36 @@
 import { db } from "@/db/client";
-import { $Enums, Prisma, RankingSession } from "@prisma/client";
+import { $Enums, Prisma, RankingSubmission } from "@prisma/client";
 import { PrismaClient } from "@prisma/client/extension";
 import { RankingResultData } from "../../sorter/components/SortingStage";
 
-type createRankingSessionProps = {
+type createRankingSubmissionProps = {
 	trackRankings: RankingResultData[];
 	userId: string;
-	type: $Enums.RankingType;
+	type: $Enums.SubmissionType;
+	albumId?: string;
 };
 
-export default async function createRankingSession(
-	{ trackRankings, userId, type }: createRankingSessionProps,
+export default async function createRankingSubmission(
+	{ trackRankings, userId, type, albumId }: createRankingSubmissionProps,
 	prisma: PrismaClient | Prisma.TransactionClient
-): Promise<RankingSession> {
+): Promise<RankingSubmission> {
 	const countTrack = trackRankings.length;
 	const trackIds = trackRankings.map((track) => track.id);
 
-	const previousRankings = await db.ranking.findMany({
+	const previousRankings = await db.trackRanking.findMany({
 		where: {
 			userId,
 			trackId: { in: trackIds },
 		},
 		distinct: ["trackId"],
 		orderBy: {
-			rankingSession: { date: "desc" },
+			submission: { completedAt: "desc" },
 		},
-		select: { trackId: true, ranking: true, artistId: true },
+		select: { trackId: true, rank: true, artistId: true },
 	});
 
 	const prevRankingMap = new Map(
-		previousRankings.map((ranking) => [ranking.trackId, ranking.ranking])
+		previousRankings.map((ranking) => [ranking.trackId, ranking.rank])
 	);
 
 	const sessionCreateData = trackRankings.map((data) => {
@@ -41,9 +42,8 @@ export default async function createRankingSession(
 		const rankPercentile = data.ranking / countTrack;
 
 		return {
-			ranking: data.ranking,
+			rank: data.ranking,
 			trackId: data.id,
-			albumId: data.albumId,
 			artistId: trackRankings[0].artistId,
 			userId,
 			rankPercentile,
@@ -51,14 +51,17 @@ export default async function createRankingSession(
 		};
 	});
 
-	const session = await prisma.rankingSession.create({
+	const submission = await prisma.rankingSubmission.create({
         data: {
             userId,
             artistId: trackRankings[0].artistId,
+            albumId,
             type,
-            rankings: { createMany: { data: sessionCreateData } },
+            status: "COMPLETED",
+            completedAt: new Date(),
+            trackRanks: { createMany: { data: sessionCreateData } },
         },
     });
 
-    return session;
+    return submission;
 }

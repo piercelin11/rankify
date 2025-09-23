@@ -20,23 +20,23 @@ export async function getTracksRankings(userId: string, trackIds: string[]) {
 			id: {
 				in: trackIds,
 			},
-			rankings: {
+			trackRanks: {
 				some: {
 					userId,
 				},
 			},
 		},
 		include: {
-			rankings: {
+			trackRanks: {
 				where: {
 					userId,
 				},
 				include: {
-					rankingSession: true,
+					submission: true,
 				},
 				orderBy: {
-					rankingSession: {
-						date: "asc",
+					submission: {
+						createdAt: "asc",
 					},
 				},
 			},
@@ -45,12 +45,12 @@ export async function getTracksRankings(userId: string, trackIds: string[]) {
 
 	return tracks.map((track) => ({
 		...track,
-		rankings: track.rankings.map((r) => ({
-			ranking: r.ranking,
+		rankings: track.trackRanks.map((r) => ({
+			ranking: r.rank,
 			rankPercentile: r.rankPercentile,
 			rankChange: r.rankChange,
-			date: r.rankingSession.date,
-			dateId: r.rankingSession.id,
+			date: r.submission.createdAt,
+			dateId: r.submission.id,
 		})),
 	}));
 }
@@ -61,16 +61,16 @@ export async function getTrackRanking(userId: string, trackId: string) {
 			id: trackId,
 		},
 		include: {
-			rankings: {
+			trackRanks: {
 				where: {
 					userId,
 				},
 				include: {
-					rankingSession: true,
+					submission: true,
 				},
 				orderBy: {
-					rankingSession: {
-						date: "asc",
+					submission: {
+						createdAt: "asc",
 					},
 				},
 			},
@@ -81,12 +81,12 @@ export async function getTrackRanking(userId: string, trackId: string) {
 
 	return {
 		...track,
-		rankings: track.rankings.map((r) => ({
-			ranking: r.ranking,
+		rankings: track.trackRanks.map((r) => ({
+			ranking: r.rank,
 			rankPercentile: r.rankPercentile,
 			rankChange: r.rankChange,
-			date: r.rankingSession.date,
-			dateId: r.rankingSession.id,
+			date: r.submission.createdAt,
+			dateId: r.submission.id,
 		})),
 	};
 }
@@ -107,7 +107,7 @@ export async function getTrackComparisonOptions(
 			artistId,
 			tracks: {
 				some: {
-					rankings: {
+					trackRanks: {
 						some: { userId },
 					},
 				},
@@ -125,7 +125,7 @@ export async function getTrackComparisonOptions(
 	const tracks = await db.track.findMany({
 		where: {
 			artistId,
-			rankings: {
+			trackRanks: {
 				some: { userId },
 			},
 		},

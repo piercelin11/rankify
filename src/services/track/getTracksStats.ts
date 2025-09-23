@@ -15,9 +15,9 @@ type getTracksStatsProps = {
 
 async function getPercentileCounts(
 	trackIds: string[],
-	conditions: Prisma.RankingWhereInput
+	conditions: Prisma.TrackRankingWhereInput
 ) {
-	const results = await db.ranking.findMany({
+	const results = await db.trackRanking.findMany({
 		where: {
 			...conditions,
 			trackId: { in: trackIds },
@@ -49,7 +49,7 @@ async function getTracksMetrics(
 	dateRange?: DateRange,
 	trackQueryConditions?: Prisma.TrackWhereInput
 ) {
-	const rankingData = await db.ranking.groupBy({
+	const rankingData = await db.trackRanking.groupBy({
 		by: ["trackId"],
 		where: {
 			userId,
@@ -57,10 +57,11 @@ async function getTracksMetrics(
 			track: {
 				...trackQueryConditions,
 			},
-			rankingSession: {
+			submission: {
 				type: "ARTIST",
+				status: "COMPLETED",
 				...(dateRange && {
-					date: {
+					createdAt: {
 						...(dateRange.from && { gte: dateRange.from }),
 						...(dateRange.to && { lte: dateRange.to }),
 					},
@@ -68,13 +69,13 @@ async function getTracksMetrics(
 			},
 		},
 		_min: {
-			ranking: true,
+			rank: true,
 		},
 		_max: {
-			ranking: true,
+			rank: true,
 		},
 		_avg: {
-			ranking: true,
+			rank: true,
 		},
 		_count: {
 			_all: true,
@@ -82,17 +83,17 @@ async function getTracksMetrics(
 		orderBy: [
 			{
 				_avg: {
-					ranking: "asc",
+					rank: "asc",
 				},
 			},
 			{
 				_min: {
-					ranking: "asc",
+					rank: "asc",
 				},
 			},
 			{
 				_max: {
-					ranking: "asc",
+					rank: "asc",
 				},
 			},
 			{
@@ -106,10 +107,10 @@ async function getTracksMetrics(
 		(item, index): TrackMetrics => ({
 			id: item.trackId,
 			ranking: index + 1,
-			peak: item._min.ranking ?? 0,
-			worst: item._max.ranking ?? 0,
+			peak: item._min.rank ?? 0,
+			worst: item._max.rank ?? 0,
 			count: item._count._all,
-			averageRanking: item._avg.ranking ?? 0,
+			averageRanking: item._avg.rank ?? 0,
 		})
 	);
 }
@@ -127,12 +128,13 @@ export default async function getTracksStats({
 
 	const dateFilter = dateRange
 		? {
-				date: {
+				createdAt: {
 					...(dateRange.from && { gte: dateRange.from }),
 					...(dateRange.to && { lte: dateRange.to }),
 				},
+				status: "COMPLETED" as const,
 			}
-		: undefined;
+		: { status: "COMPLETED" as const };
 
 	const trackMetrics = await getTracksMetrics(
 		artistId,
@@ -143,10 +145,10 @@ export default async function getTracksStats({
 	);
 	const trackIds = trackMetrics.map((track) => track.id);
 
-	const conditions: Prisma.RankingWhereInput = {
+	const conditions: Prisma.TrackRankingWhereInput = {
 		userId,
 		artistId,
-		rankingSession: dateFilter,
+		submission: dateFilter,
 		track: trackQueryConditions,
 	};
 
@@ -156,7 +158,7 @@ export default async function getTracksStats({
 		where: {
 			id: { in: trackIds },
 			artistId,
-			rankings: { some: { userId } },
+			trackRanks: { some: { userId } },
 		},
 		include: {
 			album: {

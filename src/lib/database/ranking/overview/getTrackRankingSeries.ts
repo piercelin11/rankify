@@ -3,9 +3,9 @@ import { db } from "@/db/client";
 export type TrackRankingSeriesType = Map<
     string,
     {
-        ranking: number;
-        date: Date;
-        dateId: string;
+        rank: number;
+        createdAt: Date;
+        submissionId: string;
     }[]
 >;
 
@@ -22,7 +22,7 @@ export default async function getTrackRankingSeries({
     const trackRanking = await db.track.findMany({
         where: {
             artistId,
-            rankings: {
+            trackRanks: {
                 some: {
                     userId,
                 },
@@ -32,16 +32,19 @@ export default async function getTrackRankingSeries({
             id: true,
             name: true,
             color: true,
-            rankings: {
+            trackRanks: {
+                where: {
+                    submission: { status: "COMPLETED" },
+                },
                 select: {
-                    rankingSession: {
-                        select: { date: true, id: true },
+                    submission: {
+                        select: { createdAt: true, id: true },
                     },
-                    ranking: true,
+                    rank: true,
                 },
                 orderBy: {
-                    rankingSession: {
-                        date: "asc",
+                    submission: {
+                        createdAt: "asc",
                     },
                 },
             },
@@ -49,10 +52,10 @@ export default async function getTrackRankingSeries({
     });
 
     for (const track of trackRanking) {
-        const rankings = track.rankings.map((data) => ({
-            ranking: data.ranking,
-            date: data.rankingSession.date,
-            dateId: data.rankingSession.id,
+        const rankings = track.trackRanks.map((data) => ({
+            rank: data.rank,
+            createdAt: data.submission.createdAt,
+            submissionId: data.submission.id,
         }));
         result.set(track.id, rankings);
     }

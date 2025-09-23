@@ -4,22 +4,22 @@ import { RankingResultData } from "@/features/sorter/components/SortingStage";
 import { PrismaClient } from "@prisma/client/extension";
 
 type createAlbumRankingProps = {
-	dateId: string;
+	submissionId: string;
 	artistId: string;
 	userId: string;
 	trackRankings: RankingResultData[];
 };
 
 export default async function createAlbumRanking({
-	dateId,
+	submissionId,
 	artistId,
 	userId,
 	trackRankings,
 }: createAlbumRankingProps, prisma: PrismaClient | Prisma.TransactionClient) {
 
 	const albumStats = calculateAlbumPoints(trackRankings);
-    const result: Omit<AlbumRanking, "id">[] = albumStats.map((stats, index) => ({
-        dateId,
+    const result = albumStats.map((stats, index) => ({
+        submissionId,
         artistId,
         userId,
         ranking: index + 1,
@@ -27,6 +27,7 @@ export default async function createAlbumRanking({
         points: stats.points,
         basePoints: stats.basePoints,
         averageTrackRanking: stats.averageTrackRanking,
+        // submissionId 已經包含在結構中，不需要額外的 dateId
     }));
 
 	await prisma.albumRanking.createMany({

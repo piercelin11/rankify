@@ -12,7 +12,7 @@ export default async function getLoggedArtists({
 		where: {
 			tracks: {
 				some: {
-					rankings: {
+					trackRanks: {
 						some: {
 							userId
 						}
@@ -21,13 +21,14 @@ export default async function getLoggedArtists({
 			}
 		},
 		include: {
-			rankingSessions: {
+			submissions: {
 				where: {
-					userId
+					userId,
+					status: "COMPLETED"
 				}
 			}
 		}
 	});
 
-	return artists.sort((a, b) => b.rankingSessions.length - a.rankingSessions.length);
+	return artists.sort((a, b) => b.submissions.length - a.submissions.length);
 }

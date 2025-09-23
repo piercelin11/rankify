@@ -5,17 +5,17 @@ import { getUserRankingPreference } from "../../user/getUserPreference";
 export const TrackStatsOrder = [
 	{
 		_avg: {
-			ranking: "asc",
+			rank: "asc",
 		},
 	},
 	{
 		_min: {
-			ranking: "asc",
+			rank: "asc",
 		},
 	},
 	{
 		_max: {
-			ranking: "asc",
+			rank: "asc",
 		},
 	},
 	{
@@ -39,7 +39,7 @@ export default async function getTracksMetrics({
 	dateRange,
 }: getTracksStatsProps) {
 	const trackConditions = await getUserRankingPreference({ userId });
-	const rankingData = await db.ranking.groupBy({
+	const rankingData = await db.trackRanking.groupBy({
 		by: ["trackId"],
 		where: {
 			userId,
@@ -47,10 +47,11 @@ export default async function getTracksMetrics({
 			track: {
 				...trackConditions,
 			},
-			rankingSession: {
+			submission: {
 				type: "ARTIST",
+				status: "COMPLETED",
 				...(dateRange && {
-					date: {
+					createdAt: {
 						...(dateRange.from && { gte: dateRange.from }),
 						...(dateRange.to && { lte: dateRange.to }),
 					}
@@ -58,13 +59,13 @@ export default async function getTracksMetrics({
 			},
 		},
 		_min: {
-			ranking: true,
+			rank: true,
 		},
 		_max: {
-			ranking: true,
+			rank: true,
 		},
 		_avg: {
-			ranking: true,
+			rank: true,
 		},
 		_count: {
 			_all: true,
@@ -72,17 +73,17 @@ export default async function getTracksMetrics({
 		orderBy: [
 			{
 				_avg: {
-					ranking: "asc",
+					rank: "asc",
 				},
 			},
 			{
 				_min: {
-					ranking: "asc",
+					rank: "asc",
 				},
 			},
 			{
 				_max: {
-					ranking: "asc",
+					rank: "asc",
 				},
 			},
 			{
@@ -95,9 +96,9 @@ export default async function getTracksMetrics({
 	return rankingData.map((item, index): TrackMetrics => ({
 		id: item.trackId,
 		ranking: index + 1,
-		peak: item._min.ranking ?? 0,
-		worst: item._max.ranking ?? 0,
+		peak: item._min.rank ?? 0,
+		worst: item._max.rank ?? 0,
 		count: item._count._all,
-		averageRanking: item._avg.ranking ?? 0,
+		averageRanking: item._avg.rank ?? 0,
 	}));
 }

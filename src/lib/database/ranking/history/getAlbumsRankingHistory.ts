@@ -2,8 +2,8 @@ import { AlbumData } from "@/types/data";
 import { db } from "@/db/client";
 
 export type AlbumHistoryType = Omit<AlbumData, "tracks"> & {
-	dateId: string;
-	date: Date;
+	submissionId: string;
+	createdAt: Date;
 	ranking: number;
 	top25PercentCount: number;
 	top50PercentCount: number;
@@ -20,7 +20,7 @@ type getAlbumsRankingHistoryOptions = {
 type getAlbumsRankingHistoryProps = {
 	artistId: string;
 	userId: string;
-	dateId: string;
+	submissionId: string;
 	options?: getAlbumsRankingHistoryOptions;
 };
 
@@ -30,90 +30,115 @@ const defaultOptions = {
 
 export async function getAlbumsRankingHistory({
 	artistId,
-	dateId,
+	submissionId,
 	userId,
 	options = defaultOptions,
 }: getAlbumsRankingHistoryProps): Promise<AlbumHistoryType[]> {
 	const albumRanking = await db.albumRanking.findMany({
 		where: {
 			artistId,
-			dateId,
+			submissionId,
 			userId,
+			submission: { status: "COMPLETED" },
 		},
 		include: {
 			album: true,
-			rankingSession: {
+			submission: {
 				select: {
-					date: true,
+					createdAt: true,
 				},
 			},
 		},
 	});
 
-	const top25PercentCount = await db.ranking.groupBy({
-		by: ["albumId"],
+	const top25PercentData = await db.trackRanking.findMany({
 		where: {
 			artistId,
-			albumId: {
-				not: null,
-			},
-			dateId,
+			submissionId,
 			userId,
 			rankPercentile: { lte: 0.25 },
+			submission: { status: "COMPLETED" },
+			track: {
+				albumId: {
+					not: null,
+				},
+			},
 		},
-		_count: {
-			_all: true,
+		include: {
+			track: {
+				select: {
+					albumId: true,
+				},
+			},
 		},
 	});
-	const top25PercentMap = new Map(
-		top25PercentCount.map((album) => [album.albumId, album._count._all])
-	);
 
-	const top50PercentCount = await db.ranking.groupBy({
-		by: ["albumId"],
+	const top25PercentMap = new Map<string, number>();
+	top25PercentData.forEach((item) => {
+		if (item.track.albumId) {
+			const current = top25PercentMap.get(item.track.albumId) || 0;
+			top25PercentMap.set(item.track.albumId, current + 1);
+		}
+	});
+
+	const top50PercentData = await db.trackRanking.findMany({
 		where: {
 			artistId,
-			albumId: {
-				not: null,
-			},
-			dateId,
+			submissionId,
 			userId,
 			rankPercentile: { lte: 0.5 },
+			submission: { status: "COMPLETED" },
+			track: {
+				albumId: {
+					not: null,
+				},
+			},
 		},
-		_count: {
-			_all: true,
+		include: {
+			track: {
+				select: {
+					albumId: true,
+				},
+			},
 		},
 	});
-	const top50PercentMap = new Map(
-		top50PercentCount.map((album) => [album.albumId, album._count._all])
-	);
+
+	const top50PercentMap = new Map<string, number>();
+	top50PercentData.forEach((item) => {
+		if (item.track.albumId) {
+			const current = top50PercentMap.get(item.track.albumId) || 0;
+			top50PercentMap.set(item.track.albumId, current + 1);
+		}
+	});
 
 	let prevPointsMap: Map<string, number> | undefined;
 
 	if (options.includeChange) {
-		const currentDate = albumRanking[0].rankingSession.date;
+		const currentDate = albumRanking[0].submission?.createdAt;
 
-		const prevDateId = (
-			await db.rankingSession.findFirst({
+		const prevSubmissionId = (
+			await db.rankingSubmission.findFirst({
 				where: {
 					artistId,
 					userId,
-					date: {
+					createdAt: {
 						lt: currentDate,
 					},
+					status: "COMPLETED",
 				},
 				orderBy: {
-					date: "desc",
+					createdAt: "desc",
 				},
 			})
 		)?.id;
 
-		if (prevDateId) {
+		if (prevSubmissionId) {
 			const prevAlbumRanking = await db.albumRanking.findMany({
 				where: {
 					artistId,
-					dateId: prevDateId,
+					submissionId: prevSubmissionId,
 					userId,
+					submission: { status: "COMPLETED" },
 				},
 				select: {
 					albumId: true,
@@ -138,8 +163,8 @@ export async function getAlbumsRankingHistory({
 
 		return {
 			...data.album,
-			dateId,
-			date: data.rankingSession.date,
+			submissionId,
+			createdAt: data.submission?.createdAt || new Date(),
 			ranking: data.ranking,
 			top25PercentCount: top25PercentMap.get(data.albumId) ?? 0,
 			top50PercentCount: top50PercentMap.get(data.albumId) ?? 0,

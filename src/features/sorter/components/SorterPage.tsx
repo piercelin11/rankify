@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import FilterStage from "./FilterStage";
 import SortingStage from "./SortingStage";
 import ResultStage from "./ResultStage";
-import { AlbumData, RankingDraftData, TrackData } from "@/types/data";
+import { AlbumData, RankingSubmissionData, TrackData } from "@/types/data";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 
 export type CurrentStage = "filter" | "sorting" | "result";
@@ -12,7 +12,7 @@ export type CurrentStage = "filter" | "sorting" | "result";
 type SorterPageProps = {
 	albums: AlbumData[];
 	tracks: TrackData[];
-	draft: RankingDraftData | null;
+	draft: RankingSubmissionData | null;
 	rankingType?: "artist" | "album";
 	albumId?: string;
 };
@@ -21,7 +21,8 @@ export default function SorterPage({ albums, tracks, draft, rankingType = "artis
 	const [currentStage, setCurrentStage] = useState<CurrentStage | null>(null);
  
 	useEffect(() => {
-		if (draft?.result) setCurrentStage("result");
+		const rankingState = draft?.rankingState ? JSON.parse(draft.rankingState as string) : null;
+		if (rankingState?.result) setCurrentStage("result");
 		else if (draft) setCurrentStage("sorting");
 		else setCurrentStage("filter");
 	}, [draft]);
@@ -46,7 +47,7 @@ export default function SorterPage({ albums, tracks, draft, rankingType = "artis
 				albumId={albumId}
 			/>
 		);
-	else if (currentStage === "result" && draft?.result)
+	else if (currentStage === "result" && draft)
 		return <ResultStage draft={draft} rankingType={rankingType} albumId={albumId} />;
 	else return <LoadingAnimation />;
 }

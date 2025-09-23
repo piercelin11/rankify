@@ -7,7 +7,7 @@ import { $Enums } from "@prisma/client";
 
 export default async function deleteRankingDraft(
 	artistId: string,
-	type?: $Enums.RankingType,
+	type?: $Enums.SubmissionType,
 	albumId?: string,
 	redirectPath?: string
 ) {
@@ -25,8 +25,11 @@ export default async function deleteRankingDraft(
 	}
 
 	try {
-		await db.rankingDraft.deleteMany({
-			where: whereClause,
+		await db.rankingSubmission.deleteMany({
+			where: {
+				...whereClause,
+				status: "DRAFT",
+			},
 		});
 	} catch (error) {
 		console.error("Failed to delete draft:", error);

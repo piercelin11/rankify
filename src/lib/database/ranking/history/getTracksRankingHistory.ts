@@ -3,12 +3,12 @@ import { TrackData } from "@/types/data";
 import { getUserRankingPreference } from "../../user/getUserPreference";
 import { AchievementType } from "@/features/ranking/stats/components/AchievementDisplay";
 import { notFound } from "next/navigation";
-import { RankingSession } from "@prisma/client";
+import { RankingSubmission } from "@prisma/client";
 import getLatestRankingSession from "../../user/getLatestRankingSession";
 
 export type TrackHistoryType = Omit<TrackData, "artist" | "album"> & {
-	dateId: string;
-	date: Date;
+	submissionId: string;
+	createdAt: Date;
 	album: {
 		name: string;
 		color: string | null;
@@ -27,7 +27,7 @@ type getTracksRankingHistoryOptions = {
 type getTracksRankingHistoryProps = {
 	artistId: string;
 	userId: string;
-	dateId: string;
+	submissionId: string;
 	options?: getTracksRankingHistoryOptions;
 	take?: number;
 };
@@ -39,37 +39,42 @@ const defaultOptions = {
 export async function getTracksRankingHistory({
 	artistId,
 	userId,
-	dateId,
+	submissionId,
+
 	options = defaultOptions,
 	take,
 }: getTracksRankingHistoryProps): Promise<TrackHistoryType[]> {
 	const trackConditions = await getUserRankingPreference({ userId });
-	const rankings = await db.ranking.findMany({
+	const rankings = await db.trackRanking.findMany({
 		where: {
 			artistId,
 			userId,
-			dateId,
+			submissionId,
 			track: trackConditions,
+			submission: { status: "COMPLETED" },
 		},
 		orderBy: {
-			ranking: "asc",
+			rank: "asc",
 		},
 		select: {
 			id: true,
-			ranking: true,
+			rank: true,
 			rankChange: true,
 			rankPercentile: true,
 			trackId: true,
-			track: true,
-			rankingSession: {
-				select: {
-					date: true,
+			track: {
+				include: {
+					album: {
+						select: {
+							name: true,
+							color: true,
+						},
+					},
 				},
 			},
-			album: {
+			submission: {
 				select: {
-					name: true,
-					color: true,
+					createdAt: true,
 				},
 			},
 		},
@@ -78,15 +83,16 @@ export async function getTracksRankingHistory({
 
 	if (rankings.length === 0) notFound();
 
-	let latestSession: RankingSession | null = null;
+	let latestSession: RankingSubmission | null = null;
 	let totalLogsCount = 0;
 	if (options.includeAchievement) {
 		latestSession = await getLatestRankingSession({ artistId, userId });
 		totalLogsCount = (
-			await db.rankingSession.findMany({
+			await db.rankingSubmission.findMany({
 				where: {
 					userId,
 					artistId,
+					status: "COMPLETED",
 				},
 				select: {
 					id: true,
@@ -95,29 +101,32 @@ export async function getTracksRankingHistory({
 		).length;
 	}
 
-	const currentDate = rankings[0].rankingSession.date;
+	const currentDate = rankings[0].submission.createdAt;
 	const trackIds = rankings.map((ranking) => ranking.trackId);
 
-	const historicalPeak = await db.ranking.groupBy({
+	const historicalPeak = await db.trackRanking.groupBy({
 		by: ["trackId"],
 		where: {
 			trackId: { in: trackIds },
 			userId,
 			artistId,
-			rankingSession: { date: { lt: currentDate } },
+			submission: {
+				createdAt: { lt: currentDate },
+				status: "COMPLETED"
+			},
 		},
 		_min: {
-			ranking: true,
+			rank: true,
 		},
 		_max: {
-			ranking: true,
+			rank: true,
 		},
 	});
 
 	const historicalMap = new Map(
 		historicalPeak.map((data) => [
 			data.trackId,
-			{ peak: data._min.ranking, worst: data._max.ranking },
+			{ peak: data._min.rank, worst: data._max.rank },
 		])
 	);
 
@@ -132,14 +141,14 @@ export async function getTracksRankingHistory({
 		if (Number(data.rankChange) < -(rankings.length / 5))
 			achievement.push("Big Drop");
 		if (
-			data.ranking < Number(prevPeak) &&
-			latestSession?.id === dateId &&
+			data.rank < Number(prevPeak) &&
+			latestSession?.id === submissionId &&
 			totalLogsCount > 2
 		)
 			achievement.push("New Peak");
 		if (
-			data.ranking > Number(prevWorst) &&
-			latestSession?.id === dateId &&
+			data.rank > Number(prevWorst) &&
+			latestSession?.id === submissionId &&
 			totalLogsCount > 3
 		)
 			achievement.push("New Low");
@@ -147,18 +156,18 @@ export async function getTracksRankingHistory({
 
 		return {
 			...data.track,
-			ranking: data.ranking,
+			ranking: data.rank,
 			rankPercentile: data.rankPercentile,
 			rankChange: data.rankChange,
-			dateId,
-			date: currentDate,
+			submissionId,
+			createdAt: currentDate,
 			peak:
-				!prevPeak || data.ranking < Number(prevPeak)
-					? data.ranking
+				!prevPeak || data.rank < Number(prevPeak)
+					? data.rank
 					: Number(prevPeak),
 			countSongs: rankings.length,
 			achievement: achievement,
-			album: data.album,
+			album: data.track.album,
 		};
 	});
 

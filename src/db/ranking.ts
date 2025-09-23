@@ -1,66 +1,75 @@
 import { db } from "./client";
 
 export async function getPeakRankings(peak: number, trackId: string, userId: string) {
-    const peakSession = await db.ranking.findMany({
+    const peakRankings = await db.trackRanking.findMany({
         where: {
             trackId,
-            ranking: peak,
+            rank: peak,
             userId,
         },
         include: {
-            rankingSession: {
+            submission: {
                 select: {
-                    date: true
+                    createdAt: true
                 }
             },
         },
         orderBy: {
-            rankingSession: {
-                date: "asc",
+            submission: {
+                createdAt: "asc",
             },
         },
     });
 
-    return peakSession.map(session => ({
-        ...session,
-        date: session.rankingSession.date,
+    return peakRankings.map(ranking => ({
+        ...ranking,
+        date: ranking.submission.createdAt,
+        ranking: ranking.rank, // 保持向後相容的字段名
     }))
 }
 
 export async function getLatestArtistRankingSession(artistId: string, userId: string) {
-    const latestSession = await db.rankingSession.findFirst({
+    const latestSubmission = await db.rankingSubmission.findFirst({
         where: {
             artistId,
             userId,
             type: "ARTIST",
+            status: "COMPLETED",
         },
         orderBy: {
-            date: "desc",
+            createdAt: "desc",
         },
         select: {
             id: true,
-            date: true,
+            createdAt: true,
         },
     });
 
-    return latestSession;
+    return latestSubmission ? {
+        id: latestSubmission.id,
+        date: latestSubmission.createdAt,
+    } : null;
 }
 
 export async function getArtistRankingSessions(artistId: string, userId: string) {
-    const sessions = await db.rankingSession.findMany({
+    const submissions = await db.rankingSubmission.findMany({
         where: {
             artistId,
             userId,
             type: "ARTIST",
+            status: "COMPLETED",
         },
         orderBy: {
-            date: "desc",
+            createdAt: "desc",
         },
         select: {
             id: true,
-            date: true,
+            createdAt: true,
         },
     });
 
-    return sessions;
+    return submissions.map(submission => ({
+        id: submission.id,
+        date: submission.createdAt,
+    }));
 }
