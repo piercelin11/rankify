@@ -9,27 +9,27 @@ datasource db {
 }
 
 model User {
-  id              String           @id @default(cuid())
+  id              String              @id @default(cuid())
   name            String
-  username        String?          @unique
-  email           String?          @unique
+  username        String?             @unique
+  email           String?             @unique
   password        String?
   emailVerified   DateTime?
   image           String?
-  role            Role             @default(USER)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  role            Role                @default(USER)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
   accounts        Account[]
-  userPreferences UserPreference[]
   albumRankings   AlbumRanking[]
   submissions     RankingSubmission[]
+  userPreferences UserPreference[]
 }
 
 model UserPreference {
   id              String @id @default(cuid())
   rankingSettings Json
-  user            User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   userId          String
+  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Account {
@@ -53,50 +53,50 @@ model Account {
 }
 
 model Artist {
-  id               String           @id
+  id               String              @id
   name             String
-  spotifyUrl       String           @unique
+  spotifyUrl       String              @unique
   img              String?
   spotifyFollowers Int
   userId           String?
   albums           Album[]
-  tracks           Track[]
   albumRankings    AlbumRanking[]
   submissions      RankingSubmission[]
+  tracks           Track[]
 }
 
 model Album {
-  id            String         @id
+  id            String              @id
   name          String
   artistId      String
-  spotifyUrl    String         @unique
+  spotifyUrl    String              @unique
   color         String?
   img           String?
   releaseDate   DateTime
   type          AlbumType
-  artist        Artist         @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  tracks        Track[]
+  artist        Artist              @relation(fields: [artistId], references: [id], onDelete: Cascade)
   albumRankings AlbumRanking[]
   submissions   RankingSubmission[]
+  tracks        Track[]
 
   @@unique([name, artistId])
   @@index([artistId])
 }
 
 model Track {
-  id          String    @id
+  id          String         @id
   name        String
   albumId     String?
   trackNumber Int?
-  spotifyUrl  String    @unique
-  color       String?
+  spotifyUrl  String         @unique
   img         String?
   artistId    String
   releaseDate DateTime?
   discNumber  Int?
-  type        TrackType @default(STANDARD)
-  album       Album?    @relation(fields: [albumId], references: [id], onDelete: Cascade)
-  artist      Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  type        TrackType      @default(STANDARD)
+  color       String?
+  album       Album?         @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  artist      Artist         @relation(fields: [artistId], references: [id], onDelete: Cascade)
   trackRanks  TrackRanking[]
 
   @@unique([albumId, name])
@@ -105,26 +105,60 @@ model Track {
   @@index([artistId])
 }
 
-
 model AlbumRanking {
-  id                  String         @id @default(uuid())
+  id                  String            @id @default(uuid())
   ranking             Int
   points              Int
-  basePoints          Int
-  averageTrackRanking Float
   albumId             String
   artistId            String
   userId              String
-  album               Album          @relation(fields: [albumId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  artist              Artist         @relation(fields: [artistId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-  user                User           @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  averageTrackRanking Float
+  basePoints          Int
   submissionId        String
+  album               Album             @relation(fields: [albumId], references: [id])
+  artist              Artist            @relation(fields: [artistId], references: [id])
   submission          RankingSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, submissionId, albumId])
 }
 
+model RankingSubmission {
+  id          String           @id @default(cuid())
+  status      SubmissionStatus
+  type        SubmissionType
+  draftState  Json?
+  userId      String
+  artistId    String
+  albumId     String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  completedAt DateTime?
+  albumRanks  AlbumRanking[]
+  album       Album?           @relation(fields: [albumId], references: [id], onDelete: Restrict)
+  artist      Artist           @relation(fields: [artistId], references: [id])
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackRanks  TrackRanking[]
 
+  @@unique([userId, artistId, type, albumId])
+}
+
+model TrackRanking {
+  id             String            @id @default(cuid())
+  rank           Int
+  rankPercentile Float
+  score          Float?
+  rankChange     Int?
+  submissionId   String
+  trackId        String
+  userId         String
+  artistId       String
+  submission     RankingSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  track          Track             @relation(fields: [trackId], references: [id])
+
+  @@unique([submissionId, trackId])
+  @@index([userId])
+}
 
 enum Role {
   USER
@@ -151,48 +185,3 @@ enum SubmissionStatus {
   DRAFT
   COMPLETED
 }
-
-model RankingSubmission {
-  id           String           @id @default(cuid())
-  status       SubmissionStatus // 使用 Enum 來確保狀態的有效性
-  type         SubmissionType   // 使用 Enum 來確保類型的有效性
-  rankingState Json?            // 新名字：儲存整個排名遊戲的狀態物件
-
-  userId       String
-  artistId     String
-  albumId      String?
-
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  artist       Artist   @relation(fields: [artistId], references: [id], onDelete: Restrict)
-  album        Album?   @relation(fields: [albumId], references: [id], onDelete: Restrict)
-
-  trackRanks   TrackRanking[]
-  albumRanks   AlbumRanking[]
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  completedAt  DateTime?
-
-  @@unique([userId, artistId, type, albumId])
-}
-
-model TrackRanking {
-  id             String   @id @default(cuid())
-  rank           Int
-  rankPercentile Float
-  score          Float?
-  rankChange     Int?
-
-  submissionId   String
-  submission     RankingSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-
-  trackId        String
-  track          Track    @relation(fields: [trackId], references: [id], onDelete: Restrict)
-
-  userId         String
-  artistId       String
-
-  @@unique([submissionId, trackId])
-  @@index([userId])
-}
-
