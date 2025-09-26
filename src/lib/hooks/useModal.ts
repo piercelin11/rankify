@@ -1,15 +1,5 @@
 import { useCallback } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import { 
-	openModal, 
-	closeModal, 
-	closeTopModal, 
-	closeAllModals,
-	AlertModalConfig,
-	CustomModalConfig
-} from "@/store/slices/modalSlice";
-import { clear, register, unregister } from "@/lib/modalEventManager";
+import { useModalContext, AlertModalConfig, CustomModalConfig } from "@/contexts";
 import { ReactNode } from "react";
 
 type ShowAlertOptions = Omit<AlertModalConfig, "type"> & {
@@ -23,66 +13,51 @@ type ShowCustomOptions = Omit<CustomModalConfig, "type"> & {
 };
 
 export function useModal() {
-	const dispatch = useDispatch();
-	const modals = useSelector((state: RootState) => state.modal.modals);
+	const { modals, openModal, closeModal, closeTopModal, closeAllModals } = useModalContext();
 
 	const showAlert = useCallback((options: ShowAlertOptions, priority?: number) => {
 		const { onConfirm, onCancel, ...config } = options;
-		
+
 		// 生成唯一的 modal ID
 		const modalId = `modal-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-		
-		// 先註冊事件監聽器
-		register(modalId, {
-			onConfirm,
-			onCancel
-		});
-		
-		// 派發 action 創建 modal
-		dispatch(openModal({
+
+		// 直接創建 modal，包含所有數據和回調
+		return openModal({
 			config: { ...config, type: "alert" },
-			priority,
+			priority: priority || 0,
+			onConfirm,
+			onCancel,
 			id: modalId
-		}));
-		
-		return modalId;
-	}, [dispatch]);
+		});
+	}, [openModal]);
 
 	const showCustom = useCallback((options: ShowCustomOptions, priority?: number) => {
 		const { content, footer, ...config } = options;
-		
+
 		// 生成唯一的 modal ID
 		const modalId = `modal-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-		
-		// 先註冊內容到事件管理器
-		register(modalId, {
-			content,
-			footer
-		});
-		
-		// 派發 action 創建 modal（只包含序列化數據）
-		dispatch(openModal({
+
+		// 直接創建 modal，包含所有數據和內容
+		return openModal({
 			config: { ...config, type: "custom" },
-			priority,
+			priority: priority || 0,
+			content,
+			footer,
 			id: modalId
-		}));
-		
-		return modalId;
-	}, [dispatch]);
+		});
+	}, [openModal]);
 
 	const close = useCallback((modalId: string) => {
-		unregister(modalId);
-		dispatch(closeModal(modalId));
-	}, [dispatch]);
+		closeModal(modalId);
+	}, [closeModal]);
 
 	const closeTop = useCallback(() => {
-		dispatch(closeTopModal());
-	}, [dispatch]);
+		closeTopModal();
+	}, [closeTopModal]);
 
 	const closeAll = useCallback(() => {
-		clear();
-		dispatch(closeAllModals());
-	}, [dispatch]);
+		closeAllModals();
+	}, [closeAllModals]);
 
 	// 便利方法：快速顯示確認對話框
 	const confirm = useCallback((

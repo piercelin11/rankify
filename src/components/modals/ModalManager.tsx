@@ -1,28 +1,15 @@
 "use client";
 
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-import { RootState } from "@/store/store";
-import { closeModal, Modal as ModalType } from "@/store/slices/modalSlice";
-import { clear, triggerCancel, triggerConfirm, unregister, getContent, getFooter } from "@/lib/modalEventManager";
+import { useModalContext, Modal as ModalType } from "@/contexts";
 import { AlertModal } from "./AlertModal";
 import { Modal } from "./Modal";
 
 export function ModalManager() {
-	const dispatch = useDispatch();
-	const modals = useSelector((state: RootState) => state.modal.modals);
+	const { modals, closeModal } = useModalContext();
 
 	const handleCloseModal = (modalId: string) => {
-		unregister(modalId);
-		dispatch(closeModal(modalId));
+		closeModal(modalId);
 	};
-
-	// 清理已關閉的 modal 的事件監聽器
-	useEffect(() => {
-		return () => {
-			clear();
-		};
-	}, []);
 
 	return (
 		<>
@@ -44,11 +31,11 @@ export function ModalManager() {
 								cancelText={config.cancelText}
 								variant={config.variant}
 								onConfirm={() => {
-									triggerConfirm(id);
+									modal.onConfirm?.();
 									handleCloseModal(id);
 								}}
 								onCancel={() => {
-									triggerCancel(id);
+									modal.onCancel?.();
 									handleCloseModal(id);
 								}}
 							/>
@@ -57,9 +44,6 @@ export function ModalManager() {
 				}
 
 				if (config.type === "custom") {
-					const content = getContent(id);
-					const footer = getFooter(id);
-					
 					return (
 						<div key={id} style={{ zIndex }}>
 							<Modal
@@ -70,9 +54,9 @@ export function ModalManager() {
 								title={config.title}
 								description={config.description}
 								size={config.size}
-								footer={footer}
+								footer={modal.footer}
 							>
-								{content}
+								{modal.content}
 							</Modal>
 						</div>
 					);

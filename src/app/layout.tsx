@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Poppins, /* Lato, Archivo, */ Raleway} from "next/fo
 import "./globals.css";
 import StoreProvider from "@/providers/StoreProvider";
 import { ModalManager } from "@/components/modals/ModalManager";
+import { ModalProvider } from "@/contexts";
 
 const geistSans = Geist({
 	variable: "--font-geist",
@@ -52,12 +53,14 @@ export default function RootLayout({
 	return (
 		<html lang="en" className="dark">
 			<StoreProvider>
-				<body
-					className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${raleway.variable} antialiased`}
-				>
-					{children}
-					<ModalManager />
-				</body>
+				<ModalProvider>
+					<body
+						className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${raleway.variable} antialiased`}
+					>
+						{children}
+						<ModalManager />
+					</body>
+				</ModalProvider>
 			</StoreProvider>
 		</html>
 	);
