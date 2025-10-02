@@ -2,7 +2,8 @@
 
 import React, { createContext, useContext, useCallback, useState, ReactNode } from "react";
 
-export type ModalType = "alert" | "custom";
+// === 類型定義 ===
+export type ModalType = "alert" | "custom" | "confirm";
 
 export type AlertModalConfig = {
 	type: "alert";
@@ -20,87 +21,97 @@ export type CustomModalConfig = {
 	size?: "sm" | "md" | "lg" | "xl";
 };
 
-export type ModalConfig = AlertModalConfig | CustomModalConfig;
+export type ConfirmModalConfig = {
+	type: "confirm";
+	title: string;
+	description?: string;
+	confirmText?: string;
+	cancelText?: string;
+	variant?: "default" | "destructive";
+};
+
+export type ModalConfig = AlertModalConfig | CustomModalConfig | ConfirmModalConfig;
 
 export type Modal = {
 	id: string;
 	config: ModalConfig;
-	priority: number;
-	createdAt: number;
 	onConfirm?: () => void;
 	onCancel?: () => void;
 	content?: ReactNode;
 	footer?: ReactNode;
 };
 
+// === Show Options 類型 ===
+type ShowAlertOptions = Omit<AlertModalConfig, "type"> & {
+	onConfirm: () => void;
+	onCancel?: () => void;
+};
+
+type ShowCustomOptions = Omit<CustomModalConfig, "type"> & {
+	content: ReactNode;
+	footer?: ReactNode;
+};
+
+type ShowConfirmOptions = Omit<ConfirmModalConfig, "type"> & {
+	onConfirm: () => void;
+	onCancel?: () => void;
+};
+
+// === Context 類型 ===
 type ModalContextType = {
-	modals: Modal[];
-	openModal: (modal: Omit<Modal, "id" | "createdAt"> & { id?: string }) => string;
-	closeModal: (modalId: string) => void;
-	closeTopModal: () => void;
-	closeAllModals: () => void;
-	updateModal: (id: string, config: ModalConfig) => void;
+	modal: Modal | null;
+	showAlert: (options: ShowAlertOptions) => void;
+	showCustom: (options: ShowCustomOptions) => void;
+	showConfirm: (options: ShowConfirmOptions) => void;
+	close: () => void;
 };
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
+// === Provider ===
 export function ModalProvider({ children }: { children: ReactNode }) {
-	const [modals, setModals] = useState<Modal[]>([]);
-	const [nextId, setNextId] = useState(1);
+	const [modal, setModal] = useState<Modal | null>(null);
 
-	const openModal = useCallback((modal: Omit<Modal, "id" | "createdAt"> & { id?: string }) => {
-		const modalId = modal.id || `modal-${nextId}`;
-		const newModal: Modal = {
-			...modal,
-			id: modalId,
-			createdAt: Date.now(),
-		};
-
-		setModals(prevModals => {
-			const updated = [...prevModals, newModal];
-			// 依優先級排序，優先級高的在後面（會顯示在最上層）
-			return updated.sort((a, b) => a.priority - b.priority);
-		});
-
-		if (!modal.id) {
-			setNextId(prev => prev + 1);
-		}
-
-		return modalId;
-	}, [nextId]);
-
-	const closeModal = useCallback((modalId: string) => {
-		setModals(prevModals => prevModals.filter(modal => modal.id !== modalId));
-	}, []);
-
-	const closeTopModal = useCallback(() => {
-		setModals(prevModals => {
-			if (prevModals.length > 0) {
-				return prevModals.slice(0, -1);
-			}
-			return prevModals;
+	const showAlert = useCallback((options: ShowAlertOptions) => {
+		const { onConfirm, onCancel, ...config } = options;
+		setModal({
+			id: `modal-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+			config: { ...config, type: "alert" },
+			onConfirm,
+			onCancel,
 		});
 	}, []);
 
-	const closeAllModals = useCallback(() => {
-		setModals([]);
+	const showCustom = useCallback((options: ShowCustomOptions) => {
+		const { content, footer, ...config } = options;
+		setModal({
+			id: `modal-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+			config: { ...config, type: "custom" },
+			content,
+			footer,
+		});
 	}, []);
 
-	const updateModal = useCallback((id: string, config: ModalConfig) => {
-		setModals(prevModals =>
-			prevModals.map(modal =>
-				modal.id === id ? { ...modal, config } : modal
-			)
-		);
+	const showConfirm = useCallback((options: ShowConfirmOptions) => {
+		const { onConfirm, onCancel, ...config } = options;
+		setModal({
+			id: `modal-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+			config: { ...config, type: "confirm" },
+			onConfirm,
+			onCancel,
+		});
+	}, []);
+
+	const close = useCallback(() => {
+		setModal(null);
 	}, []);
 
 	const value: ModalContextType = {
-		modals,
-		openModal,
-		closeModal,
-		closeTopModal,
-		closeAllModals,
-		updateModal,
+		modal,
+		showAlert,
+		showCustom,
+		showConfirm,
+		close,
 	};
 
 	return (
@@ -110,10 +121,11 @@ export function ModalProvider({ children }: { children: ReactNode }) {
 	);
 }
 
-export function useModalContext() {
+// === Hook ===
+export function useModal() {
 	const context = useContext(ModalContext);
 	if (context === undefined) {
-		throw new Error("useModalContext must be used within a ModalProvider");
+		throw new Error("useModal must be used within a ModalProvider");
 	}
 	return context;
 }

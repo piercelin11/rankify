@@ -11,8 +11,7 @@ import {
 import { SidebarProps } from "./types";
 import {
 	getMainMenuItems,
-	getFooterMenuItems,
-	getRecentArtists,
+	getFooterMenuItems
 } from "./config";
 import { MenuSection } from "./sections/MenuSection";
 import { ArtistSection } from "./sections/ArtistSection";
@@ -22,7 +21,7 @@ export function SimpleSidebar({ user, artists }: SidebarProps) {
 	const sidebarRef = useRef<HTMLDivElement>(null);
 	const mainItems = getMainMenuItems(user.role);
 	const footerItems = getFooterMenuItems();
-	const recentArtists = getRecentArtists(artists);
+	const recentArtists = artists.slice(0, 3);;
 
 	return (
 		<Sidebar

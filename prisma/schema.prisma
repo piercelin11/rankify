@@ -128,6 +128,7 @@ model RankingSubmission {
   status      SubmissionStatus
   type        SubmissionType
   draftState  Json?
+  resultState Json?
   userId      String
   artistId    String
   albumId     String?

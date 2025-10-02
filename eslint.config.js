@@ -79,7 +79,9 @@ export default tseslint.config(
 			"react/jsx-uses-react": "off", // 同上
 			"react/prop-types": "off", // 使用 TypeScript 時通常不需要 prop-types
 			"jsdoc/require-jsdoc": "off",
+			"jsdoc/require-param": "off",
 			"jsdoc/require-param-description": "off",
+			"jsdoc/require-returns": "off",
 			"jsdoc/require-returns-description": "off",
 			"jsdoc/require-description": "off",
 			"jsdoc/no-types": "error",

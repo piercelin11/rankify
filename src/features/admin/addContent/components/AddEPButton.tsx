@@ -3,14 +3,14 @@
 import ContentSelectionForm from "./ContentSelectionForm";
 import addAlbum from "@/features/admin/addContent/actions/addAlbum";
 import AddButton from "@/components/buttons/AddButton";
-import { useModal } from "@/lib/hooks/useModal";
+import { useModal } from "@/contexts";
 
 type AddEPButtonProps = {
 	artistId: string;
 };
 
 export default function AddEPButton({ artistId }: AddEPButtonProps) {
-	const { showCustom, closeTop } = useModal();
+	const { showCustom, close } = useModal();
 
 	function handleSubmit(EPId: string[], token: string) {
 		return addAlbum({ artistId, albumId: EPId, type: "EP", token });
@@ -25,7 +25,7 @@ export default function AddEPButton({ artistId }: AddEPButtonProps) {
 						content: (
 							<ContentSelectionForm
 								artistId={artistId}
-								onCancel={closeTop}
+								onCancel={close}
 								type="EP"
 								submitAction={handleSubmit}
 							/>

@@ -5,7 +5,7 @@ import { VIEW_SEGMENT_OPTIONS } from "@/config/segmentOptions";
 import ClientHistoryRankingTable from "@/features/ranking/table/client/ClientHistoryRankingTable";
 import { getTracksHistory } from "@/services/track/getTracksHistory";
 import { getLoggedAlbumNames } from "@/db/album";
-import { getArtistRankingSessions } from "@/db/ranking";
+import { getArtistRankingSubmissions } from "@/db/ranking";
 import { dateToDashFormat } from "@/lib/utils";
 
 type pageProps = {
@@ -28,7 +28,7 @@ export default async function HistoryDatePage({ params, searchParams }: pageProp
 	});
 
 	const albums = await getLoggedAlbumNames(artistId, userId);
-	const rankingSessions = await getArtistRankingSessions(artistId, userId);
+	const rankingSessions = await getArtistRankingSubmissions(artistId, userId);
 
 	const dateOptions = rankingSessions.map((session) => ({
 		value: session.id,

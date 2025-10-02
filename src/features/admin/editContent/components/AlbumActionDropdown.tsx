@@ -12,12 +12,12 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
-import { useModal } from "@/lib/hooks/useModal";
+import { useModal } from "@/contexts";
 
 type AlbumActionDropdownProps = { data: AlbumData };
 
 export default function AlbumActionDropdown({ data }: AlbumActionDropdownProps) {
-	const {showAlert, showCustom, closeTop} = useModal();
+	const {showAlert, showCustom, close} = useModal();
 
 	const { id } = data;
 
@@ -32,7 +32,7 @@ export default function AlbumActionDropdown({ data }: AlbumActionDropdownProps) 
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
 					<DropdownMenuItem onClick={() => showCustom({
-						content: <AlbumEditingForm data={data} onClose={closeTop} />,
+						content: <AlbumEditingForm data={data} onClose={close} />,
 						title: "Edit Album",
 						description: `Make changes to ${data.name}`,
 					})}>

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Poppins, /* Lato, Archivo, */ Raleway} from "next/font/google";
 import "./globals.css";
-import StoreProvider from "@/providers/StoreProvider";
 import { ModalManager } from "@/components/modals/ModalManager";
 import { ModalProvider } from "@/contexts";
 
@@ -52,7 +51,6 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" className="dark">
-			<StoreProvider>
 				<ModalProvider>
 					<body
 						className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${raleway.variable} antialiased`}
@@ -61,7 +59,6 @@ export default function RootLayout({
 						<ModalManager />
 					</body>
 				</ModalProvider>
-			</StoreProvider>
 		</html>
 	);
 }

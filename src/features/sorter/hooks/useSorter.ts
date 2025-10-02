@@ -1,176 +1,110 @@
+import { useSorterContext } from "@/contexts/SorterContext";
+import { TrackData } from "@/types/data";
 import {
-	setError,
-	setPercentage,
-	setSaveStatus,
-} from "@/features/sorter/slices/sorterSlice";
-import { useAppDispatch } from "@/store/hooks";
-import { RankingSubmissionData, TrackData } from "@/types/data";
-import React, { startTransition, useEffect, useCallback, useState, useMemo, useRef } from "react";
-import saveDraft from "../../ranking/actions/saveDraft";
-import { RankingResultData } from "../components/SortingStage";
-import saveDraftResult from "../../ranking/actions/saveDraftResult";
-import { CurrentStage } from "../components/SorterPage";
-import { useDebounce } from "@/lib/hooks/useDebounceAndThrottle";
+	startTransition,
+	useEffect,
+	useCallback,
+	useState,
+	useMemo,
+	useRef,
+} from "react";
+import { useThrottle } from "@/lib/hooks/useDebounceAndThrottle";
+import saveDraft from "../actions/saveDraft";
+import {
+	SorterStateSnapshotType,
+	SorterStateType,
+} from "@/types/schemas/sorter";
+import { useModal } from "@/contexts";
+import finalizeDraft from "../actions/finalizeDraft";
+import { saveDraftToLocalStorage } from "../utils/localDraft";
 
-// 使用 type 慣例定義狀態
-type SorterState = {
-	// 核心演算法狀態 (完全對應原本的 ref)
-	lstMember: number[][];
-	parent: number[];
-	equal: number[];
-	rec: number[];
-	cmp1: number;
-	cmp2: number;
-	head1: number;
-	head2: number;
-	nrec: number;
-	totalSize: number;
-	finishSize: number;
-	finishFlag: number;
-	percent: number;
-	
-	// 歌曲資料
-	namMember: string[];
-	
-	// UI 狀態
-	currentLeftIndex: number | null;
-	currentRightIndex: number | null;
-};
+const autoSaveInterval = 3 * 60 * 1000;
 
 type SortChoice = -1 | 0 | 1;
 
-type UseSorterProps = {
+type UseSorterStateProps = {
+	initialState: SorterStateType;
 	tracks: TrackData[];
-	draft: RankingSubmissionData | null;
-	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>;
-	rankingType?: "artist" | "album";
-	albumId?: string;
+	submissionId: string;
+	userId: string;
 };
 
-type UseSorterReturn = {
+type UseSorterStateReturn = {
 	leftField: TrackData | undefined;
 	rightField: TrackData | undefined;
 	finishFlag: { current: number };
-	handleSave: () => Promise<{ type: string; message: string; }>;
+	handleSave: () => Promise<{ type: string; message: string }>;
 	restorePreviousState: () => void;
 	sortList: (flag: number) => void;
 };
 
-const autoSaveCounter = 15;
-
-// 初始化排序狀態 (對應原本的 initList)
-function initializeSorterState(tracks: TrackData[]): SorterState {
-	const namMember = tracks.map((item) => item.name);
-	const lstMember: number[][] = [];
-	const parent: number[] = [];
-	let n = 0;
-	let totalSize = 0;
-
-	// 原本的 initList 邏輯，完全相同
-	lstMember[n] = [];
-	for (let i = 0; i < namMember.length; i++) {
-		lstMember[n][i] = i;
-	}
-	parent[n] = -1;
-	n++;
-
-	for (let i = 0; i < lstMember.length; i++) {
-		if (lstMember[i].length >= 2) {
-			const mid = Math.ceil(lstMember[i].length / 2);
-			lstMember[n] = lstMember[i].slice(0, mid);
-			totalSize += lstMember[n].length;
-			parent[n] = i;
-			n++;
-			lstMember[n] = lstMember[i].slice(mid, lstMember[i].length);
-			totalSize += lstMember[n].length;
-			parent[n] = i;
-			n++;
-		}
-	}
-
-	const rec = new Array(namMember.length).fill(0);
-	const equal = new Array(namMember.length + 1).fill(-1);
-	
-	const cmp1 = lstMember.length - 2;
-	const cmp2 = lstMember.length - 1;
-
-	// 取得初始比較對的索引
-	const leftIndex = (cmp1 >= 0 && lstMember[cmp1] && lstMember[cmp1].length > 0) ? lstMember[cmp1][0] : null;
-	const rightIndex = (cmp2 >= 0 && lstMember[cmp2] && lstMember[cmp2].length > 0) ? lstMember[cmp2][0] : null;
-
-	return {
-		lstMember,
-		parent,
-		equal,
-		rec,
-		cmp1,
-		cmp2,
-		head1: 0,
-		head2: 0,
-		nrec: 0,
-		totalSize,
-		finishSize: 0,
-		finishFlag: 0,
-		percent: 0,
-		namMember,
-		currentLeftIndex: leftIndex,
-		currentRightIndex: rightIndex,
-	};
-}
-
 // 核心排序邏輯 (對應原本的 sortList)
-function processSortChoice(state: SorterState, flag: SortChoice): SorterState {
+function processSortChoice(
+	state: SorterStateType,
+	flag: SortChoice
+): SorterStateType {
 	// 深拷貝需要修改的部分
-	const newState: SorterState = {
+	const newState: SorterStateType = {
 		...state,
-		lstMember: state.lstMember.map(arr => [...arr]),
+		lstMember: state.lstMember.map((arr) => [...arr]),
 		parent: [...state.parent],
 		equal: [...state.equal],
 		rec: [...state.rec],
+		namMember: [...state.namMember],
+		history: [...state.history], 
 	};
 
 	// 原本 sortList 的邏輯，完全相同
 	if (flag === -1) {
-		newState.rec[newState.nrec] = newState.lstMember[newState.cmp1][newState.head1];
+		newState.rec[newState.nrec] =
+			newState.lstMember[newState.cmp1][newState.head1];
 		newState.head1++;
 		newState.nrec++;
 		newState.finishSize++;
 		while (newState.equal[newState.rec[newState.nrec - 1]] !== -1) {
-			newState.rec[newState.nrec] = newState.lstMember[newState.cmp1][newState.head1];
+			newState.rec[newState.nrec] =
+				newState.lstMember[newState.cmp1][newState.head1];
 			newState.head1++;
 			newState.nrec++;
 			newState.finishSize++;
 		}
 	} else if (flag === 1) {
-		newState.rec[newState.nrec] = newState.lstMember[newState.cmp2][newState.head2];
+		newState.rec[newState.nrec] =
+			newState.lstMember[newState.cmp2][newState.head2];
 		newState.head2++;
 		newState.nrec++;
 		newState.finishSize++;
 		while (newState.equal[newState.rec[newState.nrec - 1]] !== -1) {
-			newState.rec[newState.nrec] = newState.lstMember[newState.cmp2][newState.head2];
+			newState.rec[newState.nrec] =
+				newState.lstMember[newState.cmp2][newState.head2];
 			newState.head2++;
 			newState.nrec++;
 			newState.finishSize++;
 		}
 	} else {
 		// flag === 0 (平手)
-		newState.rec[newState.nrec] = newState.lstMember[newState.cmp1][newState.head1];
+		newState.rec[newState.nrec] =
+			newState.lstMember[newState.cmp1][newState.head1];
 		newState.head1++;
 		newState.nrec++;
 		newState.finishSize++;
 		while (newState.equal[newState.rec[newState.nrec - 1]] !== -1) {
-			newState.rec[newState.nrec] = newState.lstMember[newState.cmp1][newState.head1];
+			newState.rec[newState.nrec] =
+				newState.lstMember[newState.cmp1][newState.head1];
 			newState.head1++;
 			newState.nrec++;
 			newState.finishSize++;
 		}
-		newState.equal[newState.rec[newState.nrec - 1]] = newState.lstMember[newState.cmp2][newState.head2];
-		newState.rec[newState.nrec] = newState.lstMember[newState.cmp2][newState.head2];
+		newState.equal[newState.rec[newState.nrec - 1]] =
+			newState.lstMember[newState.cmp2][newState.head2];
+		newState.rec[newState.nrec] =
+			newState.lstMember[newState.cmp2][newState.head2];
 		newState.head2++;
 		newState.nrec++;
 		newState.finishSize++;
 		while (newState.equal[newState.rec[newState.nrec - 1]] !== -1) {
-			newState.rec[newState.nrec] = newState.lstMember[newState.cmp2][newState.head2];
+			newState.rec[newState.nrec] =
+				newState.lstMember[newState.cmp2][newState.head2];
 			newState.head2++;
 			newState.nrec++;
 			newState.finishSize++;
@@ -183,7 +117,8 @@ function processSortChoice(state: SorterState, flag: SortChoice): SorterState {
 		newState.head2 === newState.lstMember[newState.cmp2].length
 	) {
 		while (newState.head1 < newState.lstMember[newState.cmp1].length) {
-			newState.rec[newState.nrec] = newState.lstMember[newState.cmp1][newState.head1];
+			newState.rec[newState.nrec] =
+				newState.lstMember[newState.cmp1][newState.head1];
 			newState.head1++;
 			newState.nrec++;
 			newState.finishSize++;
@@ -193,7 +128,8 @@ function processSortChoice(state: SorterState, flag: SortChoice): SorterState {
 		newState.head2 < newState.lstMember[newState.cmp2].length
 	) {
 		while (newState.head2 < newState.lstMember[newState.cmp2].length) {
-			newState.rec[newState.nrec] = newState.lstMember[newState.cmp2][newState.head2];
+			newState.rec[newState.nrec] =
+				newState.lstMember[newState.cmp2][newState.head2];
 			newState.head2++;
 			newState.nrec++;
 			newState.finishSize++;
@@ -205,7 +141,9 @@ function processSortChoice(state: SorterState, flag: SortChoice): SorterState {
 		newState.head1 === newState.lstMember[newState.cmp1].length &&
 		newState.head2 === newState.lstMember[newState.cmp2].length
 	) {
-		const totalLength = newState.lstMember[newState.cmp1].length + newState.lstMember[newState.cmp2].length;
+		const totalLength =
+			newState.lstMember[newState.cmp1].length +
+			newState.lstMember[newState.cmp2].length;
 		for (let i = 0; i < totalLength; i++) {
 			newState.lstMember[newState.parent[newState.cmp1]][i] = newState.rec[i];
 		}
@@ -228,239 +166,203 @@ function processSortChoice(state: SorterState, flag: SortChoice): SorterState {
 	if (newState.cmp1 < 0) {
 		newState.percent = 100;
 		newState.finishFlag = 1;
-		newState.currentLeftIndex = null;
-		newState.currentRightIndex = null;
 	} else {
-		newState.percent = Math.floor((newState.finishSize * 100) / newState.totalSize);
-		
+		newState.percent = Math.floor(
+			(newState.finishSize * 100) / newState.totalSize
+		);
+
 		// 更安全的索引取得方式
 		const leftGroup = newState.lstMember[newState.cmp1];
 		const rightGroup = newState.lstMember[newState.cmp2];
-		
-		newState.currentLeftIndex = (leftGroup && newState.head1 < leftGroup.length) 
-			? leftGroup[newState.head1] 
-			: null;
-			
-		newState.currentRightIndex = (rightGroup && newState.head2 < rightGroup.length) 
-			? rightGroup[newState.head2] 
-			: null;
+
+		newState.currentLeftIndex =
+			leftGroup && newState.head1 < leftGroup.length
+				? leftGroup[newState.head1]
+				: null;
+
+		newState.currentRightIndex =
+			rightGroup && newState.head2 < rightGroup.length
+				? rightGroup[newState.head2]
+				: null;
 	}
 
 	return newState;
 }
 
-// 生成最終結果 (對應原本的 showResult)
-async function generateFinalResult(
-	state: SorterState,
-	tracks: TrackData[],
-	artistId: string,
-	setCurrentStage: React.Dispatch<React.SetStateAction<CurrentStage | null>>,
-	rankingType: "artist" | "album",
-	albumId?: string
-): Promise<void> {
-	let rankingNum = 1;
-	let sameRank = 1;
-	const resultArray: RankingResultData[] = [];
-	
-	const trackMap = new Map(tracks.map((track) => [track.name, track]));
-
-	for (let i = 0; i < state.namMember.length; i++) {
-		const foundTrack = trackMap.get(state.namMember[state.lstMember[0][i]])!;
-
-		resultArray.push({
-			ranking: rankingNum,
-			...foundTrack,
-		});
-
-		if (i < state.namMember.length - 1) {
-			if (state.equal[state.lstMember[0][i]] === state.lstMember[0][i + 1]) {
-				sameRank++;
-			} else {
-				rankingNum += sameRank;
-				sameRank = 1;
-			}
-		}
-	}
-
-	try {
-		await saveDraftResult(
-			artistId,
-			resultArray,
-			rankingType === "album" ? "ALBUM" : "ARTIST",
-			albumId,
-			JSON.stringify(state)
-		);
-	} catch (err) {
-		console.error("Error saving sorter result:", err);
-	} finally {
-		setCurrentStage("result");
-	}
-}
-
 // 主要的 hook
 export default function useSorter({
+	initialState,
 	tracks,
-	draft,
-	setCurrentStage,
-	rankingType = "artist",
-	albumId,
-}: UseSorterProps): UseSorterReturn {
-	const dispatch = useAppDispatch();
-	const artistId = tracks[0].artistId;
+	submissionId,
+	userId
+}: UseSorterStateProps): UseSorterStateReturn {
+	const { setSaveStatus, setPercentage } = useSorterContext();
+	const { modal } = useModal();
+	const artistId = tracks[0]?.artistId;
 
-	// 用 useState 取代所有 useRef
-	const [state, setState] = useState<SorterState | null>(null);
-	const [history, setHistory] = useState<SorterState[]>([]);
-
-	// 初始化 (對應原本的 useEffect)
 	useEffect(() => {
-		if (tracks.length === 0) return;
-		
-		const rankingState = draft?.rankingState ? JSON.parse(draft.rankingState as string) : null;
-		if (rankingState?.draft) {
-			// 載入存檔狀態 (與原本邏輯相同)
-			try {
-				const loadedState = JSON.parse(rankingState.draft);
-				setState(loadedState);
-			} catch (error) {
-				console.error("Failed to load draft state:", error);
-				setState(initializeSorterState(tracks));
-			}
-		} else {
-			// 新開始 (對應原本的 initList + showImage)
-			setState(initializeSorterState(tracks));
-		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps -- 故意不包含 tracks 避免無限循環
-	}, [draft?.rankingState, tracks.length]); // 使用 tracks.length 而不是整個 tracks 陣列
+		setPercentage(initialState.percent);
+	}, [initialState.percent, setPercentage]);
 
-	// 當前比較的歌曲 (對應原本的 leftField, rightField)
+	// 用 useState 管理狀態
+	const [state, setState] = useState<SorterStateType>(initialState);
+
+	// 當前比較的歌曲 (使用 state.tracks 而非外部 tracks)
 	const leftField = useMemo(() => {
-		if (!state || typeof state.currentLeftIndex !== 'number' || state.currentLeftIndex < 0) return undefined;
+		if (
+			!state ||
+			typeof state.currentLeftIndex !== "number" ||
+			state.currentLeftIndex < 0
+		)
+			return undefined;
 		if (state.currentLeftIndex >= state.namMember.length) return undefined;
-		
+
 		const trackName = state.namMember[state.currentLeftIndex];
 		if (!trackName) return undefined;
-		
+
 		return tracks.find((track) => track.name === trackName);
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [state?.currentLeftIndex, state?.namMember, tracks]);
+	}, [state, tracks]);
 
 	const rightField = useMemo(() => {
-		if (!state || typeof state.currentRightIndex !== 'number' || state.currentRightIndex < 0) return undefined;
+		if (
+			!state ||
+			typeof state.currentRightIndex !== "number" ||
+			state.currentRightIndex < 0
+		)
+			return undefined;
 		if (state.currentRightIndex >= state.namMember.length) return undefined;
-		
+
 		const trackName = state.namMember[state.currentRightIndex];
 		if (!trackName) return undefined;
-		
-		return tracks.find((track) => track.name === trackName);
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [state?.currentRightIndex, state?.namMember, tracks]);
 
-	// 儲存功能 (對應原本的 handleSave)
+		return tracks.find((track) => track.name === trackName);
+	}, [state, tracks]);
+
+	// 儲存功能
 	const handleSave = useCallback(async () => {
 		if (!state) {
 			return { type: "error", message: "No state to save" };
 		}
 		const result = await saveDraft(
-			artistId,
-			JSON.stringify(state),
-			rankingType === "album" ? "ALBUM" : "ARTIST",
-			albumId
+			state,
+			submissionId
 		);
 		return result;
-	}, [state, artistId]);
+	}, [state, submissionId]);
 
 	// 使用 ref 來獲取最新的值，避免閉包問題
 	const stateRef = useRef(state);
 	const artistIdRef = useRef(artistId);
-	const dispatchRef = useRef(dispatch);
-	const tracksRef = useRef(tracks);
-	const setCurrentStageRef = useRef(setCurrentStage);
-	
+	const setSaveStatusRef = useRef(setSaveStatus);
+
 	// 更新 refs
 	useEffect(() => {
 		stateRef.current = state;
 		artistIdRef.current = artistId;
-		dispatchRef.current = dispatch;
-		tracksRef.current = tracks;
-		setCurrentStageRef.current = setCurrentStage;
-	}, [state, artistId, dispatch, tracks, setCurrentStage]);
+		setSaveStatusRef.current = setSaveStatus;
+	}, [state, artistId, setSaveStatus]);
 
-	// 創建穩定的 debounced 函數
-	const debouncedAutoSave = useDebounce(async () => {
+	// 創建穩定的 throttled 函數
+	const throttledAutoSave = useThrottle(async () => {
 		if (!stateRef.current) {
 			return;
 		}
 
+		if (modal !== null) {
+			return;
+		}
+
 		startTransition(async () => {
-			dispatchRef.current(setSaveStatus("pending"));
+			setSaveStatusRef.current("pending");
 			try {
 				await saveDraft(
-					artistIdRef.current,
-					JSON.stringify(stateRef.current),
-					rankingType === "album" ? "ALBUM" : "ARTIST",
-					albumId
+					stateRef.current,
+					submissionId
 				);
-				dispatchRef.current(setSaveStatus("saved"));
+				setSaveStatusRef.current("saved");
 			} catch (error) {
 				console.error("Failed to save draft:", error);
-				dispatchRef.current(setSaveStatus("idle"));
+				setSaveStatusRef.current("idle");
 			}
 		});
-	}, 1000 * autoSaveCounter);
+	}, autoSaveInterval);
 
+	// 核心排序函數
+	const sortList = useCallback(
+		(flag: number) => {
+			const currentState = stateRef.current;
 
-	// 核心排序函數 (完全對應原本的 sortList)
-	const sortList = useCallback((flag: number) => {
-		const currentState = stateRef.current;
-		const currentDispatch = dispatchRef.current;
-		const currentTracks = tracksRef.current;
-		const currentArtistId = artistIdRef.current;
-		const currentSetCurrentStage = setCurrentStageRef.current;
-		
-		if (!currentState) return;
-		
-		// 記錄歷史 (對應原本的 recordHistory)
-		setHistory(prev => [...prev, currentState]);
-		
-		// 更新狀態
-		currentDispatch(setSaveStatus("idle"));
-		
-		try {
-			// 執行排序邏輯 (邏輯完全相同)
-			const newState = processSortChoice(currentState, flag as SortChoice);
-			setState(newState);
-			
-			// 更新進度
-			currentDispatch(setPercentage(newState.percent));
-			
-			// 如果完成，跳到結果頁面
-			if (newState.finishFlag === 1) {
-				generateFinalResult(newState, currentTracks, currentArtistId, currentSetCurrentStage, rankingType, albumId);
-			} else {
-				// 延遲執行自動儲存，避免同步狀態更新
-				setTimeout(() => {
-					debouncedAutoSave();
-				}, 0);
+			if (!currentState) return;
+
+			// 記錄歷史 - 創建當前狀態的快照（不包含 history）
+			const snapshot: SorterStateSnapshotType = {
+				lstMember: currentState.lstMember.map((arr) => [...arr]),
+				parent: [...currentState.parent],
+				equal: [...currentState.equal],
+				rec: [...currentState.rec],
+				cmp1: currentState.cmp1,
+				cmp2: currentState.cmp2,
+				head1: currentState.head1,
+				head2: currentState.head2,
+				nrec: currentState.nrec,
+				totalSize: currentState.totalSize,
+				finishSize: currentState.finishSize,
+				finishFlag: currentState.finishFlag,
+				percent: currentState.percent,
+				namMember: [...currentState.namMember],
+				currentLeftIndex: currentState.currentLeftIndex,
+				currentRightIndex: currentState.currentRightIndex,
+			};
+
+			// 更新狀態
+			setSaveStatus("idle");
+
+			try {
+				// 執行排序邏輯 (邏輯完全相同)
+				const newState = processSortChoice(currentState, flag as SortChoice);
+				// 加入歷史記錄，限制長度為20
+				const newHistory = [...currentState.history, snapshot];
+				newState.history = newHistory.length > 20 ? newHistory.slice(-20) : newHistory;
+
+				setState(newState);
+
+				// 立即保存到 localStorage (Tier 1)
+				saveDraftToLocalStorage(newState, userId, submissionId);
+
+				// 更新進度
+				setPercentage(newState.percent);
+
+				// 如果完成，跳到結果頁面
+				if (newState.finishFlag === 1) {
+					finalizeDraft(newState, submissionId)
+				} else {
+					setTimeout(() => {
+						throttledAutoSave();
+					}, 0);
+				}
+			} catch (err) {
+				console.error(err);
 			}
-		} catch (err) {
-			console.error(err);
-			currentDispatch(setError(true));
-		}
-	}, [debouncedAutoSave]);
+		},
+		[throttledAutoSave, setSaveStatus, setPercentage, submissionId, userId]
+	);
 
-	// 復原上一步 (對應原本的 restorePreviousState)
+	// 復原上一步
 	const restorePreviousState = useCallback(() => {
-		const prevState = history[history.length - 1];
-		
-		if (!prevState) {
+		const prevSnapshot = state.history[state.history.length - 1];
+
+		if (!prevSnapshot) {
 			alert("No previous step available.");
 		} else {
-			setState(prevState);
-			setHistory(prev => prev.slice(0, -1));
-			dispatch(setPercentage(prevState.percent));
+			// 恢復狀態，但保留較短的歷史記錄
+			const restoredState: SorterStateType = {
+				...prevSnapshot,
+				history: state.history.slice(0, -1),
+			};
+			setState(restoredState);
+			setPercentage(prevSnapshot.percent);
 		}
-	}, [history, dispatch]);
+	}, [state.history, setPercentage]);
 
 	// 返回與原本完全相同的介面
 	return {

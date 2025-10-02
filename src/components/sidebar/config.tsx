@@ -1,7 +1,6 @@
 import { signOut } from "next-auth/react";
 import { $Enums } from "@prisma/client";
 import { MenuItem } from "./types";
-import { ArtistData } from "@/types/data";
 import { Home, Lock, LogOut, Mic, Settings, Star, User } from "lucide-react";
 
 export function getMainMenuItems(role: $Enums.Role): MenuItem[] {
@@ -60,8 +59,4 @@ export function getFooterMenuItems(): MenuItem[] {
 			action: () => signOut(),
 		},
 	];
-}
-
-export function getRecentArtists(artists: ArtistData[]): ArtistData[] {
-	return artists.slice(0, 3);
 }

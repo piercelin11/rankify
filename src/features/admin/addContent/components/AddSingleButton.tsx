@@ -4,14 +4,14 @@ import ContentSelectionForm from "./ContentSelectionForm";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@radix-ui/react-icons";
 import addSingle from "@/features/admin/addContent/actions/addSingle";
-import { useModal } from "@/lib/hooks/useModal";
+import { useModal } from "@/contexts";
 
 type AddSingleButtonProps = {
 	artistId: string;
 };
 
 export default function AddSingleButton({ artistId }: AddSingleButtonProps) {
-	const { showCustom, closeTop } = useModal();
+	const { showCustom, close } = useModal();
 
 	function handleSubmit(singleIds: string[], token: string) {
 		return addSingle({ artistId, trackIds: singleIds, token });
@@ -27,7 +27,7 @@ export default function AddSingleButton({ artistId }: AddSingleButtonProps) {
 					content: (
 						<ContentSelectionForm
 							artistId={artistId}
-							onCancel={closeTop}
+							onCancel={close}
 							type="Single"
 							submitAction={handleSubmit}
 						/>

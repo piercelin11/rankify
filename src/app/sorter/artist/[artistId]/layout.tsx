@@ -1,4 +1,3 @@
-
 import { getArtistById } from "@/db/artist";
 import SorterHeader from "@/features/sorter/components/SorterHeader";
 import { notFound } from "next/navigation";
@@ -16,11 +15,9 @@ export default async function layout({
 	if (!artist) notFound();
 
 	return (
-		<div className="flex h-screen flex-col overflow-x-hidden">
+		<div className="flex h-screen flex-col overflow-hidden">
 			<SorterHeader artist={artist} />
-			<div className="flex px-4 h-full">
-				<div className="container m-auto">{children}</div>
-			</div>
+			<div className="container overflow-auto">{children}</div>
 		</div>
 	);
 }
