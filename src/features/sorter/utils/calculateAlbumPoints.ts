@@ -1,4 +1,4 @@
-import { RankingResultData } from "@/features/sorter/types";
+import { RankingResultData } from "../types";
 
 export function calculateAlbumPoints(trackRankings: RankingResultData[]) {
 	const result = [];

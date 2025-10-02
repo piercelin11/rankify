@@ -91,12 +91,6 @@ export async function getTrackRanking(userId: string, trackId: string) {
 	};
 }
 
-/**
- * 獲取歌曲比較選項，用於歌曲排名線圖下拉選單
- * @param userId
- * @param artistId
- * @returns
- */
 export async function getTrackComparisonOptions(
 	userId: string,
 	artistId: string
@@ -151,4 +145,67 @@ export async function getTrackComparisonOptions(
 			parentId: track.albumId,
 		})),
 	};
+}
+
+export async function getSinglesByArtistId(artistId: string) {
+
+	const tracks = await db.track.findMany({
+		where: {
+			artistId,
+			album: null
+		},
+		include: {
+			artist: true,
+			album: true,
+		}
+	});
+
+	return tracks;
+}
+
+export default async function getTracksByArtistId(artistId: string) {
+
+	const tracks = await db.track.findMany({
+		where: {
+			artistId,
+		},
+		include: {
+			artist: true,
+			album: true,
+		},
+	});
+
+	return tracks;
+}
+
+export async function getTracksByAlbumAndTrackIds(
+	selectedAlbumIds: string[],
+	selectedTrackIds: string[]
+) {
+	const tracks = await db.track.findMany({
+		where: {
+			OR: [
+				{
+					albumId: {
+						in: selectedAlbumIds,
+					},
+				},
+				{
+					id: {
+						in: selectedTrackIds,
+					},
+				},
+			],
+		},
+		include: {
+			artist: true,
+			album: true,
+		},
+		orderBy: [
+			{ album: { releaseDate: "asc" } },
+			{ trackNumber: "asc" },
+		],
+	});
+
+	return tracks;
 }

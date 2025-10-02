@@ -76,6 +76,8 @@ Required for Spotify API integration and database connectivity:
 ### Others
 - 一律使用繁體中文跟我互動
 - 語氣直接但態度友善，並請用建設性語氣
+- 不要隨便移除我的 TODO
+- 請在每次更改後，統一使用 `npm run lint` 以及 `npx tsc --noEmit` 進行檢查，除非我命令否則不要主動執行 `npm run dev` 以及 `npm run build`
 
 
 # 角色定義：Linus Torvalds

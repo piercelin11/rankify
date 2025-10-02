@@ -1,69 +1,81 @@
 "use client";
 
-import { useModalContext, Modal as ModalType } from "@/contexts";
+import { useModal } from "@/contexts";
 import { AlertModal } from "./AlertModal";
 import { Modal } from "./Modal";
+import { ConfirmModal } from "./ConfirmModal";
 
 export function ModalManager() {
-	const { modals, closeModal } = useModalContext();
+	const { modal, close } = useModal();
 
-	const handleCloseModal = (modalId: string) => {
-		closeModal(modalId);
-	};
+	if (!modal) return null;
 
-	return (
-		<>
-			{modals.map((modal: ModalType, index: number) => {
-				const { id, config } = modal;
-				const zIndex = 50 + index; // 確保每個 modal 有不同的 z-index
+	const { config } = modal;
 
-				if (config.type === "alert") {
-					return (
-						<div key={id} style={{ zIndex }}>
-							<AlertModal
-								isOpen={true}
-								onOpenChange={(open) => {
-									if (!open) handleCloseModal(id);
-								}}
-								title={config.title}
-								description={config.description}
-								confirmText={config.confirmText}
-								cancelText={config.cancelText}
-								variant={config.variant}
-								onConfirm={() => {
-									modal.onConfirm?.();
-									handleCloseModal(id);
-								}}
-								onCancel={() => {
-									modal.onCancel?.();
-									handleCloseModal(id);
-								}}
-							/>
-						</div>
-					);
-				}
+	if (config.type === "alert") {
+		return (
+			<AlertModal
+				isOpen={true}
+				onOpenChange={(open) => {
+					if (!open) close();
+				}}
+				title={config.title}
+				description={config.description}
+				confirmText={config.confirmText}
+				cancelText={config.cancelText}
+				variant={config.variant}
+				onConfirm={() => {
+					modal.onConfirm?.();
+					close();
+				}}
+				onCancel={() => {
+					modal.onCancel?.();
+					close();
+				}}
+			/>
+		);
+	}
 
-				if (config.type === "custom") {
-					return (
-						<div key={id} style={{ zIndex }}>
-							<Modal
-								isOpen={true}
-								onOpenChange={(open) => {
-									if (!open) handleCloseModal(id);
-								}}
-								title={config.title}
-								description={config.description}
-								size={config.size}
-								footer={modal.footer}
-							>
-								{modal.content}
-							</Modal>
-						</div>
-					);
-				}
+	if (config.type === "custom") {
+		return (
+			<Modal
+				isOpen={true}
+				onOpenChange={(open) => {
+					if (!open) close();
+				}}
+				title={config.title}
+				description={config.description}
+				size={config.size}
+				footer={modal.footer}
+			>
+				{modal.content}
+			</Modal>
+		);
+	}
 
-				return null;
-			})}
-		</>
-	);
+	if (config.type === "confirm") {
+		return (
+			<ConfirmModal
+				isOpen={true}
+				onOpenChange={(open) => {
+					if (!open) close();
+				}}
+				title={config.title}
+				description={config.description}
+				confirmText={config.confirmText}
+				cancelText={config.cancelText}
+				variant={config.variant}
+				onConfirm={() => {
+					modal.onConfirm?.();
+					close();
+				}}
+				onCancel={() => {
+					modal.onCancel?.();
+					close();
+				}}
+			/>
+		);
+	}
+
+	return null;
 }

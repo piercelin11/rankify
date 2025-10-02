@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import TrackEditingForm from "./TrackEditingForm";
-import { useModal } from "@/lib/hooks/useModal";
+import { useModal } from "@/contexts";
 
 type TrackActionDropdownProps = {
 	data: TrackData;
@@ -23,7 +23,7 @@ export default function TrackActionDropdown({
 	data,
 	albums,
 }: TrackActionDropdownProps) {
-	const { showCustom, closeTop } = useModal();
+	const { showCustom, close } = useModal();
 
 	return (
 		<>
@@ -43,7 +43,7 @@ export default function TrackActionDropdown({
 									<TrackEditingForm
 										track={data}
 										albums={albums}
-										onClose={closeTop}
+										onClose={close}
 									/>
 								),
 							})

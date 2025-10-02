@@ -36,9 +36,9 @@ export function useUrlState() {
 		});
 	}, [updateUrlParams]);
 
-	const getArray = useCallback((key: string): string[] => {
+	const getArray = (key: string): string[] => {
 		return searchParams.getAll(key);
-	}, [searchParams]);
+	};
 
 	return {
 		addToArray,

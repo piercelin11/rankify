@@ -15,14 +15,14 @@ import {
 import { Button } from "@/components/ui/button";
 import ArtistEditingForm from "./ArtistEditingForm";
 import { UpdateIcon } from "@radix-ui/react-icons";
-import { useModal } from "@/lib/hooks/useModal";
+import { useModal } from "@/contexts";
 
 type ArtistActionDropdownProps = { data: ArtistData };
 
 export default function ArtistActionDropdown({
 	data,
 }: ArtistActionDropdownProps) {
-	const { showCustom, showAlert, closeTop } = useModal();
+	const { showCustom, showAlert, close } = useModal();
 
 	const { id } = data;
 
@@ -44,7 +44,7 @@ export default function ArtistActionDropdown({
 					<DropdownMenuItem
 						onClick={() =>
 							showCustom({
-								content: <ArtistEditingForm data={data} onClose={closeTop} />,
+								content: <ArtistEditingForm data={data} onClose={close} />,
 								title: "Edit Artist",
 								description: `Make changes to ${data.name}`,
 							})
@@ -66,7 +66,6 @@ export default function ArtistActionDropdown({
 								description: "This action cannot be undone.",
 								confirmText: "Delete",
 								onConfirm: () => deleteItem({ type: "artist", id }),
-								onCancel: () => closeTop(),
 							})
 						}
 					>

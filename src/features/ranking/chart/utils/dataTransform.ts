@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ComparisonData } from "../types";
 
-export type ChartDataset = {
+type ChartDataset = {
 	name: string;
 	color: string | null;
 	datas: (number | null)[];

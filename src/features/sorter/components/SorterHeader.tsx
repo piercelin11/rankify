@@ -4,16 +4,17 @@
 import { ArtistData } from "@/types/data";
 import { CheckIcon } from "@radix-ui/react-icons";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
-import { useAppSelector } from "@/store/hooks";
 import { Progress } from "@/components/ui/progress";
+import { useSorterContext } from "@/contexts/SorterContext";
 
 type SorterHeaderProps = {
 	artist: ArtistData;
 };
 
 export default function SorterHeader({ artist }: SorterHeaderProps) {
-	const percentage = useAppSelector((state) => state.sorter.percentage);
-	const saveStatus = useAppSelector((state) => state.sorter.saveStatus);
+	/* const percentage = useAppSelector((state) => state.sorter.percentage);
+	const saveStatus = useAppSelector((state) => state.sorter.saveStatus); */
+	const {saveStatus, percentage} = useSorterContext()
 
 	return (
 		<div className="grid items-center border-b  px-4 py-8 sm:grid-cols-3">

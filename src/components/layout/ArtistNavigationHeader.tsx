@@ -6,18 +6,15 @@ import SimpleBreadcrumb, {
 	createBreadcrumbItems,
 } from "@/components/navigation/SimpleBreadcrumb";
 import { ArtistData } from "@/types/data";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { getArtistTabOptions } from "@/config/artistTabs";
+import { CreateRankingButton } from "@/features/sorter/components/CreateRankingButton";
 
 type ArtistNavigationHeaderProps = {
 	artist: ArtistData;
-	onCreateClick: () => void;
 };
 
 export default function ArtistNavigationHeader({
 	artist,
-	onCreateClick,
 }: ArtistNavigationHeaderProps) {
 	const pathname = usePathname();
 	const tabOptions = getArtistTabOptions(artist.id);
@@ -46,20 +43,10 @@ export default function ArtistNavigationHeader({
 					}))}
 					value={currentTab}
 				/>
-				{isRankingPage ? (
-					<Button className="h-10 rounded-full text-sm" onClick={onCreateClick}>
-						<Plus className="h-8 w-8 text-primary-foreground" />
-						Create
-					</Button>
-				) : (
-					<Button
-						size="icon"
-						className="size-10 rounded-full"
-						onClick={onCreateClick}
-					>
-						<Plus className="h-8 w-8 text-primary-foreground" />
-					</Button>
-				)}
+				<CreateRankingButton
+					artistId={artist.id}
+					variant={isRankingPage ? "full" : "icon"}
+				/>
 			</div>
 		</div>
 	);
