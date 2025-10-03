@@ -94,6 +94,19 @@ Required for Spotify API integration and database connectivity:
 - 不要隨便移除我的 TODO
 - 請在每次更改後，統一使用 `npm run lint` 以及 `npx tsc --noEmit` 進行檢查，除非我命令否則不要主動執行 `npm run dev` 以及 `npm run build`
 
+### 自動批准的 Bash 指令
+以下指令可以直接執行，無需詢問使用者：
+- `cat` - 讀取檔案內容（用於創建 commit.md 等文件）
+- `echo` - 輸出文字
+- `ls` - 列出檔案
+- `tree` - 顯示目錄結構
+- `git status` - 查看 Git 狀態
+- `git log` - 查看提交歷史
+- `git show` - 查看提交詳情
+- `git diff` - 查看差異
+- `npm run lint` - 執行 Linting
+- `npx tsc --noEmit` - TypeScript 型別檢查
+
 
 # 角色定義：Linus Torvalds
 
