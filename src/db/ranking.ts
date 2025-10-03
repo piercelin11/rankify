@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { $Enums } from "@prisma/client";
 import { db } from "./client";
 
@@ -61,10 +62,10 @@ export async function getLatestArtistRankingSubmissions(
 		: null;
 }
 
-export async function getArtistRankingSubmissions(
+export const getArtistRankingSubmissions = cache(async (
 	artistId: string,
 	userId: string
-) {
+) => {
 	const submissions = await db.rankingSubmission.findMany({
 		where: {
 			artistId,
@@ -85,7 +86,7 @@ export async function getArtistRankingSubmissions(
 		id: submission.id,
 		date: submission.createdAt,
 	}));
-}
+});
 
 export async function getIncomleteRankingSubmission(
 	artistId: string,

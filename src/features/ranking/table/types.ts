@@ -1,5 +1,4 @@
-import { TrackHistoryType } from "@/lib/database/ranking/history/getTracksRankingHistory";
-import { TrackStatsType } from "@/services/track/types";
+import { TrackHistoryType, TrackStatsType } from "@/types/track";
 
 export type RankingListDataTypeExtend = TrackHistoryType | TrackStatsType;
 
