@@ -7,5 +7,5 @@ export default async function page({
 }) {
 	const artistId = (await params).artistId;
 
-	redirect(`/artist/${artistId}/overview`)
+	redirect(`/artist/${artistId}/my-stats`);
 }

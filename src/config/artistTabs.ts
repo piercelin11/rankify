@@ -1,13 +1,8 @@
 export const getArtistTabOptions = (artistId: string) => [
 	{
-		id: "overview",
-		label: "My Overview",
-		href: `/artist/${artistId}/overview`,
-	},
-	{
-		id: "history",
-		label: "My History",
-		href: `/artist/${artistId}/history`,
+		id: "my-stats",
+		label: "My Stats",
+		href: `/artist/${artistId}/my-stats`,
 	},
 	{
 		id: "community",
