@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { db } from "@/db/client";
 import { DateRange } from "@/types/general";
 
@@ -14,11 +15,11 @@ export default async function getAlbumForAlbumPage(albumId: string) {
 	return album;
 }
 
-export async function getLoggedAlbumNames(
+export const getLoggedAlbumNames = cache(async (
 	artistId: string,
 	userId: string,
 	dateRange?: DateRange
-) {
+) => {
 	const dateFilter = dateRange
 		? {
 				createdAt: {
@@ -52,7 +53,7 @@ export async function getLoggedAlbumNames(
 	});
 
 	return albums;
-}
+});
 
 export async function getAlbumRanking(userId: string, albumId: string) {
 	const album = await db.album.findUnique({
@@ -89,10 +90,10 @@ export async function getAlbumRanking(userId: string, albumId: string) {
 	};
 }
 
-export async function getAlbumRankingSessions(
+export const getAlbumRankingSessions = cache(async (
 	userId: string,
 	artistId: string
-) {
+) => {
 	const albums = await db.album.findMany({
 		where: {
 			artistId,
@@ -148,7 +149,7 @@ export async function getAlbumRankingSessions(
 			trackRanks: allTrackRanks,
 		};
 	});
-}
+});
 
 export async function getAlbumComparisonOptions(
 	userId: string,

@@ -1,6 +1,6 @@
+import { cache } from "react";
 import { db } from "@/db/client";
 import { DateRange } from "@/types/general";
-import { AlbumStatsType } from "./types";
 import { Prisma } from "@prisma/client";
 
 type getAlbumsStatsProps = {
@@ -43,11 +43,11 @@ async function getAlbumPercentileCounts(
 	}, {} as Record<string, { top5: number; top10: number; top25: number; top50: number }>);
 }
  
-export default async function getAlbumsStats({
+const getAlbumsStats = cache(async ({
 	artistId,
 	userId,
 	dateRange,
-}: getAlbumsStatsProps): Promise<AlbumStatsType[]> {
+}: getAlbumsStatsProps) => {
 	const dateFilter = dateRange ? {
 		createdAt: {
 			...(dateRange.from && { gte: dateRange.from }),
@@ -126,4 +126,6 @@ export default async function getAlbumsStats({
 	});
 
 	return result;
-}
+});
+
+export default getAlbumsStats;

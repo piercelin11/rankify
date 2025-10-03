@@ -1,10 +1,11 @@
+import { cache } from "react";
 import { db } from "@/db/client";
 import getUserPreference from "@/db/user";
 import { buildTrackQueryCondition } from "./buildTrackQueryCondition";
 import { defaultRankingSettings } from "@/features/settings/components/RankingSettingsForm";
 import { DateRange } from "@/types/general";
 import { Prisma } from "@prisma/client";
-import { TrackMetrics, TrackStatsType } from "./types";
+import { TrackMetrics, TrackStatsType } from "@/types/track";
 
 type getTracksStatsProps = {
 	artistId: string;
@@ -115,12 +116,12 @@ async function getTracksMetrics(
 	);
 }
 
-export default async function getTracksStats({
+const getTracksStats = cache(async ({
 	artistId,
 	userId,
 	take,
 	dateRange,
-}: getTracksStatsProps): Promise<TrackStatsType[]> {
+}: getTracksStatsProps) => {
 	const userPreference = await getUserPreference(userId);
 	const trackQueryConditions = buildTrackQueryCondition(
 		userPreference?.rankingSettings || defaultRankingSettings
@@ -194,4 +195,6 @@ export default async function getTracksStats({
 	});
 
 	return result;
-}
+});
+
+export default getTracksStats;

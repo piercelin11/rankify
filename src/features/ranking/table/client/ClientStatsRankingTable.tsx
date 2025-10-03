@@ -1,7 +1,7 @@
 "use client";
 
 import RankingTable, { AdvancedTableFeatures } from "@/features/ranking/table/RankingTable";
-import type { TrackStatsType } from "@/services/track/types";
+import type { TrackStatsType } from "@/types/track";
 import { useRouter } from "next/navigation";
 
 type ClientStatsRankingTableProps = {
