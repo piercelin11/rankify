@@ -247,17 +247,36 @@ if (view === 'list') {
 **目的**：在開發前確認元件能力和建立型別安全
 
 #### 0.5.1 建立型別定義檔案
-**檔案位置**：`src/types/artist-views.ts`
+**檔案位置**：`src/types/artist.ts`
 
 ```typescript
-export type ViewType = 'overview' | 'all-rankings';
-export type DataSourceMode = 'average' | 'snapshot';
+/**
+ * Artist 頁面的視圖類型
+ * - overview: 總覽儀表板（圖表、highlights）
+ * - all-rankings: 完整的排名列表
+ */
+export type ArtistViewType = 'overview' | 'all-rankings';
 
-export type RankingSession = {
+/**
+ * Artist 頁面的資料來源模式
+ * - average: 所有歷史排名的平均值
+ * - snapshot: 某次具體的排名快照
+ */
+export type ArtistDataSourceMode = 'average' | 'snapshot';
+
+/**
+ * Artist 排名快照的 Session 資訊
+ */
+export type ArtistRankingSession = {
   id: string;
   createdAt: Date;
 };
 ```
+
+**命名決策**：
+- ✅ 使用 `artist.ts` 而非 `artist-views.ts`（符合專案慣例：`data.ts`, `general.ts`）
+- ✅ 型別名稱加 `Artist` 前綴（避免全域衝突，import 時更清楚）
+- ✅ 未來可擴充其他 Artist 相關型別（如 `ArtistSortOrder`, `ArtistFilterType`）
 
 #### 0.5.2 驗證現有元件能力
 - [ ] 確認 `SimpleSegmentControl` 的 `queryParam` 正確保留其他查詢參數（Line 51-54）
@@ -347,13 +366,13 @@ export const getTracksStats = cache(_getTracksStats);
 
 **Props 設計**（修正後）：
 ```typescript
-import { RankingSession, ViewType } from '@/types/artist-views';
+import { ArtistRankingSession, ArtistViewType } from '@/types/artist';
 
 type HybridDataSourceControlProps = {
   artistId: string;
   currentSessionId: string | null;  // 不需要 currentMode（可推導）
-  currentView: ViewType;            // 使用型別而非 string
-  sessions: RankingSession[];
+  currentView: ArtistViewType;      // 使用型別而非 string
+  sessions: ArtistRankingSession[];
 };
 ```
 
@@ -451,10 +470,10 @@ import { useRouter } from 'next/navigation';
 
 **Props 設計**（修正後）：
 ```typescript
-import { ViewType } from '@/types/artist-views';
+import { ArtistViewType } from '@/types/artist';
 
 type ViewLayoutControlProps = {
-  currentView: ViewType;  // 使用型別而非 string
+  currentView: ArtistViewType;  // 使用型別而非 string
 };
 ```
 
@@ -492,11 +511,11 @@ export default function ViewLayoutControl({ currentView }: ViewLayoutControlProp
 // src/features/ranking/views/OverviewView.tsx
 'use client';
 
-import { DataSourceMode } from '@/types/artist-views';
+import { ArtistDataSourceMode } from '@/types/artist';
 import { AlbumStatsType, AlbumSession } from '@/types/...'; // 根據實際路徑
 
 type OverviewViewProps = {
-  mode: DataSourceMode;
+  mode: ArtistDataSourceMode;
   albumRankings?: AlbumStatsType[];  // 只在 Average 模式有
   albumSessions?: AlbumSession[];    // 只在 Average 模式有
   artistId: string;
@@ -526,13 +545,13 @@ export default function OverviewView({
 // src/features/ranking/views/AllRankingsView.tsx
 'use client';
 
-import { DataSourceMode } from '@/types/artist-views';
+import { ArtistDataSourceMode } from '@/types/artist';
 import { TrackStatsType, TrackHistoryType } from '@/types/...';
 import ClientStatsRankingTable from '@/components/.../ClientStatsRankingTable';
 import ClientHistoryRankingTable from '@/components/.../ClientHistoryRankingTable';
 
 type AllRankingsViewProps = {
-  mode: DataSourceMode;
+  mode: ArtistDataSourceMode;
   trackRankings: TrackStatsType[] | TrackHistoryType[];
   albums: Array<{ name: string }>;
 };
@@ -569,7 +588,7 @@ import { getUserSession } from '@/lib/auth';
 import { getTracksStats, getAlbumsStats, getAlbumRankingSessions, getLoggedAlbumNames } from '@/services/...';
 import { getArtistRankingSubmissions } from '@/services/...';
 import { calculateDateRangeFromSlug } from '@/lib/utils/...';
-import { ViewType } from '@/types/artist-views';
+import { ArtistViewType } from '@/types/artist';
 import HybridDataSourceControl from '@/components/artist/HybridDataSourceControl';
 import ViewLayoutControl from '@/components/artist/ViewLayoutControl';
 import OverviewView from '@/features/ranking/views/OverviewView';
@@ -586,15 +605,15 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
   const { view: rawView, range } = await searchParams;
 
   // 驗證 view 參數，無效則重定向
-  const VALID_VIEWS = ['overview', 'all-rankings'] as const;
-  if (rawView && !VALID_VIEWS.includes(rawView as any)) {
+  const VALID_VIEWS: ArtistViewType[] = ['overview', 'all-rankings'];
+  if (rawView && !VALID_VIEWS.includes(rawView as ArtistViewType)) {
     const queryParams = new URLSearchParams();
     queryParams.set('view', 'overview');
     if (range) queryParams.set('range', range);
     redirect(`/artist/${artistId}/my-stats?${queryParams.toString()}`);
   }
 
-  const view: ViewType = (rawView as ViewType) || 'overview';
+  const view: ArtistViewType = (rawView as ArtistViewType) || 'overview';
   const { id: userId } = await getUserSession();
 
   const dateRange = calculateDateRangeFromSlug(range);
@@ -651,7 +670,7 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 **重要修正點**：
 1. **View 參數驗證**：無效的 `view` 參數會重定向到 `overview`（保留其他參數如 `range`）
 2. **控制項在 Page 渲染**：所有邏輯集中在 Page 層
-3. **型別安全**：驗證後的 `view` 保證是 `ViewType`
+3. **型別安全**：驗證後的 `view` 保證是 `ArtistViewType`
 4. **條件性資料獲取**：Album 資料只在 Overview 視圖載入
 
 **為什麼用 redirect 而非 notFound**：
@@ -668,7 +687,7 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 import { getUserSession } from '@/lib/auth';
 import { getTracksHistory, getLoggedAlbumNames } from '@/services/...';
 import { getArtistRankingSubmissions } from '@/services/...';
-import { ViewType } from '@/types/artist-views';
+import { ArtistViewType } from '@/types/artist';
 import HybridDataSourceControl from '@/components/artist/HybridDataSourceControl';
 import ViewLayoutControl from '@/components/artist/ViewLayoutControl';
 import OverviewView from '@/features/ranking/views/OverviewView';
@@ -691,7 +710,7 @@ export default async function SnapshotPage({ params, searchParams }: PageProps) 
     redirect(`/artist/${artistId}/my-stats/${sessionId}?view=overview`);
   }
 
-  const view: ViewType = (rawView as ViewType) || 'overview';
+  const view: ArtistViewType = (rawView as ArtistViewType) || 'overview';
 
   // 驗證 sessionId 是否有效
   const sessions = await getArtistRankingSubmissions(artistId, userId);
@@ -916,7 +935,7 @@ npx tsc --noEmit
 - [ ] 路由檔案數量減少（5 個 → 3 個）
 - [ ] 元件邏輯清晰（Server/Client 邊界明確）
 - [ ] 視圖元件可重用（Average 和 Snapshot 共用）
-- [ ] 型別安全（使用 ViewType 和 DataSourceMode）
+- [ ] 型別安全（使用 ArtistViewType 和 ArtistDataSourceMode）
 
 ---
 
@@ -943,7 +962,7 @@ npx tsc --noEmit
 
 ### 新建檔案
 ```
-src/types/artist-views.ts
+src/types/artist.ts
 src/components/artist/HybridDataSourceControl.tsx
 src/components/artist/ViewLayoutControl.tsx
 src/features/ranking/views/OverviewView.tsx
@@ -1019,7 +1038,7 @@ src/app/(main)/artist/[artistId]/(artist)/history/[dateId]/page.tsx
 2. **不創建空殼 Layout**：`my-stats/` 不需要 `layout.tsx`，所有邏輯在 Page 層
 3. **React Cache 必須在 Phase 1 完成**：這是正確性要求，不是優化
 4. **型別安全 + Runtime 驗證**：
-   - TypeScript：使用 `ViewType` 和 `DataSourceMode`
+   - TypeScript：使用 `ArtistViewType` 和 `ArtistDataSourceMode`
    - Runtime：用 `redirect()` 處理無效的 `view` 參數
 5. **驗證邏輯的區別**：
    - 參數錯誤（view）→ `redirect()`（可修正）
