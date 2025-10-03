@@ -73,6 +73,21 @@ Required for Spotify API integration and database connectivity:
 - `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`
 - Spotify API credentials for music data fetching
 
+### Git Workflow
+- **Commit 流程**：
+  1. 完成階段性任務後，執行 `git add .`
+  2. 建立 `commit.md`（繁體中文），包含：
+     - 類型 (Type)、範圍 (Scope)、主旨 (Subject)
+     - 內容 (Body)、破壞性變更 (Breaking Changes)
+     - 建議的 commit 指令
+     - 變更檔案清單、當前分支
+  3. 通知使用者需要 commit，由使用者手動執行
+  4. **不要自動執行 `git commit`**
+- **commit.md 管理**：
+  - 每次需要 commit 時覆蓋此檔案
+  - 此檔案已加入 `.gitignore`（不應被 commit）
+  - 使用繁體中文撰寫所有內容
+
 ### Others
 - 一律使用繁體中文跟我互動
 - 語氣直接但態度友善，並請用建設性語氣
