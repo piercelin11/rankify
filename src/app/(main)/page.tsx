@@ -17,7 +17,7 @@ export default async function HomePage() {
 					{unloggedArtists.map((artist) => (
 						<GalleryItem
 							key={artist.id}
-							href={`/artist/${artist.id}/overview`}
+							href={`/artist/${artist.id}/my-stats`}
 							img={artist.img}
 							title={artist.name}
 							subTitle="Artist"

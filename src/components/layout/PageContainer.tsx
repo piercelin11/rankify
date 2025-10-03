@@ -12,7 +12,7 @@ export function PageContainer({ children }: PageContainerProps) {
 	/* const searchParams = useSearchParams();
 	const view = searchParams.get("view"); */
 
-	const shouldRemovePadding = pathname.includes("/overview");
+	const shouldRemovePadding = pathname.includes("/my-stats");
 
 	return (
 		<div className={cn(shouldRemovePadding ? "" : "p-content")}>{children}</div>
