@@ -24,7 +24,7 @@ export const getTracksHistory = cache(async ({
 	dateId,
 	take,
 }: getTracksHistoryProps) => {
-	const userPreference = await getUserPreference(userId);
+	const userPreference = await getUserPreference({ userId });
 	const trackQueryConditions = buildTrackQueryCondition(
 		userPreference?.rankingSettings || defaultRankingSettings
 	);

@@ -24,8 +24,8 @@ export default async function page({
 	const artistId = (await params).artistId;
 	const { id: userId } = await getUserSession();
 
-	const defaultAlbum = await getAlbumRanking(userId, albumId);
-	const { menuOptions } = await getAlbumComparisonOptions(userId, artistId);
+	const defaultAlbum = await getAlbumRanking({ userId, albumId });
+	const { menuOptions } = await getAlbumComparisonOptions({ userId, artistId });
 
 	if (!defaultAlbum) notFound();
 

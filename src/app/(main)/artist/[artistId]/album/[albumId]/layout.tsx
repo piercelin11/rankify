@@ -18,7 +18,7 @@ type LayoutProps = {
 
 export default async function MainLayout({ params, children }: LayoutProps) {
 	const albumId = (await params).albumId;
-	const album = await getAlbumForAlbumPage(albumId);
+	const album = await getAlbumForAlbumPage({ albumId });
 
 	if (!album) notFound();
 

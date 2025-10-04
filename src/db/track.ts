@@ -1,6 +1,6 @@
 import { db } from "@/db/client";
 
-export async function getTrackForTrackPage(trackId: string) {
+export async function getTrackForTrackPage({ trackId }: { trackId: string }) {
 	const track = await db.track.findFirst({
 		where: {
 			id: trackId,
@@ -14,7 +14,13 @@ export async function getTrackForTrackPage(trackId: string) {
 	return track;
 }
 
-export async function getTracksRankings(userId: string, trackIds: string[]) {
+export async function getTracksRankings({
+	userId,
+	trackIds,
+}: {
+	userId: string;
+	trackIds: string[];
+}) {
 	const tracks = await db.track.findMany({
 		where: {
 			id: {
@@ -55,7 +61,13 @@ export async function getTracksRankings(userId: string, trackIds: string[]) {
 	}));
 }
 
-export async function getTrackRanking(userId: string, trackId: string) {
+export async function getTrackRanking({
+	userId,
+	trackId,
+}: {
+	userId: string;
+	trackId: string;
+}) {
 	const track = await db.track.findUnique({
 		where: {
 			id: trackId,
@@ -91,10 +103,13 @@ export async function getTrackRanking(userId: string, trackId: string) {
 	};
 }
 
-export async function getTrackComparisonOptions(
-	userId: string,
-	artistId: string
-) {
+export async function getTrackComparisonOptions({
+	userId,
+	artistId,
+}: {
+	userId: string;
+	artistId: string;
+}) {
 	// 獲取該藝人的所有專輯（有排名資料的）
 	const albums = await db.album.findMany({
 		where: {
@@ -147,8 +162,11 @@ export async function getTrackComparisonOptions(
 	};
 }
 
-export async function getSinglesByArtistId(artistId: string) {
-
+export async function getSinglesByArtistId({
+	artistId,
+}: {
+	artistId: string;
+}) {
 	const tracks = await db.track.findMany({
 		where: {
 			artistId,
@@ -163,8 +181,11 @@ export async function getSinglesByArtistId(artistId: string) {
 	return tracks;
 }
 
-export default async function getTracksByArtistId(artistId: string) {
-
+export default async function getTracksByArtistId({
+	artistId,
+}: {
+	artistId: string;
+}) {
 	const tracks = await db.track.findMany({
 		where: {
 			artistId,
@@ -178,10 +199,13 @@ export default async function getTracksByArtistId(artistId: string) {
 	return tracks;
 }
 
-export async function getTracksByAlbumAndTrackIds(
-	selectedAlbumIds: string[],
-	selectedTrackIds: string[]
-) {
+export async function getTracksByAlbumAndTrackIds({
+	selectedAlbumIds,
+	selectedTrackIds,
+}: {
+	selectedAlbumIds: string[];
+	selectedTrackIds: string[];
+}) {
 	const tracks = await db.track.findMany({
 		where: {
 			OR: [

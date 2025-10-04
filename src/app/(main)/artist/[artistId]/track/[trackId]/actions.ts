@@ -11,7 +11,7 @@ export async function getComparisonTracksData(trackIds: string[]) {
 	}
 
 	try {
-		const tracks = await getTracksRankings(userId, trackIds);
+		const tracks = await getTracksRankings({ userId, trackIds });
 		return tracks.map(track => ({
 			...track,
 			type: 'track' as const,

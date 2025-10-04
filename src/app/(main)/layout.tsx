@@ -11,7 +11,7 @@ type AdminLayoutProps = {
 
 export default async function MainLayout({ children }: AdminLayoutProps) {
 	const user = await getUserSession();
-	const loggedArtists = await getRecentLoggedArtists(user.id);
+	const loggedArtists = await getRecentLoggedArtists({ userId: user.id });
 
 	return (
 		<SidebarProvider defaultOpen={true}>
