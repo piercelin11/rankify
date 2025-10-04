@@ -18,7 +18,7 @@ type LayoutProps = {
 
 export default async function MainLayout({ params, children }: LayoutProps) {
 	const trackId = (await params).trackId;
-	const track = await getTrackForTrackPage(trackId);
+	const track = await getTrackForTrackPage({ trackId });
 
 	if (!track) notFound();
 	return (

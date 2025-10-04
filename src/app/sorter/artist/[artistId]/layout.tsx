@@ -11,7 +11,7 @@ export default async function layout({
 	params: Promise<{ artistId: string }>;
 }) {
 	const artistId = (await params).artistId;
-	const artist = await getArtistById(artistId);
+	const artist = await getArtistById({ artistId });
 	if (!artist) notFound();
 
 	return (

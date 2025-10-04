@@ -1,6 +1,6 @@
 import { db } from "./client";
 
-export async function getArtistById(artistId: string) {
+export async function getArtistById({ artistId }: { artistId: string }) {
 	const artist = await db.artist.findFirst({
 		where: {
 			id: artistId,
@@ -9,7 +9,7 @@ export async function getArtistById(artistId: string) {
 	return artist;
 }
 
-export async function getLoggedArtists(userId: string) {
+export async function getLoggedArtists({ userId }: { userId: string }) {
 	const artists = await db.artist.findMany({
 		where: {
 			submissions: {
@@ -29,7 +29,7 @@ export async function getLoggedArtists(userId: string) {
 	return artists;
 }
 
-export async function getRecentLoggedArtists(userId: string) {
+export async function getRecentLoggedArtists({ userId }: { userId: string }) {
 	// 先取得有完成記錄的歌手及其最新完成時間
 	const artistsWithLatestSubmission = await db.artist.findMany({
 		where: {

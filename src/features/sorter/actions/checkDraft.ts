@@ -1,7 +1,7 @@
 "use server";
 
 import { getUserSession } from "@/../auth";
-import { getIncomleteRankingSubmission } from "@/db/ranking";
+import { getIncompleteRankingSubmission } from "@/db/ranking";
 import { $Enums } from "@prisma/client";
 
 type CheckDraftProps = {
@@ -17,12 +17,12 @@ export async function checkDraft({
 }: CheckDraftProps) {
 	try {
 		const { id: userId } = await getUserSession();
-		const submission = await getIncomleteRankingSubmission(
+		const submission = await getIncompleteRankingSubmission({
 			artistId,
 			userId,
 			type,
-			albumId
-		);
+			albumId,
+		});
 
 		if (submission) {
 			return {

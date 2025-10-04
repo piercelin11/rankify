@@ -33,10 +33,10 @@ export async function createSubmission({
 		const { id: userId } = await getUserSession();
 
 		// 獲取符合條件的歌曲
-		const tracks = await getTracksByAlbumAndTrackIds(
-			validatedData.selectedAlbumIds,
-			validatedData.selectedTrackIds
-		);
+		const tracks = await getTracksByAlbumAndTrackIds({
+			selectedAlbumIds: validatedData.selectedAlbumIds,
+			selectedTrackIds: validatedData.selectedTrackIds,
+		});
 
 		if (tracks.length === 0) {
 			throw new Error("沒有找到符合條件的歌曲");

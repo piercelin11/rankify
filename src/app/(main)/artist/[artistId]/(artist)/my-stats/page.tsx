@@ -49,14 +49,14 @@ export default async function MyStatsPage({
 						userId,
 						dateRange,
 					}),
-					albumSessions: await getAlbumRankingSessions(userId, artistId),
+					albumSessions: await getAlbumRankingSessions({ userId, artistId }),
 				}
 			: null;
 
-	const albums = await getLoggedAlbumNames(artistId, userId, dateRange);
+	const albums = await getLoggedAlbumNames({ artistId, userId, dateRange });
 
 	// 獲取 sessions（用於控制項）
-	const sessions = await getArtistRankingSubmissions(artistId, userId);
+	const sessions = await getArtistRankingSubmissions({ artistId, userId });
 
 	return (
 		<>

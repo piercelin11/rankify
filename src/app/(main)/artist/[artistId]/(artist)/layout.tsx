@@ -10,7 +10,7 @@ type LayoutProps = {
 
 export default async function MainLayout({ params, children }: LayoutProps) {
 	const artistId = (await params).artistId;
-	const artist = await getArtistById(artistId);
+	const artist = await getArtistById({ artistId });
 
 	if (!artist) notFound();
 	return (

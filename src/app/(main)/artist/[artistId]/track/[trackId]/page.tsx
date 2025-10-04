@@ -24,11 +24,11 @@ export default async function page({
 	const artistId = (await params).artistId;
 	const { id: userId } = await getUserSession();
 
-	const defaultTrack = await getTrackRanking(userId, trackId);
-	const { menuOptions, parentOptions } = await getTrackComparisonOptions(
+	const defaultTrack = await getTrackRanking({ userId, trackId });
+	const { menuOptions, parentOptions } = await getTrackComparisonOptions({
 		userId,
-		artistId
-	);
+		artistId,
+	});
 
 	if (!defaultTrack) notFound();
 
@@ -37,7 +37,11 @@ export default async function page({
 
 	if (!trackStats) notFound();
 
-	const peakSessions = await getPeakRankings(trackStats.peak, trackId, userId);
+	const peakSessions = await getPeakRankings({
+		peak: trackStats.peak,
+		trackId,
+		userId,
+	});
 
 	// 找到當前歌曲在排名中的位置
 	const currentIndex = tracks.findIndex((track) => track.id === trackId);

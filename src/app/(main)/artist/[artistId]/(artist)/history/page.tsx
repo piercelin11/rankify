@@ -10,10 +10,10 @@ export default async function HistoryPage({ params }: pageProps) {
 	const { artistId } = await params;
 	const { id: userId } = await getUserSession();
 
-	const latestSession = await getLatestArtistRankingSubmissions(
+	const latestSession = await getLatestArtistRankingSubmissions({
 		artistId,
-		userId
-	);
+		userId,
+	});
 
 	if (!latestSession) {
 		redirect(`/artist/${artistId}/my-stats`);

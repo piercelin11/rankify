@@ -1,6 +1,6 @@
 import { getUserSession } from "@/../auth";
 import { getAlbumsByArtistId } from "@/db/album";
-import { getIncomleteRankingSubmission } from "@/db/ranking";
+import { getIncompleteRankingSubmission } from "@/db/ranking";
 import getTracksByArtistId, { getSinglesByArtistId } from "@/db/track";
 import FilterStage from "@/features/sorter/components/FilterStage";
 import SorterWithConflictResolver from "@/features/sorter/components/SorterWithConflictResolver";
@@ -13,11 +13,11 @@ type pageProps = {
 export default async function page({ params }: pageProps) {
 	const { artistId } = await params;
 	const { id: userId } = await getUserSession();
-	const submission = await getIncomleteRankingSubmission(artistId, userId);
+	const submission = await getIncompleteRankingSubmission({ artistId, userId });
 
-	const singles = await getSinglesByArtistId(artistId);
-	const albums = await getAlbumsByArtistId(artistId);
-	const tracks = await getTracksByArtistId(artistId);
+	const singles = await getSinglesByArtistId({ artistId });
+	const albums = await getAlbumsByArtistId({ artistId });
+	const tracks = await getTracksByArtistId({ artistId });
 
 	if (!submission) return <FilterStage albums={albums} singles={singles} />;
 

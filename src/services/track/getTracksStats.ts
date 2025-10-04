@@ -122,7 +122,7 @@ const getTracksStats = cache(async ({
 	take,
 	dateRange,
 }: getTracksStatsProps) => {
-	const userPreference = await getUserPreference(userId);
+	const userPreference = await getUserPreference({ userId });
 	const trackQueryConditions = buildTrackQueryCondition(
 		userPreference?.rankingSettings || defaultRankingSettings
 	);

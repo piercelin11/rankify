@@ -2,7 +2,11 @@ import { cache } from "react";
 import { db } from "@/db/client";
 import { DateRange } from "@/types/general";
 
-export default async function getAlbumForAlbumPage(albumId: string) {
+export default async function getAlbumForAlbumPage({
+	albumId,
+}: {
+	albumId: string;
+}) {
 	const album = await db.album.findFirst({
 		where: {
 			id: albumId,
@@ -15,11 +19,16 @@ export default async function getAlbumForAlbumPage(albumId: string) {
 	return album;
 }
 
-export const getLoggedAlbumNames = cache(async (
-	artistId: string,
-	userId: string,
-	dateRange?: DateRange
-) => {
+export const getLoggedAlbumNames = cache(
+	async ({
+		artistId,
+		userId,
+		dateRange,
+	}: {
+		artistId: string;
+		userId: string;
+		dateRange?: DateRange;
+	}) => {
 	const dateFilter = dateRange
 		? {
 				createdAt: {
@@ -53,9 +62,16 @@ export const getLoggedAlbumNames = cache(async (
 	});
 
 	return albums;
-});
+	}
+);
 
-export async function getAlbumRanking(userId: string, albumId: string) {
+export async function getAlbumRanking({
+	userId,
+	albumId,
+}: {
+	userId: string;
+	albumId: string;
+}) {
 	const album = await db.album.findUnique({
 		where: {
 			id: albumId,
@@ -90,10 +106,14 @@ export async function getAlbumRanking(userId: string, albumId: string) {
 	};
 }
 
-export const getAlbumRankingSessions = cache(async (
-	userId: string,
-	artistId: string
-) => {
+export const getAlbumRankingSessions = cache(
+	async ({
+		userId,
+		artistId,
+	}: {
+		userId: string;
+		artistId: string;
+	}) => {
 	const albums = await db.album.findMany({
 		where: {
 			artistId,
@@ -149,12 +169,16 @@ export const getAlbumRankingSessions = cache(async (
 			trackRanks: allTrackRanks,
 		};
 	});
-});
+	}
+);
 
-export async function getAlbumComparisonOptions(
-	userId: string,
-	artistId: string
-) {
+export async function getAlbumComparisonOptions({
+	userId,
+	artistId,
+}: {
+	userId: string;
+	artistId: string;
+}) {
 	// 獲取該藝人的所有專輯（有排名資料的）
 	const albums = await db.album.findMany({
 		where: {
@@ -182,7 +206,11 @@ export async function getAlbumComparisonOptions(
 	};
 }
 
-export async function getAlbumsByArtistId(artistId: string) {
+export async function getAlbumsByArtistId({
+	artistId,
+}: {
+	artistId: string;
+}) {
 	const albums = await db.album.findMany({
 		where: {
 			artistId,

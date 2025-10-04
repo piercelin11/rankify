@@ -2,11 +2,15 @@ import { cache } from "react";
 import { $Enums } from "@prisma/client";
 import { db } from "./client";
 
-export async function getPeakRankings(
-	peak: number,
-	trackId: string,
-	userId: string
-) {
+export async function getPeakRankings({
+	peak,
+	trackId,
+	userId,
+}: {
+	peak: number;
+	trackId: string;
+	userId: string;
+}) {
 	const peakRankings = await db.trackRanking.findMany({
 		where: {
 			trackId,
@@ -34,10 +38,13 @@ export async function getPeakRankings(
 	}));
 }
 
-export async function getLatestArtistRankingSubmissions(
-	artistId: string,
-	userId: string
-) {
+export async function getLatestArtistRankingSubmissions({
+	artistId,
+	userId,
+}: {
+	artistId: string;
+	userId: string;
+}) {
 	const latestSubmission = await db.rankingSubmission.findFirst({
 		where: {
 			artistId,
@@ -62,10 +69,14 @@ export async function getLatestArtistRankingSubmissions(
 		: null;
 }
 
-export const getArtistRankingSubmissions = cache(async (
-	artistId: string,
-	userId: string
-) => {
+export const getArtistRankingSubmissions = cache(
+	async ({
+		artistId,
+		userId,
+	}: {
+		artistId: string;
+		userId: string;
+	}) => {
 	const submissions = await db.rankingSubmission.findMany({
 		where: {
 			artistId,
@@ -86,14 +97,20 @@ export const getArtistRankingSubmissions = cache(async (
 		id: submission.id,
 		date: submission.createdAt,
 	}));
-});
+	}
+);
 
-export async function getIncomleteRankingSubmission(
-	artistId: string,
-	userId: string,
-	type: $Enums.SubmissionType = "ARTIST",
-	albumId?: string
-) {
+export async function getIncompleteRankingSubmission({
+	artistId,
+	userId,
+	type = "ARTIST",
+	albumId,
+}: {
+	artistId: string;
+	userId: string;
+	type?: $Enums.SubmissionType;
+	albumId?: string;
+}) {
 	const submissions = await db.rankingSubmission.findMany({
 		where: {
 			artistId,
@@ -104,7 +121,11 @@ export async function getIncomleteRankingSubmission(
 		},
 	});
 
-	if (submissions.length > 1) throw new Error("More than one submission found");
+	if (submissions.length > 1) {
+		throw new Error(
+			`Data integrity error: Found ${submissions.length} incomplete submissions for artist ${artistId}, expected 0 or 1`
+		);
+	}
 
 	return submissions[0];
 }

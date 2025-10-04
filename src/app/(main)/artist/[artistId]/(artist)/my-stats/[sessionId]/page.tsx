@@ -30,7 +30,7 @@ export default async function SnapshotPage({
 	const view = (rawView || "overview") as ArtistViewType;
 
 	// 驗證 sessionId 是否有效
-	const sessions = await getArtistRankingSubmissions(artistId, userId);
+	const sessions = await getArtistRankingSubmissions({ artistId, userId });
 	const currentSession = sessions.find((s) => s.id === sessionId);
 
 	if (!currentSession) {
@@ -43,7 +43,7 @@ export default async function SnapshotPage({
 		userId,
 		dateId: sessionId,
 	});
-	const albums = await getLoggedAlbumNames(artistId, userId);
+	const albums = await getLoggedAlbumNames({ artistId, userId });
 
 	return (
 		<>
