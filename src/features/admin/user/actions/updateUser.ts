@@ -4,7 +4,7 @@ import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
 import { Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/auth/authorization";
+import { requireAdmin } from "@/../auth";
 
 type UpdateUserProps = {
     userId: string;

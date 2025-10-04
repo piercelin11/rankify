@@ -5,7 +5,7 @@ import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
 import { updateAlbumSchema, UpdateAlbumType } from "@/lib/schemas/admin";
 import { revalidatePath, revalidateTag } from "next/cache";
-import { requireAdmin } from "@/lib/auth/authorization";
+import { requireAdmin } from "@/../auth";
 
 type UpdateAlbumProps = {
 	albumId: string;

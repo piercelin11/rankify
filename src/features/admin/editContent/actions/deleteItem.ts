@@ -5,7 +5,7 @@ import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAdmin } from "@/lib/auth/authorization";
+import { requireAdmin } from "@/../auth";
 
 type DeleteItemProps = {
 	type: "artist" | "album" | "track";

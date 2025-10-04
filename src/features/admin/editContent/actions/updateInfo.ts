@@ -6,7 +6,7 @@ import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchArtist from "@/lib/spotify/fetchArtist";
 import { AppResponseType } from "@/types/response";
 import { revalidatePath, revalidateTag } from "next/cache";
-import { requireAdmin } from "@/lib/auth/authorization";
+import { requireAdmin } from "@/../auth";
 
 type UpdateInfoProps = {
 	type: "artist" | "album";

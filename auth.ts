@@ -66,3 +66,23 @@ export async function getUserSession() {
 
 	return session.user;
 }
+
+/**
+ * 驗證當前使用者是否為管理員
+ * @throws 如果使用者不是管理員或 session 不存在
+ * @returns 管理員的 Session 資訊
+ * @example
+ * export default async function deleteItem() {
+ *   const admin = await requireAdmin(); // 如果不是管理員,這行會拋出錯誤
+ *   await db.item.delete(...);
+ * }
+ */
+export async function requireAdmin() {
+	const session = await getUserSession();
+
+	if (session.role !== "ADMIN") {
+		throw new Error("Forbidden: Admin access required");
+	}
+
+	return session;
+}

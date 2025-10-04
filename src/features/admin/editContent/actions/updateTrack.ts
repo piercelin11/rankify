@@ -6,7 +6,7 @@ import { AlbumData, TrackData } from "@/types/data";
 import { updateTrackSchema, UpdateTrackType } from "@/lib/schemas/admin";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { ADMIN_MESSAGES } from "@/constants/messages";
-import { requireAdmin } from "@/lib/auth/authorization";
+import { requireAdmin } from "@/../auth";
 
 type UpdateTrackProps = {
 	originalData: TrackData;
