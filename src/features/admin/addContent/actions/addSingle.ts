@@ -5,7 +5,7 @@ import { db } from "@/db/client";
 import fetchTracks from "@/lib/spotify/fetchTracks";
 import { AppResponseType } from "@/types/response";
 import { revalidatePath, revalidateTag } from "next/cache";
-import { requireAdmin } from "@/lib/auth/authorization";
+import { requireAdmin } from "@/../auth";
 
 type AddSingleProps = {
 	artistId: string;

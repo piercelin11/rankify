@@ -10,7 +10,7 @@ import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import getTracksByArtist from "@/lib/database/data/getTracksByArtist";
 import { revalidateTag } from "next/cache";
 import { ADMIN_MESSAGES } from "@/constants/messages";
-import { requireAdmin } from "@/lib/auth/authorization";
+import { requireAdmin } from "@/../auth";
 
 type AddArtistProps = {
 	artistId: string;
