@@ -20,10 +20,9 @@ const config: Config = {
 		"\\.(gif|ttf|eot|svg|png|jpg)$": "<rootDir>/__mocks__/fileMock.js",
 	},
 	transformIgnorePatterns: [
-		// 這表示忽略 node_modules 下的所有檔案轉換，
-		// 除了 (?!...) 括號裡列出的套件
-		'node_modules/(?!(color-convert)/)', // <-- 添加這行，讓 Jest 轉換 color-convert
-	  ],
+		// 讓 Jest 轉換 color-convert ES Module
+		'node_modules/(?!color-convert/)',
+	],
 }
  
 export default createJestConfig(config)

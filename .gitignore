@@ -36,6 +36,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -46,3 +47,7 @@ next-env.d.ts
 
 # claude code workflow
 commit.md
+
+# Lock files (only use pnpm)
+package-lock.json
+yarn.lock

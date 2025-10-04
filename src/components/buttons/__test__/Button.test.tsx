@@ -1,3 +1,13 @@
+jest.mock("color-convert", () => ({
+	__esModule: true,
+	default: {
+		hex: { rgb: jest.fn(() => [0, 0, 0]) },
+		rgb: { lab: jest.fn(() => [0, 0, 0]), hex: jest.fn(() => "000000") },
+		lab: { lch: jest.fn(() => [0, 0, 0]), rgb: jest.fn(() => [0, 0, 0]) },
+		lch: { lab: jest.fn(() => [0, 0, 0]) },
+	},
+}));
+
 import { render, screen } from "@testing-library/react";
 import Button from "../Button";
 import userEvent from "@testing-library/user-event";

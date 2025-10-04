@@ -29,6 +29,19 @@ describe("adjustColor function", () => {
 		mockColorConvert.rgb.hex.mockClear();
 	});
 
+	describe("when receive null or empty input", () => {
+		test.each([
+			[null, 1, 1],
+			["", 1, 1],
+		])(
+			"should return DEFAULT_COLOR when hexColor is '%s'",
+			(hexColor, lightness, saturation) => {
+				const result = adjustColor(hexColor as any, lightness, saturation);
+				expect(result).toBe("#C3F75F"); // DEFAULT_COLOR from constants
+			}
+		);
+	});
+
 	describe("when receive valid input", () => {
 		test("should return a hex string that start with '#'", () => {
 			const hexString = "#917a8e";
@@ -70,7 +83,6 @@ describe("adjustColor function", () => {
 
 	describe("when receive invalid input", () => {
 		test.each([
-			["", 1, 1],
 			["FFFFFF", 1, 1],
 			["#FFF", 1, 1],
 			[123, 1, 1],

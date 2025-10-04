@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+
+    env:
+      # Dummy env vars for Prisma and build
+      POSTGRES_DATABASE_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
+      NEXT_PUBLIC_BASE_URL: "http://localhost:3000"
+      AUTH_URL: "http://localhost:3000"
+      AUTH_TRUST_HOST: "true"
+      SPOTIFY_CLIENT_ID: "dummy"
+      SPOTIFY_CLIENT_SECRET: "dummy"
+      AUTH_SECRET: "dummy-secret-for-ci-build-only"
+      AUTH_GOOGLE_ID: "dummy"
+      AUTH_GOOGLE_SECRET: "dummy"
+      AWS_ACCESS_KEY_ID: "dummy"
+      AWS_SECRET_ACCESS_KEY: "dummy"
+      AWS_REGION: "ap-southeast-2"
+      S3_BUCKET_NAME: "dummy"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Validate Prisma schema
+        run: npx prisma validate
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: ESLint
+        run: pnpm lint
+
+      - name: Prettier check
+        run: pnpm prettier --check .
+
+      - name: Run tests
+        run: pnpm test
+        env:
+          NODE_OPTIONS: '--experimental-vm-modules'
+
+      - name: Build
+        run: pnpm build
+
+  security:
+    name: Security Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for gitleaks
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Dependency audit
+        run: pnpm audit --audit-level=moderate
+        continue-on-error: true  # Don't fail CI on vulnerabilities yet
+
+      - name: Check .env.example exists
+        run: |
+          if [ ! -f .env.example ]; then
+            echo "Error: .env.example file is missing!"
+            exit 1
+          fi
+          echo ".env.example exists ✓"
+
+      - name: Scan for secrets with Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

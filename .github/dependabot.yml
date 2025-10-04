@@ -1,0 +1,62 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"  # Run once per month to reduce noise
+    open-pull-requests-limit: 3  # Max 3 PRs at a time
+
+    # Allow automatic updates for these types
+    allow:
+      - dependency-type: "development"  # Auto-update devDependencies
+
+    # Ignore high-risk dependencies (require manual review)
+    ignore:
+      # Core framework (canary version, high risk)
+      - dependency-name: "next"
+
+      # Authentication (beta version, critical)
+      - dependency-name: "next-auth"
+
+      # React (must match Next.js version)
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
+
+      # Database ORM (schema dependencies)
+      - dependency-name: "prisma"
+      - dependency-name: "@prisma/client"
+
+      # AWS SDK (API changes can break S3 functionality)
+      - dependency-name: "@aws-sdk/client-s3"
+      - dependency-name: "@aws-sdk/lib-storage"
+      - dependency-name: "@aws-sdk/s3-request-presigner"
+
+      # UI Libraries (potential breaking changes)
+      - dependency-name: "@radix-ui/react-alert-dialog"
+      - dependency-name: "@radix-ui/react-checkbox"
+      - dependency-name: "@radix-ui/react-collapsible"
+      - dependency-name: "@radix-ui/react-dialog"
+      - dependency-name: "@radix-ui/react-dropdown-menu"
+      - dependency-name: "@radix-ui/react-icons"
+      - dependency-name: "@radix-ui/react-label"
+      - dependency-name: "@radix-ui/react-popover"
+      - dependency-name: "@radix-ui/react-progress"
+      - dependency-name: "@radix-ui/react-select"
+      - dependency-name: "@radix-ui/react-separator"
+      - dependency-name: "@radix-ui/react-slot"
+      - dependency-name: "@radix-ui/react-tooltip"
+
+      # Complex data libraries (frequent API changes)
+      - dependency-name: "@tanstack/react-table"
+      - dependency-name: "@tanstack/react-virtual"
+
+      # Form validation (schema dependencies)
+      - dependency-name: "zod"
+      - dependency-name: "react-hook-form"
+
+      # Chart library (breaking changes common)
+      - dependency-name: "chart.js"
+      - dependency-name: "react-chartjs-2"
+
+      # Spotify API (API changes can break integration)
+      - dependency-name: "spotify-api.js"
