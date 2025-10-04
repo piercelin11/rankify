@@ -60,3 +60,33 @@ updates:
 
       # Spotify API (API changes can break integration)
       - dependency-name: "spotify-api.js"
+
+      # Testing frameworks (major version updates need manual review)
+      - dependency-name: "jest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/jest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@testing-library/react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@testing-library/jest-dom"
+        update-types: ["version-update:semver-major"]
+
+      # TypeScript (major version updates can break everything)
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript-eslint"
+        update-types: ["version-update:semver-major"]
+
+      # ESLint and plugins (major version updates need review)
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@eslint/js"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint-plugin-react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint-plugin-react-hooks"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint-plugin-jsdoc"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@next/eslint-plugin-next"
+        update-types: ["version-update:semver-major"]
