@@ -13,7 +13,7 @@ import {
 	MIME_TO_EXTENSION_MAP,
 	type AllowedImageMimeType,
 	type AllowedImageExtension,
-} from "@/lib/validation/constants";
+} from "@/lib/upload/uploadConfig";
 
 if (
 	!process.env.AWS_REGION ||
