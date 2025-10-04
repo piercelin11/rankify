@@ -9,7 +9,7 @@ import { UserData } from "@/types/data";
 import {
 	profileSettingsSchema,
 	ProfileSettingsType,
-} from "@/types/schemas/settings";
+} from "@/lib/schemas/settings";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";

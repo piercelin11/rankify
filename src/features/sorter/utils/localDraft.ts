@@ -1,4 +1,4 @@
-import { SorterStateType } from "@/types/schemas/sorter";
+import { SorterStateType } from "@/lib/schemas/sorter";
 
 export type LocalDraft = {
 	savedAt: string; // ISO 8601 格式的 UTC 時間字串

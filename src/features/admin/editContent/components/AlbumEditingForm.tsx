@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import ColorSelector from "./ColorSelector";
 import { Controller, useForm } from "react-hook-form";
-import { updateAlbumSchema, UpdateAlbumType } from "@/types/schemas/admin";
+import { updateAlbumSchema, UpdateAlbumType } from "@/lib/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlbumData } from "@/types/data";
 import updateAlbum from "@/features/admin/editContent/actions/updateAlbum";

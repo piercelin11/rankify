@@ -1,5 +1,5 @@
 import { TrackData } from "@/types/data";
-import { SorterStateType } from "@/types/schemas/sorter";
+import { SorterStateType } from "@/lib/schemas/sorter";
 
 export default function initializeSorterState(tracks: TrackData[]): SorterStateType {
 	const namMember = tracks.map((item) => item.name);

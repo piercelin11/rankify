@@ -4,7 +4,7 @@ import { getIncompleteRankingSubmission } from "@/db/ranking";
 import getTracksByArtistId, { getSinglesByArtistId } from "@/db/track";
 import FilterStage from "@/features/sorter/components/FilterStage";
 import SorterWithConflictResolver from "@/features/sorter/components/SorterWithConflictResolver";
-import { sorterStateSchema } from "@/types/schemas/sorter";
+import { sorterStateSchema } from "@/lib/schemas/sorter";
 
 type pageProps = {
 	params: Promise<{ artistId: string }>;

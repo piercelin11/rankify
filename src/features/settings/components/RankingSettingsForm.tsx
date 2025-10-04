@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import {
 	rankingSettingsSchema,
 	RankingSettingsType,
-} from "@/types/schemas/settings";
+} from "@/lib/schemas/settings";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserPreferenceData } from "@/types/data";
 import { AppResponseType } from "@/types/response";

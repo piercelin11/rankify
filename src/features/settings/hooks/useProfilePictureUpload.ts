@@ -6,7 +6,7 @@ import { AppResponseType } from "@/types/response";
 import {
 	profilePictureSchema,
 	ProfilePictureType,
-} from "@/types/schemas/settings";
+} from "@/lib/schemas/settings";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";

@@ -1,5 +1,5 @@
 import { TrackData } from "@/types/data";
-import { SorterStateType } from "@/types/schemas/sorter";
+import { SorterStateType } from "@/lib/schemas/sorter";
 import { RankingResultData } from "../types";
 
 export function convertResultToDraftState(

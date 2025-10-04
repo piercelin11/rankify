@@ -19,7 +19,9 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
 			});
 		},
 	},
+	...authConfig,
 	callbacks: {
+		...authConfig.callbacks,
 		async session({ session, token, trigger: _trigger }) {
 			if (token.sub && session) {
 				session.user.id = token.sub;
@@ -46,7 +48,6 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
 			return token;
 		},
 	},
-	...authConfig,
 });
 
 export async function getUserSession() {

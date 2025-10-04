@@ -6,6 +6,7 @@ import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchArtist from "@/lib/spotify/fetchArtist";
 import { AppResponseType } from "@/types/response";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { requireAdmin } from "@/lib/auth/authorization";
 
 type UpdateInfoProps = {
 	type: "artist" | "album";
@@ -18,6 +19,8 @@ export default async function updateInfo({
 	id,
 	token,
 }: UpdateInfoProps): Promise<AppResponseType> {
+	await requireAdmin();
+
 	let success = false;
 
 	try {

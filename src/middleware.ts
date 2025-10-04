@@ -32,6 +32,8 @@ export default auth(async function middleware(req) {
 		return Response.redirect(new URL("/auth/signin", nextUrl.origin));
 	}
 
+	// --- Admin 路由權限檢查已移至 auth.config.ts 的 authorized callback ---
+
 	// --- 判斷是否為 Server Action 請求 ---
 	const isServerAction = req.headers.get("Next-Action") !== null;
 

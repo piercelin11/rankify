@@ -4,7 +4,7 @@ import { db } from "@/db/client";
 import { $Enums, SubmissionStatus, SubmissionType } from "@prisma/client";
 import { getUserSession } from "@/../auth";
 import { getTracksByAlbumAndTrackIds } from "@/db/track";
-import { sorterFilterSchema, sorterStateSchema } from "@/types/schemas/sorter";
+import { sorterFilterSchema, sorterStateSchema } from "@/lib/schemas/sorter";
 import { revalidatePath } from "next/cache";
 import initializeSorterState from "../utils/initializeSorterState";
 

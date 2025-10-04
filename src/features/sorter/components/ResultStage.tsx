@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { RankingResultData } from "../types";
 import { useModal } from "@/contexts";
-import { SorterStateType } from "@/types/schemas/sorter";
+import { SorterStateType } from "@/lib/schemas/sorter";
 import {
 	convertResultToDraftState,
 	generateFinalResult,
