@@ -17,7 +17,7 @@ import {
 import updateUserProfileImage from "../actions/updateUserProfileImage";
 import deleteUserImageOnS3 from "../actions/deleteUserImageOnS3";
 import { SETTINGS_MESSAGES } from "@/constants/messages";
-import { validateImageFile } from "@/lib/validation/fileValidation";
+import { validateImageFile } from "@/lib/upload/imageValidator";
 
 export default function useProfilePictureUpload(initialImgUrl: string | null, onClose: () => void) {
 	const [optimisticImgUrl, setOptimisticImgUrl] = useState(initialImgUrl);

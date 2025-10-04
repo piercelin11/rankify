@@ -7,7 +7,7 @@ import {
 	ALLOWED_IMAGE_MIME_TYPES,
 	MAX_IMAGE_FILE_SIZE,
 	type AllowedImageMimeType,
-} from "./constants";
+} from "./uploadConfig";
 
 const MAGIC_NUMBERS: Record<string, { bytes: number[]; offset: number }> = {
 	"image/jpeg": { bytes: [0xff, 0xd8, 0xff], offset: 0 },
