@@ -11,6 +11,22 @@ jobs:
     name: Code Quality
     runs-on: ubuntu-latest
 
+    env:
+      # Dummy env vars for Prisma and build
+      POSTGRES_DATABASE_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
+      NEXT_PUBLIC_BASE_URL: "http://localhost:3000"
+      AUTH_URL: "http://localhost:3000"
+      AUTH_TRUST_HOST: "true"
+      SPOTIFY_CLIENT_ID: "dummy"
+      SPOTIFY_CLIENT_SECRET: "dummy"
+      AUTH_SECRET: "dummy-secret-for-ci-build-only"
+      AUTH_GOOGLE_ID: "dummy"
+      AUTH_GOOGLE_SECRET: "dummy"
+      AWS_ACCESS_KEY_ID: "dummy"
+      AWS_SECRET_ACCESS_KEY: "dummy"
+      AWS_REGION: "ap-southeast-2"
+      S3_BUCKET_NAME: "dummy"
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -49,21 +65,6 @@ jobs:
 
       - name: Build
         run: pnpm build
-        env:
-          # Provide dummy env vars for build
-          NEXT_PUBLIC_BASE_URL: "http://localhost:3000"
-          AUTH_URL: "http://localhost:3000"
-          AUTH_TRUST_HOST: "true"
-          POSTGRES_DATABASE_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
-          SPOTIFY_CLIENT_ID: "dummy"
-          SPOTIFY_CLIENT_SECRET: "dummy"
-          AUTH_SECRET: "dummy-secret-for-ci-build-only"
-          AUTH_GOOGLE_ID: "dummy"
-          AUTH_GOOGLE_SECRET: "dummy"
-          AWS_ACCESS_KEY_ID: "dummy"
-          AWS_SECRET_ACCESS_KEY: "dummy"
-          AWS_REGION: "ap-southeast-2"
-          S3_BUCKET_NAME: "dummy"
 
   security:
     name: Security Checks
