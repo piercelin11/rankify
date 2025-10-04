@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import RankingStage from "./RankingStage";
 import ResultStage from "./ResultStage";
-import { SorterStateType } from "@/types/schemas/sorter";
+import { SorterStateType } from "@/lib/schemas/sorter";
 import { TrackData } from "@/types/data";
 import { loadDraftFromLocalStorage, cleanupExpiredDrafts } from "../utils/localDraft";
 

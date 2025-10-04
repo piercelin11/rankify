@@ -4,6 +4,7 @@ import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
 import { Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { requireAdmin } from "@/lib/auth/authorization";
 
 type UpdateUserProps = {
     userId: string;
@@ -14,6 +15,8 @@ export default async function updateUser({
     userId,
     role,
 }: UpdateUserProps): Promise<AppResponseType> {
+    await requireAdmin();
+
     try {
         await db.user.update({
             where: {

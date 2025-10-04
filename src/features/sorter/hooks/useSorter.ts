@@ -13,7 +13,7 @@ import saveDraft from "../actions/saveDraft";
 import {
 	SorterStateSnapshotType,
 	SorterStateType,
-} from "@/types/schemas/sorter";
+} from "@/lib/schemas/sorter";
 import { useModal } from "@/contexts";
 import finalizeDraft from "../actions/finalizeDraft";
 import { saveDraftToLocalStorage } from "../utils/localDraft";

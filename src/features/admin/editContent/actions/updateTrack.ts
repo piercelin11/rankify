@@ -3,9 +3,10 @@
 import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
 import { AlbumData, TrackData } from "@/types/data";
-import { updateTrackSchema, UpdateTrackType } from "@/types/schemas/admin";
+import { updateTrackSchema, UpdateTrackType } from "@/lib/schemas/admin";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { ADMIN_MESSAGES } from "@/constants/messages";
+import { requireAdmin } from "@/lib/auth/authorization";
 
 type UpdateTrackProps = {
 	originalData: TrackData;
@@ -16,6 +17,8 @@ export default async function updateTrack({
 	originalData,
 	formData,
 }: UpdateTrackProps): Promise<AppResponseType> {
+	await requireAdmin();
+
 	let isSuccess = false;
 	let newAlbum: AlbumData | null;
 

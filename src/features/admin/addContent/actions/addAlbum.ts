@@ -8,6 +8,7 @@ import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
 import { AppResponseType } from "@/types/response";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { requireAdmin } from "@/lib/auth/authorization";
 
 type AddAlbumProps = {
 	artistId: string;
@@ -22,6 +23,8 @@ export default async function addAlbum({
 	type,
 	token,
 }: AddAlbumProps): Promise<AppResponseType> {
+	await requireAdmin();
+
 	let isSuccess = false;
 
 	if (Array.isArray(albumId) && albumId.length === 0)

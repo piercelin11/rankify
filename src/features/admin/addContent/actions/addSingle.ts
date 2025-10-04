@@ -5,6 +5,7 @@ import { db } from "@/db/client";
 import fetchTracks from "@/lib/spotify/fetchTracks";
 import { AppResponseType } from "@/types/response";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { requireAdmin } from "@/lib/auth/authorization";
 
 type AddSingleProps = {
 	artistId: string;
@@ -17,6 +18,8 @@ export default async function addSingle({
 	trackIds,
 	token,
 }: AddSingleProps): Promise<AppResponseType> {
+	await requireAdmin();
+
 	let isSuccess = false;
 
 	if (trackIds.length === 0)

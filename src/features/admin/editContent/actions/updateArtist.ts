@@ -3,8 +3,9 @@
 import { ADMIN_MESSAGES } from "@/constants/messages";
 import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
-import { updateArtistSchema, UpdateArtistType } from "@/types/schemas/admin";
+import { updateArtistSchema, UpdateArtistType } from "@/lib/schemas/admin";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { requireAdmin } from "@/lib/auth/authorization";
 
 type UpdateArtistProps = {
 	artistId: string;
@@ -14,6 +15,8 @@ export default async function updateArtist({
 	artistId,
 	formData,
 }: UpdateArtistProps): Promise<AppResponseType> {
+	await requireAdmin();
+
 	let isSuccess = false;
 
 	const artist = await db.artist.findFirst({

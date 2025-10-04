@@ -5,7 +5,7 @@ import {
 	TrackRanking,
 	Track,
 } from "@prisma/client";
-import { RankingSettingsType } from "./schemas/settings";
+import { RankingSettingsType } from "../lib/schemas/settings";
 
 export type AlbumData = Album & {
 	tracks?: TrackData[];

@@ -9,7 +9,7 @@ import { PLACEHOLDER_PIC } from "@/constants";
 import Image from "next/image";
 import { useForm, Controller, Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sorterFilterSchema, SorterFilterType } from "@/types/schemas/sorter";
+import { sorterFilterSchema, SorterFilterType } from "@/lib/schemas/sorter";
 import { createSubmission } from "../actions/createSubmission";
 import { useSorterContext } from "@/contexts/SorterContext";
 

@@ -2,7 +2,7 @@
 
 import { getUserSession } from "@/../auth";
 import { db } from "@/db/client";
-import { sorterStateSchema, SorterStateType } from "@/types/schemas/sorter";
+import { sorterStateSchema, SorterStateType } from "@/lib/schemas/sorter";
 import { revalidatePath } from "next/cache";
 
 export default async function finalizeDraft(

@@ -10,6 +10,7 @@ import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import getTracksByArtist from "@/lib/database/data/getTracksByArtist";
 import { revalidateTag } from "next/cache";
 import { ADMIN_MESSAGES } from "@/constants/messages";
+import { requireAdmin } from "@/lib/auth/authorization";
 
 type AddArtistProps = {
 	artistId: string;
@@ -22,6 +23,8 @@ export default async function addArtist({
 	albumId,
 	token,
 }: AddArtistProps): Promise<AppResponseType> {
+	await requireAdmin();
+
 	let isSuccess = false;
 
 	const artistData = await fetchArtist(artistId, token);

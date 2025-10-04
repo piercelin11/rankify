@@ -10,7 +10,7 @@ import { useModal } from "@/contexts";
 import { TrackData } from "@/types/data";
 import deleteSubmission from "../actions/deleteSubmission";
 import { useSorterContext } from "@/contexts/SorterContext";
-import { SorterStateType } from "@/types/schemas/sorter";
+import { SorterStateType } from "@/lib/schemas/sorter";
 
 type RankingStageProps = {
 	initialState: SorterStateType;

@@ -3,7 +3,7 @@
 import {
 	rankingSettingsSchema,
 	RankingSettingsType,
-} from "@/types/schemas/settings";
+} from "@/lib/schemas/settings";
 import { getUserSession } from "../../../../auth";
 import { AppResponseType } from "@/types/response";
 import { db } from "@/db/client";

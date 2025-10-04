@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import FormItem from "@/components/form/FormInput";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
-import { updateArtistSchema, UpdateArtistType } from "@/types/schemas/admin";
+import { updateArtistSchema, UpdateArtistType } from "@/lib/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArtistData } from "@/types/data";
 import FormMessage from "@/components/form/FormMessage";

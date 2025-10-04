@@ -3,8 +3,9 @@
 import { ADMIN_MESSAGES } from "@/constants/messages";
 import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
-import { updateAlbumSchema, UpdateAlbumType } from "@/types/schemas/admin";
+import { updateAlbumSchema, UpdateAlbumType } from "@/lib/schemas/admin";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { requireAdmin } from "@/lib/auth/authorization";
 
 type UpdateAlbumProps = {
 	albumId: string;
@@ -15,6 +16,8 @@ export default async function updateAlbum({
 	albumId,
 	formData,
 }: UpdateAlbumProps): Promise<AppResponseType> {
+	await requireAdmin();
+
 	const album = await db.album.findFirst({
 		where: {
 			id: albumId,
