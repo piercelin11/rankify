@@ -17,6 +17,7 @@ import {
 import updateUserProfileImage from "../actions/updateUserProfileImage";
 import deleteUserImageOnS3 from "../actions/deleteUserImageOnS3";
 import { SETTINGS_MESSAGES } from "@/constants/messages";
+import { validateImageFile } from "@/lib/validation/fileValidation";
 
 export default function useProfilePictureUpload(initialImgUrl: string | null, onClose: () => void) {
 	const [optimisticImgUrl, setOptimisticImgUrl] = useState(initialImgUrl);
@@ -76,10 +77,12 @@ export default function useProfilePictureUpload(initialImgUrl: string | null, on
 			return;
 		}
 
-		if (!file.type.includes("image")) {
+		// 前端驗證 (包含 Magic Number 檢查)
+		const validation = await validateImageFile(file);
+		if (!validation.valid) {
 			setResponse({
 				type: "error",
-				message: SETTINGS_MESSAGES.FILE_UPLOAD.INVALID_TYPE_IMAGE_ONLY,
+				message: validation.error || SETTINGS_MESSAGES.FILE_UPLOAD.INVALID_TYPE_IMAGE_ONLY,
 			});
 			return;
 		}
@@ -89,6 +92,7 @@ export default function useProfilePictureUpload(initialImgUrl: string | null, on
 			presignedResponse = await generatePresignedUploadUrl({
 				fileName: file.name,
 				fileType: file.type,
+				fileSize: file.size,
 			});
 			onClose();
 		} catch (err) {

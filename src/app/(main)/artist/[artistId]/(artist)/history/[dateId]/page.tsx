@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { isValidArtistView } from "@/types/artist";
 
 type pageProps = {
 	params: Promise<{ artistId: string; dateId: string }>;
@@ -12,7 +13,9 @@ export default async function HistoryDatePage({
 	const { artistId, dateId } = await params;
 	const { view } = await searchParams;
 
-	// Redirect 到新路由，保留 view 參數
-	const queryString = view ? `?view=${view}` : "";
+	// 驗證 view 參數,無效則重定向到乾淨的 URL
+	const queryString =
+		view && isValidArtistView(view) ? `?view=${view}` : "";
+
 	redirect(`/artist/${artistId}/my-stats/${dateId}${queryString}`);
 }
