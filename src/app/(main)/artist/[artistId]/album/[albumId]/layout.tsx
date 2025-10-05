@@ -9,7 +9,7 @@ import { ArtistData } from "@/types/data";
 import Image from "next/image";
 import Link from "next/link";
 import { Album } from "@prisma/client";
-import getAlbumForAlbumPage from "@/db/album";
+import { getAlbumForAlbumPage } from "@/db/album";
 
 type LayoutProps = {
 	params: Promise<{ albumId: string }>;

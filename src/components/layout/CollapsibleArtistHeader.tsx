@@ -65,7 +65,7 @@ export default function CollapsibleArtistHeader({
 				rounded
 				type="Artist"
 			/>
-			<div ref={sentinelRef} className="" />
+			<div ref={sentinelRef} className="mb-10" />
 
 			{children}
 		</>

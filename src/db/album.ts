@@ -2,11 +2,17 @@ import { cache } from "react";
 import { db } from "@/db/client";
 import { DateRange } from "@/types/general";
 
-export default async function getAlbumForAlbumPage({
-	albumId,
-}: {
-	albumId: string;
-}) {
+export async function getAlbumById({ albumId }: { albumId: string }) {
+	const album = await db.album.findFirst({
+		where: {
+			id: albumId,
+		},
+	});
+
+	return album;
+}
+
+export async function getAlbumForAlbumPage({ albumId }: { albumId: string }) {
 	const album = await db.album.findFirst({
 		where: {
 			id: albumId,
@@ -29,39 +35,39 @@ export const getLoggedAlbumNames = cache(
 		userId: string;
 		dateRange?: DateRange;
 	}) => {
-	const dateFilter = dateRange
-		? {
-				createdAt: {
-					...(dateRange.from && { gte: dateRange.from }),
-					...(dateRange.to && { lte: dateRange.to }),
-				},
-				status: "COMPLETED" as const,
-			}
-		: { status: "COMPLETED" as const };
+		const dateFilter = dateRange
+			? {
+					createdAt: {
+						...(dateRange.from && { gte: dateRange.from }),
+						...(dateRange.to && { lte: dateRange.to }),
+					},
+					status: "COMPLETED" as const,
+				}
+			: { status: "COMPLETED" as const };
 
-	const albums = await db.album.findMany({
-		where: {
-			artistId,
-			tracks: {
-				some: {
-					trackRanks: {
-						some: {
-							userId,
-							submission: dateFilter,
+		const albums = await db.album.findMany({
+			where: {
+				artistId,
+				tracks: {
+					some: {
+						trackRanks: {
+							some: {
+								userId,
+								submission: dateFilter,
+							},
 						},
 					},
 				},
 			},
-		},
-		select: {
-			name: true,
-		},
-		orderBy: {
-			releaseDate: "desc",
-		},
-	});
+			select: {
+				name: true,
+			},
+			orderBy: {
+				releaseDate: "desc",
+			},
+		});
 
-	return albums;
+		return albums;
 	}
 );
 
@@ -107,68 +113,62 @@ export async function getAlbumRanking({
 }
 
 export const getAlbumRankingSessions = cache(
-	async ({
-		userId,
-		artistId,
-	}: {
-		userId: string;
-		artistId: string;
-	}) => {
-	const albums = await db.album.findMany({
-		where: {
-			artistId,
-			tracks: {
-				some: {
-					trackRanks: {
-						some: {
-							userId,
-							submission: {
-								type: "ALBUM",
-								status: "COMPLETED",
-							},
-						},
-					},
-				},
-			},
-		},
-		include: {
-			tracks: {
-				include: {
-					trackRanks: {
-						where: {
-							userId,
-							submission: {
-								type: "ALBUM",
-								status: "COMPLETED",
-							},
-						},
-						select: {
-							submission: {
-								select: {
-									id: true,
+	async ({ userId, artistId }: { userId: string; artistId: string }) => {
+		const albums = await db.album.findMany({
+			where: {
+				artistId,
+				tracks: {
+					some: {
+						trackRanks: {
+							some: {
+								userId,
+								submission: {
+									type: "ALBUM",
+									status: "COMPLETED",
 								},
 							},
 						},
-						distinct: ["submissionId"],
 					},
 				},
 			},
-		},
-		orderBy: {
-			releaseDate: "desc",
-		},
-	});
+			include: {
+				tracks: {
+					include: {
+						trackRanks: {
+							where: {
+								userId,
+								submission: {
+									type: "ALBUM",
+									status: "COMPLETED",
+								},
+							},
+							select: {
+								submission: {
+									select: {
+										id: true,
+									},
+								},
+							},
+							distinct: ["submissionId"],
+						},
+					},
+				},
+			},
+			orderBy: {
+				releaseDate: "desc",
+			},
+		});
 
-	return albums.map((album) => {
-		// 收集所有 tracks 的 trackRanks
-		const allTrackRanks = album.tracks.flatMap((track) => track.trackRanks);
+		return albums.map((album) => {
+			// 收集所有 tracks 的 trackRanks
+			const allTrackRanks = album.tracks.flatMap((track) => track.trackRanks);
 
-		return {
-			...album,
-			sessionCount: allTrackRanks.length,
-			trackRanks: allTrackRanks,
-		};
-	});
+			return {
+				...album,
+				sessionCount: allTrackRanks.length,
+				trackRanks: allTrackRanks,
+			};
+		});
 	}
 );
 
@@ -206,11 +206,7 @@ export async function getAlbumComparisonOptions({
 	};
 }
 
-export async function getAlbumsByArtistId({
-	artistId,
-}: {
-	artistId: string;
-}) {
+export async function getAlbumsByArtistId({ artistId }: { artistId: string }) {
 	const albums = await db.album.findMany({
 		where: {
 			artistId,
