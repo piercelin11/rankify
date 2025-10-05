@@ -1,4 +1,4 @@
-import { getArtistById } from "@/db/artist";
+import { getAlbumById } from "@/db/album";
 import SorterHeader from "@/features/sorter/components/SorterHeader";
 import { notFound } from "next/navigation";
 import React, { ReactNode } from "react";
@@ -8,15 +8,15 @@ export default async function layout({
 	params,
 }: {
 	children: ReactNode;
-	params: Promise<{ artistId: string }>;
+	params: Promise<{ albumId: string }>;
 }) {
-	const artistId = (await params).artistId;
-	const artist = await getArtistById({ artistId });
-	if (!artist) notFound();
+	const albumId = (await params).albumId;
+	const album = await getAlbumById({ albumId });
+	if (!album) notFound();
 
 	return (
 		<div className="flex h-screen flex-col overflow-hidden">
-			<SorterHeader title={artist.name} />
+			<SorterHeader title={album.name} />
 			<div className="container overflow-auto">{children}</div>
 		</div>
 	);

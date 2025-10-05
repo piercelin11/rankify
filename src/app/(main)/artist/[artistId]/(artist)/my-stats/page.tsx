@@ -3,15 +3,17 @@ import { calculateDateRangeFromSlug } from "@/lib/utils";
 import getTracksStats from "@/services/track/getTracksStats";
 import getAlbumsStats from "@/services/album/getAlbumsStats";
 import { getLoggedAlbumNames, getAlbumRankingSessions } from "@/db/album";
-import { getArtistRankingSubmissions } from "@/db/ranking";
-import HybridDataSourceControl from "@/components/artist/HybridDataSourceControl";
-import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
+//import { getArtistRankingSubmissions } from "@/db/ranking";
+//import HybridDataSourceControl from "@/components/artist/HybridDataSourceControl";
+//import UnderlinedTabs from "@/components/navigation/UnderlinedTabs";
 import OverviewView from "@/features/ranking/views/OverviewView";
 import AllRankingsView from "@/features/ranking/views/AllRankingsView";
 import {
 	ArtistRangeParamsSchema,
 	ArtistViewParamsSchema,
 } from "@/lib/schemas/artist";
+import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
+import PillTabs from "@/components/navigation/PillTabs";
 
 type PageProps = {
 	params: Promise<{ artistId: string }>;
@@ -52,20 +54,15 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 	const albums = await getLoggedAlbumNames({ artistId, userId, dateRange });
 
 	// 獲取 sessions（用於控制項）
-	const sessions = await getArtistRankingSubmissions({ artistId, userId });
+	//const sessions = await getArtistRankingSubmissions({ artistId, userId });
 
 	return (
 		<>
 			{/* 控制項區域 */}
-			<div className="flex items-center justify-between p-content">
-				<HybridDataSourceControl
-					artistId={artistId}
-					currentSessionId={null}
-					currentView={view}
-					sessions={sessions.map((s) => ({ id: s.id, createdAt: s.date }))}
-				/>
+			<div className="space-y-6 p-content">
 				<SimpleSegmentControl
 					value={view}
+					variant="primary"
 					options={[
 						{
 							label: "Overview",
@@ -80,6 +77,33 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 					]}
 					size="md"
 				/>
+				{/* <UnderlinedTabs
+					value={view}
+					options={[
+						{
+							label: "Overview",
+							value: "overview",
+						},
+						{
+							label: "All Rankings",
+							value: "all-rankings",
+						},
+					]}
+				/> */}
+				<PillTabs
+					value={view}
+					options={[
+						{
+							label: "Overview",
+							value: "overview",
+						},
+						{
+							label: "All Rankings",
+							value: "all-rankings",
+						},
+					]}
+				/> 
+				
 			</div>
 
 			{/* 視圖渲染 */}

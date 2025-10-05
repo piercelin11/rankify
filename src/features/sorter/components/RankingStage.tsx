@@ -111,77 +111,78 @@ export default function RankingStage({
 	}, [handleKeyDown, handleKeyUp]);
 
 	return (
-		//TODO: 調整樣式使其置中
-		<section className="select-none space-y-6">
-			<div className="grid grid-cols-2 grid-rows-[150px_75px_150px] gap-3 sm:grid-flow-col sm:grid-cols-3 sm:grid-rows-2 xl:gap-6">
-				<TrackBtn
-					isPressed={pressedKey === "ArrowLeft"}
-					isSelected={selectedButton === "left"}
-					onClick={() => handleSelectFeedback("left", -1)}
-					data={leftField}
-				/>
-				<EqualBtn
-					isPressed={pressedKey === "ArrowUp"}
-					isSelected={selectedButton === "like-both"}
-					onClick={() => handleSelectFeedback("like-both", 0)}
-				>
-					i like both
-				</EqualBtn>
-				<EqualBtn
-					isPressed={pressedKey === "ArrowDown"}
-					isSelected={selectedButton === "no-opinion"}
-					onClick={() => handleSelectFeedback("no-opinion", 0)}
-				>
-					no opinion
-				</EqualBtn>
-				<TrackBtn
-					isPressed={pressedKey === "ArrowRight"}
-					isSelected={selectedButton === "right"}
-					onClick={() => handleSelectFeedback("right", 1)}
-					data={rightField}
-				/>
-			</div>
-
-			<div className="flex justify-between gap-3">
-				<Button variant="outline" onClick={restorePreviousState}>
-					<ChevronLeftIcon />
-					<p>Previous</p>
-				</Button>
-
-				<div className="flex gap-3 xl:gap-6">
-					<Button
-						variant="outline"
-						onClick={() =>
-							showAlert({
-								title: "Are You Sure?",
-								description: "You will clear your sorting record.",
-								confirmText: "Clear and Restart",
-								onConfirm: () => handleClear(),
-							})
-						}
+		<section className="flex h-[calc(100vh-80px)] select-none">
+			<div className="m-auto flex-1 space-y-6">
+				<div className="grid grid-cols-2 grid-rows-[150px_75px_150px] gap-3 sm:grid-flow-col sm:grid-cols-3 sm:grid-rows-2 xl:gap-6">
+					<TrackBtn
+						isPressed={pressedKey === "ArrowLeft"}
+						isSelected={selectedButton === "left"}
+						onClick={() => handleSelectFeedback("left", -1)}
+						data={leftField}
+					/>
+					<EqualBtn
+						isPressed={pressedKey === "ArrowUp"}
+						isSelected={selectedButton === "like-both"}
+						onClick={() => handleSelectFeedback("like-both", 0)}
 					>
-						Restart
+						i like both
+					</EqualBtn>
+					<EqualBtn
+						isPressed={pressedKey === "ArrowDown"}
+						isSelected={selectedButton === "no-opinion"}
+						onClick={() => handleSelectFeedback("no-opinion", 0)}
+					>
+						no opinion
+					</EqualBtn>
+					<TrackBtn
+						isPressed={pressedKey === "ArrowRight"}
+						isSelected={selectedButton === "right"}
+						onClick={() => handleSelectFeedback("right", 1)}
+						data={rightField}
+					/>
+				</div>
+
+				<div className="flex justify-between gap-3">
+					<Button variant="outline" onClick={restorePreviousState}>
+						<ChevronLeftIcon />
+						<p>Previous</p>
 					</Button>
-					<Button
-						variant="outline"
-						onClick={() => {
-							if (saveStatus === "idle")
-								showConfirm({
+
+					<div className="flex gap-3 xl:gap-6">
+						<Button
+							variant="outline"
+							onClick={() =>
+								showAlert({
 									title: "Are You Sure?",
-									description: "Your sorting record has not been saved.",
-									confirmText: "Quit",
-									cancelText: "Save",
-									onConfirm: () => handleQuit(),
-									onCancel: async () => {
-										await handleSave();
-										handleQuit();
-									},
-								});
-							else handleQuit();
-						}}
-					>
-						Quit
-					</Button>
+									description: "You will clear your sorting record.",
+									confirmText: "Clear and Restart",
+									onConfirm: () => handleClear(),
+								})
+							}
+						>
+							Restart
+						</Button>
+						<Button
+							variant="outline"
+							onClick={() => {
+								if (saveStatus === "idle")
+									showConfirm({
+										title: "Are You Sure?",
+										description: "Your sorting record has not been saved.",
+										confirmText: "Quit",
+										cancelText: "Save",
+										onConfirm: () => handleQuit(),
+										onCancel: async () => {
+											await handleSave();
+											handleQuit();
+										},
+									});
+								else handleQuit();
+							}}
+						>
+							Quit
+						</Button>
+					</div>
 				</div>
 			</div>
 		</section>
