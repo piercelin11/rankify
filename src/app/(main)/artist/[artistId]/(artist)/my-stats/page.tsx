@@ -4,31 +4,27 @@ import getTracksStats from "@/services/track/getTracksStats";
 import getAlbumsStats from "@/services/album/getAlbumsStats";
 import { getLoggedAlbumNames, getAlbumRankingSessions } from "@/db/album";
 import { getArtistRankingSubmissions } from "@/db/ranking";
-import { isValidArtistView, type ArtistViewType } from "@/types/artist";
 import HybridDataSourceControl from "@/components/artist/HybridDataSourceControl";
 import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
 import OverviewView from "@/features/ranking/views/OverviewView";
 import AllRankingsView from "@/features/ranking/views/AllRankingsView";
-import { redirect } from "next/navigation";
+import {
+	ArtistRangeParamsSchema,
+	ArtistViewParamsSchema,
+} from "@/lib/schemas/artist";
 
 type PageProps = {
 	params: Promise<{ artistId: string }>;
 	searchParams: Promise<{ view?: string; range?: string }>;
 };
 
-export default async function MyStatsPage({
-	params,
-	searchParams,
-}: PageProps) {
+export default async function MyStatsPage({ params, searchParams }: PageProps) {
 	const { artistId } = await params;
-	const { view: rawView, range } = await searchParams;
+	const { view: rawView, range: rawRange } = await searchParams;
 
-	// 驗證 view 參數，無效則重定向到乾淨的 base URL
-	if (rawView && !isValidArtistView(rawView)) {
-		redirect(`/artist/${artistId}/my-stats`);
-	}
+	const view = ArtistViewParamsSchema.parse(rawView);
+	const range = ArtistRangeParamsSchema.parse(rawRange);
 
-	const view = (rawView || "overview") as ArtistViewType;
 	const { id: userId } = await getUserSession();
 
 	const dateRange = calculateDateRangeFromSlug(range);

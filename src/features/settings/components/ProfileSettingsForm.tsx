@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import saveProfileSettings from "../actions/saveProfileSettings";
 import ImageUploadForm from "./ImageUploadForm";
 import { SETTINGS_MESSAGES } from "@/constants/messages";
+import { useServerAction } from "@/lib/hooks/useServerAction";
 
 type ProfileSettingsForm = {
 	user: UserData;
@@ -24,11 +25,12 @@ type ProfileSettingsForm = {
 export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 	const [response, setResponse] = useState<AppResponseType | null>(null);
 	const isMounted = useRef<HTMLFormElement | null>(null);
+	const { execute, isPending } = useServerAction(saveProfileSettings);
 
 	const {
 		register,
 		handleSubmit,
-		formState: { errors, isSubmitting },
+		formState: { errors },
 	} = useForm<ProfileSettingsType>({
 		resolver: zodResolver(profileSettingsSchema),
 		defaultValues: {
@@ -39,7 +41,7 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 
 	async function onSubmit(formData: ProfileSettingsType) {
 		try {
-			const response = await saveProfileSettings(formData);
+			const response = await execute(formData);
 			if (isMounted.current) setResponse(response);
 		} catch (error) {
 			console.error(SETTINGS_MESSAGES.PROFILE.SAVE_FAILURE, error);
@@ -75,13 +77,13 @@ export default function ProfileSettingsForm({ user }: ProfileSettingsForm) {
 					/>
 				</div>
 				<div className="flex items-center gap-4">
-					<Button type="submit" disabled={isSubmitting}>
+					<Button type="submit" disabled={isPending}>
 						Save
 					</Button>
-					{!isSubmitting && response && (
+					{!isPending && response && (
 						<FormMessage message={response.message} type={response.type} />
 					)}
-					{isSubmitting && (
+					{isPending && (
 						<div>
 							<LoadingAnimation />
 						</div>

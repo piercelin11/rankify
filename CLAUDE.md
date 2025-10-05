@@ -103,7 +103,7 @@
 ### 3.2. Git Commit 流程 (Git Commit Workflow)
 
 1.  完成階段性任務後，執行 `git add .`。
-2.  建立 `COMMIT.md` 檔案 (繁體中文)，內容包含：
+2.  建立 `docs/COMMIT.md` 檔案 (繁體中文)，內容包含：
     - 類型 (Type)、範圍 (Scope)、主旨 (Subject)
     - 內容 (Body)、破壞性變更 (Breaking Changes)
     - 建議的 `git commit` 指令

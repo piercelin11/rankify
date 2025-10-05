@@ -2,12 +2,12 @@ import { getUserSession } from "@/../auth";
 import { getTracksHistory } from "@/services/track/getTracksHistory";
 import { getLoggedAlbumNames } from "@/db/album";
 import { getArtistRankingSubmissions } from "@/db/ranking";
-import { isValidArtistView, type ArtistViewType } from "@/types/artist";
 import HybridDataSourceControl from "@/components/artist/HybridDataSourceControl";
 import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
 import OverviewView from "@/features/ranking/views/OverviewView";
 import AllRankingsView from "@/features/ranking/views/AllRankingsView";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { ArtistViewParamsSchema } from "@/lib/schemas/artist";
 
 type PageProps = {
 	params: Promise<{ artistId: string; sessionId: string }>;
@@ -22,12 +22,7 @@ export default async function SnapshotPage({
 	const { view: rawView } = await searchParams;
 	const { id: userId } = await getUserSession();
 
-	// 驗證 view 參數，無效則重定向到乾淨的 base URL
-	if (rawView && !isValidArtistView(rawView)) {
-		redirect(`/artist/${artistId}/my-stats/${sessionId}`);
-	}
-
-	const view = (rawView || "overview") as ArtistViewType;
+	const view = ArtistViewParamsSchema.parse(rawView);
 
 	// 驗證 sessionId 是否有效
 	const sessions = await getArtistRankingSubmissions({ artistId, userId });

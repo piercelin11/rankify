@@ -10,6 +10,7 @@ import { AppResponseType } from "@/types/response";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import updateArtist from "@/features/admin/editContent/actions/updateArtist";
 import { ADMIN_MESSAGES } from "@/constants/messages";
+import { useServerAction } from "@/lib/hooks/useServerAction";
 
 type ArtistEditingFormProps = {
 	data: ArtistData;
@@ -22,19 +23,20 @@ export default function ArtistEditingForm({
 }: ArtistEditingFormProps) {
 	const [response, setResponse] = useState<AppResponseType | null>(null);
 	const isMounted = useRef<HTMLFormElement | null>(null);
+	const { execute, isPending } = useServerAction(updateArtist);
 
 	const {
 		register,
 		handleSubmit,
 		setFocus,
-		formState: { errors, isSubmitting },
+		formState: { errors },
 	} = useForm<UpdateArtistType>({
 		resolver: zodResolver(updateArtistSchema),
 	});
 
 	async function onSubmit(formData: UpdateArtistType) {
 		try {
-			const updateAlbumResponse = await updateArtist({
+			const updateAlbumResponse = await execute({
 				artistId: data.id,
 				formData,
 			});
@@ -76,14 +78,14 @@ export default function ArtistEditingForm({
 						variant="outline"
 						type="button"
 						onClick={onClose}
-						disabled={isSubmitting}
+						disabled={isPending}
 					>
 						Cancel
 					</Button>
-					<Button type="submit" disabled={isSubmitting}>
+					<Button type="submit" disabled={isPending}>
 						Save
 					</Button>
-					{isSubmitting && (
+					{isPending && (
 						<div className="px-5">
 							<LoadingAnimation />
 						</div>
