@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { sorterFilterSchema, SorterFilterType } from "@/lib/schemas/sorter";
 import { createSubmission } from "../actions/createSubmission";
 import { useSorterContext } from "@/contexts/SorterContext";
+import { useRouter } from "next/navigation";
 
 type FilterStageProps = {
 	albums: AlbumData[];
@@ -20,6 +21,7 @@ type FilterStageProps = {
 
 export default function FilterStage({ albums, singles }: FilterStageProps) {
 	const { setPercentage } = useSorterContext();
+	const router = useRouter();
 
 	const {
 		control,
@@ -41,12 +43,17 @@ export default function FilterStage({ albums, singles }: FilterStageProps) {
 				return;
 			}
 
-			await createSubmission({
+			const result = await createSubmission({
 				selectedAlbumIds: data.selectedAlbumIds,
 				selectedTrackIds: data.selectedTrackIds,
 				type: "ARTIST",
 				artistId,
 			});
+
+			// 成功後 refresh 以獲取最新資料
+			if (result.data && "id" in result.data) {
+				router.refresh();
+			}
 		} catch (error) {
 			console.error("創建排序失敗:", error);
 			alert("創建排序失敗，請重試");

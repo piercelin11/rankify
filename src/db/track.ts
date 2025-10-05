@@ -199,6 +199,19 @@ export default async function getTracksByArtistId({
 	return tracks;
 }
 
+export async function getTracksByAlbumId({ albumId }: { albumId: string }) {
+	const tracks = await db.track.findMany({
+		where: { albumId },
+		include: {
+			artist: true,
+			album: true,
+		},
+		orderBy: [{ discNumber: "asc" }, { trackNumber: "asc" }],
+	});
+
+	return tracks;
+}
+
 export async function getTracksByAlbumAndTrackIds({
 	selectedAlbumIds,
 	selectedTrackIds,

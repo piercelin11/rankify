@@ -5,15 +5,15 @@ import getAlbumsStats from "@/services/album/getAlbumsStats";
 import { getLoggedAlbumNames, getAlbumRankingSessions } from "@/db/album";
 //import { getArtistRankingSubmissions } from "@/db/ranking";
 //import HybridDataSourceControl from "@/components/artist/HybridDataSourceControl";
-//import UnderlinedTabs from "@/components/navigation/UnderlinedTabs";
 import OverviewView from "@/features/ranking/views/OverviewView";
 import AllRankingsView from "@/features/ranking/views/AllRankingsView";
 import {
 	ArtistRangeParamsSchema,
 	ArtistViewParamsSchema,
 } from "@/lib/schemas/artist";
-import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
+//import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
 import PillTabs from "@/components/navigation/PillTabs";
+import UnderlinedTabs from "@/components/navigation/UnderlinedTabs";
 
 type PageProps = {
 	params: Promise<{ artistId: string }>;
@@ -60,7 +60,7 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 		<>
 			{/* 控制項區域 */}
 			<div className="space-y-6 p-content">
-				<SimpleSegmentControl
+				{/* <SimpleSegmentControl
 					value={view}
 					variant="primary"
 					options={[
@@ -76,19 +76,6 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 						},
 					]}
 					size="md"
-				/>
-				{/* <UnderlinedTabs
-					value={view}
-					options={[
-						{
-							label: "Overview",
-							value: "overview",
-						},
-						{
-							label: "All Rankings",
-							value: "all-rankings",
-						},
-					]}
 				/> */}
 				<PillTabs
 					value={view}
@@ -103,6 +90,20 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 						},
 					]}
 				/> 
+				<UnderlinedTabs
+					value={view}
+					options={[
+						{
+							label: "Overview",
+							value: "overview",
+						},
+						{
+							label: "All Rankings",
+							value: "all-rankings",
+						},
+					]}
+				/>
+				
 				
 			</div>
 

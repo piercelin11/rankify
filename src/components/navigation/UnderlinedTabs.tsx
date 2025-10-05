@@ -28,7 +28,7 @@ export default function UnderlinedTabs({
   };
 
   return (
-    <div className={cn("border-b", className)}>
+    <div className={cn("border-b border-border/80", className)}>
       <div className="-mb-px flex" aria-label="Tabs">
         {options.map((option) => (
           <button

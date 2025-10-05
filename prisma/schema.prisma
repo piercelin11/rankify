@@ -139,8 +139,6 @@ model RankingSubmission {
   artist      Artist           @relation(fields: [artistId], references: [id])
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   trackRanks  TrackRanking[]
-
-  @@unique([userId, artistId, type, albumId])
 }
 
 model TrackRanking {

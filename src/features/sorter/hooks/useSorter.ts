@@ -198,7 +198,6 @@ export default function useSorter({
 }: UseSorterStateProps): UseSorterStateReturn {
 	const { setSaveStatus, setPercentage } = useSorterContext();
 	const { modal } = useModal();
-	const artistId = tracks[0]?.artistId;
 
 	useEffect(() => {
 		setPercentage(initialState.percent);
@@ -252,15 +251,13 @@ export default function useSorter({
 
 	// 使用 ref 來獲取最新的值，避免閉包問題
 	const stateRef = useRef(state);
-	const artistIdRef = useRef(artistId);
 	const setSaveStatusRef = useRef(setSaveStatus);
 
 	// 更新 refs
 	useEffect(() => {
 		stateRef.current = state;
-		artistIdRef.current = artistId;
 		setSaveStatusRef.current = setSaveStatus;
-	}, [state, artistId, setSaveStatus]);
+	}, [state, setSaveStatus]);
 
 	// 創建穩定的 throttled 函數
 	const throttledAutoSave = useThrottle(async () => {

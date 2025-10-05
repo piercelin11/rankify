@@ -1,6 +1,11 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+	createContext,
+	useContext,
+	useState,
+	ReactNode,
+} from "react";
 
 export type SaveStatusType = "idle" | "pending" | "saved" | "failed";
 
@@ -17,7 +22,7 @@ export function SorterProvider({ children }: { children: ReactNode }) {
 	const [saveStatus, setSaveStatus] = useState<SaveStatusType>("idle");
 	const [percentage, setPercentage] = useState<number>(0);
 
-	const value: SorterContextValue = {
+	const value = {
 		saveStatus,
 		percentage,
 		setSaveStatus,
@@ -25,9 +30,7 @@ export function SorterProvider({ children }: { children: ReactNode }) {
 	};
 
 	return (
-		<SorterContext.Provider value={value}>
-			{children}
-		</SorterContext.Provider>
+		<SorterContext.Provider value={value}>{children}</SorterContext.Provider>
 	);
 }
 

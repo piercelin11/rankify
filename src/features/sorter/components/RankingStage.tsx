@@ -37,7 +37,8 @@ export default function RankingStage({
 }: RankingStageProps) {
 	const router = useRouter();
 	const { showAlert, showConfirm } = useModal();
-	const { setSaveStatus, setPercentage, saveStatus } = useSorterContext();
+	const { setSaveStatus, setPercentage, saveStatus } =
+		useSorterContext();
 
 	const [selectedButton, setSelectedButton] = useState<string | null>(null);
 	const [pressedKey, setPressedKey] = useState<PressedKeyType | null>(null);

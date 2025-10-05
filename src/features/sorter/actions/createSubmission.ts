@@ -5,8 +5,9 @@ import { $Enums, SubmissionStatus, SubmissionType } from "@prisma/client";
 import { getUserSession } from "@/../auth";
 import { getTracksByAlbumAndTrackIds } from "@/db/track";
 import { sorterFilterSchema, sorterStateSchema } from "@/lib/schemas/sorter";
-import { revalidatePath } from "next/cache";
 import initializeSorterState from "../utils/initializeSorterState";
+import { AppResponseType } from "@/types/response";
+import { RankingSubmissionData } from "@/types/data";
 
 type CreateSubmissionProps = {
 	selectedAlbumIds: string[];
@@ -22,15 +23,20 @@ export async function createSubmission({
 	type,
 	artistId,
 	albumId,
-}: CreateSubmissionProps) {
+}: CreateSubmissionProps): Promise<AppResponseType<RankingSubmissionData>> {
 	try {
-		// 驗證輸入參數
-		const validatedData = sorterFilterSchema.parse({
-			selectedAlbumIds,
-			selectedTrackIds,
-		});
-
 		const { id: userId } = await getUserSession();
+
+		// Album Sorter 只有 1 個專輯，跳過 schema 驗證
+		// Artist Sorter 需要至少 2 個專輯
+		let validatedData = { selectedAlbumIds, selectedTrackIds };
+
+		if (type === "ARTIST") {
+			validatedData = sorterFilterSchema.parse({
+				selectedAlbumIds,
+				selectedTrackIds,
+			});
+		}
 
 		// 獲取符合條件的歌曲
 		const tracks = await getTracksByAlbumAndTrackIds({
@@ -63,20 +69,24 @@ export async function createSubmission({
 			},
 		});
 
-		revalidatePath("/sorter");
-
 		if (existingSubmission) {
 			// 更新現有的 submission
-			return await db.rankingSubmission.update({
+			const updatedSubmission = await db.rankingSubmission.update({
 				where: { id: existingSubmission.id },
 				data: {
 					draftState: validatedDraftState,
 					updatedAt: new Date(),
 				},
 			});
+			return {
+				data: updatedSubmission,
+				type: "success",
+				message: "Submission updated",
+			};
 		}
+
 		// 創建新的 submission
-		return await db.rankingSubmission.create({
+		const newSubmission = await db.rankingSubmission.create({
 			data: {
 				userId,
 				artistId,
@@ -86,6 +96,11 @@ export async function createSubmission({
 				draftState: validatedDraftState,
 			},
 		});
+		return {
+			data: newSubmission,
+			type: "success",
+			message: "Submission updated",
+		};
 	} catch (error) {
 		console.error("createSubmission error:", error);
 		return {
