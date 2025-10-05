@@ -10,6 +10,7 @@ import {
 import fetchArtistsAlbum from "@/lib/spotify/fetchArtistsAlbum";
 import fetchArtist from "@/lib/spotify/fetchArtist";
 import fetchSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
+import { useServerAction } from "@/lib/hooks/useServerAction";
 
 export default function useAdminContentAddtion(
 	type: ContentType,
@@ -21,7 +22,7 @@ export default function useAdminContentAddtion(
 	const [selectedIds, setSelectedIds] = useState<string[]>([]);
 	const [response, setResponse] = useState<AppResponseType | null>(null);
 	const [isLoading, setLoading] = useState<boolean>(false);
-	const [isPending, setPending] = useState<boolean>(false);
+	const { execute, isPending } = useServerAction(submitAction);
 
 	useEffect(() => {
 		async function fetchaDatas() {
@@ -55,22 +56,8 @@ export default function useAdminContentAddtion(
 
 	async function handleSubmit() {
 		const accessToken = await fetchSpotifyToken();
-		setPending(true);
-		try {
-			const response = await submitAction(selectedIds, accessToken);
-			setResponse(response);
-		} catch (error) {
-			if (error instanceof Error) {
-				if (error.message !== "NEXT_REDIRECT") {
-					setResponse({
-						message: "Something went wrong.",
-						type: "error",
-					});
-				}
-			}
-		} finally {
-			setPending(false);
-		}
+		const response = await execute(selectedIds, accessToken);
+		setResponse(response);
 	}
 
 	return {

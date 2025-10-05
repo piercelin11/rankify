@@ -552,7 +552,7 @@ export default async function DashboardPage() {
 
 - [ ] **階段 0 完成**：產出完整的修復清單 (Markdown 表格)
 - [ ] **階段 1 完成**：所有 20 個 POST/PUT/DELETE Actions 都有 `Promise<AppResponseType>` 型別標註 + 完整 try-catch (GET Actions 已正確實作,無需修改)
-- [ ] **階段 2 完成**：`useServerAction` hook 建立並有使用範例
+- [x] **階段 2 完成**：`useServerAction` hook 建立並有使用範例
 - [ ] **階段 3 完成**：一般組件都使用 `useServerAction`（複雜邏輯組件視情況決定）
 - [ ] **階段 4 完成**：所有主要路由都有 `error.tsx` 與 `not-found.tsx`
 - [ ] **階段 5 完成**：`ERROR_HANDLING.md` 文檔完成，包含清晰的 Before/After 範例

@@ -15,6 +15,7 @@ import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import ToggleSwitch from "@/components/form/ToggleSwitch";
 import saveRankingSettings from "../actions/saveRankingSettings";
 import { SETTINGS_MESSAGES } from "@/constants/messages";
+import { useServerAction } from "@/lib/hooks/useServerAction";
 
 type RankingSettingsFormProps = {
 	settings: UserPreferenceData | null;
@@ -32,11 +33,11 @@ export default function RankingSettingsForm({
 	const defaultSettings = settings?.rankingSettings || defaultRankingSettings;
 	const [response, setResponse] = useState<AppResponseType | null>(null);
 	const isMounted = useRef<HTMLFormElement | null>(null);
+	const { execute, isPending } = useServerAction(saveRankingSettings);
 
 	const {
 		handleSubmit,
 		control,
-		formState: { isSubmitting },
 	} = useForm<RankingSettingsType>({
 		resolver: zodResolver(rankingSettingsSchema),
 		defaultValues: {
@@ -48,7 +49,7 @@ export default function RankingSettingsForm({
 
 	async function onSubmit(formData: RankingSettingsType) {
 		try {
-			const response = await saveRankingSettings(formData);
+			const response = await execute(formData);
 			if (isMounted.current) setResponse(response);
 		} catch (error) {
 			if (error instanceof Error) {
@@ -116,13 +117,13 @@ export default function RankingSettingsForm({
 				/>
 			</div>
 			<div className="flex items-center gap-4">
-				<Button type="submit" disabled={isSubmitting}>
+				<Button type="submit" disabled={isPending}>
 					Save
 				</Button>
-				{!isSubmitting && response && (
+				{!isPending && response && (
 					<FormMessage message={response.message} type={response.type} />
 				)}
-				{isSubmitting && (
+				{isPending && (
 					<div>
 						<LoadingAnimation />
 					</div>

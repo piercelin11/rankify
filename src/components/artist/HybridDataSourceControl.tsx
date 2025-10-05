@@ -14,7 +14,8 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { dateToLong } from '@/lib/utils/date.utils';
-import type { ArtistRankingSession, ArtistViewType } from '@/types/artist';
+import type { ArtistRankingSession } from '@/types/artist';
+import type { ArtistViewType } from '@/lib/schemas/artist';
 import { CheckIcon, ChevronDownIcon } from '@radix-ui/react-icons';
 import { useRouter } from 'next/navigation';
 

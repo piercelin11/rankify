@@ -13,6 +13,7 @@ import CoverSelector from "./AlbumCoverSelector";
 import { ADMIN_MESSAGES } from "@/constants/messages";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useServerAction } from "@/lib/hooks/useServerAction";
 
 type AlbumEditingFormProps = {
 	data: AlbumData;
@@ -25,13 +26,14 @@ export default function AlbumEditingForm({
 }: AlbumEditingFormProps) {
 	const [response, setResponse] = useState<AppResponseType | null>(null);
 	const isMounted = useRef<HTMLFormElement | null>(null);
+	const { execute, isPending } = useServerAction(updateAlbum);
 
 	const {
 		control,
 		register,
 		handleSubmit,
 		setFocus,
-		formState: { errors, isSubmitting },
+		formState: { errors },
 	} = useForm<UpdateAlbumType>({
 		resolver: zodResolver(updateAlbumSchema),
 		defaultValues: {
@@ -43,7 +45,7 @@ export default function AlbumEditingForm({
 
 	async function onSubmit(formData: UpdateAlbumType) {
 		try {
-			const updateAlbumResponse = await updateAlbum({
+			const updateAlbumResponse = await execute({
 				albumId: data.id,
 				formData,
 			});
@@ -115,7 +117,7 @@ export default function AlbumEditingForm({
 					)}
 				/>
 				<div className="flex items-center gap-3">
-					<Button type="submit" disabled={isSubmitting} className="flex-1">
+					<Button type="submit" disabled={isPending} className="flex-1">
 						Save
 					</Button>
 					<Button
@@ -123,11 +125,11 @@ export default function AlbumEditingForm({
 						type="button"
 						className="flex-1"
 						onClick={onClose}
-						disabled={isSubmitting}
+						disabled={isPending}
 					>
 						Cancel
 					</Button>
-					{isSubmitting && (
+					{isPending && (
 						<div className="px-5">
 							<LoadingAnimation />
 						</div>
