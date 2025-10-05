@@ -18,20 +18,19 @@ export default async function addSingle({
 	trackIds,
 	token,
 }: AddSingleProps): Promise<AppResponseType> {
-	await requireAdmin();
-
-	let isSuccess = false;
-
-	if (trackIds.length === 0)
-		return {
-			type: "error",
-			message: ADMIN_MESSAGES.TRACK_SELECTION_REQUIRED,
-		};
-
 	try {
+		await requireAdmin();
+
+		if (trackIds.length === 0) {
+			return {
+				type: "error",
+				message: ADMIN_MESSAGES.TRACK_SELECTION_REQUIRED,
+			};
+		}
+
 		const tracksData = await fetchTracks(trackIds, token);
 
-		if (tracksData)
+		if (tracksData && tracksData.length > 0) {
 			await db.track.createMany({
 				data: tracksData.map((track) => ({
 					id: track.id,
@@ -42,16 +41,13 @@ export default async function addSingle({
 					releaseDate: new Date(track.album.release_date),
 				})),
 			});
+		}
 
-		isSuccess = true;
-	} catch (error) {
-		console.error(ADMIN_MESSAGES.SINGLE.ADD.FAILURE, error);
-		return { type: "error", message: ADMIN_MESSAGES.SINGLE.ADD.FAILURE };
-	}
-
-	if (isSuccess) {
 		revalidatePath(`/admin/artist/${artistId}`);
 		revalidateTag("admin-data");
+		return { type: "success", message: ADMIN_MESSAGES.SINGLE.ADD.SUCCESS };
+	} catch (error) {
+		console.error("addSingle error:", error);
+		return { type: "error", message: ADMIN_MESSAGES.SINGLE.ADD.FAILURE };
 	}
-	return { type: "success", message: ADMIN_MESSAGES.SINGLE.ADD.SUCCESS };
 }

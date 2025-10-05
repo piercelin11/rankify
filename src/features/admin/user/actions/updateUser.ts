@@ -15,9 +15,9 @@ export default async function updateUser({
     userId,
     role,
 }: UpdateUserProps): Promise<AppResponseType> {
-    await requireAdmin();
-
     try {
+        await requireAdmin();
+
         await db.user.update({
             where: {
                 id: userId,
@@ -28,16 +28,16 @@ export default async function updateUser({
         });
 
         revalidatePath("/admin/user");
-        
-        return { 
-            type: "success", 
-            message: "使用者角色更新成功" 
+
+        return {
+            type: "success",
+            message: "使用者角色更新成功"
         };
     } catch (error) {
-        console.error("Failed to update user role:", error);
-        return { 
-            type: "error", 
-            message: "更新使用者角色失敗" 
+        console.error("updateUser error:", error);
+        return {
+            type: "error",
+            message: "更新使用者角色失敗"
         };
     }
 }

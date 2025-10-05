@@ -16,48 +16,53 @@ export default async function deleteItem({
 	type,
 	id,
 }: DeleteItemProps): Promise<AppResponseType> {
-	await requireAdmin();
-
-	let isSuccess = false;
-	let artistId: null | string = null;
-
 	try {
-		switch (type) {
-			case "artist":
-				await db.artist.delete({
-					where: {
-						id,
-					},
-				});
-				break;
-			case "album":
-				const deletedAlbum = await db.album.delete({
-					where: {
-						id,
-					},
-				});
-				artistId = deletedAlbum.artistId;
-				break;
-			case "track":
-				await db.track.deleteMany({
-					where: {
-						id,
-					},
-				});
-				break;
+		await requireAdmin();
+
+		let isSuccess = false;
+		let artistId: null | string = null;
+
+		try {
+			switch (type) {
+				case "artist":
+					await db.artist.delete({
+						where: {
+							id,
+						},
+					});
+					break;
+				case "album":
+					const deletedAlbum = await db.album.delete({
+						where: {
+							id,
+						},
+					});
+					artistId = deletedAlbum.artistId;
+					break;
+				case "track":
+					await db.track.deleteMany({
+						where: {
+							id,
+						},
+					});
+					break;
+			}
+
+			isSuccess = true;
+		} catch (error) {
+			console.error(ADMIN_MESSAGES.OPERATION_MESSAGES.DELETE.FAILURE(type), error);
+			return { type: "error", message: ADMIN_MESSAGES.OPERATION_MESSAGES.DELETE.FAILURE(type) };
 		}
 
-		isSuccess = true;
+		if (isSuccess) {
+			if (type === "track") revalidatePath("/admin");
+			if (type === "album") redirect(`/admin/artist/${artistId}`);
+			if (type === "artist") redirect("/admin/artist");
+			revalidateTag("admin-data");
+		}
+		return { type: "success", message: ADMIN_MESSAGES.OPERATION_MESSAGES.DELETE.SUCCESS(type) };
 	} catch (error) {
-		console.error(ADMIN_MESSAGES.OPERATION_MESSAGES.DELETE.FAILURE(type), error);
+		console.error("deleteItem error:", error);
 		return { type: "error", message: ADMIN_MESSAGES.OPERATION_MESSAGES.DELETE.FAILURE(type) };
 	}
-
-	if (isSuccess) {
-		if (type === "track") revalidatePath("/admin");
-		if (type === "album") redirect(`/admin/artist/${artistId}`);
-		if (type === "artist") redirect("/admin/artist");
-		revalidateTag("admin-data");
-	}
-	return { type: "success", message: ADMIN_MESSAGES.OPERATION_MESSAGES.DELETE.SUCCESS(type) };
 }

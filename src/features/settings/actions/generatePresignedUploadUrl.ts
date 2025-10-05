@@ -69,71 +69,79 @@ export async function generatePresignedUploadUrl({
 	fileType,
 	fileSize,
 }: GenerateUrlParams): Promise<GenerateUrlResponse> {
-	const { id: userId } = await getUserSession();
-
-	// 1. 基本欄位檢查
-	if (!fileName || !fileType || !fileSize) {
-		return {
-			type: "error",
-			message: SETTINGS_MESSAGES.FILE_UPLOAD.FILENAME_AND_TYPE_REQUIRED,
-		};
-	}
-
-	// 2. MIME Type 白名單驗證
-	if (!isAllowedMimeType(fileType)) {
-		return {
-			type: "error",
-			message: `只允許上傳 ${ALLOWED_IMAGE_MIME_TYPES.join(", ")} 格式的圖片`,
-		};
-	}
-
-	// 3. 副檔名驗證
-	const fileExtension = fileName.toLowerCase().match(/\.[^.]+$/)?.[0];
-	if (!fileExtension || !isAllowedExtension(fileExtension)) {
-		return {
-			type: "error",
-			message: `只允許上傳 ${ALLOWED_IMAGE_EXTENSIONS.join(", ")} 副檔名的檔案`,
-		};
-	}
-
-	// 4. 檔案大小限制
-	if (fileSize > MAX_IMAGE_FILE_SIZE) {
-		return {
-			type: "error",
-			message: `檔案大小不得超過 ${MAX_IMAGE_FILE_SIZE / 1024 / 1024}MB`,
-		};
-	}
-
-	// 5. MIME Type 與副檔名一致性檢查
-	const expectedExtensions = MIME_TO_EXTENSION_MAP[fileType];
-	if (!expectedExtensions?.includes(fileExtension)) {
-		return {
-			type: "error",
-			message: "檔案類型與副檔名不符",
-		};
-	}
-
-	const s3Key = `avatars/${userId}/${nanoid()}-${fileName.replace(/\s+/g, "_")}`;
-
-	const command = new PutObjectCommand({
-		Bucket: BUCKET_NAME,
-		Key: s3Key,
-		ContentType: fileType,
-	});
-
 	try {
-		const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 900 });
-		const finalImageUrl = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
+		const { id: userId } = await getUserSession();
 
-		return {
-			type: "success",
-			signedUrl,
-			finalImageUrl,
-			s3Key,
-			message: SETTINGS_MESSAGES.FILE_UPLOAD.PRESIGNED_URL_SUCCESS,
-		};
+		// 1. 基本欄位檢查
+		if (!fileName || !fileType || !fileSize) {
+			return {
+				type: "error",
+				message: SETTINGS_MESSAGES.FILE_UPLOAD.FILENAME_AND_TYPE_REQUIRED,
+			};
+		}
+
+		// 2. MIME Type 白名單驗證
+		if (!isAllowedMimeType(fileType)) {
+			return {
+				type: "error",
+				message: `只允許上傳 ${ALLOWED_IMAGE_MIME_TYPES.join(", ")} 格式的圖片`,
+			};
+		}
+
+		// 3. 副檔名驗證
+		const fileExtension = fileName.toLowerCase().match(/\.[^.]+$/)?.[0];
+		if (!fileExtension || !isAllowedExtension(fileExtension)) {
+			return {
+				type: "error",
+				message: `只允許上傳 ${ALLOWED_IMAGE_EXTENSIONS.join(", ")} 副檔名的檔案`,
+			};
+		}
+
+		// 4. 檔案大小限制
+		if (fileSize > MAX_IMAGE_FILE_SIZE) {
+			return {
+				type: "error",
+				message: `檔案大小不得超過 ${MAX_IMAGE_FILE_SIZE / 1024 / 1024}MB`,
+			};
+		}
+
+		// 5. MIME Type 與副檔名一致性檢查
+		const expectedExtensions = MIME_TO_EXTENSION_MAP[fileType];
+		if (!expectedExtensions?.includes(fileExtension)) {
+			return {
+				type: "error",
+				message: "檔案類型與副檔名不符",
+			};
+		}
+
+		const s3Key = `avatars/${userId}/${nanoid()}-${fileName.replace(/\s+/g, "_")}`;
+
+		const command = new PutObjectCommand({
+			Bucket: BUCKET_NAME,
+			Key: s3Key,
+			ContentType: fileType,
+		});
+
+		try {
+			const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 900 });
+			const finalImageUrl = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
+
+			return {
+				type: "success",
+				signedUrl,
+				finalImageUrl,
+				s3Key,
+				message: SETTINGS_MESSAGES.FILE_UPLOAD.PRESIGNED_URL_SUCCESS,
+			};
+		} catch (error) {
+			console.error(SETTINGS_MESSAGES.FILE_UPLOAD.PRESIGNED_URL_FAILURE, error);
+			return {
+				type: "error",
+				message: SETTINGS_MESSAGES.FILE_UPLOAD.PRESIGNED_URL_FAILURE,
+			};
+		}
 	} catch (error) {
-		console.error(SETTINGS_MESSAGES.FILE_UPLOAD.PRESIGNED_URL_FAILURE, error);
+		console.error("generatePresignedUploadUrl error:", error);
 		return {
 			type: "error",
 			message: SETTINGS_MESSAGES.FILE_UPLOAD.PRESIGNED_URL_FAILURE,
