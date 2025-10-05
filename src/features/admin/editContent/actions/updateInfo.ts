@@ -19,73 +19,81 @@ export default async function updateInfo({
 	id,
 	token,
 }: UpdateInfoProps): Promise<AppResponseType> {
-	await requireAdmin();
-
-	let success = false;
-
 	try {
-		if (type === "album") {
-			const album = await fetchAlbum(id, token);
+		await requireAdmin();
 
-			if (!album)
-				return {
-					type: "error",
-					message: ADMIN_MESSAGES.ALBUM.UPDATE.ERROR_NOT_FOUND,
-				};
+		let success = false;
 
-			const albumData = await db.album.update({
-				where: {
-					id,
-				},
-				data: {
-					img: album.images[0].url,
-				},
-			});
-			await db.track.updateMany({
-				where: {
-					albumId: albumData.id,
-				},
-				data: {
-					img: albumData.img,
-				},
-			});
-		} else {
-			const artist = await fetchArtist(id, token);
+		try {
+			if (type === "album") {
+				const album = await fetchAlbum(id, token);
 
-			if (!artist)
-				return {
-					type: "error",
-					message: ADMIN_MESSAGES.ARTIST.UPDATE.ERROR_NOT_FOUND,
-				};
+				if (!album)
+					return {
+						type: "error",
+						message: ADMIN_MESSAGES.ALBUM.UPDATE.ERROR_NOT_FOUND,
+					};
 
-			await db.artist.update({
-				where: {
-					id,
-				},
-				data: {
-					img: artist.images[0].url,
-					spotifyFollowers: artist.followers.total,
-				},
-			});
+				const albumData = await db.album.update({
+					where: {
+						id,
+					},
+					data: {
+						img: album.images[0].url,
+					},
+				});
+				await db.track.updateMany({
+					where: {
+						albumId: albumData.id,
+					},
+					data: {
+						img: albumData.img,
+					},
+				});
+			} else {
+				const artist = await fetchArtist(id, token);
+
+				if (!artist)
+					return {
+						type: "error",
+						message: ADMIN_MESSAGES.ARTIST.UPDATE.ERROR_NOT_FOUND,
+					};
+
+				await db.artist.update({
+					where: {
+						id,
+					},
+					data: {
+						img: artist.images[0].url,
+						spotifyFollowers: artist.followers.total,
+					},
+				});
+			}
+			success = true;
+		} catch (error) {
+			console.error(
+				ADMIN_MESSAGES.OPERATION_MESSAGES.UPDATE.FAILURE(type),
+				error
+			);
+			return {
+				type: "error",
+				message: ADMIN_MESSAGES.OPERATION_MESSAGES.UPDATE.FAILURE(type),
+			};
 		}
-		success = true;
+
+		if (success) {
+			revalidatePath(`/admin/${type}/${id}`);
+			revalidateTag("admin-data");
+		}
+		return {
+			type: "success",
+			message: ADMIN_MESSAGES.OPERATION_MESSAGES.UPDATE.SUCCESS(type),
+		};
 	} catch (error) {
-		console.error(
-			ADMIN_MESSAGES.OPERATION_MESSAGES.UPDATE.FAILURE(type),
-			error
-		);
+		console.error("updateInfo error:", error);
 		return {
 			type: "error",
 			message: ADMIN_MESSAGES.OPERATION_MESSAGES.UPDATE.FAILURE(type),
 		};
 	}
-
-	if (success) {
-		revalidatePath(`/admin/${type}/${id}`);
-		revalidateTag("admin-data");
-	}
-	return {
-		type: "success",
-		message: ADMIN_MESSAGES.OPERATION_MESSAGES.UPDATE.SUCCESS(type),
-	};
 }

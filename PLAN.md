@@ -38,24 +38,49 @@
 
 #### 做法
 
-##### 0.1 盤點所有 Server Actions (共 21 個)
+##### 0.1 盤點所有 Server Actions (共 22 個)
 
-執行以下指令：
+執行以下指令自動化盤點：
 ```bash
-grep -r "use server" src/features --include="*.ts" --include="*.tsx"
+# 找出所有包含 "use server" 的檔案
+grep -r "use server" src --include="*.ts" --include="*.tsx" | cut -d: -f1 | sort -u
+
+# 找出缺少型別標註的 actions (排除 GET 類型的 actions)
+grep -r "export.*function" src/features/**/actions/*.ts 2>/dev/null | grep -v "Promise<AppResponseType>"
 ```
 
-分類標準：
-- **✅ 完全正確**：有 try-catch + 型別標註 `Promise<AppResponseType>` + 捕獲所有 throw
-- **⚠️ 缺少型別標註**：無 `Promise<AppResponseType>`
-- **⚠️ 缺少 try-catch**：`requireAdmin()` / `getUserSession()` 未被捕獲
-- **⚠️ 缺少錯誤處理**：資料庫操作未被捕獲
+**Server Actions 分類：**
+
+**A. 需要修復的 Actions (20 個) — 修改資料 (POST/PUT/DELETE)**
+- `src/features/admin/addContent/actions/` (3 個)
+- `src/features/admin/editContent/actions/` (5 個)
+- `src/features/admin/user/actions/` (1 個)
+- `src/features/auth/actions/` (1 個)
+- `src/features/settings/actions/` (5 個)
+- `src/features/sorter/actions/` (6 個)
+
+**修復標準：**
+- ✅ 有 try-catch + 型別標註 `Promise<AppResponseType>` + 捕獲所有 throw
+- ⚠️ 缺少型別標註：無 `Promise<AppResponseType>`
+- ⚠️ 缺少 try-catch：`requireAdmin()` / `getUserSession()` 未被捕獲
+- ⚠️ 缺少錯誤處理：資料庫操作未被捕獲
+
+**B. 已正確實作的 Actions (2 個) — 讀取資料 (GET)**
+- `src/app/(main)/artist/[artistId]/album/[albumId]/actions.ts` (1 個: `getComparisonAlbumsData`)
+- `src/app/(main)/artist/[artistId]/track/[trackId]/actions.ts` (1 個: `getComparisonTracksData`)
+
+**已符合標準：**
+- ✅ 有 try-catch
+- ✅ 錯誤時返回空陣列 (合理的降級策略)
+- ✅ `getUserSession()` 已被 catch 包裹
+- ℹ️ 不需要返回 `AppResponseType` (因為是 GET,不是表單提交)
 
 ##### 0.2 盤點所有調用 Server Actions 的組件
 
 執行以下指令：
 ```bash
-grep -r "import.*from.*actions" src/features --include="*.tsx"
+# 搜尋整個 src 目錄,不僅限於 features
+grep -r "import.*from.*actions" src --include="*.tsx"
 ```
 
 分類標準：
@@ -326,67 +351,43 @@ npm run test  # 如果有相關測試
 
 #### 做法
 
-##### 3.1 建立 `src/app/(main)/error.tsx`
+##### 4.1 建立 `src/app/(main)/error.tsx`
 
 ```typescript
 "use client";
 
-import { useEffect } from "react";
-
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
-  useEffect(() => {
-    console.error("Server Component Error:", error);
-  }, [error]);
+export default function Error({ error, reset }: { error: Error; reset: () => void }) {
+  console.error("Server Component Error:", error);
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">發生錯誤</h2>
-        <p className="text-gray-600 mb-6">
-          {error.message || "系統發生未預期的錯誤，請稍後再試。"}
-        </p>
-        <button
-          onClick={reset}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          重試
-        </button>
-      </div>
+    <div>
+      <h2>發生錯誤</h2>
+      <p>{error.message || "系統錯誤"}</p>
+      <button onClick={reset}>重試</button>
     </div>
   );
 }
 ```
 
-##### 3.2 建立 `src/app/(main)/not-found.tsx` (如果尚未建立)
+**說明：** 樣式交給 Tailwind 或 UI 元件處理,核心邏輯保持極簡。
+
+##### 4.2 建立 `src/app/(main)/not-found.tsx` (如果尚未建立)
 
 ```typescript
 import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <h2 className="text-4xl font-bold mb-4">404</h2>
-        <p className="text-gray-600 mb-6">找不到此頁面</p>
-        <Link 
-          href="/"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          返回首頁
-        </Link>
-      </div>
+    <div>
+      <h2>404</h2>
+      <p>找不到此頁面</p>
+      <Link href="/">返回首頁</Link>
     </div>
   );
 }
 ```
 
-##### 3.3 在需要的 Server Component 中使用 `notFound()`
+##### 4.3 在需要的 Server Component 中使用 `notFound()`
 
 ```typescript
 // src/app/(main)/artist/[id]/page.tsx
@@ -420,77 +421,43 @@ export default async function ArtistPage({ params }: { params: { id: string } })
 
 #### 做法
 
-##### 4.1 建立 `docs/ERROR_HANDLING.md`
+##### 5.1 建立 `docs/ERROR_HANDLING.md` (精簡版)
 
 ```markdown
 # 錯誤處理規範
 
-## 分層策略
+## 核心原則：每一層只做一件事
 
-### 第一層：資料庫查詢 (src/db/*)
-
-**原則：** 只返回資料，不處理錯誤
-
-✅ **正確範例：**
-\`\`\`typescript
-export async function getUserPreference({ userId }: { userId: string }) {
-  return db.userPreference.findFirst({ where: { userId } });
-}
-\`\`\`
-
-✅ **唯一例外：資料完整性錯誤**
-\`\`\`typescript
-export async function getIncompleteRankingSubmission(...) {
-  const submissions = await db.rankingSubmission.findMany(...);
-  
-  if (submissions.length > 1) {
-    throw new Error(\`Data integrity error: Found \${submissions.length}...\`);
-  }
-  
-  return submissions[0];
-}
-\`\`\`
+| 層級 | 職責 | 錯誤處理策略 |
+|------|------|------------|
+| **DB 層** (`src/db/*`) | 返回資料 | 只在資料完整性錯誤時 `throw` |
+| **Services 層** | 業務邏輯 | 違反規則時 `throw` |
+| **Actions 層** (`src/features/**/actions/*`) | API 介面 | **永不 throw**,統一返回 `AppResponseType` |
+| **Auth 層** | 權限檢查 | 失敗時 `throw` |
+| **Server Components** | 渲染 | 404 → `notFound()`, 500 → 讓它 throw |
+| **Client Components** | 互動 | 使用 `useServerAction` |
 
 ---
 
-### 第二層：業務邏輯 (src/services/*)
+## 修復 Server Action 範例
 
-**原則：** 違反業務規則時 throw Error
-
-✅ **範例：**
+**Before (❌ 錯誤):**
 \`\`\`typescript
-export async function createRanking({ userId, trackId }) {
-  const existing = await db.ranking.findFirst({ where: { userId, trackId } });
-  
-  if (existing) {
-    throw new Error("Ranking already exists");
-  }
-  
-  return db.ranking.create({ data: { userId, trackId } });
+export default async function updateTrack(...) {
+  await requireAdmin(); // 未被 catch
+  await db.track.update(...); // 未被 catch
+  return { type: "success", message: "..." };
 }
 \`\`\`
 
----
-
-### 第三層：Server Actions (src/features/**/actions/*)
-
-**原則：** 統一返回 AppResponseType，永不讓錯誤拋出
-
-✅ **標準格式：**
+**After (✅ 正確):**
 \`\`\`typescript
-export async function updateTrack(...): Promise<AppResponseType> {
+export default async function updateTrack(...): Promise<AppResponseType> {
   try {
-    await requireAdmin(); // 可能 throw
-    
-    const validated = schema.safeParse(formData);
-    if (!validated.success) {
-      return { type: "error", message: "驗證失敗" };
-    }
-    
+    await requireAdmin();
     await db.track.update(...);
     revalidatePath(...);
-    
-    return { type: "success", message: "更新成功" };
+    return { type: "success", message: "..." };
   } catch (err) {
     console.error(err);
     return { type: "error", message: "操作失敗" };
@@ -500,121 +467,24 @@ export async function updateTrack(...): Promise<AppResponseType> {
 
 ---
 
-### 第四層：授權檢查 (auth.ts)
+## Server Components 錯誤處理
 
-**原則：** 失敗時 throw Error
-
-✅ **範例：** `requireAdmin()`, `getUserSession()`
-\`\`\`typescript
-// auth.ts
-export async function requireAdmin() {
-  const session = await getUserSession();
-
-  if (session.role !== "ADMIN") {
-    throw new Error("Forbidden: Admin access required");
-  }
-
-  return session;
-}
-\`\`\`
-
----
-
-### 第五層：Server Components
-
-**原則：** 區分可預期與不可預期的錯誤
-
-#### **情境 A：可預期的錯誤 → 使用 try-catch 或條件判斷**
-
-✅ **範例 1：資源不存在 → 使用 notFound()**
+**404 → 使用 `notFound()`:**
 \`\`\`typescript
 import { notFound } from 'next/navigation';
 
 export default async function ArtistPage({ params }) {
   const artist = await db.artist.findUnique({ where: { id: params.id } });
-
-  if (!artist) {
-    notFound(); // 觸發 not-found.tsx，不是 error.tsx
-  }
-
-  const tracks = await getTracksStats({ artistId: params.id, userId: session.id });
-  return <TrackList tracks={tracks} />;
+  if (!artist) notFound();
+  return <ArtistView artist={artist} />;
 }
 \`\`\`
 
-✅ **範例 2：權限不足 → 顯示客製化 UI**
-\`\`\`typescript
-export default async function AdminPage() {
-  try {
-    await requireAdmin();
-  } catch (err) {
-    // 可預期的錯誤：使用者不是管理員
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-red-500">您沒有權限訪問此頁面</p>
-      </div>
-    );
-  }
-
-  const data = await db.track.findMany(...);
-  return <AdminDashboard data={data} />;
-}
-\`\`\`
-
-✅ **範例 3：外部 API 失敗 → 降級處理**
-\`\`\`typescript
-export default async function SpotifyTracksPage({ params }) {
-  let spotifyData = null;
-
-  try {
-    spotifyData = await fetchSpotifyAPI(params.artistId);
-  } catch (err) {
-    console.error('Spotify API 失敗', err);
-    // 不拋出錯誤，改為顯示降級 UI
-  }
-
-  return (
-    <div>
-      {spotifyData ? (
-        <SpotifyTrackList data={spotifyData} />
-      ) : (
-        <div className="text-gray-500">無法載入 Spotify 資料</div>
-      )}
-    </div>
-  );
-}
-\`\`\`
-
-#### **情境 B：不可預期的錯誤 → 讓它 throw 給 error.tsx**
-
-✅ **範例：資料庫連線失敗、系統級錯誤**
+**500 → 讓它 throw 給 error.tsx:**
 \`\`\`typescript
 export default async function DashboardPage() {
-  // 如果 db 連線失敗，會自動 throw 給 error.tsx
-  const stats = await db.trackRanking.groupBy(...);
+  const stats = await db.trackRanking.groupBy(...); // 失敗會自動 throw
   return <StatsDisplay stats={stats} />;
-}
-\`\`\`
-
-**關鍵判斷標準：**
-- **404/403/可預期的業務錯誤** → try-catch 或條件判斷
-- **500/資料庫失敗/程式 Bug** → 讓它拋給 error.tsx
-
----
-
-### 第六層：Client Components
-
-**原則：** 使用 useServerAction hook
-
-✅ **範例：**
-\`\`\`typescript
-const { execute, isPending, error } = useServerAction(updateTrack);
-
-async function handleSubmit() {
-  const result = await execute({ ... });
-  if (result.type === "success") {
-    toast.success(result.message);
-  }
 }
 \`\`\`
 
@@ -622,11 +492,10 @@ async function handleSubmit() {
 
 ## 檢查清單
 
-- [ ] DB 層函式只返回資料，不 throw (除非資料完整性錯誤)
-- [ ] Server Actions 都有 try-catch 並返回 AppResponseType
-- [ ] Client Components 使用 useServerAction hook
-- [ ] 所有需要的路由都有 error.tsx
-- [ ] 使用 notFound() 處理 404 情況
+- [ ] 所有 POST/PUT/DELETE Actions 都有 `Promise<AppResponseType>` 型別標註
+- [ ] 所有可能 throw 的函式都被 try-catch 包裹
+- [ ] Client Components 使用 `useServerAction`
+- [ ] 主要路由都有 `error.tsx` 與 `not-found.tsx`
 \`\`\`
 
 #### 原因
@@ -682,7 +551,7 @@ async function handleSubmit() {
 ## ✅ 成功指標
 
 - [ ] **階段 0 完成**：產出完整的修復清單 (Markdown 表格)
-- [ ] **階段 1 完成**：所有 21 個 Server Actions 都有 `Promise<AppResponseType>` 型別標註 + 完整 try-catch
+- [ ] **階段 1 完成**：所有 20 個 POST/PUT/DELETE Actions 都有 `Promise<AppResponseType>` 型別標註 + 完整 try-catch (GET Actions 已正確實作,無需修改)
 - [ ] **階段 2 完成**：`useServerAction` hook 建立並有使用範例
 - [ ] **階段 3 完成**：一般組件都使用 `useServerAction`（複雜邏輯組件視情況決定）
 - [ ] **階段 4 完成**：所有主要路由都有 `error.tsx` 與 `not-found.tsx`

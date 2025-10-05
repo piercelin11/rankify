@@ -9,20 +9,20 @@ export default async function deleteSubmission({
 }: {
 	submissionId: string;
 }) {
-	const { id: userId } = await getUserSession();
-
 	try {
+		const { id: userId } = await getUserSession();
+
 		await db.rankingSubmission.delete({
 			where: {
 				id: submissionId,
 				userId,
 			},
 		});
+
+		revalidatePath("/sorter");
+		return { type: "success", message: "Draft is successfully deleted." };
 	} catch (error) {
-		console.error("Failed to delete draft:", error);
+		console.error("deleteSubmission error:", error);
 		return { type: "error", message: "Failed to delete draft" };
 	}
-
-	revalidatePath("/sorter");
-	return { type: "success", message: "Draft is successfully deleted." };
 }

@@ -39,7 +39,10 @@ export async function createSubmission({
 		});
 
 		if (tracks.length === 0) {
-			throw new Error("沒有找到符合條件的歌曲");
+			return {
+				type: "error",
+				message: "沒有找到符合條件的歌曲",
+			};
 		}
 
 		// 初始化排序狀態
@@ -85,6 +88,9 @@ export async function createSubmission({
 		});
 	} catch (error) {
 		console.error("createSubmission error:", error);
-		throw error;
+		return {
+			type: "error",
+			message: "Failed to create submission",
+		};
 	}
 }

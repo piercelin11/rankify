@@ -13,57 +13,62 @@ import { SETTINGS_MESSAGES } from "@/constants/messages";
 export default async function saveRankingSettings(
 	formData: RankingSettingsType
 ): Promise<AppResponseType> {
-	const { id: userId } = await getUserSession();
-
-	const validatedField = rankingSettingsSchema.safeParse(formData);
-	if (!validatedField.success) {
-		console.error(
-			SETTINGS_MESSAGES.RANKING.ERROR_INVALID_FIELDS,
-			validatedField.error.flatten()
-		);
-		return {
-			type: "error",
-			message: SETTINGS_MESSAGES.RANKING.ERROR_INVALID_FIELDS,
-		};
-	}
-	const validatedData = validatedField.data;
-
 	try {
-		const existingUserPreference = await db.userPreference.findFirst({
-			where: {
-				userId,
-			},
-			select: {
-				id: true,
-			},
-		});
+		const { id: userId } = await getUserSession();
 
-		if (existingUserPreference) {
-			const preference = await db.userPreference.update({
-				where: {
-					id: existingUserPreference.id,
-					userId,
-				},
-				data: {
-					rankingSettings: validatedData,
-				},
-			});
-			console.log("action", preference);
-		} else {
-			await db.userPreference.create({
-				data: {
-					userId,
-					rankingSettings: validatedData,
-				},
-			});
+		const validatedField = rankingSettingsSchema.safeParse(formData);
+		if (!validatedField.success) {
+			console.error(
+				SETTINGS_MESSAGES.RANKING.ERROR_INVALID_FIELDS,
+				validatedField.error.flatten()
+			);
+			return {
+				type: "error",
+				message: SETTINGS_MESSAGES.RANKING.ERROR_INVALID_FIELDS,
+			};
 		}
+		const validatedData = validatedField.data;
+
+		try {
+			const existingUserPreference = await db.userPreference.findFirst({
+				where: {
+					userId,
+				},
+				select: {
+					id: true,
+				},
+			});
+
+			if (existingUserPreference) {
+				const preference = await db.userPreference.update({
+					where: {
+						id: existingUserPreference.id,
+						userId,
+					},
+					data: {
+						rankingSettings: validatedData,
+					},
+				});
+				console.log("action", preference);
+			} else {
+				await db.userPreference.create({
+					data: {
+						userId,
+						rankingSettings: validatedData,
+					},
+				});
+			}
+		} catch (error) {
+			console.error(SETTINGS_MESSAGES.RANKING.SAVE_FAILURE, error);
+			return { type: "error", message: SETTINGS_MESSAGES.RANKING.SAVE_FAILURE };
+		}
+		revalidatePath("/settings/ranking");
+		return {
+			type: "success",
+			message: SETTINGS_MESSAGES.RANKING.SAVE_SUCCESS,
+		};
 	} catch (error) {
-		console.error(SETTINGS_MESSAGES.RANKING.SAVE_FAILURE, error);
+		console.error("saveRankingSettings error:", error);
 		return { type: "error", message: SETTINGS_MESSAGES.RANKING.SAVE_FAILURE };
 	}
-	revalidatePath("/settings/ranking");
-	return {
-		type: "success",
-		message: SETTINGS_MESSAGES.RANKING.SAVE_SUCCESS,
-	};
 }

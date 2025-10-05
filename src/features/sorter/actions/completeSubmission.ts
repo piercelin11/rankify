@@ -16,11 +16,11 @@ export default async function completeSubmission({
 	trackRankings,
 	submissionId,
 }: CompleteSubmissionProps) {
-	const { id: userId } = await getUserSession();
-	const countTrack = trackRankings.length;
-	const trackIds = trackRankings.map((track) => track.id);
-
 	try {
+		const { id: userId } = await getUserSession();
+		const countTrack = trackRankings.length;
+		const trackIds = trackRankings.map((track) => track.id);
+
 		await db.$transaction(async (tx) => {
 			const existingSubmission = await tx.rankingSubmission.findUnique({
 				where: {
@@ -108,10 +108,11 @@ export default async function completeSubmission({
 				});
 			}
 		});
+
+		revalidatePath(`/artist/${trackRankings[0].artistId}`);
+		return { type: "success", message: "Submission completed" };
 	} catch (error) {
-		console.error("Failed to complete submission:", error);
+		console.error("completeSubmission error:", error);
 		return { type: "error", message: "Failed to complete submission" };
 	}
-
-	revalidatePath(`/artist/${trackRankings[0].artistId}`);
 }

@@ -9,18 +9,19 @@ export default async function finalizeDraft(
 	draftState: SorterStateType,
 	submissionId: string
 ) {
-	const { id: userId } = await getUserSession();
-
-	const existingSubmission = await db.rankingSubmission.findUnique({
-		where: {
-			id: submissionId,
-			userId,
-		},
-	});
-
-	if (!existingSubmission) return { type: "error", message: "Draft not found" };
-
 	try {
+		const { id: userId } = await getUserSession();
+
+		const existingSubmission = await db.rankingSubmission.findUnique({
+			where: {
+				id: submissionId,
+				userId,
+			},
+		});
+
+		if (!existingSubmission)
+			return { type: "error", message: "Draft not found" };
+
 		const validatedDraftState = sorterStateSchema.parse(draftState);
 
 		await db.rankingSubmission.update({
@@ -32,11 +33,11 @@ export default async function finalizeDraft(
 				status: "DRAFT",
 			},
 		});
+
+		revalidatePath("/sorter");
+		return { type: "success", message: "Ranking completed successfully." };
 	} catch (error) {
-		console.error("Failed to finalize draft:", error);
+		console.error("finalizeDraft error:", error);
 		return { type: "error", message: "Failed to finalize draft" };
 	}
-
-	revalidatePath("/sorter");
-	return { type: "success", message: "Ranking completed successfully." };
 }
