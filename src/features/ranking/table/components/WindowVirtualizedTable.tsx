@@ -133,7 +133,7 @@ export default function WindowVirtualizedTable<
 					<div ref={sentinelRef} className="h-0" />
 					<div
 						className={cn(
-							"sticky top-[72px] z-10 px-content",
+							"sticky top-[72px] z-10",
 							isStuck ? "border-b bg-background/85 backdrop-blur" : ""
 						)}
 					>
@@ -201,7 +201,7 @@ export default function WindowVirtualizedTable<
 				</>
 			)}
 
-			<div ref={listRef} className="mt-4 px-content">
+			<div ref={listRef} className="mt-4">
 				<div
 					style={{
 						height: virtualizer.getTotalSize(),

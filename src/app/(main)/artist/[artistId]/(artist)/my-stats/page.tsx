@@ -1,127 +1,95 @@
 import { getUserSession } from "@/../auth";
-import { calculateDateRangeFromSlug } from "@/lib/utils";
-import getTracksStats from "@/services/track/getTracksStats";
-import getAlbumsStats from "@/services/album/getAlbumsStats";
-import { getLoggedAlbumNames, getAlbumRankingSessions } from "@/db/album";
-//import { getArtistRankingSubmissions } from "@/db/ranking";
-//import HybridDataSourceControl from "@/components/artist/HybridDataSourceControl";
+import { getAlbumRankingSessions, getLoggedAlbumNames } from "@/db/album";
+import MyStatsToolbar from "@/components/artist/MyStatsToolbar";
+import ClientHistoryRankingTable from "@/features/ranking/table/client/ClientHistoryRankingTable";
+import ClientStatsRankingTable from "@/features/ranking/table/client/ClientStatsRankingTable";
 import OverviewView from "@/features/ranking/views/OverviewView";
-import AllRankingsView from "@/features/ranking/views/AllRankingsView";
+import { cuidSchema } from "@/lib/schemas/general";
 import {
-	ArtistRangeParamsSchema,
-	ArtistViewParamsSchema,
+	artistRangeParamsSchema,
+	artistViewParamsSchema,
 } from "@/lib/schemas/artist";
-//import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
-import PillTabs from "@/components/navigation/PillTabs";
-import UnderlinedTabs from "@/components/navigation/UnderlinedTabs";
+import { calculateDateRangeFromSlug } from "@/lib/utils";
+import getAlbumsStats from "@/services/album/getAlbumsStats";
+import { getTracksHistory } from "@/services/track/getTracksHistory";
+import getTracksStats from "@/services/track/getTracksStats";
+import { getArtistRankingSubmissions } from "@/db/ranking";
 
 type PageProps = {
 	params: Promise<{ artistId: string }>;
-	searchParams: Promise<{ view?: string; range?: string }>;
+	searchParams: Promise<{
+		view?: string;
+		submissionId?: string;
+		range?: string;
+	}>;
 };
 
 export default async function MyStatsPage({ params, searchParams }: PageProps) {
 	const { artistId } = await params;
-	const { view: rawView, range: rawRange } = await searchParams;
+	const query = await searchParams;
 
-	const view = ArtistViewParamsSchema.parse(rawView);
-	const range = ArtistRangeParamsSchema.parse(rawRange);
+	const view = artistViewParamsSchema.parse(query.view);
+	const range = artistRangeParamsSchema.parse(query.range);
+	const submissionId = cuidSchema.optional().parse(query.submissionId);
 
 	const { id: userId } = await getUserSession();
-
 	const dateRange = calculateDateRangeFromSlug(range);
 
-	// 獲取 Track 資料
-	const trackRankings = await getTracksStats({
-		artistId,
-		userId,
-		dateRange,
-	});
+	const submissions = await getArtistRankingSubmissions({ artistId, userId });
+	const latestSubmissionId = submissions[0].id;
 
-	// 條件性獲取 Album 資料（只在 Overview 視圖需要）
-	const albumData =
-		view === "overview"
-			? {
-					albumRankings: await getAlbumsStats({
-						artistId,
-						userId,
-						dateRange,
-					}),
-					albumSessions: await getAlbumRankingSessions({ userId, artistId }),
-				}
-			: null;
+	const activeTab = submissionId ? "history" : view;
 
-	const albums = await getLoggedAlbumNames({ artistId, userId, dateRange });
+	let content: React.ReactNode;
 
-	// 獲取 sessions（用於控制項）
-	//const sessions = await getArtistRankingSubmissions({ artistId, userId });
+	if (view === "overview") {
+		const [albumRankings, albumSubmissions] = await Promise.all([
+			getAlbumsStats({ artistId, userId, dateRange }),
+			getAlbumRankingSessions({ userId, artistId }),
+		]);
+
+		content = (
+			<OverviewView
+				mode="average"
+				albumRankings={albumRankings}
+				albumSubmissions={albumSubmissions}
+				artistId={artistId}
+			/>
+		);
+	} else if (submissionId) {
+		const [trackRankings, albums] = await Promise.all([
+			getTracksHistory({ artistId, userId, submissionId }),
+			getLoggedAlbumNames({ artistId, userId, dateRange }),
+		]);
+
+		content = (
+			<ClientHistoryRankingTable
+				trackRankings={trackRankings}
+				albums={albums.map((album) => album.name)}
+			/>
+		);
+	} else {
+		const [trackRankings, albums] = await Promise.all([
+			getTracksStats({ artistId, userId, dateRange }),
+			getLoggedAlbumNames({ artistId, userId, dateRange }),
+		]);
+
+		content = (
+			<ClientStatsRankingTable
+				trackRankings={trackRankings}
+				albums={albums.map((album) => album.name)}
+			/>
+		);
+	}
 
 	return (
-		<>
-			{/* 控制項區域 */}
-			<div className="space-y-6 p-content">
-				{/* <SimpleSegmentControl
-					value={view}
-					variant="primary"
-					options={[
-						{
-							label: "Overview",
-							value: "overview",
-							queryParam: ["view", "overview"],
-						},
-						{
-							label: "All Rankings",
-							value: "all-rankings",
-							queryParam: ["view", "all-rankings"],
-						},
-					]}
-					size="md"
-				/> */}
-				<PillTabs
-					value={view}
-					options={[
-						{
-							label: "Overview",
-							value: "overview",
-						},
-						{
-							label: "All Rankings",
-							value: "all-rankings",
-						},
-					]}
-				/> 
-				<UnderlinedTabs
-					value={view}
-					options={[
-						{
-							label: "Overview",
-							value: "overview",
-						},
-						{
-							label: "All Rankings",
-							value: "all-rankings",
-						},
-					]}
-				/>
-				
-				
-			</div>
-
-			{/* 視圖渲染 */}
-			{view === "overview" ? (
-				<OverviewView
-					mode="average"
-					albumRankings={albumData?.albumRankings}
-					albumSessions={albumData?.albumSessions}
-					artistId={artistId}
-				/>
-			) : (
-				<AllRankingsView
-					mode="average"
-					trackRankings={trackRankings}
-					albums={albums.map((album) => album.name)}
-				/>
-			)}
-		</>
+		<div className="space-y-10 p-content">
+			<MyStatsToolbar
+				artistId={artistId}
+				activeTab={activeTab}
+				latestSubmissionId={latestSubmissionId}
+			/>
+			{content}
+		</div>
 	);
 }

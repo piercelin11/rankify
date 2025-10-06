@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { buildTrackQueryCondition } from "./buildTrackQueryCondition";
 import { defaultRankingSettings } from "@/features/settings/components/RankingSettingsForm";
 import { AchievementType } from "@/features/ranking/stats/components/AchievementDisplay";
+import { TrackHistoryType } from "@/types/track";
 
 type getTracksRankingHistoryOptions = {
 	includeAchievement?: boolean;
@@ -13,7 +14,7 @@ type getTracksRankingHistoryOptions = {
 type getTracksHistoryProps = {
 	artistId: string;
 	userId: string;
-	dateId: string;
+	submissionId: string;
 	options?: getTracksRankingHistoryOptions;
 	take?: number;
 };
@@ -21,9 +22,9 @@ type getTracksHistoryProps = {
 export const getTracksHistory = cache(async ({
 	artistId,
 	userId,
-	dateId,
+	submissionId,
 	take,
-}: getTracksHistoryProps) => {
+}: getTracksHistoryProps): Promise<TrackHistoryType[]> => {
 	const userPreference = await getUserPreference({ userId });
 	const trackQueryConditions = buildTrackQueryCondition(
 		userPreference?.rankingSettings || defaultRankingSettings
@@ -33,7 +34,7 @@ export const getTracksHistory = cache(async ({
 		where: {
 			artistId,
 			userId,
-			submissionId: dateId,
+			submissionId,
 			track: trackQueryConditions,
 		},
 		orderBy: {
@@ -102,7 +103,6 @@ export const getTracksHistory = cache(async ({
 			ranking: data.rank,
 			rankPercentile: data.rankPercentile,
 			rankChange: data.rankChange,
-			dateId,
 			date: currentDate,
 			submissionId: data.submissionId,
 			createdAt: currentDate,

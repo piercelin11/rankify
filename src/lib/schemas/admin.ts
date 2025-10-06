@@ -1,5 +1,5 @@
 import { $Enums } from "@prisma/client";
-import * as z from "zod";
+import z from "zod/v4";
 
 export const updateTrackSchema = z.object({
 	name: z.string(),

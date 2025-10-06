@@ -117,42 +117,15 @@ export const getAlbumRankingSessions = cache(
 		const albums = await db.album.findMany({
 			where: {
 				artistId,
-				tracks: {
-					some: {
-						trackRanks: {
-							some: {
-								userId,
-								submission: {
-									type: "ALBUM",
-									status: "COMPLETED",
-								},
-							},
-						},
-					},
-				},
 			},
 			include: {
-				tracks: {
-					include: {
-						trackRanks: {
-							where: {
-								userId,
-								submission: {
-									type: "ALBUM",
-									status: "COMPLETED",
-								},
-							},
-							select: {
-								submission: {
-									select: {
-										id: true,
-									},
-								},
-							},
-							distinct: ["submissionId"],
-						},
-					},
-				},
+				submissions: {
+					where: {
+						userId,
+						status: "COMPLETED",
+						type: "ALBUM",
+					}
+				}
 			},
 			orderBy: {
 				releaseDate: "desc",
@@ -160,13 +133,9 @@ export const getAlbumRankingSessions = cache(
 		});
 
 		return albums.map((album) => {
-			// 收集所有 tracks 的 trackRanks
-			const allTrackRanks = album.tracks.flatMap((track) => track.trackRanks);
-
 			return {
 				...album,
-				sessionCount: allTrackRanks.length,
-				trackRanks: allTrackRanks,
+				sessionCount: album.submissions.length,
 			};
 		});
 	}
