@@ -71,7 +71,7 @@
 		--sidebar-ring: 217.2 91.2% 59.8%;
 
 		--font-size-xs: 0.725rem;
-		--font-size-sm: clamp(0.825rem, 0.81rem + 0.08vw, 0.875rem);
+		--font-size-sm: clamp(0.8rem, 0.81rem + 0.08vw, 0.825rem);
 		--font-size-base: 0.875rem;
 		--font-size-md: 0.9rem;
 		--font-size-lg: 1rem;
@@ -90,7 +90,7 @@
 		--secondary: 240 4% 16%;
 		--secondary-foreground: 240 6% 70%;
 
-		--muted: 240 4% 16%;
+		--muted: 240 4% 12%;
 		--muted-foreground: 240 3% 40%;
 
 		--accent: 240 5% 10%;

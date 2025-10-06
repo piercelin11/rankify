@@ -1,6 +1,5 @@
 "use client";
 
-
 import {
 	Chart as ChartJS,
 	CategoryScale,
@@ -61,48 +60,34 @@ const options = {
 	},
 };
 
-type DataType = {
-	data: {
-		labels: string[];
-		mainData: number[];
-		subData: (number | null)[];
-		color: (string | null)[];
-	};
+type DatasetType = {
+	label: string;
+	data: number[];
+	color?: string;
+	hoverColor: string[];
 };
 
-export default function DoubleBarChart({
-	data: { labels, mainData, subData, color },
-}: DataType) {
+type Props = {
+	labels: string[];
+	datasets: DatasetType[];
+};
+
+export default function DoubleBarChart({ labels, datasets }: Props) {
 	const data = {
 		labels: labels.map((label) => toAcronym(label)),
-		datasets: [
-			{
-				label: "points",
-				data: mainData,
-				borderWidth: 1.5,
-				borderColor: DEFAULT_COLOR + "BF",
-				backgroundColor: DEFAULT_COLOR + "BF",
-				hoverBackgroundColor: color.map(
-					(item) => adjustColor(item!, 0.4, 1.5) + "80"
-				),
-				hoverBorderColor: color.map((item) =>
-					adjustColor(item!, 0.6, 2)
-				),
-			},
-			{
-				label: "raw points",
-				data: subData,
-				borderWidth: 1.5,
-				borderColor: "#464748BF",
-				backgroundColor: "#464748BF",
-				hoverBackgroundColor: color.map(
-					(item) => adjustColor(item!, 0.2, 1.5) + "66"
-				),
-				hoverBorderColor: color.map((item) =>
-					adjustColor(item!, 0.6, 2)
-				),
-			},
-		],
+		datasets: datasets.map((item) => ({
+			label: item.label,
+			data: item.data,
+			borderWidth: 1.5,
+			borderColor: item.color || DEFAULT_COLOR,
+			backgroundColor: item.color || DEFAULT_COLOR,
+			hoverBackgroundColor: item.hoverColor.map(
+				(color) => adjustColor(color, 0.4, 1.5) + "80"
+			),
+			hoverBorderColor: item.hoverColor.map((color) =>
+				adjustColor(color, 0.6, 2)
+			),
+		})),
 	};
 
 	return (

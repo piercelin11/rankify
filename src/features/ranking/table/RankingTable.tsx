@@ -59,7 +59,7 @@ export default function RankingTable<
 
 	return (
 		<div className={className}>
-			<div className="flex items-center justify-between gap-4 px-content pb-4 pt-6">
+			<div className="flex items-center justify-between gap-4 mb-6">
 				<FilterToolbar
 					globalFilter={globalFilter}
 					onGlobalFilterChange={setGlobalFilter}

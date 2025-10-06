@@ -26,7 +26,7 @@ export default function StatsCard({
 	return (
 		<Card
 			className={cn(
-				"flex flex-col justify-between space-y-6 bg-gradient-to-b from-transparent to-background p-8",
+				"flex flex-col justify-between space-y-6 bg-gradient-to-b from-background/20 to-background p-8",
 				className
 			)}
 		>

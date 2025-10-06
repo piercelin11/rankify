@@ -35,7 +35,7 @@ export default function UnderlinedTabs({
             key={option.value}
             onClick={() => handleTabClick(option.value)}
             className={cn(
-              "whitespace-nowrap border-b py-2 px-2 text-sm font-medium",
+              "whitespace-nowrap border-b py-2 px-2 text-base font-medium",
               option.value === value
                 ? "border-foreground text-foreground"
                 : "border-transparent text-muted-foreground hover:text-accent-foreground"

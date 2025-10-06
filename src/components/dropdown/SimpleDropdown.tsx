@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { ReactNode } from "react";
 
 export type SimpleDropdownOption = {
 	value: string;
@@ -28,10 +29,11 @@ type SimpleDropdownProps = {
 	disabled?: boolean;
 	className?: string;
 	size?: "sm" | "md" | "lg";
+	icon?: ReactNode;
 };
 
 const sizeClasses = {
-	sm: "h-9 px-3 text-sm",
+	sm: "h-8 px-2 text-sm",
 	md: "h-10 px-4 text-base",
 	lg: "h-11 px-4 text-base",
 };
@@ -45,6 +47,7 @@ export default function SimpleDropdown({
 	disabled,
 	className,
 	size = "md",
+	icon
 }: SimpleDropdownProps) {
 	const router = useRouter();
 	const pathname = usePathname();
@@ -88,17 +91,22 @@ export default function SimpleDropdown({
 		>
 			<SelectTrigger
 				className={cn(
-					" bg-field text-secondary-foreground hover:text-foreground focus:text-foreground",
+					"bg-field text-secondary-foreground hover:text-foreground focus:text-foreground",
 					sizeClasses[size],
 					className
 				)}
 			>
+				<div className="flex items-center gap-2">
+				{icon}
 				<SelectValue placeholder={placeholder} />
+				</div>
 			</SelectTrigger>
-			<SelectContent className="text-base max-h-80">
+			<SelectContent className="max-h-80 text-base">
 				{options.map((option) => (
 					<SelectItem
-						className="text-base"
+						className={cn("text-base", {
+							"text-sm": size === "sm",
+						})}
 						key={option.value}
 						value={option.value}
 						disabled={option.disabled}

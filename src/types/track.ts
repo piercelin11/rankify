@@ -27,7 +27,6 @@ export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
 };
 
 export type TrackHistoryType = Omit<TrackData, "artist" | "album"> & {
-	dateId: string;
 	date: Date;
 	submissionId: string;
 	createdAt: Date;
