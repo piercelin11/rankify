@@ -82,7 +82,7 @@
 		"globals": "^16.4.0",
 		"jest": "^29.7.0",
 		"jest-environment-jsdom": "^29.7.0",
-		"jiti": "^2.5.1",
+		"jiti": "^2.6.1",
 		"postcss": "^8",
 		"prettier": "3.4.2",
 		"prettier-plugin-tailwindcss": "^0.6.9",
