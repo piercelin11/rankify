@@ -1,24 +1,19 @@
 import { useSorterContext } from "@/contexts/SorterContext";
 import { TrackData } from "@/types/data";
 import {
-	startTransition,
 	useEffect,
 	useCallback,
 	useState,
 	useMemo,
 	useRef,
 } from "react";
-import { useThrottle } from "@/lib/hooks/useDebounceAndThrottle";
-import saveDraft from "../actions/saveDraft";
 import {
 	SorterStateSnapshotType,
 	SorterStateType,
 } from "@/lib/schemas/sorter";
-import { useModal } from "@/contexts";
 import finalizeDraft from "../actions/finalizeDraft";
-import { saveDraftToLocalStorage } from "../utils/localDraft";
-
-const autoSaveInterval = 3 * 60 * 1000;
+import saveDraft from "../actions/saveDraft";
+import { useAutoSave } from "./useAutoSave";
 
 type SortChoice = -1 | 0 | 1;
 
@@ -194,14 +189,15 @@ export default function useSorter({
 	initialState,
 	tracks,
 	submissionId,
-	userId
+	userId: _userId
 }: UseSorterStateProps): UseSorterStateReturn {
 	const { setSaveStatus, setPercentage } = useSorterContext();
-	const { modal } = useModal();
 
+	// 初始化 saveStatus: 頁面載入時永遠是已儲存狀態（草稿來自資料庫）
 	useEffect(() => {
 		setPercentage(initialState.percent);
-	}, [initialState.percent, setPercentage]);
+		setSaveStatus("saved");
+	}, [initialState.percent, setPercentage, setSaveStatus]);
 
 	// 用 useState 管理狀態
 	const [state, setState] = useState<SorterStateType>(initialState);
@@ -237,52 +233,40 @@ export default function useSorter({
 		return tracks.find((track) => track.name === trackName);
 	}, [state, tracks]);
 
-	// 儲存功能
+	// 使用 ref 來獲取最新的值，避免閉包問題
+	const stateRef = useRef(state);
+
+	// 更新 ref
+	useEffect(() => {
+		stateRef.current = state;
+	}, [state]);
+
+	// 使用新的 useAutoSave Hook
+	const triggerAutoSave = useAutoSave({
+		submissionId,
+		setSaveStatus,
+		// debounceDelay 和 maxInterval 使用預設值 (10s, 2min)
+	});
+
+	// 手動儲存功能 (用於 Quit 按鈕)
 	const handleSave = useCallback(async () => {
 		if (!state) {
 			return { type: "error", message: "No state to save" };
 		}
-		const result = await saveDraft(
-			state,
-			submissionId
-		);
-		return result;
-	}, [state, submissionId]);
-
-	// 使用 ref 來獲取最新的值，避免閉包問題
-	const stateRef = useRef(state);
-	const setSaveStatusRef = useRef(setSaveStatus);
-
-	// 更新 refs
-	useEffect(() => {
-		stateRef.current = state;
-		setSaveStatusRef.current = setSaveStatus;
-	}, [state, setSaveStatus]);
-
-	// 創建穩定的 throttled 函數
-	const throttledAutoSave = useThrottle(async () => {
-		if (!stateRef.current) {
-			return;
-		}
-
-		if (modal !== null) {
-			return;
-		}
-
-		startTransition(async () => {
-			setSaveStatusRef.current("pending");
-			try {
-				await saveDraft(
-					stateRef.current,
-					submissionId
-				);
-				setSaveStatusRef.current("saved");
-			} catch (error) {
-				console.error("Failed to save draft:", error);
-				setSaveStatusRef.current("idle");
+		setSaveStatus("pending");
+		try {
+			const result = await saveDraft(state, submissionId);
+			if (result.type === "error") {
+				setSaveStatus("failed");
+				return { type: "error", message: result.message };
 			}
-		});
-	}, autoSaveInterval);
+			setSaveStatus("saved");
+			return { type: "success", message: "Draft saved successfully" };
+		} catch {
+			setSaveStatus("failed");
+			return { type: "error", message: "Failed to save draft" };
+		}
+	}, [state, submissionId, setSaveStatus]);
 
 	// 核心排序函數
 	const sortList = useCallback(
@@ -323,9 +307,6 @@ export default function useSorter({
 
 				setState(newState);
 
-				// 立即保存到 localStorage (Tier 1)
-				saveDraftToLocalStorage(newState, userId, submissionId);
-
 				// 更新進度
 				setPercentage(newState.percent);
 
@@ -333,15 +314,14 @@ export default function useSorter({
 				if (newState.finishFlag === 1) {
 					finalizeDraft(newState, submissionId)
 				} else {
-					setTimeout(() => {
-						throttledAutoSave();
-					}, 0);
+					// 觸發自動儲存 (debounce + max interval)
+					triggerAutoSave(newState);
 				}
 			} catch (err) {
 				console.error(err);
 			}
 		},
-		[throttledAutoSave, setSaveStatus, setPercentage, submissionId, userId]
+		[triggerAutoSave, setSaveStatus, setPercentage, submissionId]
 	);
 
 	// 復原上一步

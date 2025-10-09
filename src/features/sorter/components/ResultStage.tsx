@@ -12,11 +12,7 @@ import { cn } from "@/lib/utils";
 import { RankingResultData } from "../types";
 import { useModal } from "@/contexts";
 import { SorterStateType } from "@/lib/schemas/sorter";
-import {
-	convertResultToDraftState,
-	generateFinalResult,
-} from "../utils/convertResult";
-import { saveDraftToLocalStorage } from "../utils/localDraft";
+import { generateFinalResult } from "../utils/convertResult";
 import {
 	DndContext,
 	closestCenter,
@@ -48,7 +44,7 @@ type ResultStageProps = {
 export default function ResultStage({
 	draftState,
 	tracks,
-	userId,
+	userId: _userId,
 	submissionId,
 }: ResultStageProps) {
 	const { showAlert } = useModal();
@@ -70,8 +66,6 @@ export default function ResultStage({
 		(_, newResult: RankingResultData[]) => newResult
 	);
 	const [isLoading, setIsLoading] = useState(true);
-	const [originalDraftState, setOriginalDraftState] =
-		useState<SorterStateType>(draftState);
 
 	// 初始化結果數據
 	useEffect(() => {
@@ -83,7 +77,6 @@ export default function ResultStage({
 				}
 				const finalResult = generateFinalResult(draftState, tracks);
 				setInitialResult(finalResult);
-				setOriginalDraftState(draftState);
 				setIsLoading(false);
 			} catch (error) {
 				console.error("Failed to generate result:", error);
@@ -94,23 +87,22 @@ export default function ResultStage({
 		initializeResult();
 	}, [draftState, tracks]);
 
-	// localStorage 自動儲存函數
-	const saveToLocalStorage = (resultData: RankingResultData[]) => {
-		try {
-			const newDraftState = convertResultToDraftState(
-				resultData,
-				originalDraftState
-			);
-			saveDraftToLocalStorage(newDraftState, userId, submissionId);
-		} catch (error) {
-			console.error("Failed to save to localStorage:", error);
-		}
-	};
 
 	// 設定進度為 100%
 	useEffect(() => {
 		setPercentage(100);
 	}, [setPercentage]);
+
+	// beforeunload 警告：ResultStage 永遠顯示警告（因為結果尚未送出）
+	useEffect(() => {
+		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+			e.preventDefault();
+			e.returnValue = '';
+		};
+
+		window.addEventListener('beforeunload', handleBeforeUnload);
+		return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+	}, []);
 
 	// 拖曳結束處理
 	const handleDragEnd = (event: DragEndEvent) => {
@@ -140,10 +132,9 @@ export default function ResultStage({
 			ranking: index + 1,
 		}));
 
-		// 樂觀更新和立即儲存
+		// 樂觀更新
 		startTransition(() => {
 			setOptimisticResult(updatedResult);
-			saveToLocalStorage(updatedResult);
 		});
 	};
 

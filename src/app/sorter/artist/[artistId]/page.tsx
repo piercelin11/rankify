@@ -3,7 +3,8 @@ import { getAlbumsByArtistId } from "@/db/album";
 import { getIncompleteRankingSubmission } from "@/db/ranking";
 import getTracksByArtistId, { getSinglesByArtistId } from "@/db/track";
 import FilterStage from "@/features/sorter/components/FilterStage";
-import SorterWithConflictResolver from "@/features/sorter/components/SorterWithConflictResolver";
+import { DraftPrompt } from "@/features/sorter/components/DraftPrompt";
+import { CorruptedDraftFallback } from "@/features/sorter/components/CorruptedDraftFallback";
 import { sorterStateSchema } from "@/lib/schemas/sorter";
 
 type pageProps = {
@@ -19,34 +20,32 @@ export default async function page({ params }: pageProps) {
 	const albums = await getAlbumsByArtistId({ artistId });
 	const tracks = await getTracksByArtistId({ artistId });
 
-	if (!submission) return <FilterStage albums={albums} singles={singles} />;
-
-	const validation = sorterStateSchema.safeParse(submission.draftState);
-
-	if (!validation.success) {
-		console.error(
-			`Submission data with the id ${submission.id} has an invalid draftState`,
-			validation.error
-		);
-		//TODO: 優雅處理錯誤
-		return <p>排名資料已損毀，請重新開始</p>;
+	// 🟢 Server Component 條件渲染：沒有草稿 → 直接顯示 FilterStage
+	if (!submission) {
+		return <FilterStage albums={albums} singles={singles} />;
 	}
 
-	if (submission.status === "IN_PROGRESS" || submission.status === "DRAFT") {
+	// 🟢 驗證草稿資料
+	const validation = sorterStateSchema.safeParse(submission.draftState);
+	if (!validation.success) {
+		// 資料損毀 → 用 Client Component 處理刪除 + Loading 狀態
 		return (
-			<SorterWithConflictResolver
-				serverDraft={{
-					state: validation.data,
-					updatedAt:
-						submission.updatedAt?.toISOString() || new Date().toISOString(),
-				}}
-				tracks={tracks}
+			<CorruptedDraftFallback
 				submissionId={submission.id}
-				userId={userId}
-				status={submission.status}
+				redirectPath={`/sorter/artist/${artistId}`}
 			/>
 		);
 	}
 
-	return <div></div>;
+	// 🟢 Server Component 條件渲染：有草稿 → 渲染 DraftPrompt
+	// DraftPrompt 內部處理 Modal 與 RankingStage 的切換
+	return (
+		<DraftPrompt
+			submissionId={submission.id}
+			draftState={validation.data}
+			draftDate={submission.updatedAt || submission.createdAt}
+			tracks={tracks}
+			userId={userId}
+		/>
+	);
 }

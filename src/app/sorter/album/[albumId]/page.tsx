@@ -2,7 +2,8 @@ import { getUserSession } from "@/../auth";
 import { getAlbumById } from "@/db/album";
 import { getIncompleteRankingSubmission } from "@/db/ranking";
 import { getTracksByAlbumId } from "@/db/track";
-import SorterWithConflictResolver from "@/features/sorter/components/SorterWithConflictResolver";
+import { DraftPrompt } from "@/features/sorter/components/DraftPrompt";
+import { CorruptedDraftFallback } from "@/features/sorter/components/CorruptedDraftFallback";
 import { sorterStateSchema } from "@/lib/schemas/sorter";
 import { createSubmission } from "@/features/sorter/actions/createSubmission";
 import { notFound } from "next/navigation";
@@ -20,7 +21,7 @@ export default async function page({ params }: pageProps) {
 	const album = await getAlbumById({ albumId });
 	if (!album) notFound();
 
-	let submission = await getIncompleteRankingSubmission({
+	const submission = await getIncompleteRankingSubmission({
 		artistId: album.artistId,
 		userId,
 		type: "ALBUM",
@@ -29,8 +30,8 @@ export default async function page({ params }: pageProps) {
 
 	const tracks = await getTracksByAlbumId({ albumId });
 
+	// 🟢 Server Component 條件渲染：沒有草稿 → 自動建立（不 redirect）
 	if (!submission) {
-
 		if (tracks.length === 0) {
 			return (
 				<div className="flex flex-col items-center justify-center py-20">
@@ -48,37 +49,62 @@ export default async function page({ params }: pageProps) {
 			type: "ALBUM",
 			artistId: album.artistId,
 			albumId,
-		})
+		});
 
-		if (submissionResult.data) submission = submissionResult.data;
-	}
+		// 建立失敗 → 顯示錯誤
+		if (!submissionResult.data) {
+			return (
+				<div className="flex flex-col items-center gap-4 py-20">
+					<p className="text-destructive">無法建立排名</p>
+					<p className="text-sm text-muted-foreground">
+						{submissionResult.message || "未知錯誤"}
+					</p>
+				</div>
+			);
+		}
 
-	const validation = sorterStateSchema.safeParse(submission.draftState);
+		// 建立成功 → 驗證並渲染 DraftPrompt
+		const validation = sorterStateSchema.safeParse(submissionResult.data.draftState);
+		if (!validation.success) {
+			return (
+				<CorruptedDraftFallback
+					submissionId={submissionResult.data.id}
+					redirectPath={`/sorter/album/${albumId}`}
+				/>
+			);
+		}
 
-	if (!validation.success) {
-		console.error(
-			`Submission data with the id ${submission.id} has an invalid draftState`,
-			validation.error
-		);
-		//TODO: 優雅處理錯誤
-		return <p>排名資料已損毀，請重新開始</p>;
-	}
-
-	if (submission.status === "IN_PROGRESS" || submission.status === "DRAFT") {
 		return (
-			<SorterWithConflictResolver
-				serverDraft={{
-					state: validation.data,
-					updatedAt:
-						submission.updatedAt?.toISOString() || new Date().toISOString(),
-				}}
+			<DraftPrompt
+				submissionId={submissionResult.data.id}
+				draftState={validation.data}
+				draftDate={submissionResult.data.updatedAt || submissionResult.data.createdAt}
 				tracks={tracks}
-				submissionId={submission.id}
 				userId={userId}
-				status={submission.status}
 			/>
 		);
 	}
 
-	return <div></div>;
+	// 🟢 驗證既有草稿資料
+	const validation = sorterStateSchema.safeParse(submission.draftState);
+	if (!validation.success) {
+		// 資料損毀 → 用 Client Component 處理刪除 + Loading 狀態
+		return (
+			<CorruptedDraftFallback
+				submissionId={submission.id}
+				redirectPath={`/sorter/album/${albumId}`}
+			/>
+		);
+	}
+
+	// 🟢 Server Component 條件渲染：有草稿 → 渲染 DraftPrompt
+	return (
+		<DraftPrompt
+			submissionId={submission.id}
+			draftState={validation.data}
+			draftDate={submission.updatedAt || submission.createdAt}
+			tracks={tracks}
+			userId={userId}
+		/>
+	);
 }
