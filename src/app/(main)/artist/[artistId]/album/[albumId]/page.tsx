@@ -18,11 +18,14 @@ import { Badge } from "@/components/ui/badge";
 
 export default async function page({
 	params,
+	searchParams,
 }: {
 	params: Promise<{ albumId: string; artistId: string }>;
+	searchParams: Promise<{ type?: string }>;
 }) {
 	const albumId = (await params).albumId;
 	const artistId = (await params).artistId;
+	const { type = "artist" } = await searchParams;
 	const { id: userId } = await getUserSession();
 
 	const defaultAlbum = await getAlbumRanking({ userId, albumId });
@@ -68,7 +71,7 @@ export default async function page({
 		<div className="space-y-8">
 			<SimpleSegmentControl
 				options={ALBUM_SEGMENT_OPTIONS}
-				defaultValue="artist"
+				value={type}
 				variant="primary"
 			/>
 			<div className="grid grid-cols-2 gap-4 xl:grid-cols-4">

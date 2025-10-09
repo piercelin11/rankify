@@ -1,6 +1,6 @@
 import { TrackData } from "@/types/data";
 import { AchievementType } from "@/features/ranking/stats/components/AchievementDisplay";
-import { TrackStats } from "@prisma/client";
+import { TrackStat } from "@prisma/client";
 
 export type TrackMetrics = {
 	id: string;
@@ -27,7 +27,7 @@ export type TrackMetrics = {
 	sessionCount: number;
 }; */
 
-export type TrackStatsType = TrackStats & Omit<TrackData, "artist" | "album"> & {
+export type TrackStatsType = TrackStat & Omit<TrackData, "artist" | "album"> & {
 	rank: number;
 	gap: number | null;
 	album: {

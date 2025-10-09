@@ -39,7 +39,7 @@ const getTracksStats = cache(
 		artistId,
 		userId,
 	}: getTracksStatsProps): Promise<TrackStatsType[]> => {
-		const trackStats = await db.trackStats.findMany({
+		const trackStats = await db.trackStat.findMany({
 			where: {
 				artistId,
 				userId,

@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import TrackCell from "../components/TrackCell";
 import type { RankingListDataTypeExtend } from "../types";
 
-export type ColumnType = "ranking" | "track" | "number" | "change";
+export type ColumnType = "rank" | "track" | "number" | "change";
 
 export type ColumnConfig = {
 	key: string;
@@ -18,7 +18,7 @@ const NUMBER_SIZE = 140
 
 // 欄位配置定義
 export const COLUMN_CONFIGS: Record<string, ColumnConfig> = {
-	ranking: { key: "ranking", header: "#", type: "ranking", size: 60 },
+	rank: { key: "rank", header: "#", type: "rank", size: 60 },
 	name: { key: "name", header: "Track", type: "track" },
 	rankChange: { key: "rankChange", header: "Change", type: "change", size: NUMBER_SIZE },
 	overallRankChange: { key: "overallRankChange", header: "Change", type: "change", size: NUMBER_SIZE },
@@ -86,7 +86,7 @@ export const createColumn = (configKey: keyof typeof COLUMN_CONFIGS): ColumnDef<
 	const config = COLUMN_CONFIGS[configKey];
 
 	switch (config.type) {
-		case "ranking":
+		case "rank":
 			return createRankingColumn(config);
 		case "track":
 			return createTrackColumn(config);

@@ -66,6 +66,7 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 				currentSubmissionId={submissionId}
 				columnKey={["peak", "rankChange"]}
 				availableAlbums={albums.map((album) => album.name)}
+				view="snapshot"
 			/>
 		);
 	} else {
@@ -81,6 +82,7 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 				currentSubmissionId={submissionId}
 				columnKey={["highestRank", "overallRankChange"]}
 				availableAlbums={albums.map((album) => album.name)}
+				view="average"
 			/>
 		);
 	}

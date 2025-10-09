@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, forwardRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { DEFAULT_COLOR } from "@/constants";
 import { adjustColor } from "@/lib/utils/color.utils";
 import { useThrottle } from "@/lib/hooks/useDebounceAndThrottle";
@@ -14,7 +13,6 @@ export type SegmentOption = {
 	disabled?: boolean;
 	href?: string;
 	onClick?: () => void;
-	queryParam?: [string, string];
 };
 
 type IndicatorStyle = {
@@ -25,9 +23,7 @@ type IndicatorStyle = {
 
 type AnimatedSegmentControlProps = {
 	options: SegmentOption[];
-	value?: string;
-	defaultValue?: string;
-	onValueChange?: (value: string) => void;
+	value: string;
 	className?: string;
 	size?: "sm" | "md" | "lg";
 	color?: string | null;
@@ -36,47 +32,27 @@ type AnimatedSegmentControlProps = {
 export default function AnimatedSegmentControl({
 	options,
 	value,
-	defaultValue,
-	onValueChange,
 	className,
 	size = "md",
 	color,
 }: AnimatedSegmentControlProps) {
-	const [internalValue, setInternalValue] = useState(
-		value || defaultValue || options[0]?.value || ""
-	);
 	const [pendingValue, setPendingValue] = useState<string | null>(null);
 	const [indicatorStyle, setIndicatorStyle] = useState<IndicatorStyle | null>(
 		null
 	);
 	const segmentRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
-	const router = useRouter();
-	const pathname = usePathname();
-	const searchParams = useSearchParams();
 
-	const currentValue = value !== undefined ? value : internalValue;
-	const displayValue = pendingValue ? pendingValue : currentValue;
+	const displayValue = pendingValue ? pendingValue : value;
 
 	const handleValueChange = useCallback(
 		(option: SegmentOption) => {
 			setPendingValue(option.value);
 
-			if (value === undefined) {
-				setInternalValue(option.value);
-			}
-			onValueChange?.(option.value);
-
-			if (option.queryParam) {
-				const params = new URLSearchParams(searchParams.toString());
-				params.set(option.queryParam[0], option.queryParam[1]);
-				router.push(`${pathname}?${params.toString()}`);
-			}
-
 			if (option.onClick) {
 				option.onClick();
 			}
 		},
-		[value, onValueChange, router, pathname, searchParams]
+		[]
 	);
 
 	const updateIndicator = useCallback(() => {
@@ -93,9 +69,9 @@ export default function AnimatedSegmentControl({
 	}, [displayValue]);
 
 	useEffect(() => {
-		if (pendingValue === currentValue) setPendingValue(null);
+		if (pendingValue === value) setPendingValue(null);
 		updateIndicator();
-	}, [currentValue, pendingValue, updateIndicator]);
+	}, [value, pendingValue, updateIndicator]);
 
 	const throttledUpdateIndicator = useThrottle(() => {
 		updateIndicator();

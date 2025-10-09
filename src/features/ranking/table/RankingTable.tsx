@@ -21,6 +21,7 @@ export default function RankingTable<T extends RankingListDataTypeExtend>({
 	isLoading = false,
 	className,
 	availableAlbums = [],
+	view,
 }: RankingTableProps<T>) {
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>({});
@@ -58,6 +59,7 @@ export default function RankingTable<T extends RankingListDataTypeExtend>({
 								href: `/artist/${data[0].artistId}/my-stats?submissionId=${latestSubmissionId}&view=all-rankings`,
 							},
 						]}
+						value={view}
 					/>
 					{currentSubmission && (
 						<div className="flex items-center gap-2">
@@ -66,7 +68,6 @@ export default function RankingTable<T extends RankingListDataTypeExtend>({
 								size="sm"
 								className="w-fit min-w-36 border-transparent bg-secondary"
 								value={currentSubmission.id}
-								defaultValue={currentSubmission.id}
 								placeholder={dateToDashFormat(currentSubmission.date)}
 								options={submissions.map((s) => ({
 									value: s.id,

@@ -140,7 +140,7 @@ async function updateTrackStats(
 	}>
 ) {
 	const trackIds = trackRankData.map((t) => t.trackId);
-	const oldStatsArray = await tx.trackStats.findMany({
+	const oldStatsArray = await tx.trackStat.findMany({
 		where: { userId, trackId: { in: trackIds } },
 	});
 	const oldStatsMap = new Map(oldStatsArray.map((s) => [s.trackId, s]));
@@ -179,7 +179,7 @@ async function updateTrackStats(
 				? (oldStats?.cumulativeRankChange ?? 0) + Math.abs(rankChange)
 				: (oldStats?.cumulativeRankChange ?? 0);
 
-		await tx.trackStats.upsert({
+		await tx.trackStat.upsert({
 			where: { userId_trackId: { userId, trackId: track.trackId } },
 			create: {
 				userId,
@@ -210,7 +210,7 @@ async function updateTrackStats(
 		});
 	}
 
-	const allStats = await tx.trackStats.findMany({
+	const allStats = await tx.trackStat.findMany({
 		where: { userId, artistId },
 		orderBy: [
 			{ averageRank: "asc" },
@@ -227,7 +227,7 @@ async function updateTrackStats(
 			? stat.overallRank - newOverallRank
 			: null;
 
-		await tx.trackStats.update({
+		await tx.trackStat.update({
 			where: { id: stat.id },
 			data: {
 				previousOverallRank: stat.overallRank,

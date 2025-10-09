@@ -69,7 +69,6 @@ export default async function SnapshotPage({
 							size="sm"
 							className="w-fit min-w-36 border-transparent bg-secondary"
 							value={currentSubmission.id}
-							defaultValue={currentSubmission.id}
 							placeholder={dateToDashFormat(currentSubmission.date)}
 							options={submissions.map((s) => ({
 								value: s.id,

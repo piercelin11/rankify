@@ -15,6 +15,25 @@
 	.text-description {
 		@apply text-base font-normal leading-tight text-muted;
 	}
+
+	/* 可見滾動條樣式 */
+	.custom-scrollbar::-webkit-scrollbar {
+		@apply h-1 w-1 rounded-full;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb {
+		@apply h-1 w-1 rounded-full bg-muted;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-button {
+		display: none;
+	}
+
+	/* Firefox 支援 */
+	.custom-scrollbar {
+		scrollbar-width: thin;
+		scrollbar-color: hsl(var(--muted)) transparent;
+	}
 }
 
 @layer base {
@@ -120,8 +139,14 @@
 		@apply border-border;
 	}
 	html {
-		overflow-y: scroll;
+		overflow-y: overlay; /* 滾動條浮在內容上，不佔空間（部分瀏覽器已棄用）*/
+		scrollbar-width: none; /* Firefox */
 	}
+
+	html::-webkit-scrollbar {
+		display: none; /* Chrome/Safari */
+	}
+
 	body {
 		@apply font-sans;
 		font-weight: 500;
@@ -156,17 +181,5 @@
 	}
 	button {
 		@apply select-none;
-	}
-
-	::-webkit-scrollbar {
-		@apply h-1 w-1 rounded-full;
-	}
-
-	::-webkit-scrollbar-thumb {
-		@apply h-1 w-1 rounded-full bg-muted;
-	}
-
-	::-webkit-scrollbar-button {
-		display: none;
 	}
 }

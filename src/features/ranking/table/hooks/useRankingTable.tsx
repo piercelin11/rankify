@@ -26,7 +26,7 @@ export function useRankingTable<T extends RankingListDataTypeExtend>({
 		(() => {
 			// 確保 ranking 和 name 欄位總是存在
 			const requiredColumns: (keyof typeof COLUMN_CONFIGS)[] = [
-				"ranking",
+				"rank",
 				"name",
 			];
 			const validColumnKeys = columnKey.filter(

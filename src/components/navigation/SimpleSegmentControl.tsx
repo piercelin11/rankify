@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 export type SegmentOption = {
 	label: string;
@@ -11,14 +10,11 @@ export type SegmentOption = {
 	disabled?: boolean;
 	href?: string;
 	onClick?: () => void;
-	queryParam?: [string, string];
 };
 
 type SimpleSegmentControlProps = {
 	options: SegmentOption[];
-	value?: string;
-	defaultValue?: string;
-	onValueChange?: (value: string) => void;
+	value: string;
 	className?: string;
 	size?: "sm" | "md" | "lg";
 	variant?: "primary" | "secondary" | "muted";
@@ -27,39 +23,17 @@ type SimpleSegmentControlProps = {
 export default function SimpleSegmentControl({
 	options,
 	value,
-	defaultValue,
-	onValueChange,
 	className,
 	size = "md",
 	variant = "secondary",
 }: SimpleSegmentControlProps) {
-	const [internalValue, setInternalValue] = useState(
-		value || defaultValue || options[0]?.value || ""
-	);
-	const router = useRouter();
-	const pathname = usePathname();
-	const searchParams = useSearchParams();
-
-	const currentValue = value !== undefined ? value : internalValue;
-
 	const handleValueChange = useCallback(
 		(option: SegmentOption) => {
-			if (value === undefined) {
-				setInternalValue(option.value);
-			}
-			onValueChange?.(option.value);
-
-			if (option.queryParam) {
-				const params = new URLSearchParams(searchParams.toString());
-				params.set(option.queryParam[0], option.queryParam[1]);
-				router.push(`${pathname}?${params.toString()}`);
-			}
-
 			if (option.onClick) {
 				option.onClick();
 			}
 		},
-		[value, onValueChange, router, pathname, searchParams]
+		[]
 	);
 
 	const sizeClasses = {
@@ -83,7 +57,7 @@ export default function SimpleSegmentControl({
 			)}
 		>
 			{options.map((option, index) => {
-				const isActive = currentValue === option.value;
+				const isActive = value === option.value;
 				const isLast = index === options.length - 1;
 
 				const baseClasses = cn(
