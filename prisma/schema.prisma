@@ -22,7 +22,7 @@ model User {
   albumRankings   AlbumRanking[]
   submissions     RankingSubmission[]
   userPreferences UserPreference[]
-  trackStats      TrackStats[]
+  trackStats      TrackStat[]
 }
 
 model UserPreference {
@@ -63,7 +63,7 @@ model Artist {
   albumRankings    AlbumRanking[]
   submissions      RankingSubmission[]
   tracks           Track[]
-  trackStats       TrackStats[]
+  trackStats       TrackStat[]
 }
 
 model Album {
@@ -99,7 +99,7 @@ model Track {
   album       Album?         @relation(fields: [albumId], references: [id], onDelete: Cascade)
   artist      Artist         @relation(fields: [artistId], references: [id], onDelete: Cascade)
   trackRanks  TrackRanking[]
-  trackStats  TrackStats[]
+  trackStats  TrackStat[]
 
   @@unique([albumId, name])
   @@unique([artistId, name])
@@ -161,7 +161,7 @@ model TrackRanking {
   @@index([userId])
 }
 
-model TrackStats {
+model TrackStat {
   id       String @id @default(cuid())
   userId   String
   artistId String

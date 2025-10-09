@@ -1,15 +1,15 @@
 import { SegmentOption } from "@/components/navigation/SimpleSegmentControl";
 
-export const VIEW_SEGMENT_OPTIONS = [
+export const VIEW_SEGMENT_OPTIONS: SegmentOption[] = [
 	{
 		label: "Ranking List",
 		value: "list",
-		queryParam: ["view", "list"] as [string, string],
+		href: "?view=list",
 	},
 	{
 		label: "Stats Charts",
 		value: "charts",
-		queryParam: ["view", "charts"] as [string, string],
+		href: "?view=charts",
 	},
 ];
 
@@ -17,12 +17,12 @@ export const TRACK_SEGMENT_OPTIONS: SegmentOption[] = [
 	{
 		label: "In Artist Rankings",
 		value: "artist",
-		queryParam: ["type", "artist"],
+		href: "?type=artist",
 	},
 	{
 		label: "In Album Rankings",
 		value: "album",
-		queryParam: ["type", "album"],
+		href: "?type=album",
 	},
 ];
 
@@ -30,11 +30,11 @@ export const ALBUM_SEGMENT_OPTIONS: SegmentOption[] = [
 	{
 		label: "In Artist Rankings",
 		value: "artist",
-		queryParam: ["type", "artist"],
+		href: "?type=artist",
 	},
 	{
 		label: "In Album Rankings",
 		value: "album",
-		queryParam: ["type", "album"],
+		href: "?type=album",
 	},
 ];

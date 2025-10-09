@@ -51,7 +51,7 @@ const getAlbumsStats = cache(async ({
     artistId,
     userId,
 }: getAlbumsStatsProps): Promise<AlbumStatsType[]> => {
-    const allTrackStatsForArtist = await db.trackStats.findMany({
+    const allTrackStatsForArtist = await db.trackStat.findMany({
         where: { artistId, userId },
         select: {
             track: { select: { albumId: true } },

@@ -18,4 +18,5 @@ export type RankingTableProps<T extends RankingListDataTypeExtend> = {
 	isLoading?: boolean;
 	className?: string;
 	availableAlbums?: string[];
+	view: "average" | "snapshot";
 };
