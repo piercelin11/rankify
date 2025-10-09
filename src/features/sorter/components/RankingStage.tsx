@@ -111,6 +111,20 @@ export default function RankingStage({
 		};
 	}, [handleKeyDown, handleKeyUp]);
 
+	// beforeunload 警告：防止意外關閉導致資料遺失
+	useEffect(() => {
+		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+			// 如果有未儲存的變更，顯示警告
+			if (saveStatus !== "saved") {
+				e.preventDefault();
+				e.returnValue = ''; // Chrome 需要設定 returnValue
+			}
+		};
+
+		window.addEventListener('beforeunload', handleBeforeUnload);
+		return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+	}, [saveStatus]);
+
 	return (
 		<section className="flex h-[calc(100vh-80px)] select-none">
 			<div className="m-auto flex-1 space-y-6">
