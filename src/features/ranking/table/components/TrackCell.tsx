@@ -1,12 +1,8 @@
 import Image from "next/image";
-import type {
-	RankingListDataTypeExtend,
-	RankingTableAppearance,
-} from "../types";
+import type { RankingListDataTypeExtend } from "../types";
 
 type TrackCellProps = {
 	item: RankingListDataTypeExtend;
-	appearance?: RankingTableAppearance;
 	imageSize?: "sm" | "md" | "lg";
 };
 
@@ -16,17 +12,12 @@ const imageSizes = {
 	lg: { width: "h-16 w-16", sizes: "64px" },
 };
 
-export default function TrackCell({
-	item,
-	appearance = {},
-	imageSize = "lg",
-}: TrackCellProps) {
-	const showImages = appearance.showImages !== false;
-	const { /* width, */ sizes } = imageSizes[imageSize];
+export default function TrackCell({ item, imageSize = "lg" }: TrackCellProps) {
+	const { sizes } = imageSizes[imageSize];
 
 	return (
 		<div className="flex items-center gap-3">
-			{showImages && item.img && (
+			{item.img && (
 				<div
 					className={`relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg lg:h-14 lg:w-14`}
 				>

@@ -14,17 +14,22 @@ export type ColumnConfig = {
 	className?: string;
 };
 
+const NUMBER_SIZE = 140
+
 // 欄位配置定義
 export const COLUMN_CONFIGS: Record<string, ColumnConfig> = {
-	ranking: { key: "ranking", header: "#", type: "ranking", size: 20 },
+	ranking: { key: "ranking", header: "#", type: "ranking", size: 60 },
 	name: { key: "name", header: "Track", type: "track" },
-	rankChange: { key: "rankChange", header: "Change", type: "change", size: 100 },
-	peak: { key: "peak", header: "Peak", type: "number", size: 100 },
-	worst: { key: "worst", header: "Worst", type: "number", size: 100 },
-	averageRanking: { key: "averageRanking", header: "Avg.", type: "number", size: 100 },
-	top50PercentCount: { key: "top50PercentCount", header: "Top 50%", type: "number", size: 100 },
-	top25PercentCount: { key: "top25PercentCount", header: "Top 25%", type: "number", size: 100 },
-	top5PercentCount: { key: "top5PercentCount", header: "Top 5%", type: "number", size: 100 },
+	rankChange: { key: "rankChange", header: "Change", type: "change", size: NUMBER_SIZE },
+	overallRankChange: { key: "overallRankChange", header: "Change", type: "change", size: NUMBER_SIZE },
+	highestRank: { key: "highestRank", header: "Peak", type: "number", size: NUMBER_SIZE },
+	lowestRank: { key: "lowestRank", header: "Worst", type: "number", size: NUMBER_SIZE },
+	hotStreak: { key: "hotStreak", header: "Hot Streak", type: "number", size: NUMBER_SIZE },
+	coldStreak: { key: "coldStreak", header: "Cold Streak", type: "number", size: NUMBER_SIZE },
+	averageRank: { key: "averageRank", header: "Avg.", type: "number", size: NUMBER_SIZE },
+	top50PercentCount: { key: "top50PercentCount", header: "Top 50%", type: "number", size: NUMBER_SIZE },
+	top25PercentCount: { key: "top25PercentCount", header: "Top 25%", type: "number", size: NUMBER_SIZE },
+	top5PercentCount: { key: "top5PercentCount", header: "Top 5%", type: "number", size: NUMBER_SIZE },
 };
 
 // 欄位工廠函數

@@ -1,52 +1,64 @@
 import { Card } from "../ui/card";
-import { Badge } from "../ui/badge";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
 
-type StatsCardProps = {
+export type StatsCardProps = {
 	title?: string;
 	value?: string | ReactNode | number;
 	subtitle?: string;
-	badge?: {
-		text: string;
-		variant?: "default" | "outline" | "secondary" | "destructive";
-	};
+	extra?: ReactNode | string | number;
 	className?: string;
 	children?: React.ReactNode;
+	backgroundImg?: string | null;
 };
 
 export default function StatsCard({
 	title,
 	value,
 	subtitle,
-	badge,
+	extra,
 	className,
 	children,
+	backgroundImg,
 }: StatsCardProps) {
+	const cardStyle = backgroundImg
+		? {
+				backgroundImage: `linear-gradient(to top, hsl(var(--background) / 0.9), hsl(var(--accent) / 0.55) ), url(${backgroundImg})`,
+			}
+		: {};
+
 	return (
 		<Card
 			className={cn(
-				"flex flex-col justify-between space-y-6 bg-gradient-to-b from-background/20 to-background p-8",
+				"relative flex flex-col justify-between space-y-6 overflow-hidden bg-[length:150%] bg-center p-4 transition-all duration-300 ease-in-out hover:bg-[length:160%] 2xl:p-6",
 				className
 			)}
+			style={cardStyle}
 		>
 			{children || (
 				<>
 					<div className="space-y-3">
 						<div className="flex items-center justify-between">
 							<h3 className="text-base font-semibold">{title}</h3>
-							{badge && (
-								<Badge
-									variant={badge.variant || "outline"}
-									className=""
-								>
-									{badge.text}
-								</Badge>
-							)}
+							{extra}
 						</div>
-						<p className="text-3xl font-bold">{value}</p>
+						{typeof value === "string" || typeof value === "number" ? (
+							<p className="line-clamp-3 font-numeric text-3xl font-bold">
+								{value}
+							</p>
+						) : (
+							value
+						)}
 					</div>
-					{subtitle && <p className="mt-auto text-muted-foreground">{subtitle}</p>}
+					{subtitle && (
+						<p
+							className={cn("mt-auto text-muted-foreground", {
+								"text-secondary-foreground": backgroundImg,
+							})}
+						>
+							{subtitle}
+						</p>
+					)}
 				</>
 			)}
 		</Card>

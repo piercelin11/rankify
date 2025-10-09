@@ -47,7 +47,7 @@ export async function getComparisonAlbumsData(albumIds: string[]) {
 			rankings: album.albumRankings
 				.filter((r) => r.submission.completedAt !== null)
 				.map((r) => ({
-					ranking: r.ranking,
+					rank: r.rank,
 					points: r.points,
 					date: r.submission.completedAt!,
 					dateId: r.submission.id,

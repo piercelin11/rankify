@@ -2,97 +2,97 @@
 
 import { useState } from "react";
 import { useRankingTable } from "./hooks/useRankingTable";
-import { useColumnSelector } from "./hooks/useColumnSelector";
 import WindowVirtualizedTable from "./components/WindowVirtualizedTable";
-import ColumnSelectorPanel from "./components/ColumnSelectorPanel";
 import FilterToolbar from "./components/FilterToolbar";
-import type { RankingTableProps, AdvancedFilters, RankingListDataTypeExtend } from "./types";
+import type {
+	RankingTableProps,
+	AdvancedFilters,
+	RankingListDataTypeExtend,
+} from "./types";
+import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
 import SimpleDropdown from "@/components/dropdown/SimpleDropdown";
-import { TIME_RANGE_OPTIONS } from "@/config/timeRangeOptions";
-import { useSearchParams } from "next/navigation";
+import { dateToDashFormat } from "@/lib/utils";
 
-const defaultFeatures = {
-	sort: true,
-	search: true,
-	virtualization: true,
-	timeRangeSelector: true,
-	columnSelector: false,
-	advancedFilter: true,
-	header: true,
-};
-
-export default function RankingTable<
-	T extends RankingListDataTypeExtend,
->({
+export default function RankingTable<T extends RankingListDataTypeExtend>({
 	data,
 	columnKey,
+	currentSubmissionId,
+	submissions = [],
 	isLoading = false,
-	features = defaultFeatures,
 	className,
 	availableAlbums = [],
-	onRowClick,
 }: RankingTableProps<T>) {
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>({});
 
-	const searchParams = useSearchParams();
-	const range = searchParams.get("range");
-
-	const { tableColumns: defaultColumns } = useRankingTable({
+	const { tableColumns } = useRankingTable({
 		data,
 		columnKey,
-		features,
 	});
-
-	const {
-		visibleColumns,
-		columnOptions,
-		visibleCount,
-		toggleColumn,
-		setAllColumns,
-		resetColumns,
-	} = useColumnSelector<T>(defaultColumns, undefined, undefined);
 
 	const handleFiltersChange = (filters: AdvancedFilters) => {
 		setAdvancedFilters(filters);
 	};
 
+	const currentSubmission = submissions.find(
+		(s) => s.id === currentSubmissionId
+	);
+	const latestSubmissionId = submissions[0].id;
+
 	return (
 		<div className={className}>
-			<div className="flex items-center justify-between gap-4 mb-6">
+			<div className="mb-8 flex items-center justify-between gap-4">
+				<div className="flex items-center gap-2">
+					<SimpleSegmentControl
+						className="border-transparent bg-secondary"
+						size="sm"
+						options={[
+							{
+								value: "average",
+								label: "Average",
+								href: `/artist/${data[0].artistId}/my-stats?view=all-rankings`,
+							},
+							{
+								value: "snapshot",
+								label: "Snapshot",
+								href: `/artist/${data[0].artistId}/my-stats?submissionId=${latestSubmissionId}&view=all-rankings`,
+							},
+						]}
+					/>
+					{currentSubmission && (
+						<div className="flex items-center gap-2">
+							<p className="text-sm text-muted-foreground">View rankings from:</p>
+							<SimpleDropdown
+								size="sm"
+								className="w-fit min-w-36 border-transparent bg-secondary"
+								value={currentSubmission.id}
+								defaultValue={currentSubmission.id}
+								placeholder={dateToDashFormat(currentSubmission.date)}
+								options={submissions.map((s) => ({
+									value: s.id,
+									label: dateToDashFormat(s.date),
+									href: `/artist/${data[0].artistId}/my-stats?submissionId=${s.id}&view=all-rankings`,
+								}))}
+							/>
+						</div>
+					)}
+				</div>
 				<FilterToolbar
 					globalFilter={globalFilter}
 					onGlobalFilterChange={setGlobalFilter}
 					filters={advancedFilters}
 					onFiltersChange={handleFiltersChange}
-					showAdvancedFilters={features.advancedFilter}
 					availableAlbums={availableAlbums}
 				/>
-				{features.columnSelector && (
-					<ColumnSelectorPanel
-						columnOptions={columnOptions}
-						visibleCount={visibleCount}
-						onToggleColumn={toggleColumn}
-						onSetAllColumns={setAllColumns}
-						onResetColumns={resetColumns}
-					/>
-				)}
-				{features.timeRangeSelector && <SimpleDropdown
-					className="w-40"
-					options={TIME_RANGE_OPTIONS}
-					defaultValue={range || "all-time"}
-				/>}
 			</div>
 
 			<WindowVirtualizedTable
 				data={data}
-				columns={visibleColumns}
-				features={features}
+				columns={tableColumns}
 				globalFilter={globalFilter}
 				onGlobalFilterChange={setGlobalFilter}
 				advancedFilters={advancedFilters}
 				isLoading={isLoading}
-				onRowClick={onRowClick}
 			/>
 
 			{!isLoading && data.length === 0 && (
@@ -103,11 +103,3 @@ export default function RankingTable<
 		</div>
 	);
 }
-
-// 重新匯出相關型別
-export type {
-	RankingTableProps,
-	AdvancedTableFeatures,
-	AdvancedFilters,
-	ColumnVisibility,
-} from "./types";

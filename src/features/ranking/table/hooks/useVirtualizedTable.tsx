@@ -8,12 +8,11 @@ import {
 	type ColumnDef,
 } from "@tanstack/react-table";
 import type { RankingListDataTypeExtend } from "../types";
-import type { AdvancedTableFeatures, AdvancedFilters } from "../types";
+import type { AdvancedFilters } from "../types";
 
 export function useVirtualizedTable<T extends RankingListDataTypeExtend>({
 	data,
 	columns,
-	features = {},
 	globalFilter,
 	onGlobalFilterChange,
 	advancedFilters = {},
@@ -22,7 +21,6 @@ export function useVirtualizedTable<T extends RankingListDataTypeExtend>({
 }: {
 	data: T[];
 	columns: ColumnDef<T>[];
-	features?: AdvancedTableFeatures;
 	globalFilter?: string;
 	onGlobalFilterChange?: (value: string) => void;
 	advancedFilters?: AdvancedFilters;
@@ -58,8 +56,8 @@ export function useVirtualizedTable<T extends RankingListDataTypeExtend>({
 		},
 		onGlobalFilterChange,
 		getCoreRowModel: getCoreRowModel(),
-		getSortedRowModel: features.sort ? getSortedRowModel() : undefined,
-		getFilteredRowModel: features.search ? getFilteredRowModel() : undefined,
+		getSortedRowModel: getSortedRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
 	});
 
 	const { rows } = table.getRowModel();

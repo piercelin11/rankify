@@ -39,12 +39,12 @@ const options = {
 				color: "#27272a80",
 			},
 			grid: {
-				color: "#27272a80",
+				color: "#27272a00",
 			},
 		},
 	},
-	barPercentage: 0.7,
-	categoryPercentage: 0.6,
+	barPercentage: 0.5,
+	categoryPercentage: 0.8,
 	plugins: {
 		tooltip: {
 			padding: 18,

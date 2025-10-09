@@ -22,6 +22,7 @@ model User {
   albumRankings   AlbumRanking[]
   submissions     RankingSubmission[]
   userPreferences UserPreference[]
+  trackStats      TrackStats[]
 }
 
 model UserPreference {
@@ -62,6 +63,7 @@ model Artist {
   albumRankings    AlbumRanking[]
   submissions      RankingSubmission[]
   tracks           Track[]
+  trackStats       TrackStats[]
 }
 
 model Album {
@@ -97,6 +99,7 @@ model Track {
   album       Album?         @relation(fields: [albumId], references: [id], onDelete: Cascade)
   artist      Artist         @relation(fields: [artistId], references: [id], onDelete: Cascade)
   trackRanks  TrackRanking[]
+  trackStats  TrackStats[]
 
   @@unique([albumId, name])
   @@unique([artistId, name])
@@ -105,19 +108,19 @@ model Track {
 }
 
 model AlbumRanking {
-  id                  String            @id @default(uuid())
-  ranking             Int
-  points              Int
-  albumId             String
-  artistId            String
-  userId              String
-  averageTrackRanking Float
-  basePoints          Int
-  submissionId        String
-  album               Album             @relation(fields: [albumId], references: [id])
-  artist              Artist            @relation(fields: [artistId], references: [id])
-  submission          RankingSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String            @id @default(uuid())
+  rank             Int
+  points           Int
+  albumId          String
+  artistId         String
+  userId           String
+  averageTrackRank Float
+  basePoints       Int
+  submissionId     String
+  album            Album             @relation(fields: [albumId], references: [id])
+  artist           Artist            @relation(fields: [artistId], references: [id])
+  submission       RankingSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, submissionId, albumId])
 }
@@ -156,6 +159,37 @@ model TrackRanking {
 
   @@unique([submissionId, trackId])
   @@index([userId])
+}
+
+model TrackStats {
+  id       String @id @default(cuid())
+  userId   String
+  artistId String
+  trackId  String
+
+  overallRank         Int
+  previousOverallRank Int?
+  overallRankChange   Int?
+
+  hotStreak            Int @default(0)
+  coldStreak           Int @default(0)
+  cumulativeRankChange Int @default(0)
+
+  highestRank         Int
+  lowestRank          Int
+  previousAverageRank Float?
+  averageRank         Float
+  submissionCount     Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  track  Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, trackId])
+  @@index([userId, artistId])
 }
 
 enum Role {

@@ -1,5 +1,5 @@
 import { getUserSession } from "@/../auth";
-//import { getTracksHistory } from "@/services/track/getTracksHistory";
+import { getTracksHistory } from "@/services/track/getTracksHistory";
 //import { getLoggedAlbumNames } from "@/db/album";
 import { artistViewParamsSchema } from "@/lib/schemas/artist";
 import MyStatsToolbar from "@/components/artist/MyStatsToolbar";
@@ -10,6 +10,11 @@ import SimpleDropdown from "@/components/dropdown/SimpleDropdown";
 import { getArtistRankingSubmissions } from "@/db/ranking";
 import { notFound } from "next/navigation";
 import { dateToDashFormat } from "@/lib/utils";
+import StatsCard from "@/components/card/StatsCard";
+import { PLACEHOLDER_PIC } from "@/constants/placeholder.constants";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 type PageProps = {
 	params: Promise<{ artistId: string; submissionId: string }>;
@@ -25,9 +30,9 @@ export default async function SnapshotPage({
 	const { id: userId } = await getUserSession();
 
 	const submissions = await getArtistRankingSubmissions({ artistId, userId });
-	const currentSubmissions = submissions.find((s) => s.id === submissionId);
+	const currentSubmission = submissions.find((s) => s.id === submissionId);
 
-	if (!currentSubmissions) {
+	if (!currentSubmission) {
 		notFound();
 	}
 
@@ -38,12 +43,13 @@ export default async function SnapshotPage({
 		submissionId,
 	});
 
-	// 獲取 Snapshot 資料
-	/* const trackRankings = await getTracksHistory({
+	const trackHistory = await getTracksHistory({
 		artistId,
 		userId,
 		submissionId,
 	});
+	// 獲取 Snapshot 資料
+	/* 
 	const albums = await getLoggedAlbumNames({ artistId, userId }); */
 
 	return (
@@ -56,15 +62,15 @@ export default async function SnapshotPage({
 					latestSubmissionId={submissions[0].id}
 				/>
 				{/* 資料區域 */}
-				<section className="space-y-6">
-					<div className="flex items-center gap-2">
-						<p className="text-muted-foreground text-sm">View stats from:</p>
+				<section className="space-y-4">
+					<div className="flex items-center gap-2 mb-10">
+						<p className="text-sm text-muted-foreground">View stats from:</p>
 						<SimpleDropdown
 							size="sm"
-							className="w-fit min-w-36 border-transparent bg-muted"
-							value={currentSubmissions.id}
-							defaultValue={currentSubmissions.id}
-							placeholder={dateToDashFormat(currentSubmissions.date)}
+							className="w-fit min-w-36 border-transparent bg-secondary"
+							value={currentSubmission.id}
+							defaultValue={currentSubmission.id}
+							placeholder={dateToDashFormat(currentSubmission.date)}
 							options={submissions.map((s) => ({
 								value: s.id,
 								label: dateToDashFormat(s.date),
@@ -72,7 +78,53 @@ export default async function SnapshotPage({
 							}))}
 						/>
 					</div>
-					<Card className="p-12">
+					<div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+						<StatsCard className="space-y-3">
+							{trackHistory.slice(0, 3).map((track) => (
+								<div key={track.id} className="flex items-center gap-2">
+									<p className="min-w-5 font-numeric text-lg text-secondary-foreground">
+										{track.rank}
+									</p>
+									<Image
+										src={track.img || PLACEHOLDER_PIC}
+										alt={`${track.name} cover`}
+										className="rounded-lg"
+										width={50}
+										height={50}
+									/>
+									<div className="overflow-hidden">
+										<p className="truncate font-medium">{track.name}</p>
+										<p className="truncate text-sm text-muted-foreground">
+											{track.album?.name}
+										</p>
+									</div>
+								</div>
+							))}
+							<Link
+								href={`/artist/${trackHistory[0].artistId}/my-stats?view=all-rankings&submissionId=${submissionId}`}
+								className="ml-auto flex items-center gap-1 text-sm text-foreground hover:text-primary"
+							>
+								Full rankings
+								<ArrowRight size={16} />
+							</Link>
+						</StatsCard>
+						<StatsCard
+							title={"item.title"}
+							value={"item.value"}
+							subtitle={"item.subtitle"}
+						/>
+						<StatsCard
+							title={"item.title"}
+							value={"item.value"}
+							subtitle={"item.subtitle"}
+						/>
+						<StatsCard
+							title={"item.title"}
+							value={"item.value"}
+							subtitle={"item.subtitle"}
+						/>
+					</div>
+					<Card className="p-6">
 						<h2 className="mb-4">Your Album Points</h2>
 						<DoubleBarChart
 							labels={albumRankings.map((album) => album.name)}
@@ -80,13 +132,19 @@ export default async function SnapshotPage({
 								{
 									label: "points",
 									data: albumRankings.map((album) => album.totalPoints),
-									hoverColor: albumRankings.map((album) => album.color ?? "#464748"),
+									hoverColor: albumRankings.map(
+										(album) => album.color ?? "#464748"
+									),
 								},
 								{
 									label: "previous points",
-									data: albumRankings.map((album) => album.previousTotalPoints ?? 0),
+									data: albumRankings.map(
+										(album) => album.previousTotalPoints ?? 0
+									),
 									color: "#464748BF",
-									hoverColor: albumRankings.map((album) => album.color ?? "#464748"),
+									hoverColor: albumRankings.map(
+										(album) => album.color ?? "#464748"
+									),
 								},
 							]}
 						/>

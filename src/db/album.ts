@@ -104,7 +104,7 @@ export async function getAlbumRanking({
 	return {
 		...album,
 		rankings: album.albumRankings.map((r) => ({
-			ranking: r.ranking,
+			rank: r.rank,
 			points: r.points,
 			date: r.submission?.createdAt || new Date(),
 			dateId: r.submission?.id || r.submissionId || "",

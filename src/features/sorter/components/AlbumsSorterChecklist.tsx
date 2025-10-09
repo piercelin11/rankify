@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Plus, PlusIcon } from "lucide-react";
@@ -10,7 +9,7 @@ import type { Album } from "@prisma/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PLACEHOLDER_PIC } from "@/constants";
 import { cn } from "@/lib/utils";
-import { Progress } from "../ui/progress";
+import { Progress } from "@/components/ui/progress";
 
 type AlbumWithSessions = Album & {
 	sessionCount: number;
@@ -21,11 +20,7 @@ type Props = {
 	artistId: string;
 };
 
-export default function AlbumsSorterChecklist({
-	albums,
-	artistId,
-}: Props) {
-	const router = useRouter();
+export default function AlbumsSorterChecklist({ albums, artistId }: Props) {
 	const [showAll, setShowAll] = useState(false);
 	const isMobile = useIsMobile();
 
@@ -44,22 +39,19 @@ export default function AlbumsSorterChecklist({
 		: albumsSortBySessionCount.slice(0, initialLimit);
 	const hasMore = albumsCount > initialLimit;
 
-	const handleRankAgain = (albumId: string) => {
-		router.push(`/sorter?artistId=${artistId}&type=album&albumId=${albumId}`);
-	};
-
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between gap-6">
 				<div>
-					<h2>Album Sorter Checklist</h2>
+					<h2>Album Rank Progress</h2>
 					<div className="flex items-center gap-2">
 						<Progress
 							className="h-1.5 w-64"
 							value={(sortedAlbumsCount / albumsCount) * 100}
 						/>
 						<p className="text-sm text-muted-foreground">
-							{sortedAlbumsCount}/{albumsCount} sorted • {(sortedAlbumsCount/albumsCount * 100).toFixed(0)}%
+							{sortedAlbumsCount}/{albumsCount} sorted •{" "}
+							{((sortedAlbumsCount / albumsCount) * 100).toFixed(0)}%
 						</p>
 					</div>
 				</div>
@@ -69,7 +61,7 @@ export default function AlbumsSorterChecklist({
 					Finish the Rest
 				</Button>
 			</div>
-			<div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
+			<div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-6">
 				{displayedAlbums.map((album) => (
 					<div key={album.id}>
 						<div className="group relative aspect-square w-full overflow-hidden rounded-lg">
@@ -88,17 +80,15 @@ export default function AlbumsSorterChecklist({
 								/>
 							</Link>
 							<div className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
-								<Button
-									variant="primary"
-									size="icon"
-									className="h-8 w-8 rounded-full shadow-lg"
-									onClick={(e) => {
-										e.stopPropagation();
-										handleRankAgain(album.id);
-									}}
-								>
-									<Plus className="h-4 w-4" />
-								</Button>
+								<Link href={`/sorter/album/${album.id}`}>
+									<Button
+										variant="primary"
+										size="icon"
+										className="h-8 w-8 rounded-full shadow-lg"
+									>
+										<Plus className="h-4 w-4" />
+									</Button>
+								</Link>
 							</div>
 						</div>
 						<div className="mt-2">
@@ -123,9 +113,7 @@ export default function AlbumsSorterChecklist({
 						onClick={() => setShowAll(!showAll)}
 						className="px-0 text-secondary-foreground"
 					>
-						{showAll
-							? "Show less"
-							: `Show all ${albums.length} albums`}
+						{showAll ? "Show less" : `Show all ${albums.length} albums`}
 					</Button>
 				</div>
 			)}
