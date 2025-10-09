@@ -100,7 +100,7 @@ export const getTracksHistory = cache(async ({
 
 		return {
 			...data.track,
-			ranking: data.rank,
+			rank: data.rank,
 			rankPercentile: data.rankPercentile,
 			rankChange: data.rankChange,
 			date: currentDate,

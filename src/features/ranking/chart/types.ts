@@ -20,7 +20,7 @@ export type DynamicTrackData = {
 	name: string;
 	color: string | null;
 	rankings?: Array<{
-		ranking: number;
+		rank: number;
 		rankPercentile: number;
 		rankChange: number | null;
 		date: Date;
@@ -34,7 +34,7 @@ export type DynamicAlbumData = {
 	name: string;
 	color: string | null;
 	rankings?: Array<{
-		ranking: number;
+		rank: number;
 		points: number;
 		date: Date;
 		dateId: string;

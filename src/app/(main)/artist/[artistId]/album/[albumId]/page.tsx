@@ -6,7 +6,7 @@ import { getAlbumRanking, getAlbumComparisonOptions } from "@/db/album";
 import RankingLineChart from "@/features/ranking/chart/RankingLineChart";
 import { notFound } from "next/navigation";
 import { getComparisonAlbumsData } from "./actions";
-import StatsCard from "@/components/card/StatsCard";
+import StatsCard, { StatsCardProps } from "@/components/card/StatsCard";
 import getAlbumsStats from "@/services/album/getAlbumsStats";
 import { getScoreLabel } from "@/lib/utils/score.utils";
 import { AnimatedProgress } from "@/components/ui/animated-progress";
@@ -14,6 +14,7 @@ import getTracksStats from "@/services/track/getTracksStats";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export default async function page({
 	params,
@@ -33,33 +34,29 @@ export default async function page({
 	const albumStats = albums.find((album) => album.id === albumId);
 
 	if (!albumStats) notFound();
-	
-	const albumTracks = (await getTracksStats({ userId, artistId })).filter((track) => track.albumId === albumId);
 
-	const statsCardItems = [
+	const albumTracks = (await getTracksStats({ userId, artistId })).filter(
+		(track) => track.albumId === albumId
+	);
+
+	const statsCardItems: StatsCardProps[] = [
 		{
 			title: "Overall Ranking",
-			value: `#${albumStats.ranking}`,
-			subtitle: `Avg. ranking is ${albumStats.averageRanking}`,
-			badge: {
-				text: `Top ${((albumStats.ranking / albums.length) * 100).toFixed(0)}%`,
-			},
+			value: `#${albumStats.rank}`,
+			subtitle: `Avg. ranking is ${albumStats.averageRank}`,
+			extra: `Top ${((albumStats.rank / albums.length) * 100).toFixed(0)}%`,
 		},
 		{
 			title: "Album Points",
 			value: `${albumStats.avgPoints}`,
 			subtitle: `Avg. points per track is ${(albumStats.avgPoints / albumTracks.length).toFixed(1)}`,
-			badge: {
-				text: getScoreLabel(albumStats.avgPoints),
-			},
+			extra: getScoreLabel(albumStats.avgPoints),
 		},
 		{
 			title: "Favorite Track",
 			value: `${albumTracks[0].name}`,
-			subtitle: `Peak at #${albumTracks[0].peak}`,
-			badge: {
-				text: `#${albumTracks[0].ranking}`,
-			},
+			subtitle: `Peak at #${albumTracks[0].highestRank}`,
+			extra: `#${albumTracks[0].rank}`,
 		},
 	];
 
@@ -74,34 +71,28 @@ export default async function page({
 				defaultValue="artist"
 				variant="primary"
 			/>
-			<div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+			<div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
 				{statsCardItems.map((item) => (
 					<StatsCard
 						key={item.title}
 						title={item.title}
 						value={item.value}
 						subtitle={item.subtitle}
-						badge={item.badge}
+						extra={<Badge variant={"outline"}>{item.extra}</Badge>}
 					/>
 				))}
 				<StatsCard>
 					<div className="space-y-4">
 						<AnimatedProgress
-							value={
-								(albumStats.top10PercentCount / albumStats.sessionCount / albumTracks.length) * 100
-							}
+							value={(albumStats.top10PercentCount / albumTracks.length) * 100}
 							label="Tracks in top 10% Rate"
 						/>
 						<AnimatedProgress
-							value={
-								(albumStats.top25PercentCount / albumStats.sessionCount / albumTracks.length) * 100
-							}
+							value={(albumStats.top25PercentCount / albumTracks.length) * 100}
 							label="Tracks in top 25% Rate"
 						/>
 						<AnimatedProgress
-							value={
-								(albumStats.top50PercentCount / albumStats.sessionCount / albumTracks.length) * 100
-							}
+							value={(albumStats.top50PercentCount / albumTracks.length) * 100}
 							label="Tracks in top 50% Rate"
 						/>
 					</div>

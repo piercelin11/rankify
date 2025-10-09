@@ -9,11 +9,12 @@ import { getComparisonTracksData } from "./actions";
 import { Button } from "@/components/ui/button";
 import getTracksStats from "@/services/track/getTracksStats";
 import { getPeakRankings } from "@/db/ranking";
-import StatsCard from "@/components/card/StatsCard";
+import StatsCard, { StatsCardProps } from "@/components/card/StatsCard";
 import { dateToDashFormat } from "@/lib/utils";
 import { AnimatedProgress } from "@/components/ui/animated-progress";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export default async function page({
 	params,
@@ -38,7 +39,7 @@ export default async function page({
 	if (!trackStats) notFound();
 
 	const peakSessions = await getPeakRankings({
-		peak: trackStats.peak,
+		peak: trackStats.highestRank,
 		trackId,
 		userId,
 	});
@@ -48,32 +49,26 @@ export default async function page({
 	const prevTrack = tracks[currentIndex - 1] || tracks[tracks.length - 1]; // 如果是第一首，取最後一首
 	const nextTrack = tracks[currentIndex + 1] || tracks[0]; // 如果是最後一首，取第一首
 
-	const statsCardItems = [
+	const statsCardItems: StatsCardProps[] = [
 		{
 			title: "Overall Ranking",
-			value: `#${trackStats.ranking}`,
-			subtitle: `Avg. ranking is ${trackStats.averageRanking}`,
-			badge: {
-				text: `Top ${((trackStats.ranking / tracks.length) * 100).toFixed(0)}%`,
-			},
+			value: `#${trackStats.rank}`,
+			subtitle: `Avg. ranking is ${trackStats.averageRank}`,
+			extra: `Top ${((trackStats.rank / tracks.length) * 100).toFixed(0)}%`,
 		},
 		{
 			title: "Peak Position",
-			value: `#${trackStats.peak}`,
+			value: `#${trackStats.highestRank}`,
 			subtitle: `First hit peak at ${dateToDashFormat(peakSessions[0].date)}`,
-			badge: {
-				text: `x${peakSessions.length}`,
-			},
+			extra: `x${peakSessions.length}`,
 		},
 		{
 			title: "Ranking Range",
 			value: trackStats.gap
-				? `#${trackStats.peak} - #${trackStats.worst}`
-				: `#${trackStats.peak} - TBD`,
+				? `#${trackStats.highestRank} - #${trackStats.lowestRank}`
+				: `#${trackStats.highestRank} - TBD`,
 			subtitle: `The gap is ${trackStats.gap}`,
-			badge: {
-				text: `Covers ${trackStats.gap ? ((trackStats.gap / tracks.length) * 100).toFixed(2) : 0}%`,
-			},
+			extra: `Covers ${trackStats.gap ? ((trackStats.gap / tracks.length) * 100).toFixed(2) : 0}%`,
 		},
 	];
 
@@ -84,33 +79,35 @@ export default async function page({
 				defaultValue="artist"
 				variant="primary"
 			/>
-			<div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+			<div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
 				{statsCardItems.map((item) => (
 					<StatsCard
 						key={item.title}
 						title={item.title}
 						value={item.value}
 						subtitle={item.subtitle}
-						badge={item.badge}
+						extra={<Badge variant={"outline"}>{item.extra}</Badge>}
 					/>
 				))}
 				<StatsCard>
 					<div className="space-y-4">
 						<AnimatedProgress
 							value={
-								(trackStats.top5PercentCount / trackStats.sessionCount) * 100
+								(trackStats.top5PercentCount / trackStats.submissionCount) * 100
 							}
 							label="Top 5% Rate"
 						/>
 						<AnimatedProgress
 							value={
-								(trackStats.top25PercentCount / trackStats.sessionCount) * 100
+								(trackStats.top25PercentCount / trackStats.submissionCount) *
+								100
 							}
 							label="Top 25% Rate"
 						/>
 						<AnimatedProgress
 							value={
-								(trackStats.top50PercentCount / trackStats.sessionCount) * 100
+								(trackStats.top50PercentCount / trackStats.submissionCount) *
+								100
 							}
 							label="Top 50% Rate"
 						/>

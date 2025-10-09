@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Filter } from "lucide-react";
+import { Funnel, FunnelPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -7,7 +7,6 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
 import type { AdvancedFilters } from "../types";
 import SearchInput from "./SearchInput";
 import { Separator } from "@/components/ui/separator";
@@ -17,7 +16,6 @@ type FilterToolbarProps = {
 	onGlobalFilterChange: (value: string) => void;
 	filters?: AdvancedFilters;
 	onFiltersChange?: (filters: AdvancedFilters) => void;
-	showAdvancedFilters?: boolean;
 	availableAlbums?: string[]; // 可選的專輯列表
 };
 
@@ -26,7 +24,6 @@ export default function FilterToolbar({
 	onGlobalFilterChange,
 	filters = {},
 	onFiltersChange,
-	showAdvancedFilters = true,
 	availableAlbums = [],
 }: FilterToolbarProps) {
 	const [localFilters, setLocalFilters] = useState<AdvancedFilters>(filters);
@@ -58,25 +55,20 @@ export default function FilterToolbar({
 			<SearchInput
 				globalFilter={globalFilter}
 				setGlobalFilter={onGlobalFilterChange}
-				features={{
-					search: true,
-				}}
 			/>
 
 			{/* Album Filters */}
-			{showAdvancedFilters && availableAlbums.length > 0 && (
+			{availableAlbums.length > 0 && (
 				<Popover>
 					<PopoverTrigger asChild>
 						<Button
-							variant="outline"
-							size="lg"
-							className="items-center gap-1 px-3"
+							variant={activeFilterCount ? "selected" : "secondary"}
+							size="sm"
+							className="gap-1 px-2"
 						>
-							<Filter className="size-10"/>
+							{activeFilterCount > 0 ? <FunnelPlus /> : <Funnel />}
 							{activeFilterCount > 0 && (
-								<Badge variant="secondary">
-									{activeFilterCount}
-								</Badge>
+								<span className="text-base"> {activeFilterCount}</span>
 							)}
 						</Button>
 					</PopoverTrigger>
@@ -84,7 +76,7 @@ export default function FilterToolbar({
 						<div className="space-y-4">
 							{/* Header */}
 							<div className="flex items-center justify-between">
-								<h4 className="font-semibold text-md">Filter by Albums</h4>
+								<h4 className="text-md font-semibold">Filter by Albums</h4>
 								<Button
 									variant="ghost"
 									onClick={clearFilters}
@@ -93,7 +85,7 @@ export default function FilterToolbar({
 									Clear All
 								</Button>
 							</div>
-							<Separator/>
+							<Separator />
 
 							{/* Album List */}
 							<div className="max-h-64 space-y-2 overflow-auto pr-4 scrollbar-hidden">
@@ -111,7 +103,7 @@ export default function FilterToolbar({
 										/>
 										<label
 											htmlFor={albumName}
-											className="flex-1 text-sm cursor-pointer select-none overflow-hidden text-ellipsis text-nowrap leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+											className="flex-1 cursor-pointer select-none overflow-hidden text-ellipsis text-nowrap text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 										>
 											{albumName}
 										</label>

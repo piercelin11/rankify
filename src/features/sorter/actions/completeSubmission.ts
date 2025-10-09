@@ -96,11 +96,11 @@ export default async function completeSubmission({
 					submissionId,
 					artistId: trackRankings[0].artistId,
 					userId,
-					ranking: index + 1,
+					rank: index + 1,
 					albumId: stats.albumId,
 					points: stats.points,
 					basePoints: stats.basePoints,
-					averageTrackRanking: stats.averageTrackRanking,
+					averageTrackRank: stats.averageTrackRanking,
 				}));
 
 				await tx.albumRanking.createMany({

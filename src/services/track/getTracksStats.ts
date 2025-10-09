@@ -1,27 +1,18 @@
 import { cache } from "react";
 import { db } from "@/db/client";
-import getUserPreference from "@/db/user";
-import { buildTrackQueryCondition } from "./buildTrackQueryCondition";
-import { defaultRankingSettings } from "@/features/settings/components/RankingSettingsForm";
-import { DateRange } from "@/types/general";
-import { Prisma } from "@prisma/client";
-import { TrackMetrics, TrackStatsType } from "@/types/track";
+import { TrackStatsType } from "@/types/track";
 
 type getTracksStatsProps = {
 	artistId: string;
 	userId: string;
 	take?: number;
-	dateRange?: DateRange;
 };
 
-async function getPercentileCounts(
-	trackIds: string[],
-	conditions: Prisma.TrackRankingWhereInput
-) {
+async function getPercentileCounts(trackIds: string[]) {
 	const results = await db.trackRanking.findMany({
 		where: {
-			...conditions,
 			trackId: { in: trackIds },
+			submission: { type: "ARTIST", status: "COMPLETED" },
 		},
 		select: {
 			trackId: true,
@@ -43,155 +34,58 @@ async function getPercentileCounts(
 	);
 }
 
-async function getTracksMetrics(
-	artistId: string,
-	userId: string,
-	take?: number,
-	dateRange?: DateRange,
-	trackQueryConditions?: Prisma.TrackWhereInput
-) {
-	const rankingData = await db.trackRanking.groupBy({
-		by: ["trackId"],
-		where: {
-			userId,
-			artistId,
-			track: {
-				...trackQueryConditions,
-			},
-			submission: {
-				type: "ARTIST",
-				status: "COMPLETED",
-				...(dateRange && {
-					createdAt: {
-						...(dateRange.from && { gte: dateRange.from }),
-						...(dateRange.to && { lte: dateRange.to }),
-					},
-				}),
-			},
-		},
-		_min: {
-			rank: true,
-		},
-		_max: {
-			rank: true,
-		},
-		_avg: {
-			rank: true,
-		},
-		_count: {
-			_all: true,
-		},
-		orderBy: [
-			{
-				_avg: {
-					rank: "asc",
-				},
-			},
-			{
-				_min: {
-					rank: "asc",
-				},
-			},
-			{
-				_max: {
-					rank: "asc",
-				},
-			},
-			{
-				trackId: "desc",
-			},
-		],
-		take,
-	});
-
-	return rankingData.map(
-		(item, index): TrackMetrics => ({
-			id: item.trackId,
-			ranking: index + 1,
-			peak: item._min.rank ?? 0,
-			worst: item._max.rank ?? 0,
-			count: item._count._all,
-			averageRanking: item._avg.rank ?? 0,
-		})
-	);
-}
-
 const getTracksStats = cache(
-	async ({ artistId, userId, take, dateRange }: getTracksStatsProps) => {
-		const userPreference = await getUserPreference({ userId });
-		const trackQueryConditions = buildTrackQueryCondition(
-			userPreference?.rankingSettings || defaultRankingSettings
-		);
-
-		const dateFilter: Prisma.RankingSubmissionWhereInput = dateRange
-			? {
-					createdAt: {
-						...(dateRange.from && { gte: dateRange.from }),
-						...(dateRange.to && { lte: dateRange.to }),
-					},
-					status: "COMPLETED",
-					type: "ARTIST",
-				}
-			: { status: "COMPLETED", type: "ARTIST" };
-
-		const trackMetrics = await getTracksMetrics(
-			artistId,
-			userId,
-			take,
-			dateRange,
-			trackQueryConditions
-		);
-		const trackIds = trackMetrics.map((track) => track.id);
-
-		const conditions: Prisma.TrackRankingWhereInput = {
-			userId,
-			artistId,
-			submission: dateFilter,
-			track: trackQueryConditions,
-		};
-
-		const percentileCounts = await getPercentileCounts(trackIds, conditions);
-
-		const allTracks = await db.track.findMany({
+	async ({
+		artistId,
+		userId,
+	}: getTracksStatsProps): Promise<TrackStatsType[]> => {
+		const trackStats = await db.trackStats.findMany({
 			where: {
-				id: { in: trackIds },
 				artistId,
-				trackRanks: { some: { userId } },
+				userId,
 			},
 			include: {
-				album: {
-					select: {
-						name: true,
-						color: true,
+				track: {
+					include: {
+						album: {
+							select: {
+								name: true,
+								color: true,
+							},
+						},
 					},
 				},
 			},
+			orderBy: {
+				overallRank: "asc",
+			},
 		});
-		const allTracksMap = new Map(allTracks.map((track) => [track.id, track]));
 
-		const result: TrackStatsType[] = trackMetrics.map((data) => {
-			const track = allTracksMap.get(data.id)!;
-			const counts = percentileCounts[data.id] || {
+		const trackIds = trackStats.map((stats) => stats.track.id);
+		const percentileCounts = await getPercentileCounts(trackIds);
+
+		const result: TrackStatsType[] = trackStats.map((data) => {
+			const counts = percentileCounts[data.track.id] || {
 				top50: 0,
 				top25: 0,
 				top5: 0,
 			};
 
+			const { track, ...restTrackStats } = data;
+			const { album, ...restTrackData } = track;
+
 			return {
-				...track,
+				...restTrackStats,
+				...restTrackData,
+				rank: data.overallRank,
 				album: {
-					name: track.album?.name ?? null,
-					color: track.album?.color ?? null,
+					name: album?.name ?? null,
+					color: album?.color ?? null,
 				},
-				ranking: data.ranking,
-				averageRanking: data.averageRanking.toFixed(1),
-				peak: data.peak,
-				worst: data.worst,
-				gap: data.worst - data.peak,
+				gap: data.lowestRank - data.highestRank,
 				top50PercentCount: counts.top50,
 				top25PercentCount: counts.top25,
 				top5PercentCount: counts.top5,
-				sessionCount: data.count,
 			};
 		});
 

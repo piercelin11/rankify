@@ -4,7 +4,7 @@ import { db } from "@/db/client";
 export type AlbumHistoryType = Omit<AlbumData, "tracks"> & {
 	submissionId: string;
 	createdAt: Date;
-	ranking: number;
+	rank: number;
 	top25PercentCount: number;
 	top50PercentCount: number;
 	totalPoints: number;
@@ -165,7 +165,7 @@ export async function getAlbumsRankingHistory({
 			...data.album,
 			submissionId,
 			createdAt: data.submission?.createdAt || new Date(),
-			ranking: data.ranking,
+			rank: data.rank,
 			top25PercentCount: top25PercentMap.get(data.albumId) ?? 0,
 			top50PercentCount: top50PercentMap.get(data.albumId) ?? 0,
 			totalPoints: data.points,

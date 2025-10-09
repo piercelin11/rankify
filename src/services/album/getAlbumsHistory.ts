@@ -1,19 +1,7 @@
 import { cache } from "react";
-import { AlbumData } from "@/types/data";
 import { db } from "@/db/client";
 import { notFound } from "next/navigation";
-
-export type AlbumHistoryType = Omit<AlbumData, "tracks"> & {
-	submissionId: string;
-	createdAt: Date;
-	ranking: number;
-	top25PercentCount: number;
-	top50PercentCount: number;
-	totalPoints: number;
-	totalBasePoints: number;
-	previousTotalPoints?: number;
-	pointsChange?: number | null;
-};
+import { AlbumHistoryType } from "@/types/album";
 
 type getAlbumsRankingHistoryProps = {
 	artistId: string;
@@ -49,7 +37,7 @@ export const getAlbumsHistory = cache(async ({
 			},
 		},
 		orderBy: {
-			ranking: "asc",
+			rank: "asc",
 		},
 	});
 
@@ -132,7 +120,7 @@ export const getAlbumsHistory = cache(async ({
 			...data.album,
 			submissionId,
 			createdAt: data.submission?.createdAt || new Date(),
-			ranking: data.ranking,
+			rank: data.rank,
 			top25PercentCount: top25PercentMap.get(data.albumId) ?? 0,
 			top50PercentCount: top50PercentMap.get(data.albumId) ?? 0,
 			totalPoints: data.points,

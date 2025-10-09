@@ -11,42 +11,42 @@ type TabOption = {
 
 type PillTabsProps = {
 	options: TabOption[];
+	size?: "sm" | "md" | "lg";
 	value: string;
 	className?: string;
 };
 
-export default function PillTabs({ options, value, className }: PillTabsProps) {
+export default function PillTabs({
+	options,
+	size = "md",
+	value,
+	className,
+}: PillTabsProps) {
+
+	const sizeClasses = {
+		sm: "h-8 px-4 text-sm",
+		md: "h-10 px-4 text-base",
+		lg: "h-12 px-4 text-base",
+	};
+
 	return (
 		<div className={cn("flex items-center gap-2", className)}>
 			{options.map((option) => (
 				<Link key={option.value} href={option.href}>
-					<PillButton
-						isSelected={value === option.value}
-						label={option.label}
-					/>
+					<button
+						className={cn(
+							"rounded-full font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+							value === option.value
+								? "bg-primary text-primary-foreground"
+								: "bg-secondary text-secondary-foreground hover:bg-accent",
+							sizeClasses[size]
+						)}
+					>
+						{option.label}
+					</button>
 				</Link>
 			))}
 		</div>
 	);
 }
 
-function PillButton({
-	isSelected,
-	label,
-}: {
-	isSelected: boolean;
-	label: string;
-}) {
-	return (
-		<button
-			className={cn(
-				"rounded-full px-4 h-10 text-base font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-				isSelected
-					? "bg-foreground text-background"
-					: "bg-secondary text-secondary-foreground hover:bg-accent"
-			)}
-		>
-			{label}
-		</button>
-	);
-}

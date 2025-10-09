@@ -51,8 +51,6 @@ export default async function page({ params }: pageProps) {
 		})
 
 		if (submissionResult.data) submission = submissionResult.data;
-
-		//redirect(`/sorter/album/${albumId}`);
 	}
 
 	const validation = sorterStateSchema.safeParse(submission.draftState);

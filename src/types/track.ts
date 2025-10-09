@@ -1,5 +1,6 @@
 import { TrackData } from "@/types/data";
 import { AchievementType } from "@/features/ranking/stats/components/AchievementDisplay";
+import { TrackStats } from "@prisma/client";
 
 export type TrackMetrics = {
 	id: string;
@@ -10,7 +11,7 @@ export type TrackMetrics = {
 	averageRanking: number;
 };
 
-export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
+/* export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
 	ranking: number;
 	averageRanking: number | string;
 	peak: number;
@@ -24,7 +25,20 @@ export type TrackStatsType = Omit<TrackData, "artist" | "album"> & {
 	top25PercentCount: number;
 	top5PercentCount: number;
 	sessionCount: number;
+}; */
+
+export type TrackStatsType = TrackStats & Omit<TrackData, "artist" | "album"> & {
+	rank: number;
+	gap: number | null;
+	album: {
+		name: string | null;
+		color: string | null;
+	};
+	top50PercentCount: number;
+	top25PercentCount: number;
+	top5PercentCount: number;
 };
+
 
 export type TrackHistoryType = Omit<TrackData, "artist" | "album"> & {
 	date: Date;
@@ -34,7 +48,7 @@ export type TrackHistoryType = Omit<TrackData, "artist" | "album"> & {
 		name: string;
 		color: string | null;
 	} | null;
-	ranking: number;
+	rank: number;
 	peak: number;
 	rankChange: number | null;
 	rankPercentile: number;

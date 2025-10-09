@@ -1,8 +1,6 @@
 import { getUserSession } from "@/../auth";
 import { getAlbumRankingSessions, getLoggedAlbumNames } from "@/db/album";
 import MyStatsToolbar from "@/components/artist/MyStatsToolbar";
-import ClientHistoryRankingTable from "@/features/ranking/table/client/ClientHistoryRankingTable";
-import ClientStatsRankingTable from "@/features/ranking/table/client/ClientStatsRankingTable";
 import OverviewView from "@/features/ranking/views/OverviewView";
 import { cuidSchema } from "@/lib/schemas/general";
 import {
@@ -14,6 +12,7 @@ import getAlbumsStats from "@/services/album/getAlbumsStats";
 import { getTracksHistory } from "@/services/track/getTracksHistory";
 import getTracksStats from "@/services/track/getTracksStats";
 import { getArtistRankingSubmissions } from "@/db/ranking";
+import RankingTable from "@/features/ranking/table/RankingTable";
 
 type PageProps = {
 	params: Promise<{ artistId: string }>;
@@ -38,22 +37,20 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 	const submissions = await getArtistRankingSubmissions({ artistId, userId });
 	const latestSubmissionId = submissions[0].id;
 
-	const activeTab = submissionId ? "history" : view;
-
 	let content: React.ReactNode;
 
 	if (view === "overview") {
-		const [albumRankings, albumSubmissions] = await Promise.all([
+		const [trackStats, albumStats, albumSubmissions] = await Promise.all([
+			getTracksStats({ artistId, userId }),
 			getAlbumsStats({ artistId, userId, dateRange }),
 			getAlbumRankingSessions({ userId, artistId }),
 		]);
 
 		content = (
 			<OverviewView
-				mode="average"
-				albumRankings={albumRankings}
+				albumStats={albumStats}
 				albumSubmissions={albumSubmissions}
-				artistId={artistId}
+				trackStats={trackStats}
 			/>
 		);
 	} else if (submissionId) {
@@ -63,21 +60,27 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 		]);
 
 		content = (
-			<ClientHistoryRankingTable
-				trackRankings={trackRankings}
-				albums={albums.map((album) => album.name)}
+			<RankingTable
+				data={trackRankings}
+				submissions={submissions}
+				currentSubmissionId={submissionId}
+				columnKey={["peak", "rankChange"]}
+				availableAlbums={albums.map((album) => album.name)}
 			/>
 		);
 	} else {
 		const [trackRankings, albums] = await Promise.all([
-			getTracksStats({ artistId, userId, dateRange }),
+			getTracksStats({ artistId, userId }),
 			getLoggedAlbumNames({ artistId, userId, dateRange }),
 		]);
 
 		content = (
-			<ClientStatsRankingTable
-				trackRankings={trackRankings}
-				albums={albums.map((album) => album.name)}
+			<RankingTable
+				data={trackRankings}
+				submissions={submissions}
+				currentSubmissionId={submissionId}
+				columnKey={["highestRank", "overallRankChange"]}
+				availableAlbums={albums.map((album) => album.name)}
 			/>
 		);
 	}
@@ -86,7 +89,7 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 		<div className="space-y-10 p-content">
 			<MyStatsToolbar
 				artistId={artistId}
-				activeTab={activeTab}
+				activeTab={view}
 				latestSubmissionId={latestSubmissionId}
 			/>
 			{content}

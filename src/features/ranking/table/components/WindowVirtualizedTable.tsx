@@ -16,8 +16,9 @@ import { cn } from "@/lib/utils";
 import { useStickyState } from "@/lib/hooks/useStickyState";
 import { useVirtualizedTable } from "../hooks/useVirtualizedTable";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { AdvancedTableFeatures, AdvancedFilters } from "../types";
+import type { AdvancedFilters } from "../types";
 import { RankingListDataTypeExtend } from "../types";
+import { useRouter } from "next/navigation";
 
 const ROW_HEIGHT = 70;
 const OVERSCAN = 5;
@@ -25,12 +26,10 @@ const OVERSCAN = 5;
 type WindowVirtualizedTableProps<T extends RankingListDataTypeExtend> = {
 	data: T[];
 	columns: ColumnDef<T>[];
-	features: AdvancedTableFeatures;
 	globalFilter: string;
 	onGlobalFilterChange: (value: string) => void;
 	advancedFilters?: AdvancedFilters;
 	isLoading?: boolean;
-	onRowClick?: (item: T) => void;
 };
 
 export default function WindowVirtualizedTable<
@@ -38,15 +37,18 @@ export default function WindowVirtualizedTable<
 >({
 	data,
 	columns,
-	features,
 	globalFilter,
 	onGlobalFilterChange,
 	advancedFilters,
 	isLoading = false,
-	onRowClick,
 }: WindowVirtualizedTableProps<T>) {
 	const [isClient, setIsClient] = useState(false);
+	const router = useRouter();
 	const listRef = useRef<HTMLDivElement>(null);
+
+	function handleRowClick(item: RankingListDataTypeExtend) {
+		router.push(`/artist/${item.artistId}/track/${item.id}`);
+	}
 	const { isStuck, sentinelRef } = useStickyState({
 		rootMargin: "-100px",
 		threshold: 0,
@@ -59,7 +61,6 @@ export default function WindowVirtualizedTable<
 	const { table } = useVirtualizedTable({
 		data,
 		columns,
-		features,
 		globalFilter,
 		onGlobalFilterChange,
 		advancedFilters,
@@ -128,78 +129,74 @@ export default function WindowVirtualizedTable<
 
 	return (
 		<div>
-			{features.header !== false && (
-				<>
-					<div ref={sentinelRef} className="h-0" />
-					<div
-						className={cn(
-							"sticky top-[72px] z-10",
-							isStuck ? "border-b bg-background/85 backdrop-blur" : ""
-						)}
-					>
-						<Table>
-							<TableHeader className={cn({ "border-b": !isStuck })}>
-								{table.getHeaderGroups().map((headerGroup) => (
-									<TableRow
-										key={headerGroup.id}
-										className="border-transparent hover:bg-transparent"
-									>
-										{headerGroup.headers.map((header) => {
-											const isLeftAligned =
-												header.column.id === "ranking" ||
-												header.column.id === "name";
-											const canSort = header.column.getCanSort();
-											const sortState = header.column.getIsSorted();
+			<div ref={sentinelRef} className="h-0" />
+			<div
+				className={cn(
+					"sticky top-[72px] z-10",
+					isStuck ? "border-b backdrop-blur" : ""
+				)}
+			>
+				<Table>
+					<TableHeader className={cn({ "border-b": !isStuck })}>
+						{table.getHeaderGroups().map((headerGroup) => (
+							<TableRow
+								key={headerGroup.id}
+								className="border-transparent hover:bg-transparent"
+							>
+								{headerGroup.headers.map((header) => {
+									const isLeftAligned =
+										header.column.id === "ranking" ||
+										header.column.id === "name";
+									const canSort = header.column.getCanSort();
+									const sortState = header.column.getIsSorted();
 
-											return (
-												<TableHead
-													key={header.id}
-													className={cn("bg-transparent px-4")}
-													style={
-														header.getSize() !== 150
-															? { width: header.getSize() }
-															: {}
-													}
+									return (
+										<TableHead
+											key={header.id}
+											className={cn("bg-transparent px-4")}
+											style={
+												header.getSize() !== 150
+													? { width: header.getSize() }
+													: {}
+											}
+										>
+											{header.isPlaceholder ? null : (
+												<div
+													className={cn(
+														"flex items-center gap-2 text-secondary-foreground",
+														isLeftAligned ? "" : "justify-end",
+														canSort &&
+															"-m-1 cursor-pointer select-none rounded p-1 hover:text-foreground"
+													)}
+													onClick={header.column.getToggleSortingHandler()}
 												>
-													{header.isPlaceholder ? null : (
-														<div
-															className={cn(
-																"flex items-center gap-2 text-secondary-foreground",
-																isLeftAligned ? "" : "justify-end",
-																canSort &&
-																	"-m-1 cursor-pointer select-none rounded p-1 hover:text-foreground"
+													{flexRender(
+														header.column.columnDef.header,
+														header.getContext()
+													)}
+													{canSort && (
+														<div>
+															{sortState === "asc" && (
+																<ArrowUp className="h-4 w-4" />
 															)}
-															onClick={header.column.getToggleSortingHandler()}
-														>
-															{flexRender(
-																header.column.columnDef.header,
-																header.getContext()
+															{sortState === "desc" && (
+																<ArrowDown className="h-4 w-4" />
 															)}
-															{features.sort && canSort && (
-																<div>
-																	{sortState === "asc" && (
-																		<ArrowUp className="h-4 w-4" />
-																	)}
-																	{sortState === "desc" && (
-																		<ArrowDown className="h-4 w-4" />
-																	)}
-																	{!sortState && (
-																		<ArrowUpDown className="h-4 w-4 opacity-50" />
-																	)}
-																</div>
+															{!sortState && (
+																<ArrowUpDown className="h-4 w-4 opacity-50" />
 															)}
 														</div>
 													)}
-												</TableHead>
-											);
-										})}
-									</TableRow>
-								))}
-							</TableHeader>
-						</Table>
-					</div>
-				</>
-			)}
+												</div>
+											)}
+										</TableHead>
+									);
+								})}
+							</TableRow>
+						))}
+					</TableHeader>
+				</Table>
+			</div>
 
 			<div ref={listRef} className="mt-4">
 				<div
@@ -246,11 +243,8 @@ export default function WindowVirtualizedTable<
 									<TableBody>
 										<TableRow
 											data-state={row.getIsSelected() && "selected"}
-											className={cn(
-												"hover:bg-neutral-900",
-												onRowClick && "cursor-pointer hover:bg-muted/70"
-											)}
-											onClick={() => onRowClick?.(row.original)}
+											className={cn("cursor-pointer")}
+											onClick={() => handleRowClick(row.original)}
 										>
 											{row.getVisibleCells().map((cell) => (
 												<TableCell key={cell.id} className="px-4">

@@ -21,7 +21,7 @@ type SimpleSegmentControlProps = {
 	onValueChange?: (value: string) => void;
 	className?: string;
 	size?: "sm" | "md" | "lg";
-	variant?: "primary" | "secondary";
+	variant?: "primary" | "secondary" | "muted";
 };
 
 export default function SimpleSegmentControl({
@@ -42,22 +42,25 @@ export default function SimpleSegmentControl({
 
 	const currentValue = value !== undefined ? value : internalValue;
 
-	const handleValueChange = useCallback((option: SegmentOption) => {
-		if (value === undefined) {
-			setInternalValue(option.value);
-		}
-		onValueChange?.(option.value);
+	const handleValueChange = useCallback(
+		(option: SegmentOption) => {
+			if (value === undefined) {
+				setInternalValue(option.value);
+			}
+			onValueChange?.(option.value);
 
-		if (option.queryParam) {
-			const params = new URLSearchParams(searchParams.toString());
-			params.set(option.queryParam[0], option.queryParam[1]);
-			router.push(`${pathname}?${params.toString()}`);
-		}
+			if (option.queryParam) {
+				const params = new URLSearchParams(searchParams.toString());
+				params.set(option.queryParam[0], option.queryParam[1]);
+				router.push(`${pathname}?${params.toString()}`);
+			}
 
-		if (option.onClick) {
-			option.onClick();
-		}
-	}, [value, onValueChange, router, pathname, searchParams]);
+			if (option.onClick) {
+				option.onClick();
+			}
+		},
+		[value, onValueChange, router, pathname, searchParams]
+	);
 
 	const sizeClasses = {
 		sm: "h-8 text-sm",
@@ -66,32 +69,34 @@ export default function SimpleSegmentControl({
 	};
 
 	const paddingClasses = {
-		sm: "px-3 py-2",
-		md: "px-4 py-2",
-		lg: "px-4 py-2",
+		sm: "px-3",
+		md: "px-4",
+		lg: "px-4",
 	};
 
 	return (
-		<div className={cn(
-			"select-none rounded-lg overflow-hidden inline-flex border",
-			sizeClasses[size],
-			className
-		)}>
+		<div
+			className={cn(
+				"inline-flex select-none overflow-hidden rounded-lg border border-border",
+				sizeClasses[size],
+				className
+			)}
+		>
 			{options.map((option, index) => {
 				const isActive = currentValue === option.value;
 				const isLast = index === options.length - 1;
 
 				const baseClasses = cn(
-					"flex-1 text-nowrap appearance-none border-none outline-none transition-all duration-150",
+					"flex-1 text-nowrap flex items-center justify-center text-secondary-foreground appearance-none border-none outline-none transition-all duration-150",
 					paddingClasses[size],
 					!isLast && "border-r",
-					isActive
-						? variant === "primary"
-							? "bg-primary text-primary-foreground"
-							: "bg-secondary"
-						: "bg-field hover:bg-accent",
-					option.disabled &&
-						"cursor-not-allowed opacity-40"
+					{
+						"bg-primary text-primary-foreground": isActive && variant === "primary",
+						"bg-foreground text-background":
+							isActive && variant === "secondary",
+						"bg-secondary text-foreground": isActive && variant === "muted",
+					},
+					option.disabled && "cursor-not-allowed opacity-40"
 				);
 
 				if (option.href) {
