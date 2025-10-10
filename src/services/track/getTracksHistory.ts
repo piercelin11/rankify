@@ -41,14 +41,24 @@ export const getTracksHistory = cache(async ({
 			rank: "asc",
 		},
 		select: {
-			id: true,
 			rank: true,
 			rankChange: true,
 			rankPercentile: true,
 			trackId: true,
 			submissionId: true,
 			track: {
-				include: {
+				select: {
+					id: true,
+					name: true,
+					artistId: true,
+					albumId: true,
+					img: true,
+					color: true,
+					trackNumber: true,
+					discNumber: true,
+					type: true,
+					releaseDate: true,
+					spotifyUrl: true,
 					album: {
 						select: {
 							name: true,
@@ -94,21 +104,35 @@ export const getTracksHistory = cache(async ({
 		])
 	);
 
-	const result = rankings.map((data) => {
+	const result: TrackHistoryType[] = rankings.map((data) => {
 		const historicalBest = historicalMap.get(data.trackId)?.peak;
 		const isNewPeak = !historicalBest || data.rank < historicalBest;
 
 		return {
-			...data.track,
+			// Track Model 欄位
+			id: data.track.id,
+			name: data.track.name,
+			artistId: data.track.artistId,
+			albumId: data.track.albumId,
+			img: data.track.img,
+			color: data.track.color,
+			trackNumber: data.track.trackNumber,
+			discNumber: data.track.discNumber,
+			type: data.track.type,
+			releaseDate: data.track.releaseDate,
+			spotifyUrl: data.track.spotifyUrl,
+			// TrackRanking Model 欄位
 			rank: data.rank,
 			rankPercentile: data.rankPercentile,
 			rankChange: data.rankChange,
+			// RankingSubmission 欄位
 			date: currentDate,
 			submissionId: data.submissionId,
 			createdAt: currentDate,
-			peak: isNewPeak ? data.rank : historicalBest,
-			countSongs: rankings.length,
+			// 計算欄位
+			peak: isNewPeak ? data.rank : historicalBest!,
 			achievement: isNewPeak ? ["New Peak" as AchievementType] : [],
+			// 關聯資料
 			album: data.track.album,
 		};
 	});

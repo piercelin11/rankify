@@ -28,8 +28,23 @@ export const getAlbumsHistory = cache(async ({
 			userId,
 			submission: { status: "COMPLETED" },
 		},
-		include: {
-			album: true,
+		select: {
+			albumId: true,
+			rank: true,
+			points: true,
+			basePoints: true,
+			album: {
+				select: {
+					id: true,
+					name: true,
+					artistId: true,
+					spotifyUrl: true,
+					color: true,
+					img: true,
+					releaseDate: true,
+					type: true,
+				},
+			},
 			submission: {
 				select: {
 					createdAt: true,
@@ -113,18 +128,29 @@ export const getAlbumsHistory = cache(async ({
 			: []
 	);
 
-	const result = albumRanking.map((data) => {
+	const result: AlbumHistoryType[] = albumRanking.map((data) => {
 		const prevPoints = prevPointsMap.get(data.albumId);
 
 		return {
-			...data.album,
-			submissionId,
-			createdAt: data.submission?.createdAt || new Date(),
+			// Album Model 欄位
+			id: data.album.id,
+			name: data.album.name,
+			artistId: data.album.artistId,
+			spotifyUrl: data.album.spotifyUrl,
+			color: data.album.color,
+			img: data.album.img,
+			releaseDate: data.album.releaseDate,
+			type: data.album.type,
+			// AlbumRanking 欄位
 			rank: data.rank,
-			top25PercentCount: top25PercentMap.get(data.albumId) ?? 0,
-			top50PercentCount: top50PercentMap.get(data.albumId) ?? 0,
 			totalPoints: data.points,
 			totalBasePoints: data.basePoints,
+			// RankingSubmission 欄位
+			submissionId,
+			createdAt: data.submission?.createdAt || new Date(),
+			// 計算欄位
+			top25PercentCount: top25PercentMap.get(data.albumId) ?? 0,
+			top50PercentCount: top50PercentMap.get(data.albumId) ?? 0,
 			previousTotalPoints: prevPoints,
 			pointsChange: calculatePointsChange(data.points, prevPoints),
 		};

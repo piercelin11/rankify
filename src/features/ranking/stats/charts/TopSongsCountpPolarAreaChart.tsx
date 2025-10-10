@@ -3,8 +3,7 @@
 import PolarAreaChart from "@/components/charts/PolarAreaChart";
 import DropdownMenu from "@/components/menu/DropdownMenu";
 import Tabs from "@/components/navigation/Tabs.old";
-import { AlbumHistoryType } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
-import { AlbumStatsType } from "@/types/album";
+import { AlbumHistoryType, AlbumStatsType } from "@/types/album";
 import React, { useState } from "react";
 
 type TopSongsCountpPolarAreaChartProps = {
