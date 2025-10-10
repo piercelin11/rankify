@@ -66,10 +66,19 @@ const getAlbumsStats = cache(async ({
     ];
 
     const [albumData, albumPoints] = await Promise.all([
-        
         db.album.findMany({
             where: {
                 id: { in: relevantAlbumIds },
+            },
+            select: {
+                id: true,
+                name: true,
+                artistId: true,
+                spotifyUrl: true,
+                color: true,
+                img: true,
+                releaseDate: true,
+                type: true,
             },
         }),
 
@@ -93,23 +102,34 @@ const getAlbumsStats = cache(async ({
     const result = albumPoints
         .map((data) => {
             const album = albumDataMap.get(data.albumId);
-            if (!album) return null; 
+            if (!album) return null;
 
             const counts = percentileCounts[data.albumId] || { top5: 0, top10: 0, top25: 0, top50: 0 };
 
             return {
-                ...album,
+                // Album Model 欄位
+                id: album.id,
+                name: album.name,
+                artistId: album.artistId,
+                spotifyUrl: album.spotifyUrl,
+                color: album.color,
+                img: album.img,
+                releaseDate: album.releaseDate,
+                type: album.type,
+                // AlbumRanking 聚合欄位
                 averageRank: data._avg.rank?.toFixed(1) ?? "0",
+                avgPoints: data._avg.points ? Math.round(data._avg.points) : 0,
+                avgBasePoints: data._avg.basePoints ? Math.round(data._avg.basePoints) : 0,
+                submissionCount: data._count.rank,
+                // 計算欄位
+                rank: 0, // 將在下方排序後設定
                 top5PercentCount: counts.top5,
                 top10PercentCount: counts.top10,
                 top25PercentCount: counts.top25,
                 top50PercentCount: counts.top50,
-                avgPoints: data._avg.points ? Math.round(data._avg.points) : 0,
-                avgBasePoints: data._avg.basePoints ? Math.round(data._avg.basePoints) : 0,
-                submissionCount: data._count.rank,
             };
         })
-        .filter(Boolean) as (AlbumStatsType & { avgPoints: number })[];
+        .filter(Boolean) as AlbumStatsType[];
         
     return result
         .sort((a, b) => b.avgPoints - a.avgPoints)
