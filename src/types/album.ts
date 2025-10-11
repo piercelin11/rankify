@@ -4,8 +4,7 @@
  *
  * 資料來源：
  * - Album Model: id, name, artistId, spotifyUrl, color, img, releaseDate, type
- * - AlbumRanking (aggregated): averageRank, avgPoints, avgBasePoints, submissionCount
- * - 計算欄位: rank, top5PercentCount, top10PercentCount, top25PercentCount, top50PercentCount
+ * - AlbumStats: rank, averageRank, avgPoints, submissionCount, top5/10/25/50PercentCount
  */
 export type AlbumStatsType = {
 	// === Album Model 欄位 ===
@@ -18,13 +17,11 @@ export type AlbumStatsType = {
 	releaseDate: Date;
 	type: string;
 
-	// === AlbumRanking 聚合欄位 ===
+	// === AlbumStats 欄位 ===
 	averageRank: number | string;
 	avgPoints: number;
-	avgBasePoints: number;
 	submissionCount: number;
 
-	// === 計算欄位 ===
 	rank: number;
 	top5PercentCount: number;
 	top10PercentCount: number;
@@ -38,7 +35,7 @@ export type AlbumStatsType = {
  *
  * 資料來源：
  * - Album Model: id, name, artistId, spotifyUrl, color, img, releaseDate, type
- * - AlbumRanking: rank, totalPoints, totalBasePoints
+ * - AlbumRanking: rank, totalPoints
  * - RankingSubmission: createdAt
  * - 計算欄位: top25PercentCount, top50PercentCount, previousTotalPoints, pointsChange
  */
@@ -56,7 +53,6 @@ export type AlbumHistoryType = {
 	// === AlbumRanking 欄位 ===
 	rank: number;
 	totalPoints: number;
-	totalBasePoints: number;
 
 	// === RankingSubmission 欄位 ===
 	submissionId: string;

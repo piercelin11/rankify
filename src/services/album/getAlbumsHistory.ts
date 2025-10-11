@@ -32,7 +32,6 @@ export const getAlbumsHistory = cache(async ({
 			albumId: true,
 			rank: true,
 			points: true,
-			basePoints: true,
 			album: {
 				select: {
 					id: true,
@@ -144,7 +143,6 @@ export const getAlbumsHistory = cache(async ({
 			// AlbumRanking 欄位
 			rank: data.rank,
 			totalPoints: data.points,
-			totalBasePoints: data.basePoints,
 			// RankingSubmission 欄位
 			submissionId,
 			createdAt: data.submission?.createdAt || new Date(),
