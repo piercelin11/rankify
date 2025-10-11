@@ -6,6 +6,8 @@ import { RankingResultData } from "../types";
 import { getUserSession } from "@/../auth";
 import { revalidatePath } from "next/cache";
 import { calculateAlbumPoints } from "../utils/calculateAlbumPoints";
+import { updateAlbumStats } from "@/services/album/updateAlbumStats";
+import { updateTrackStats } from "@/services/track/updateTrackStats";
 
 type CompleteSubmissionProps = {
 	trackRankings: RankingResultData[];
@@ -99,7 +101,6 @@ export default async function completeSubmission({
 					rank: index + 1,
 					albumId: stats.albumId,
 					points: stats.points,
-					basePoints: stats.basePoints,
 					averageTrackRank: stats.averageTrackRanking,
 				}));
 
@@ -118,6 +119,9 @@ export default async function completeSubmission({
 						rankChange: t.rankChange,
 					}))
 				);
+
+				// 更新 AlbumStats（基於 TrackStats）
+				await updateAlbumStats(tx, userId, existingSubmission.artistId);
 			}
 		});
 
@@ -126,114 +130,5 @@ export default async function completeSubmission({
 	} catch (error) {
 		console.error("completeSubmission error:", error);
 		return { type: "error", message: "Failed to complete submission" };
-	}
-}
-
-async function updateTrackStats(
-	tx: Prisma.TransactionClient,
-	userId: string,
-	artistId: string,
-	trackRankData: Array<{
-		trackId: string;
-		rank: number;
-		rankChange: number | null;
-	}>
-) {
-	const trackIds = trackRankData.map((t) => t.trackId);
-	const oldStatsArray = await tx.trackStat.findMany({
-		where: { userId, trackId: { in: trackIds } },
-	});
-	const oldStatsMap = new Map(oldStatsArray.map((s) => [s.trackId, s]));
-
-	for (const track of trackRankData) {
-		const oldStats = oldStatsMap.get(track.trackId);
-		const currentRank = track.rank;
-		const rankChange = track.rankChange;
-
-		const submissionCount = (oldStats?.submissionCount ?? 0) + 1;
-		const previousAverageRank = oldStats?.averageRank ?? null;
-		const averageRank =
-			previousAverageRank !== null
-				? (previousAverageRank * (submissionCount - 1) + currentRank) /
-					submissionCount
-				: currentRank;
-
-		const highestRank = Math.min(
-			oldStats?.highestRank ?? Infinity,
-			currentRank
-		);
-		const lowestRank = Math.max(oldStats?.lowestRank ?? 0, currentRank);
-
-		let hotStreak = 0;
-		let coldStreak = 0;
-		if (rankChange !== null) {
-			if (rankChange > 0) {
-				hotStreak = (oldStats?.hotStreak ?? 0) + 1;
-			} else if (rankChange < 0) {
-				coldStreak = (oldStats?.coldStreak ?? 0) + 1;
-			}
-		}
-
-		const cumulativeRankChange =
-			rankChange !== null
-				? (oldStats?.cumulativeRankChange ?? 0) + Math.abs(rankChange)
-				: (oldStats?.cumulativeRankChange ?? 0);
-
-		await tx.trackStat.upsert({
-			where: { userId_trackId: { userId, trackId: track.trackId } },
-			create: {
-				userId,
-				artistId,
-				trackId: track.trackId,
-				overallRank: 0,
-				previousOverallRank: null,
-				overallRankChange: null,
-				submissionCount,
-				averageRank,
-				previousAverageRank: null,
-				highestRank,
-				lowestRank,
-				hotStreak,
-				coldStreak,
-				cumulativeRankChange,
-			},
-			update: {
-				submissionCount,
-				averageRank,
-				previousAverageRank,
-				highestRank,
-				lowestRank,
-				hotStreak,
-				coldStreak,
-				cumulativeRankChange,
-			},
-		});
-	}
-
-	const allStats = await tx.trackStat.findMany({
-		where: { userId, artistId },
-		orderBy: [
-			{ averageRank: "asc" },
-			{ highestRank: "asc" },
-			{ lowestRank: "asc" },
-			{ trackId: "desc" },
-		],
-	});
-
-	for (let i = 0; i < allStats.length; i++) {
-		const stat = allStats[i];
-		const newOverallRank = i + 1;
-		const overallRankChange = stat.overallRank
-			? stat.overallRank - newOverallRank
-			: null;
-
-		await tx.trackStat.update({
-			where: { id: stat.id },
-			data: {
-				previousOverallRank: stat.overallRank,
-				overallRank: newOverallRank,
-				overallRankChange,
-			},
-		});
 	}
 }
