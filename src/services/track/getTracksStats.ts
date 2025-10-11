@@ -44,9 +44,31 @@ const getTracksStats = cache(
 				artistId,
 				userId,
 			},
-			include: {
+			select: {
+				// TrackStat 欄位
+				overallRank: true,
+				highestRank: true,
+				lowestRank: true,
+				averageRank: true,
+				cumulativeRankChange: true,
+				submissionCount: true,
+				hotStreak: true,
+				coldStreak: true,
+				overallRankChange: true,
+				// Track 關聯
 				track: {
-					include: {
+					select: {
+						id: true,
+						name: true,
+						artistId: true,
+						albumId: true,
+						img: true,
+						color: true,
+						trackNumber: true,
+						discNumber: true,
+						type: true,
+						releaseDate: true,
+						spotifyUrl: true,
 						album: {
 							select: {
 								name: true,
@@ -71,21 +93,40 @@ const getTracksStats = cache(
 				top5: 0,
 			};
 
-			const { track, ...restTrackStats } = data;
-			const { album, ...restTrackData } = track;
-
 			return {
-				...restTrackStats,
-				...restTrackData,
+				// Track Model 欄位
+				id: data.track.id,
+				name: data.track.name,
+				artistId: data.track.artistId,
+				albumId: data.track.albumId,
+				img: data.track.img,
+				color: data.track.color,
+				trackNumber: data.track.trackNumber,
+				discNumber: data.track.discNumber,
+				type: data.track.type,
+				releaseDate: data.track.releaseDate,
+				spotifyUrl: data.track.spotifyUrl,
+				// TrackStat Model 欄位
+				overallRank: data.overallRank,
+				highestRank: data.highestRank,
+				lowestRank: data.lowestRank,
+				averageRank: data.averageRank,
+				cumulativeRankChange: data.cumulativeRankChange,
+				submissionCount: data.submissionCount,
+				hotStreak: data.hotStreak,
+				coldStreak: data.coldStreak,
+				overallRankChange: data.overallRankChange,
+				// 計算欄位
 				rank: data.overallRank,
-				album: {
-					name: album?.name ?? null,
-					color: album?.color ?? null,
-				},
 				gap: data.lowestRank - data.highestRank,
 				top50PercentCount: counts.top50,
 				top25PercentCount: counts.top25,
 				top5PercentCount: counts.top5,
+				// 關聯資料
+				album: {
+					name: data.track.album?.name ?? null,
+					color: data.track.album?.color ?? null,
+				},
 			};
 		});
 

@@ -1,4 +1,4 @@
-import { AlbumHistoryType } from "@/lib/database/ranking/history/getAlbumsRankingHistory";
+import { AlbumHistoryType } from "@/types/album";
 import { TrackHistoryType } from "@/types/track";
 import {
 	ArrowDownRoundIcon,

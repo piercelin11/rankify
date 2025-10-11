@@ -1,8 +1,8 @@
-import { RankingResultData } from "@/features/sorter/types";
+type TrackRankingsType = {albumId: string, rank: number}
 
-export function calculateAlbumPoints(trackRankings: RankingResultData[]) {
+export function calculateAlbumPoints(trackRankings: TrackRankingsType[]) {
 	const result = [];
-	const rankingsGroupedByAlbum = new Map<string, RankingResultData[]>();
+	const rankingsGroupedByAlbum = new Map<string, TrackRankingsType[]>();
 	for (const ranking of trackRankings) {
 		if (ranking.albumId) {
 			if (!rankingsGroupedByAlbum.has(ranking.albumId)) {
@@ -13,22 +13,20 @@ export function calculateAlbumPoints(trackRankings: RankingResultData[]) {
 	}
 	for (const [albumId, groupedRankings] of rankingsGroupedByAlbum.entries()) {
 		let totalPoints = 0;
-		let totalBasePoints = 0;
 		let rankSum = 0;
 
 		for (const trackRanking of groupedRankings) {
-			const { points, basePoints } = calculateTrackPoints({
-				trackRanking: trackRanking.ranking,
+			const points = calculateTrackPoints({
+				trackRanking: trackRanking.rank,
 				trackCount: trackRankings.length,
 				albumTrackCount: groupedRankings.length,
 				albumCount: rankingsGroupedByAlbum.size,
 			});
 			totalPoints += points;
-			totalBasePoints += basePoints;
-			rankSum += trackRanking.ranking;
+			rankSum += trackRanking.rank;
 		}
 
-		result.push({albumId, points: totalPoints, basePoints: totalBasePoints, averageTrackRanking: rankSum / groupedRankings.length });
+		result.push({albumId, points: totalPoints, averageTrackRanking: rankSum / groupedRankings.length });
 	}
 
 	return result.sort((a, b) => a.averageTrackRanking - b.averageTrackRanking);
@@ -45,7 +43,6 @@ function calculateTrackPoints({
 	trackRanking,
 	trackCount,
 	albumTrackCount,
-	albumCount,
 }: calculateTrackPointsProps) {
 	// 計算百分比排名
 	const percentileRank =
@@ -66,9 +63,6 @@ function calculateTrackPoints({
 			: 1;
 	// 調整分數
 	const points = Math.floor((score / albumTrackCount) * smoothingFactor);
-	const basePoints = Math.floor(
-		score / (trackCount / albumCount)
-	);
 
-	return { points, basePoints };
+	return points;
 }
