@@ -9,134 +9,56 @@ type getAlbumsStatsProps = {
     dateRange?: DateRange;
 };
 
-function getAlbumPercentileCounts(
-    albumIds: string[],
-    allTrackStats: {
-        track: { albumId: string | null };
-        overallRank: number;
-    }[],
-    totalTrackCount: number
-) {
-    if (totalTrackCount === 0) {
-        return {} as Record<string, { top5: number; top10: number; top25: number; top50: number }>;
-    }
-    
-    const statsByAlbum = allTrackStats.reduce((acc, stat) => {
-        if (stat.track.albumId) {
-            if (!acc[stat.track.albumId]) {
-                acc[stat.track.albumId] = [];
-            }
-            acc[stat.track.albumId].push(stat);
-        }
-        return acc;
-    }, {} as Record<string, typeof allTrackStats>);
-
-    return albumIds.reduce((acc, albumId) => {
-        const counts = { top5: 0, top10: 0, top25: 0, top50: 0 };
-
-        (statsByAlbum[albumId] || []).forEach(track => {
-            const percentile = track.overallRank / totalTrackCount;
-            if (percentile <= 0.05) counts.top5++;
-            if (percentile <= 0.1) counts.top10++;
-            if (percentile <= 0.25) counts.top25++;
-            if (percentile <= 0.5) counts.top50++;
+const getAlbumsStats = cache(
+    async ({
+        artistId,
+        userId,
+    }: getAlbumsStatsProps): Promise<AlbumStatsType[]> => {
+        // 直接查詢 AlbumStats（已預先計算好所有資料）
+        const albumStats = await db.albumStat.findMany({
+            where: { artistId, userId },
+            include: {
+                album: {
+                    select: {
+                        id: true,
+                        name: true,
+                        artistId: true,
+                        spotifyUrl: true,
+                        color: true,
+                        img: true,
+                        releaseDate: true,
+                        type: true,
+                    },
+                },
+            },
+            orderBy: { overallRank: "asc" },
         });
 
-        acc[albumId] = counts;
-        return acc;
-    }, {} as Record<string, { top5: number; top10: number; top25: number; top50: number }>);
-}
- 
-const getAlbumsStats = cache(async ({
-    artistId,
-    userId,
-}: getAlbumsStatsProps): Promise<AlbumStatsType[]> => {
-    const allTrackStatsForArtist = await db.trackStat.findMany({
-        where: { artistId, userId },
-        select: {
-            track: { select: { albumId: true } },
-            overallRank: true,
-        },
-    });
-    
-    const totalTrackCount = allTrackStatsForArtist.length;
+        // 轉換成 AlbumStatsType 格式
+        return albumStats.map((stat) => ({
+            // Album Model 欄位
+            id: stat.album.id,
+            name: stat.album.name,
+            artistId: stat.album.artistId,
+            spotifyUrl: stat.album.spotifyUrl,
+            color: stat.album.color,
+            img: stat.album.img,
+            releaseDate: stat.album.releaseDate,
+            type: stat.album.type,
 
-    const relevantAlbumIds = [
-        ...new Set(allTrackStatsForArtist.map(t => t.track.albumId).filter(Boolean) as string[]),
-    ];
+            // AlbumStats 欄位
+            rank: stat.overallRank,
+            averageRank: stat.averageTrackRank.toFixed(1),
+            avgPoints: stat.points,
+            submissionCount: stat.submissionCount,
 
-    const [albumData, albumPoints] = await Promise.all([
-        db.album.findMany({
-            where: {
-                id: { in: relevantAlbumIds },
-            },
-            select: {
-                id: true,
-                name: true,
-                artistId: true,
-                spotifyUrl: true,
-                color: true,
-                img: true,
-                releaseDate: true,
-                type: true,
-            },
-        }),
-
-        db.albumRanking.groupBy({
-            by: ["albumId"],
-            where: {
-                artistId,
-                userId,
-                albumId: { in: relevantAlbumIds },
-                submission: { type: "ARTIST", status: "COMPLETED" },
-            },
-            _avg: { points: true, basePoints: true, rank: true },
-            _count: { rank: true },
-        }),
-    ]);
-    
-    const albumDataMap = new Map(albumData.map((album) => [album.id, album]));
-
-    const percentileCounts = getAlbumPercentileCounts(relevantAlbumIds, allTrackStatsForArtist, totalTrackCount);
-
-    const result = albumPoints
-        .map((data) => {
-            const album = albumDataMap.get(data.albumId);
-            if (!album) return null;
-
-            const counts = percentileCounts[data.albumId] || { top5: 0, top10: 0, top25: 0, top50: 0 };
-
-            return {
-                // Album Model 欄位
-                id: album.id,
-                name: album.name,
-                artistId: album.artistId,
-                spotifyUrl: album.spotifyUrl,
-                color: album.color,
-                img: album.img,
-                releaseDate: album.releaseDate,
-                type: album.type,
-                // AlbumRanking 聚合欄位
-                averageRank: data._avg.rank?.toFixed(1) ?? "0",
-                avgPoints: data._avg.points ? Math.round(data._avg.points) : 0,
-                avgBasePoints: data._avg.basePoints ? Math.round(data._avg.basePoints) : 0,
-                submissionCount: data._count.rank,
-                // 計算欄位
-                rank: 0, // 將在下方排序後設定
-                top5PercentCount: counts.top5,
-                top10PercentCount: counts.top10,
-                top25PercentCount: counts.top25,
-                top50PercentCount: counts.top50,
-            };
-        })
-        .filter(Boolean) as AlbumStatsType[];
-        
-    return result
-        .sort((a, b) => b.avgPoints - a.avgPoints)
-        .map((data, index) => ({
-            ...data,
-            rank: index + 1,
+            // 百分位統計（已預先計算）
+            top5PercentCount: stat.top5PercentCount,
+            top10PercentCount: stat.top10PercentCount,
+            top25PercentCount: stat.top25PercentCount,
+            top50PercentCount: stat.top50PercentCount,
         }));
-});
+    }
+);
 
 export default getAlbumsStats;

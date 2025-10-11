@@ -20,6 +20,7 @@ model User {
   updatedAt       DateTime            @updatedAt
   accounts        Account[]
   albumRankings   AlbumRanking[]
+  albumStats      AlbumStat[]
   submissions     RankingSubmission[]
   userPreferences UserPreference[]
   trackStats      TrackStat[]
@@ -61,6 +62,7 @@ model Artist {
   userId           String?
   albums           Album[]
   albumRankings    AlbumRanking[]
+  albumStats       AlbumStat[]
   submissions      RankingSubmission[]
   tracks           Track[]
   trackStats       TrackStat[]
@@ -77,6 +79,7 @@ model Album {
   type          AlbumType
   artist        Artist              @relation(fields: [artistId], references: [id], onDelete: Cascade)
   albumRankings AlbumRanking[]
+  albumStats    AlbumStat[]
   submissions   RankingSubmission[]
   tracks        Track[]
 
@@ -115,7 +118,6 @@ model AlbumRanking {
   artistId         String
   userId           String
   averageTrackRank Float
-  basePoints       Int
   submissionId     String
   album            Album             @relation(fields: [albumId], references: [id])
   artist           Artist            @relation(fields: [artistId], references: [id])
@@ -190,6 +192,54 @@ model TrackStat {
 
   @@unique([userId, trackId])
   @@index([userId, artistId])
+}
+
+model AlbumStat {
+  id       String @id @default(cuid())
+  userId   String
+  artistId String
+  albumId  String
+
+  // ========== 核心統計（基於 TrackStats） ==========
+
+  // 專輯分數（基於 TrackStats.overallRank 計算）
+  points              Int
+  previousPoints      Int?
+  pointsChange        Int?
+
+  // 專輯排名（基於 points 排序）
+  overallRank         Int
+  previousOverallRank Int?
+  overallRankChange   Int?
+
+  // 輔助統計
+  averageTrackRank    Float // 該專輯所有歌的 overallRank 平均（顯示用）
+  trackCount          Int   // 該專輯有幾首歌
+  submissionCount     Int   // 該專輯被排名幾次（對應 AlbumRanking 的提交次數）
+
+  // ========== 百分位統計 ==========
+  // 意義：這張專輯有幾首歌的綜合排名在前 X%
+  // 例如：totalTrackCount=100 時，overallRank 1-5 的歌曲符合 top5PercentCount
+
+  top5PercentCount  Int // 前 5% 的歌曲數 (overallRank / totalTrackCount <= 0.05)
+  top10PercentCount Int // 前 10% 的歌曲數 (overallRank / totalTrackCount <= 0.10)
+  top25PercentCount Int // 前 25% 的歌曲數 (overallRank / totalTrackCount <= 0.25)
+  top50PercentCount Int // 前 50% 的歌曲數 (overallRank / totalTrackCount <= 0.50)
+
+  // ========== 時間戳記 ==========
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ========== 關聯 ==========
+
+  album  Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, albumId])
+  @@index([userId, artistId])
+  @@index([overallRank])
 }
 
 enum Role {
