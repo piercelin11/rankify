@@ -1,4 +1,4 @@
-type TrackRankingsType = {albumId: string, rank: number}
+type TrackRankingsType = {albumId: string | null, rank: number}
 
 export function calculateAlbumPoints(trackRankings: TrackRankingsType[]) {
 	const result = [];
@@ -50,19 +50,19 @@ function calculateTrackPoints({
 	// 計算分數
 	const score =
 		percentileRank > 0.75
-			? percentileRank * 1000
+			? percentileRank * 900
 			: percentileRank > 0.5
-				? percentileRank * 950
+				? percentileRank * 700
 				: percentileRank > 0.25
-					? percentileRank * 650
-					: percentileRank * 500;
-	// 引入平滑係數：若專輯數小於5首且歌曲排名在前百分之五十，則引入平滑係數
+					? percentileRank * 500
+					: percentileRank * 400;
+	// 短專輯懲罰：若專輯數小於5首且歌曲排名在前百分之五十，則引入平滑係數，防止曲目少的專輯僅靠一兩首神曲取勝
 	const smoothingFactor =
 		percentileRank > 0.5 && albumTrackCount < 5
-			? albumTrackCount * 0.15 + 0.25
+			? albumTrackCount * 0.10 + 0.45
 			: 1;
-	// 調整分數
-	const points = Math.floor((score / albumTrackCount) * smoothingFactor);
+	// 長專輯懲罰：防止曲目多的專輯僅靠數量取勝
+	const points = Math.floor((score / Math.pow(albumTrackCount, 0.8)) * smoothingFactor);
 
 	return points;
 }

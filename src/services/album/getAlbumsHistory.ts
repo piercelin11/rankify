@@ -51,7 +51,7 @@ export const getAlbumsHistory = cache(async ({
 			},
 		},
 		orderBy: {
-			rank: "asc",
+			points: "desc",
 		},
 	});
 
@@ -103,6 +103,7 @@ export const getAlbumsHistory = cache(async ({
 			artistId,
 			userId,
 			createdAt: { lt: currentDate },
+			type: "ARTIST",
 			status: "COMPLETED",
 		},
 		orderBy: { createdAt: "desc" },

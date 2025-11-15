@@ -25,7 +25,7 @@ type LineChartFilterProps = {
 	onComparisonDataChange?: (data: ComparisonData[]) => void;
 };
 
-export function LineChartFilter({
+export default function LineChartFilter({
 	defaultTag,
 	menuOptions,
 	parentOptions,
@@ -156,5 +156,3 @@ export function LineChartFilter({
 		</DropdownMenu>
 	);
 }
-
-export default LineChartFilter;

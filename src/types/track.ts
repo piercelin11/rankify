@@ -46,7 +46,7 @@ export type TrackStatsType = {
 	submissionCount: number;
 	hotStreak: number;
 	coldStreak: number;
-	overallRankChange: number | null;
+	rankChange: number | null;
 
 	// === 計算欄位 ===
 	rank: number;

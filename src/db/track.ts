@@ -1,4 +1,5 @@
 import { db } from "@/db/client";
+import { $Enums } from "@prisma/client";
 
 export async function getTrackForTrackPage({ trackId }: { trackId: string }) {
 	const track = await db.track.findFirst({
@@ -17,9 +18,11 @@ export async function getTrackForTrackPage({ trackId }: { trackId: string }) {
 export async function getTracksRankings({
 	userId,
 	trackIds,
+	type = "ARTIST",
 }: {
 	userId: string;
 	trackIds: string[];
+	type?: $Enums.SubmissionType;
 }) {
 	const tracks = await db.track.findMany({
 		where: {
@@ -36,6 +39,10 @@ export async function getTracksRankings({
 			trackRanks: {
 				where: {
 					userId,
+					submission: {
+						type,
+						status: "COMPLETED",
+					},
 				},
 				include: {
 					submission: true,
@@ -64,9 +71,11 @@ export async function getTracksRankings({
 export async function getTrackRanking({
 	userId,
 	trackId,
+	type = "ARTIST",
 }: {
 	userId: string;
 	trackId: string;
+	type?: $Enums.SubmissionType;
 }) {
 	const track = await db.track.findUnique({
 		where: {
@@ -76,6 +85,10 @@ export async function getTrackRanking({
 			trackRanks: {
 				where: {
 					userId,
+					submission: {
+						type,
+						status: "COMPLETED",
+					},
 				},
 				include: {
 					submission: true,
@@ -162,20 +175,16 @@ export async function getTrackComparisonOptions({
 	};
 }
 
-export async function getSinglesByArtistId({
-	artistId,
-}: {
-	artistId: string;
-}) {
+export async function getSinglesByArtistId({ artistId }: { artistId: string }) {
 	const tracks = await db.track.findMany({
 		where: {
 			artistId,
-			album: null
+			album: null,
 		},
 		include: {
 			artist: true,
 			album: true,
-		}
+		},
 	});
 
 	return tracks;
@@ -238,10 +247,7 @@ export async function getTracksByAlbumAndTrackIds({
 			artist: true,
 			album: true,
 		},
-		orderBy: [
-			{ album: { releaseDate: "asc" } },
-			{ trackNumber: "asc" },
-		],
+		orderBy: [{ album: { releaseDate: "asc" } }, { trackNumber: "asc" }],
 	});
 
 	return tracks;

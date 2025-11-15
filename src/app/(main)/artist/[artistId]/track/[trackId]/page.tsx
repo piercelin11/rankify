@@ -56,7 +56,7 @@ export default async function page({
 		{
 			title: "Overall Ranking",
 			value: `#${trackStats.rank}`,
-			subtitle: `Avg. ranking is ${trackStats.averageRank}`,
+			subtitle: `Avg. ranking is ${trackStats.averageRank.toFixed(2)}`,
 			extra: `Top ${((trackStats.rank / tracks.length) * 100).toFixed(0)}%`,
 		},
 		{
