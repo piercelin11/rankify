@@ -106,8 +106,10 @@ export async function updateAlbumStats(
 		const previousOverallRank = oldStats?.overallRank ?? null;
 		const previousPoints = oldStats?.points ?? null;
 
+		const { userId, artistId, albumId, ...rest } = stat;
+
 		const dataPayload: Prisma.AlbumStatCreateInput = {
-			...stat,
+			...rest,
 			overallRank: newRank,
 			previousOverallRank,
 			overallRankChange: previousOverallRank
@@ -118,7 +120,7 @@ export async function updateAlbumStats(
 			// 確保關聯欄位正確
 			user: { connect: { id: userId } },
 			artist: { connect: { id: artistId } },
-			album: { connect: { id: stat.albumId } },
+			album: { connect: { id: albumId } },
 		};
 
 		upsertPromises.push(

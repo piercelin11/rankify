@@ -1,6 +1,5 @@
 "use client";
 
-
 import { Button } from "@/components/ui/button";
 import { GoogleIcon, SpotifyIcon } from "@/components/icons/LogoIcons";
 import handleOath from "@/features/auth/actions/handleOath";

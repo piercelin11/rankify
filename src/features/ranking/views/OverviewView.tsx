@@ -104,7 +104,7 @@ export default function OverviewView({
 						},
 						{
 							label: "base points",
-							data: albumStats.map((album) => album.avgBasePoints),
+							data: albumStats.map((album) => album.avgPoints),
 							color: "#464748BF",
 							hoverColor: albumStats.map((album) => album.color ?? "#464748"),
 						},

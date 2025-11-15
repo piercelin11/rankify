@@ -247,7 +247,7 @@ export default function WindowVirtualizedTable<
 											onClick={() => handleRowClick(row.original)}
 										>
 											{row.getVisibleCells().map((cell) => (
-												<TableCell key={cell.id} className="px-4">
+												<TableCell key={cell.id}>
 													{flexRender(
 														cell.column.columnDef.cell,
 														cell.getContext()
