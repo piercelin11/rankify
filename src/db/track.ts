@@ -107,7 +107,7 @@ export async function getTrackRanking({
 	return {
 		...track,
 		rankings: track.trackRanks.map((r) => ({
-			ranking: r.rank,
+			rank: r.rank,
 			rankPercentile: r.rankPercentile,
 			rankChange: r.rankChange,
 			date: r.submission.createdAt,

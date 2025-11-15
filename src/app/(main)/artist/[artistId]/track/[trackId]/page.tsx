@@ -124,7 +124,7 @@ export default async function page({
 					menuOptions={menuOptions}
 					parentOptions={parentOptions}
 					config={{
-						dataKey: "ranking",
+						dataKey: "rank",
 						isReverse: true,
 						hasToggle: false,
 					}}
