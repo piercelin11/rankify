@@ -107,14 +107,14 @@ export default async function page({
 					defaultData={defaultAlbum}
 					menuOptions={menuOptions}
 					config={{
-						dataKey: "ranking",
+						dataKey: "rank",
 						isReverse: true,
 						hasToggle: true,
 						toggleOptions: [
 							{
 								label: "Album Ranking",
 								value: "ranking",
-								dataKey: "ranking",
+								dataKey: "rank",
 								isReverse: true,
 							},
 							{

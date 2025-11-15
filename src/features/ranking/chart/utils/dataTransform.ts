@@ -57,8 +57,9 @@ export function transformTrackToDataset(
 	return {
 		name: track.name,
 		color: track.color,
-		datas: track.rankings?.map((item) =>
-			item[dataKey] ? Number(item[dataKey]) : null
-		) ?? [],
+		datas: track.rankings?.map((item) => {
+			const value = item[dataKey];
+			return typeof value === 'number' ? value : null;
+		}) ?? [],
 	};
 }
