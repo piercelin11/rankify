@@ -1,1866 +1,1344 @@
-# AlbumStats 架構重構計畫
+# Sorter 系統修復計畫
 
-## 📋 目標概述
-
-重構專輯統計系統，新增 `AlbumStats` model 作為專輯綜合統計的單一資料來源，解決目前 `getAlbumsStats` 依賴 `AlbumRanking.groupBy` 聚合的效能問題，並移除已棄用的 `basePoints` 欄位。
-
----
-
-## 🎯 核心問題與解決方案
-
-### **問題 1：專輯統計缺乏獨立的 Stats Model**
-
-**現況**：
-```
-getAlbumsStats()
-    ↓
-查詢 AlbumRanking (所有歷史提交)
-    ↓
-groupBy albumId 聚合 (平均 points, basePoints, rank)
-    ↓
-查詢 TrackStats (計算百分位統計)
-    ↓
-合併資料 → 回傳 AlbumStatsType
-```
-
-**問題**：
-- ❌ 每次查詢都要聚合所有 `AlbumRanking` 記錄（效能差）
-- ❌ 無法追蹤專輯排名變化（`previousRank`, `rankChange`）
-- ❌ 資料來源不一致：`points` 來自 AlbumRanking（歷史平均），百分位來自 TrackStats（綜合排名）
-- ❌ 架構不對稱：Track 有 `TrackStats`，但 Album 沒有 `AlbumStats`
-
-**解決方案**：
-```
-使用者完成排名
-    ↓
-1. 寫入 TrackRanking (快照：該次提交的即時排名)
-    ↓
-2. 計算並寫入 AlbumRanking (快照：該次提交的即時專輯分數)
-    ↓
-3. 更新 TrackStats (統計：跨提交的綜合排名)
-    ↓
-4. 更新 AlbumStats (統計：基於 TrackStats 計算專輯分數) ✨ 新增
-    ↓
-getAlbumsStats() → 直接查詢 AlbumStats (超快) ✅
-```
+**建立時間**：2025-11-16  
+**負責人**：Linus AI  
+**預計工時**：1.5 小時
 
 ---
 
-### **問題 2：basePoints 欄位已棄用但仍存在**
+## 執行摘要
 
-**現況**：
-- `AlbumRanking.basePoints` 被寫入但幾乎沒有使用
-- 只在 `getAlbumsStats` 中被平均後回傳，但前端不需要
-- 佔用資料庫空間，增加維護成本
+本計畫針對 Sorter 系統的核心問題提出修復方案：
 
-**問題**：
-- ❌ 未使用的欄位造成混淆（開發者不知道是否該用）
-- ❌ `calculateAlbumPoints` 需計算兩種 points（`points`, `basePoints`）
-- ❌ Schema migration 歷史記錄顯示此欄位為後來新增（非核心設計）
+1. ✅ **問題 1 + 問題 3**：DraftPrompt 狀態機重構（致命 + 體驗問題）
+   - 整合「ResultStage 流程缺失」與「草稿提示時機不當」兩個問題
+   - 一次性重構 DraftPrompt 為清晰的狀態機
+2. ✅ **問題 2**：拖曳功能失效（嚴重）
+3. ⚠️ **問題 4**：型別重構評估（暫不處理）
 
-**解決方案**：
-- ✅ 從 `AlbumRanking` Schema 移除 `basePoints`
-- ✅ 從 `calculateAlbumPoints` 移除 `basePoints` 計算邏輯
-- ✅ 從 `AlbumStatsType` / `AlbumHistoryType` 移除相關欄位
-- ✅ 更新所有受影響的 service 和 component
+**優先順序**：問題 1+3 > 問題 2 > 問題 4
 
 ---
 
-### **問題 3：專輯分數計算依據不明確**
+## 問題 1 + 問題 3：DraftPrompt 狀態機重構（整合修復）
 
-**現況**：
-- `AlbumRanking.points`：基於 `TrackRanking`（該次提交的即時排名）
-- `AlbumStats` 應該基於什麼計算？
+> **注意**：此問題整合了原本的「問題 1：ResultStage 流程缺失」和「問題 3：草稿提示時機不當」，因為兩者都需要修改 DraftPrompt 的狀態判斷邏輯，應該一次性完成。
 
-**需求確認**（使用者已確定）：
-- ✅ `AlbumStats.points` 應基於 `TrackStats.overallRank`（跨提交的綜合排名）
-- ✅ 使用「虛擬排名」：將 `overallRank` 當作 `ranking` 傳入 `calculateAlbumPoints`
-- ✅ 這樣可複用現有的計算邏輯，無需重寫
+### 【問題診斷】
 
-**實作方式**：
-```typescript
-// updateAlbumStats 中
-const trackStats = await db.trackStat.findMany({ where: { userId, artistId } });
+#### 問題 1：ResultStage 流程缺失（致命）
 
-// 轉換成 calculateAlbumPoints 需要的格式
-const virtualRankings = trackStats.map(stat => ({
-    id: stat.trackId,
-    albumId: stat.track.albumId,
-    ranking: stat.overallRank,  // ← 虛擬排名
-}));
+**當前流程（❌ 錯誤）**：
 
-// 複用現有邏輯
-const albumPoints = calculateAlbumPoints(virtualRankings);
+```mermaid
+graph TD
+    A[RankingStage 完成] --> B[useSorter 呼叫 finalizeDraft]
+    B --> C[更新 status = DRAFT, finishFlag = 1]
+    C --> D[revalidatePath 觸發頁面刷新]
+    D --> E[getIncompleteRankingSubmission 查詢]
+    E --> F[找到 status=DRAFT 的提交]
+    F --> G[渲染 DraftPrompt]
+    G --> H[DraftPrompt 只渲染 RankingStage]
+    H --> I[❌ ResultStage 永遠不會被渲染]
 ```
+
+**根本原因**：
+- `DraftPrompt` 沒有檢查 `draftState.finishFlag`
+- 排序完成後（`finishFlag === 1`）仍然渲染 RankingStage
+- 使用者無法進入 ResultStage 查看結果並拖曳調整
+
+#### 問題 3：草稿提示時機不當（體驗問題）
+
+**當前流程（❌ 不直觀）**：
+
+```
+FilterStage → 點擊「開始排序」
+    → createSubmission（創建 status=IN_PROGRESS, percent=0 的草稿）
+    → router.refresh()
+    → getIncompleteRankingSubmission（找到剛創建的草稿）
+    → DraftPrompt 顯示「你有未完成的排序，要繼續嗎？」
+    → 使用者困惑：「我才剛按下開始，怎麼就有草稿了？」
+```
+
+**根本原因**：
+- `createSubmission` 創建時使用 `status: IN_PROGRESS, percent: 0`
+- `DraftPrompt` 對所有 `percent` 值都顯示 Modal
+- 剛創建的草稿（`percent === 0`）被當作「未完成草稿」
+
+#### DraftPrompt 的真實狀態空間
+
+| finishFlag | percent | 實際意義 | **應該渲染什麼** | 當前渲染什麼 |
+|------------|---------|---------|-----------------|-------------|
+| 0 | 0 | 剛創建，尚未開始 | RankingStage（不顯示 Modal） | ❌ Modal |
+| 0 | 1-99 | 進行中，有部分進度 | DraftPrompt Modal | ✅ Modal |
+| 1 | 100 | 已完成，等待提交 | ResultStage | ❌ RankingStage |
+
+**核心洞察**：這是一個**狀態機**，有 3 個互斥狀態，應該用清晰的條件判斷來處理。
+
+#### 影響範圍
+
+- **專輯 Sorter**：`src/app/sorter/album/[albumId]/page.tsx`
+- **藝人 Sorter**：`src/app/sorter/artist/[artistId]/page.tsx`
+- **兩者都受影響**
 
 ---
 
-## 📐 架構設計
+### 【修復方案】
 
-### **最終資料流**
+#### 方案選擇：重構 DraftPrompt 為狀態機（推薦）
 
-```
-─────────────────────────────────────────────
-              快照層 (歷史記錄)
-─────────────────────────────────────────────
-  TrackRanking              AlbumRanking
-  (每次提交的即時排名)       (每次提交的即時專輯分數)
-        ↓                         ↓
-      用於                       用於
-  getTracksHistory         getAlbumsHistory
-                           + RankingLineChart
-        ↓
-─────────────────────────────────────────────
-              統計層 (綜合統計)
-─────────────────────────────────────────────
-    TrackStats                AlbumStats ✨
-  (跨提交綜合統計)          (基於 TrackStats 計算)
-        ↓                         ↓
-      用於                       用於
-  getTracksStats            getAlbumsStats
-```
+**做法**：
+- 在 DraftPrompt 中加入清晰的狀態判斷邏輯
+- 判斷順序（優先級）：
+  1. `finishFlag === 1` → 渲染 ResultStage
+  2. `percent === 0` → 渲染 RankingStage（不顯示 Modal）
+  3. `0 < percent < 100` → 顯示 DraftPrompt Modal
 
-**關鍵設計決策**：
-1. **保留 AlbumRanking**：用於歷史快照（`getAlbumsHistory`, `RankingLineChart`）
-2. **新增 AlbumStats**：用於綜合統計（`getAlbumsStats`）
-3. **移除 basePoints**：簡化計算邏輯，減少維護成本
-4. **複用 calculateAlbumPoints**：無需重寫，只改輸入資料來源
+**優點**：
+- ✅ 改動最小（只需修改 1 個檔案）
+- ✅ 邏輯清晰（狀態機，易於理解和測試）
+- ✅ 一次性解決兩個問題
+- ✅ 不需要新增路由或改變資料結構
 
----
+**缺點**：
+- ⚠️ DraftPrompt 的職責變得更複雜（需判斷多種狀態）
+- ⚠️ 但這是合理的複雜度（符合元件的職責）
 
-### **Schema 設計**
+#### 替代方案：改變資料結構（不推薦）
 
-#### 新增 AlbumStats Model
+**做法**：
+- `createSubmission` 創建時使用 `status: DRAFT`
+- FilterStage 提交後不 `router.refresh()`，直接客戶端渲染 RankingStage
 
-```prisma
-model AlbumStat {
-  id       String @id @default(cuid())
-  userId   String
-  artistId String
-  albumId  String
-
-  // ========== 核心統計（基於 TrackStats） ==========
-
-  // 專輯分數（基於 TrackStats.overallRank 計算）
-  points              Int
-  previousPoints      Int?
-  pointsChange        Int?
-
-  // 專輯排名（基於 points 排序）
-  overallRank         Int
-  previousOverallRank Int?
-  overallRankChange   Int?
-
-  // 輔助統計
-  averageTrackRank    Float    // 該專輯所有歌的 overallRank 平均（顯示用）
-  trackCount          Int      // 該專輯有幾首歌
-  submissionCount     Int      // 該專輯被排名幾次（對應 AlbumRanking 的提交次數）
-
-  // ========== 百分位統計 ==========
-  // 意義：這張專輯有幾首歌的綜合排名在前 X%
-  // 例如：totalTrackCount=100 時，overallRank 1-5 的歌曲符合 top5PercentCount
-
-  top5PercentCount    Int      // 前 5% 的歌曲數 (overallRank / totalTrackCount <= 0.05)
-  top10PercentCount   Int      // 前 10% 的歌曲數 (overallRank / totalTrackCount <= 0.10)
-  top25PercentCount   Int      // 前 25% 的歌曲數 (overallRank / totalTrackCount <= 0.25)
-  top50PercentCount   Int      // 前 50% 的歌曲數 (overallRank / totalTrackCount <= 0.50)
-
-  // ========== 時間戳記 ==========
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // ========== 關聯 ==========
-
-  album  Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, albumId])
-  @@index([userId, artistId])
-  @@index([overallRank])  // 用於全域排名查詢
-}
-```
-
-**設計要點**：
-1. **點數與排名分離**：`points` 用於計算，`overallRank` 用於顯示
-2. **變化追蹤**：`previousPoints`, `pointsChange`, `previousOverallRank`, `overallRankChange`
-3. **百分位預先計算**：避免每次查詢都重新計算（效能提升 2-3 倍）
-4. **複合索引**：`userId + albumId` 唯一，`userId + artistId` 查詢優化
-
-#### 修改 AlbumRanking Model（移除 basePoints）
-
-```diff
-model AlbumRanking {
-  id               String            @id @default(uuid())
-  rank             Int
-  points           Int
-  albumId          String
-  artistId         String
-  userId           String
-  averageTrackRank Float
-- basePoints       Int
-  submissionId     String
-  album            Album             @relation(fields: [albumId], references: [id])
-  artist           Artist            @relation(fields: [artistId], references: [id])
-  submission       RankingSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, submissionId, albumId])
-}
-```
+**缺點**：
+- ❌ 影響範圍大（需修改 server action + 頁面元件）
+- ❌ 可能破壞其他依賴 `status` 的邏輯
+- ❌ 不符合實用主義原則
 
 ---
 
-### **資料計算邏輯**
+### 【實作步驟】
 
-#### updateAlbumStats 核心流程
+#### 步驟 1：重構 DraftPrompt.tsx 為狀態機
 
-```typescript
-async function updateAlbumStats(
-    tx: Prisma.TransactionClient,
-    userId: string,
-    artistId: string
-) {
-    // 1️⃣ 取得所有 TrackStats（已有 overallRank）
-    const trackStats = await tx.trackStat.findMany({
-        where: { userId, artistId },
-        include: { track: { select: { id: true, albumId: true } } },
-        orderBy: { overallRank: 'asc' }
-    });
+**檔案**：`src/features/sorter/components/DraftPrompt.tsx`
 
-    const totalTrackCount = trackStats.length;
+**修改位置**：L27-86（整個函式主體）
 
-    // 2️⃣ 轉換成虛擬排名格式（複用 calculateAlbumPoints）
-    const virtualRankings = trackStats
-        .filter(stat => stat.track.albumId)
-        .map(stat => ({
-            id: stat.track.id,
-            albumId: stat.track.albumId!,
-            ranking: stat.overallRank,  // ← 關鍵：用 overallRank 當作 ranking
-        }));
+**當前程式碼**：
 
-    // 3️⃣ 計算專輯分數（複用現有邏輯）
-    const albumPoints = calculateAlbumPoints(virtualRankings);
+```tsx
+export function DraftPrompt({
+    submissionId,
+    draftState,
+    draftDate,
+    tracks,
+    userId,
+}: DraftPromptProps) {
+    const [choice, setChoice] = useState<"continue" | "restart" | null>(null);
+    const [isPending, startTransition] = useTransition();
+    const router = useRouter();
 
-    // 4️⃣ 計算百分位統計（預先計算，避免查詢時重複運算）
-    const percentileCounts = calculatePercentileCounts(trackStats, totalTrackCount);
+    const handleRestart = () => {
+        setChoice("restart");
+        startTransition(async () => {
+            await deleteSubmission({ submissionId });
+            router.refresh();
+        });
+    };
 
-    // 5️⃣ 更新每張專輯的 AlbumStats
-    for (const albumData of albumPoints) {
-        const albumTracks = trackStats.filter(
-            t => t.track.albumId === albumData.albumId
+    // 使用者尚未選擇 → 顯示 Modal
+    if (choice === null) {
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                {/* Modal 內容 */}
+            </div>
         );
-        const avgTrackRank = mean(albumTracks.map(t => t.overallRank));
-
-        const oldStats = await tx.albumStat.findUnique({
-            where: { userId_albumId: { userId, albumId: albumData.albumId } }
-        });
-
-        await tx.albumStat.upsert({
-            where: { userId_albumId: { userId, albumId: albumData.albumId } },
-            create: {
-                userId,
-                artistId,
-                albumId: albumData.albumId,
-                points: albumData.points,
-                previousPoints: null,
-                pointsChange: null,
-                overallRank: 0, // 稍後重新排序
-                previousOverallRank: null,
-                overallRankChange: null,
-                averageTrackRank: avgTrackRank,
-                trackCount: albumTracks.length,
-                ...percentileCounts[albumData.albumId],
-            },
-            update: {
-                previousPoints: oldStats?.points,
-                points: albumData.points,
-                pointsChange: oldStats?.points
-                    ? albumData.points - oldStats.points
-                    : null,
-                averageTrackRank: avgTrackRank,
-                trackCount: albumTracks.length,
-                ...percentileCounts[albumData.albumId],
-            }
-        });
     }
 
-    // 6️⃣ 重新計算 overallRank（基於 points 排序）
-    const allAlbumStats = await tx.albumStat.findMany({
-        where: { userId, artistId },
-        orderBy: { points: 'desc' }  // ← 分數高的排前面
-    });
-
-    for (let i = 0; i < allAlbumStats.length; i++) {
-        const newRank = i + 1;
-        const oldRank = allAlbumStats[i].overallRank;
-
-        await tx.albumStat.update({
-            where: { id: allAlbumStats[i].id },
-            data: {
-                previousOverallRank: oldRank || null,
-                overallRank: newRank,
-                overallRankChange: oldRank ? oldRank - newRank : null
-            }
-        });
-    }
-}
-
-// 輔助函式：計算百分位統計
-function calculatePercentileCounts(
-    trackStats: Array<{ overallRank: number, track: { albumId: string | null } }>,
-    totalTrackCount: number
-) {
-    // 1️⃣ 預先計算閾值（避免重複除法運算）
-    const threshold5 = totalTrackCount * 0.05;
-    const threshold10 = totalTrackCount * 0.10;
-    const threshold25 = totalTrackCount * 0.25;
-    const threshold50 = totalTrackCount * 0.50;
-
-    // 2️⃣ 只遍歷一次，同時統計所有百分位（效能提升 4 倍）
-    const result: Record<string, {
-        top5PercentCount: number,
-        top10PercentCount: number,
-        top25PercentCount: number,
-        top50PercentCount: number
-    }> = {};
-
-    for (const stat of trackStats) {
-        if (!stat.track.albumId) continue;
-
-        if (!result[stat.track.albumId]) {
-            result[stat.track.albumId] = {
-                top5PercentCount: 0,
-                top10PercentCount: 0,
-                top25PercentCount: 0,
-                top50PercentCount: 0
-            };
-        }
-
-        const counts = result[stat.track.albumId];
-        if (stat.overallRank <= threshold5) counts.top5PercentCount++;
-        if (stat.overallRank <= threshold10) counts.top10PercentCount++;
-        if (stat.overallRank <= threshold25) counts.top25PercentCount++;
-        if (stat.overallRank <= threshold50) counts.top50PercentCount++;
+    // 使用者選擇重新開始 → 顯示刪除中畫面
+    if (choice === "restart") {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <p className="text-muted-foreground">正在刪除草稿...</p>
+            </div>
+        );
     }
 
-    return result;
-}
-
-// 輔助函式：計算平均值
-function mean(numbers: number[]): number {
-    if (numbers.length === 0) return 0;
-    return numbers.reduce((sum, n) => sum + n, 0) / numbers.length;
-}
-```
-
-**計算邏輯說明**：
-1. **虛擬排名**：將 `TrackStats.overallRank` 當作「一次虛擬的排名提交」
-2. **複用邏輯**：直接使用現有的 `calculateAlbumPoints`，無需重寫
-3. **百分位預先計算**：避免 `getAlbumsStats` 每次查詢時都要計算
-4. **兩次排序**：
-   - 第一次：計算 `points`
-   - 第二次：基於 `points` 計算 `overallRank`（支援排名變化追蹤）
-
----
-
-## 📝 實施步驟總覽
-
-### **第一階段：新增功能（不破壞現有功能）**
-
-| Phase | 流程 | 檔案操作 | 說明 |
-|-------|------|----------|------|
-| **Phase 1A** | 新增 AlbumStat Model | 編輯 `prisma/schema.prisma`<br>執行 Migration | 只新增，不刪除 basePoints |
-| **Phase 2** | 實作 updateAlbumStats | 新增 `src/services/album/updateAlbumStats.ts`<br>新增 `scripts/test-updateAlbumStats.ts` | 核心統計邏輯 |
-| **Phase 3** | 整合到 completeSubmission | 編輯 `src/features/sorter/actions/completeSubmission.ts` | 提交時自動更新 AlbumStats |
-| **Phase 4** | 重構 getAlbumsStats | 編輯 `src/services/album/getAlbumsStats.ts` | 從 140 行簡化為 40 行 |
-| **Phase 7** | 回填現有資料 | 新增 `scripts/backfillAlbumStats.ts`<br>新增 `scripts/recalculateAlbumScores.ts`<br>執行 backfill Script | 為現有使用者回填 AlbumStats |
-
-**驗證點**：AlbumStats 已正常運作，basePoints 仍存在但不影響功能
-
----
-
-### **第二階段：清理舊欄位（確認新功能穩定後）**
-
-| Phase | 流程 | 檔案操作 | 說明 |
-|-------|------|----------|------|
-| **Phase 5** | 移除 basePoints 計算 | 編輯 `src/features/ranking/utils/calculateAlbumPoints.ts`<br>編輯 `src/features/sorter/utils/calculateAlbumPoints.ts`<br>編輯 `src/features/sorter/actions/completeSubmission.ts` | 移除 basePoints 寫入邏輯 |
-| **Phase 6** | 更新 TypeScript 類型 | 編輯 `src/types/album.ts`<br>編輯 `src/services/album/getAlbumsHistory.ts` | 移除 basePoints 相關型別 |
-| **Phase 1B** | 刪除 basePoints 欄位 | 編輯 `prisma/schema.prisma`<br>執行 Migration | 破壞性變更：移除欄位 |
-| **Phase 8** | 最終驗證與清理 | 執行 Lint + TypeScript + E2E 測試 | 確保無殘留引用 |
-
----
-
-## 📝 實施步驟詳細說明
-
-### **Phase 1：Schema 變更與 Migration**
-
-#### **任務 1.1：修改 Prisma Schema（第一階段：只新增）**
-
-**檔案**：`prisma/schema.prisma`
-
-**變更：新增 AlbumStat Model（暫時保留 `AlbumRanking.basePoints`）**
-
-```prisma
-model AlbumStat {
-  id       String @id @default(cuid())
-  userId   String
-  artistId String
-  albumId  String
-
-  points              Int
-  previousPoints      Int?
-  pointsChange        Int?
-
-  overallRank         Int
-  previousOverallRank Int?
-  overallRankChange   Int?
-
-  averageTrackRank    Float
-  trackCount          Int
-  submissionCount     Int
-
-  top5PercentCount    Int
-  top10PercentCount   Int
-  top25PercentCount   Int
-  top50PercentCount   Int
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  album  Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, albumId])
-  @@index([userId, artistId])
-  @@index([overallRank])
-}
-```
-
-**更新 User / Artist / Album 關聯**
-
-```diff
-model User {
-  // ... 現有欄位
-  albumRankings   AlbumRanking[]
-+ albumStats      AlbumStat[]
-  // ...
-}
-
-model Artist {
-  // ... 現有欄位
-  albumRankings    AlbumRanking[]
-+ albumStats       AlbumStat[]
-  // ...
-}
-
-model Album {
-  // ... 現有欄位
-  albumRankings AlbumRanking[]
-+ albumStats    AlbumStat[]
-  // ...
-}
-```
-
----
-
-#### **任務 1.2：執行 Prisma Migration（第一階段）**
-
-**步驟**：
-
-```bash
-# 1. 創建 migration（只新增 AlbumStat，不刪 basePoints）
-npx prisma migrate dev --name add_album_stats
-
-# 2. 檢查生成的 SQL
-# 應只包含：
-# - CREATE TABLE "AlbumStat" (...)
-# - ALTER TABLE "User" / "Artist" / "Album" 添加關聯
-
-# 3. Migration 會自動執行並生成 Prisma Client
-```
-
-**風險考量**：
-- ✅ **只新增不刪除**，零破壞性
-- ✅ 現有功能完全不受影響
-- ✅ 隨時可以 rollback（只需刪除 AlbumStat table）
-
----
-
-#### **任務 1.3：驗證 Migration**
-
-**驗證項目**：
-- [ ] `npx prisma generate` 成功
-- [ ] TypeScript 編譯通過（`npx tsc --noEmit`）
-- [ ] 檢查資料庫：`AlbumStat` table 已創建
-- [ ] 檢查資料庫：`AlbumRanking.basePoints` 仍存在（暫時保留）
-- [ ] 開發環境資料庫可正常連線
-
-**風險處理**：
-- 如果 Migration 失敗 → 檢查是否有外鍵約束衝突
-- 如果 TypeScript 編譯失敗 → 暫時忽略（因為尚未實作 `updateAlbumStats`）
-
----
-
-### **Phase 2：實作 updateAlbumStats 核心邏輯**
-
-#### **任務 2.1：建立 updateAlbumStats 函式**
-
-**檔案**：`src/services/album/updateAlbumStats.ts`（新建）
-
-**實作**：
-
-```typescript
-import { Prisma } from "@prisma/client";
-import { calculateAlbumPoints } from "@/features/ranking/utils/calculateAlbumPoints";
-
-/**
- * 更新使用者對某藝人的所有專輯統計
- *
- * 流程：
- * 1. 查詢所有 TrackStats
- * 2. 轉換成虛擬排名格式
- * 3. 計算專輯分數（複用 calculateAlbumPoints）
- * 4. 計算百分位統計
- * 5. Upsert 每張專輯的 AlbumStats
- * 6. 重新計算所有專輯的 overallRank
- */
-export async function updateAlbumStats(
-    tx: Prisma.TransactionClient,
-    userId: string,
-    artistId: string
-) {
-    // 1️⃣ 取得所有 TrackStats
-    const trackStats = await tx.trackStat.findMany({
-        where: { userId, artistId },
-        include: { track: { select: { id: true, albumId: true } } },
-        orderBy: { overallRank: 'asc' }
-    });
-
-    const totalTrackCount = trackStats.length;
-
-    // 邊界情況：沒有任何歌曲
-    if (totalTrackCount === 0) {
-        return;
-    }
-
-    // 2️⃣ 轉換成虛擬排名格式
-    const virtualRankings = trackStats
-        .filter(stat => stat.track.albumId !== null)
-        .map(stat => ({
-            id: stat.track.id,
-            albumId: stat.track.albumId!,
-            ranking: stat.overallRank,
-        }));
-
-    // 邊界情況：沒有任何專輯歌曲（只有 singles）
-    if (virtualRankings.length === 0) {
-        return;
-    }
-
-    // 3️⃣ 計算專輯分數
-    const albumPoints = calculateAlbumPoints(virtualRankings);
-
-    // 4️⃣ 計算百分位統計
-    const percentileCounts = calculatePercentileCounts(trackStats, totalTrackCount);
-
-    // 5️⃣ 查詢每張專輯的提交次數（submissionCount）
-    const albumSubmissionCounts = await tx.albumRanking.groupBy({
-        by: ['albumId'],
-        where: { userId, artistId },
-        _count: { albumId: true }
-    });
-    const submissionCountMap = new Map(
-        albumSubmissionCounts.map(item => [item.albumId, item._count.albumId])
+    // 使用者選擇繼續 → 顯示 RankingStage
+    return (
+        <RankingStage
+            initialState={draftState}
+            tracks={tracks}
+            submissionId={submissionId}
+            userId={userId}
+        />
     );
+}
+```
 
-    // 6️⃣ 更新每張專輯的 AlbumStats
-    for (const albumData of albumPoints) {
-        const albumTracks = trackStats.filter(
-            t => t.track.albumId === albumData.albumId
+**修改後**：
+
+```tsx
+export function DraftPrompt({
+    submissionId,
+    draftState,
+    draftDate,
+    tracks,
+    userId,
+}: DraftPromptProps) {
+    const [choice, setChoice] = useState<"continue" | "restart" | null>(null);
+    const [isPending, startTransition] = useTransition();
+    const router = useRouter();
+
+    const handleRestart = () => {
+        setChoice("restart");
+        startTransition(async () => {
+            await deleteSubmission({ submissionId });
+            router.refresh();
+        });
+    };
+
+    // ========================================
+    // 狀態機：根據 draftState 決定渲染什麼
+    // ========================================
+
+    // 【狀態 1】排序已完成（finishFlag === 1，percent === 100）
+    // → 直接顯示 ResultStage，讓使用者拖曳調整或提交
+    if (draftState.finishFlag === 1) {
+        return (
+            <ResultStage
+                draftState={draftState}
+                tracks={tracks}
+                userId={userId}
+                submissionId={submissionId}
+            />
         );
-        const avgTrackRank = mean(albumTracks.map(t => t.overallRank));
-        const submissionCount = submissionCountMap.get(albumData.albumId) ?? 0;
-
-        const oldStats = await tx.albumStat.findUnique({
-            where: {
-                userId_albumId: { userId, albumId: albumData.albumId }
-            }
-        });
-
-        await tx.albumStat.upsert({
-            where: {
-                userId_albumId: { userId, albumId: albumData.albumId }
-            },
-            create: {
-                userId,
-                artistId,
-                albumId: albumData.albumId,
-                points: albumData.points,
-                previousPoints: null,
-                pointsChange: null,
-                overallRank: 0,
-                previousOverallRank: null,
-                overallRankChange: null,
-                averageTrackRank: avgTrackRank,
-                trackCount: albumTracks.length,
-                submissionCount,
-                ...percentileCounts[albumData.albumId],
-            },
-            update: {
-                previousPoints: oldStats?.points,
-                points: albumData.points,
-                pointsChange: oldStats?.points
-                    ? albumData.points - oldStats.points
-                    : null,
-                averageTrackRank: avgTrackRank,
-                trackCount: albumTracks.length,
-                submissionCount,
-                ...percentileCounts[albumData.albumId],
-            }
-        });
     }
 
-    // 7️⃣ 重新計算 overallRank
-    const allAlbumStats = await tx.albumStat.findMany({
-        where: { userId, artistId },
-        orderBy: { points: 'desc' }
-    });
-
-    for (let i = 0; i < allAlbumStats.length; i++) {
-        const newRank = i + 1;
-        const oldRank = allAlbumStats[i].overallRank;
-
-        await tx.albumStat.update({
-            where: { id: allAlbumStats[i].id },
-            data: {
-                previousOverallRank: oldRank || null,
-                overallRank: newRank,
-                overallRankChange: oldRank ? oldRank - newRank : null
-            }
-        });
+    // 【狀態 2】剛創建的草稿（percent === 0）
+    // → 使用者剛從 FilterStage 點擊「開始排序」，不應顯示 Modal
+    if (draftState.percent === 0) {
+        return (
+            <RankingStage
+                initialState={draftState}
+                tracks={tracks}
+                submissionId={submissionId}
+                userId={userId}
+            />
+        );
     }
+
+    // ========================================
+    // 狀態 3：有進度但未完成（0 < percent < 100）
+    // → 需要詢問使用者是否繼續
+    // ========================================
+
+    // 【狀態 3.1】使用者尚未選擇 → 顯示 Modal
+    if (choice === null) {
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                <div className="bg-background rounded-lg p-6 max-w-md w-full mx-4 space-y-4">
+                    <h2 className="text-xl font-semibold">Unfinished Draft Found</h2>
+                    <p className="text-muted-foreground">
+                        You have an incomplete draft from {dateToDashFormat(draftDate)}
+                        ({Math.round(draftState.percent)}% complete). Would you like to continue?
+                    </p>
+                    <div className="flex gap-3 justify-end">
+                        <Button
+                            variant="outline"
+                            onClick={handleRestart}
+                            disabled={isPending}
+                        >
+                            Start Over
+                        </Button>
+                        <Button
+                            onClick={() => setChoice("continue")}
+                            disabled={isPending}
+                        >
+                            Continue Draft
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // 【狀態 3.2】使用者選擇重新開始 → 顯示刪除中畫面
+    if (choice === "restart") {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <p className="text-muted-foreground">正在刪除草稿...</p>
+            </div>
+        );
+    }
+
+    // 【狀態 3.3】使用者選擇繼續 → 顯示 RankingStage
+    return (
+        <RankingStage
+            initialState={draftState}
+            tracks={tracks}
+            submissionId={submissionId}
+            userId={userId}
+        />
+    );
 }
+```
 
-// ========== 輔助函式 ==========
+**說明**：
+1. ✅ 優先判斷 `finishFlag === 1`（最高優先級）→ 問題 1 修復
+2. ✅ 其次判斷 `percent === 0`（次高優先級）→ 問題 3 修復
+3. ✅ 最後才處理 Modal 和使用者選擇（預設邏輯）
+4. ✅ Modal 顯示進度百分比（體驗優化）
+5. ✅ 清晰的註解說明每個狀態的語義
 
-function calculatePercentileCounts(
-    trackStats: Array<{
-        overallRank: number,
-        track: { albumId: string | null }
-    }>,
-    totalTrackCount: number
-) {
-    // 1️⃣ 預先計算閾值（避免重複除法運算）
-    const threshold5 = totalTrackCount * 0.05;
-    const threshold10 = totalTrackCount * 0.10;
-    const threshold25 = totalTrackCount * 0.25;
-    const threshold50 = totalTrackCount * 0.50;
+---
 
-    // 2️⃣ 只遍歷一次，同時統計所有百分位（效能提升 4 倍）
-    const result: Record<string, {
-        top5PercentCount: number,
-        top10PercentCount: number,
-        top25PercentCount: number,
-        top50PercentCount: number
-    }> = {};
+#### 步驟 2：加入 ResultStage import
 
-    for (const stat of trackStats) {
-        if (!stat.track.albumId) continue;
+**檔案**：`src/features/sorter/components/DraftPrompt.tsx`
 
-        if (!result[stat.track.albumId]) {
-            result[stat.track.albumId] = {
-                top5PercentCount: 0,
-                top10PercentCount: 0,
-                top25PercentCount: 0,
-                top50PercentCount: 0
-            };
+**修改位置**：L1-10（頂部 imports）
+
+**當前程式碼**：
+
+```tsx
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import deleteSubmission from "../actions/deleteSubmission";
+import { dateToDashFormat } from "@/lib/utils/date.utils";
+import RankingStage from "./RankingStage";
+import type { SorterStateType } from "@/lib/schemas/sorter";
+import type { TrackData } from "@/types/data";
+```
+
+**修改後**：
+
+```tsx
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import deleteSubmission from "../actions/deleteSubmission";
+import { dateToDashFormat } from "@/lib/utils/date.utils";
+import RankingStage from "./RankingStage";
+import ResultStage from "./ResultStage";  // 【新增】
+import type { SorterStateType } from "@/lib/schemas/sorter";
+import type { TrackData } from "@/types/data";
+```
+
+---
+
+### 【測試計畫】
+
+#### 測試案例 1：新排序流程（問題 3 驗證）
+
+1. 前往專輯/藝人頁面
+2. 在 FilterStage 選擇歌曲/專輯
+3. 點擊「開始排序」
+4. **預期結果**：
+   - ❌ **不顯示** DraftPrompt Modal
+   - ✅ **直接進入** RankingStage
+   - 流程順暢，無多餘步驟
+
+#### 測試案例 2：專輯 Sorter 完整流程（問題 1 驗證）
+
+1. 前往專輯頁面 `/sorter/album/[albumId]`
+2. 在 FilterStage 選擇歌曲
+3. 點擊「開始排序」
+4. 在 RankingStage 完成所有比較
+5. **預期結果**：
+   - ✅ 自動進入 ResultStage，顯示排名結果
+   - URL 不變，但畫面切換到結果頁面
+
+#### 測試案例 3：藝人 Sorter 完整流程（問題 1 驗證）
+
+1. 前往藝人頁面 `/sorter/artist/[artistId]`
+2. 在 FilterStage 選擇專輯與歌曲
+3. 點擊「開始排序」
+4. 在 RankingStage 完成所有比較
+5. **預期結果**：
+   - ✅ 自動進入 ResultStage，顯示排名結果
+   - URL 不變，但畫面切換到結果頁面
+
+#### 測試案例 4：中途離開後恢復（有進度）
+
+1. 在 RankingStage 完成 30% 的排序
+2. 離開頁面（關閉分頁或導航到其他頁面）
+3. 重新進入排序頁面
+4. **預期結果**：
+   - ✅ **顯示** DraftPrompt Modal
+   - Modal 顯示「已完成 30%」
+   - 使用者可選擇「繼續」或「重新開始」
+
+#### 測試案例 5：已完成草稿的恢復
+
+1. 在 RankingStage 完成排序並進入 ResultStage
+2. 離開頁面（未提交）
+3. 重新進入頁面
+4. **預期結果**：
+   - ❌ **不顯示** DraftPrompt Modal
+   - ✅ **直接顯示** ResultStage
+
+#### 測試案例 6：邊界條件（percent 接近 0）
+
+1. 在 RankingStage 完成第一次比較（percent 約 5%）
+2. 離開頁面
+3. 重新進入
+4. **預期結果**：
+   - ✅ **顯示** DraftPrompt Modal（因為 `percent > 0`）
+   - 使用者可選擇繼續或重新開始
+
+---
+
+### 【風險評估】
+
+| 風險 | 影響 | 機率 | 緩解措施 |
+|------|------|------|---------|
+| ResultStage props 不匹配 | 高 | 低 | ResultStage 的 props 與 RankingStage 類似 |
+| 狀態判斷順序錯誤 | 高 | 低 | 明確的註解和優先級說明 |
+| draftState 資料不完整 | 中 | 低 | 測試案例 4, 5 驗證 |
+| percent 計算不準確 | 低 | 低 | 測試案例 6 驗證邊界條件 |
+| 現有草稿資料損毀 | 中 | 低 | CorruptedDraftFallback 已處理 |
+
+---
+
+## 問題 2：ResultStage 拖曳功能修復
+
+### 【問題診斷】
+
+#### 當前行為（❌ 錯誤）
+
+1. 使用者拖曳歌曲項目
+2. 拖曳過程中位置改變
+3. 放開後，項目**回到原位**
+4. 提交時可能送出錯誤的排名
+
+#### 技術根源
+
+**檔案**：`src/features/sorter/components/ResultStage.tsx`
+
+**問題程式碼**（L64-67）：
+
+```tsx
+const [optimisticResult, setOptimisticResult] = useOptimistic(
+    initialResult,
+    (_, newResult: RankingResultData[]) => newResult
+);
+```
+
+**問題分析**：
+
+`useOptimistic` 是 React 19 引入的 hook，專為「樂觀更新」場景設計：
+
+```tsx
+// 正確用法：樂觀更新 + 非同步操作 + 自動回滾
+const [optimisticData, setOptimisticData] = useOptimistic(serverData);
+
+const handleUpdate = async () => {
+    setOptimisticData(newData);  // 立即顯示
+    await updateServer(newData);  // 背景同步
+    // 如果失敗，自動回滾到 serverData
+};
+```
+
+**為什麼不適合拖曳場景**：
+- ResultStage 的拖曳是**純本地操作**，不需要伺服器同步
+- 真正的提交在點擊 "Submit" 按鈕時才發生
+- 使用 `useOptimistic` 增加了不必要的複雜度和認知負擔
+- **不需要樂觀更新機制**，應該使用簡單的 `useState`
+
+---
+
+### 【修復方案】
+
+#### 修復策略：useOptimistic → useState
+
+**理由**：
+- ✅ 拖曳是純本地操作，不需要伺服器同步
+- ✅ `useState` 更簡潔，認知負擔更低
+- ✅ 更符合語義，易於理解和維護
+
+**效能考量**：
+- 先完成功能修復
+- 實際測試拖曳效能（歌曲數 10、20、30、50）
+- 如有明顯 lag 再考慮優化（React.memo 或虛擬化）
+
+---
+
+### 【實作步驟】
+
+#### 步驟 1：移除 useOptimistic 和 initialResult，改用 useState
+
+**檔案**：`src/features/sorter/components/ResultStage.tsx`
+
+**修改位置 1**：L63-67（移除 initialResult 和 useOptimistic）
+
+**當前程式碼**：
+
+```tsx
+const [initialResult, setInitialResult] = useState<RankingResultData[]>([]);
+const [optimisticResult, setOptimisticResult] = useOptimistic(
+    initialResult,
+    (_, newResult: RankingResultData[]) => newResult
+);
+```
+
+**修改後**：
+
+```tsx
+const [result, setResult] = useState<RankingResultData[]>([]);
+```
+
+**說明**：同時移除 `initialResult` 和 `optimisticResult`，改用單一的 `result` state
+
+---
+
+**修改位置 2**：L71-88（初始化邏輯）
+
+**當前程式碼**：
+
+```tsx
+useEffect(() => {
+    const initializeResult = async () => {
+        try {
+            if (!draftState) {
+                setIsLoading(false);
+                return;
+            }
+            const finalResult = generateFinalResult(draftState, tracks);
+            setInitialResult(finalResult);
+            setIsLoading(false);
+        } catch (error) {
+            console.error("Failed to generate result:", error);
+            setIsLoading(false);
         }
+    };
 
-        const counts = result[stat.track.albumId];
-        if (stat.overallRank <= threshold5) counts.top5PercentCount++;
-        if (stat.overallRank <= threshold10) counts.top10PercentCount++;
-        if (stat.overallRank <= threshold25) counts.top25PercentCount++;
-        if (stat.overallRank <= threshold50) counts.top50PercentCount++;
+    initializeResult();
+}, [draftState, tracks]);
+```
+
+**修改後**：
+
+```tsx
+useEffect(() => {
+    const initializeResult = async () => {
+        try {
+            if (!draftState) {
+                setIsLoading(false);
+                return;
+            }
+            const finalResult = generateFinalResult(draftState, tracks);
+            setResult(finalResult);
+            setIsLoading(false);
+        } catch (error) {
+            console.error("Failed to generate result:", error);
+            setIsLoading(false);
+        }
+    };
+
+    initializeResult();
+}, [draftState, tracks]);
+```
+
+**說明**：將 `setInitialResult(finalResult)` 改為 `setResult(finalResult)`
+
+---
+
+**修改位置 3**：L108-138（拖曳處理）
+
+**當前程式碼**：
+
+```tsx
+const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+        return;
     }
 
-    return result;
-}
+    const oldIndex = optimisticResult.findIndex((item) => item.id === active.id);
+    const newIndex = optimisticResult.findIndex((item) => item.id === over.id);
 
-function mean(numbers: number[]): number {
-    if (numbers.length === 0) return 0;
-    return numbers.reduce((sum, n) => sum + n, 0) / numbers.length;
-}
+    if (oldIndex === -1 || newIndex === -1) {
+        return;
+    }
 
+    // 重新排列數組
+    const newResult = [...optimisticResult];
+    const [movedItem] = newResult.splice(oldIndex, 1);
+    newResult.splice(newIndex, 0, movedItem);
+
+    // 更新排名
+    const updatedResult = newResult.map((item, index) => ({
+        ...item,
+        ranking: index + 1,
+    }));
+
+    // 樂觀更新
+    startTransition(() => {
+        setOptimisticResult(updatedResult);
+    });
+};
 ```
 
-**設計要點**：
-- ✅ 使用 Transaction Client（由呼叫方傳入）
-- ✅ 邊界情況處理（無歌曲、無專輯歌曲）
-- ✅ 變化追蹤（`previousPoints`, `pointsChange`, `previousOverallRank`, `overallRankChange`）
-- ✅ 兩次排序保證正確性（先算 points，再算 overallRank）
+**修改後**：
+
+```tsx
+const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+        return;
+    }
+
+    const oldIndex = result.findIndex((item) => item.id === active.id);
+    const newIndex = result.findIndex((item) => item.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) {
+        return;
+    }
+
+    // 重新排列數組
+    const newResult = [...result];
+    const [movedItem] = newResult.splice(oldIndex, 1);
+    newResult.splice(newIndex, 0, movedItem);
+
+    // 更新排名
+    const updatedResult = newResult.map((item, index) => ({
+        ...item,
+        ranking: index + 1,
+    }));
+
+    // 直接更新狀態
+    setResult(updatedResult);
+};
+```
+
+**說明**：
+- 所有 `optimisticResult` 改為 `result`
+- 移除 `startTransition`（拖曳是高優先級更新）
+- 直接用 `setResult` 更新狀態
 
 ---
 
-#### **任務 2.2：測試 updateAlbumStats（獨立測試）**
+**修改位置 4**：L141-144（提交處理）
 
-**建立測試檔案**：`scripts/test-updateAlbumStats.ts`
+**當前程式碼**：
 
-```typescript
-import { db } from "@/db/client";
-import { updateAlbumStats } from "@/services/album/updateAlbumStats";
-
-async function testUpdateAlbumStats() {
-    const userId = "YOUR_USER_ID";
-    const artistId = "YOUR_ARTIST_ID";
-
-    await db.$transaction(async (tx) => {
-        await updateAlbumStats(tx, userId, artistId);
-    });
-
-    // 檢查結果
-    const albumStats = await db.albumStat.findMany({
-        where: { userId, artistId },
-        orderBy: { overallRank: 'asc' }
-    });
-
-    console.log("AlbumStats created:", albumStats.length);
-    console.log("Top 3 albums:", albumStats.slice(0, 3));
-}
-
-testUpdateAlbumStats()
-    .then(() => console.log("✅ Test passed"))
-    .catch(err => console.error("❌ Test failed:", err))
-    .finally(() => db.$disconnect());
+```tsx
+const handleSubmit = () => {
+    completeSubmission({ trackRankings: optimisticResult, submissionId });
+    //TODO: 導向正確路由
+};
 ```
 
-**執行**：
-```bash
-npx tsx scripts/test-updateAlbumStats.ts
+**修改後**：
+
+```tsx
+const handleSubmit = () => {
+    completeSubmission({ trackRankings: result, submissionId });
+    //TODO: 導向正確路由
+};
 ```
 
-**驗證項目**：
-- [ ] `AlbumStats` 記錄成功創建
-- [ ] `points` 計算正確（與手動計算一致）
-- [ ] `overallRank` 排序正確（分數高的排前面）
-- [ ] 百分位統計正確（top5/10/25/50PercentCount）
+**說明**：將 `optimisticResult` 改為 `result`
 
 ---
 
-### **Phase 3：整合 updateAlbumStats 到 completeSubmission**
+**修改位置 5**：L184-194（渲染邏輯）
 
-#### **任務 3.1：修改 completeSubmission**
+**當前程式碼**：
+
+```tsx
+<SortableContext
+    items={optimisticResult.map((item) => item.id)}
+    strategy={verticalListSortingStrategy}
+>
+    <div>
+        {optimisticResult.map((data, index) => (
+            <SortableResultItem
+                key={data.id}
+                data={data}
+                ranking={index + 1}
+            />
+        ))}
+    </div>
+</SortableContext>
+```
+
+**修改後**：
+
+```tsx
+<SortableContext
+    items={result.map((item) => item.id)}
+    strategy={verticalListSortingStrategy}
+>
+    <div>
+        {result.map((data) => (
+            <SortableResultItem
+                key={data.id}
+                data={data}
+                ranking={data.ranking}
+            />
+        ))}
+    </div>
+</SortableContext>
+```
+
+**說明**：
+- 所有 `optimisticResult` 改為 `result`
+- `ranking={index + 1}` 改為 `ranking={data.ranking}`（使用 data 中已計算好的 ranking）
+
+---
+
+#### 步驟 2：更新 import 語句
+
+**檔案**：`src/features/sorter/components/ResultStage.tsx`
+
+**修改位置**：L4-9（頂部 imports）
+
+**當前程式碼**：
+
+```tsx
+import React, {
+	startTransition,
+	useEffect,
+	useOptimistic,
+	useState,
+} from "react";
+```
+
+**修改後**：
+
+```tsx
+import React, {
+	useEffect,
+	useState,
+} from "react";
+```
+
+**說明**：移除 `startTransition` 和 `useOptimistic`，保留 `useState` 和 `useEffect`
+
+---
+
+### 【測試計畫】
+
+#### 測試案例 1：基本拖曳功能
+
+1. 完成 RankingStage，進入 ResultStage
+2. 拖曳第 3 首歌到第 1 位
+3. **預期結果**：
+   - 拖曳過程中位置改變
+   - 放開後**保持在新位置**
+   - 排名數字自動更新（1, 2, 3...）
+
+#### 測試案例 2：多次拖曳
+
+1. 在 ResultStage 中
+2. 執行以下操作：
+   - 拖曳 A 到第 1 位
+   - 拖曳 B 到第 2 位
+   - 拖曳 C 到第 3 位
+3. **預期結果**：
+   - 每次拖曳後位置都正確保存
+   - 排名數字持續更新
+
+#### 測試案例 3：拖曳後提交
+
+1. 在 ResultStage 中拖曳調整排名
+2. 點擊「Submit」按鈕
+3. **預期結果**：
+   - 提交成功
+   - 資料庫中的排名與拖曳後的順序一致
+4. **驗證方式**：
+   - 檢查 `TrackRanking` 表的 `ranking` 欄位
+   - 或在個人排名頁面查看結果
+
+#### 測試案例 4：邊界測試
+
+1. 拖曳第一首歌到最後
+2. 拖曳最後一首歌到第一
+3. 拖曳中間的歌到中間的其他位置
+4. **預期結果**：所有情況都能正確更新排名
+
+---
+
+### 【效能測試建議】
+
+修復完成後，建議進行實際效能測試：
+
+1. **測試不同歌曲數量**：10、20、30、50 首
+2. **觀察拖曳流暢度**：是否有明顯卡頓或延遲
+3. **使用 Chrome DevTools Performance** 錄製拖曳過程
+
+**如果發現效能問題**，可考慮以下優化：
+- React.memo（需要 custom comparator）
+- 虛擬化列表（`@tanstack/react-virtual`）
+- 優化圖片載入（lazy loading）
+
+---
+
+### 【風險評估】
+
+| 風險 | 影響 | 機率 | 緩解措施 |
+|------|------|------|---------|
+| 拖曳後仍回到原位 | 高 | 低 | 測試案例 1, 2 詳細驗證 |
+| 提交資料不一致 | 高 | 低 | 測試案例 3 驗證資料庫 |
+| TypeScript 型別錯誤 | 中 | 低 | 執行 `npx tsc --noEmit` 檢查 |
+
+---
+
+## 問題 4：型別重構評估
+
+> **注意**：問題 3（草稿提示時機優化）已整合至「問題 1 + 問題 3」，此處為問題 4。
+
+### 【問題診斷】
+
+#### 當前狀況
+
+**型別定義**（`src/features/sorter/types.ts`）：
+
+```tsx
+export type RankingResultData = TrackData & {
+    ranking: number;
+};
+```
+
+**使用場景**：
+
+1. **ResultStage.tsx**：
+   - 用於拖曳列表的 data type
+   - **需要的欄位**：`id`, `name`, `img`, `album.name`, `ranking`（完整的 TrackData）
+
+2. **convertResult.ts**：
+   - `generateFinalResult` 回傳型別
+   - `convertResultToDraftState` 參數型別
+   - **需要的欄位**：`result.name` 用於查找 index
+
+3. **completeSubmission.ts**：
+   - `trackRankings` 參數型別
+   - **需要的欄位**：完整的 TrackData（用於建立 `TrackRanking` 資料）
+
+4. **calculateAlbumPoints.ts**（sorter 版本）：
+   - **需要的欄位**：`albumId`, `ranking`（只需要這兩個）
+
+#### 新舊版本差異
+
+| 檔案 | 參數型別 | 實際使用欄位 |
+|------|---------|------------|
+| `features/sorter/utils/calculateAlbumPoints.ts` | `RankingResultData[]` | `albumId`, `ranking` |
+| `features/ranking/utils/calculateAlbumPoints.ts` | `{albumId: string \| null, rank: number}[]` | `albumId`, `rank` |
+
+**問題**：
+- Sorter 版本接收完整的 `RankingResultData`，但只用到 2 個欄位
+- Ranking 版本使用更精簡的型別
+
+---
+
+### 【評估結論】
+
+#### ❌ 不建議移除 RankingResultData
+
+**理由**：
+
+1. **大部分場景需要完整資料**：
+   - ResultStage 需要顯示 UI（封面、專輯名稱等）
+   - completeSubmission 需要建立完整的 TrackRanking 資料
+   - convertResultToDraftState 需要 `result.name` 來查找 index
+
+2. **只有一個函式用不到**：
+   - 只有 `calculateAlbumPoints` 用不到完整的 TrackData
+   - 為了一個函式重構整個型別系統，**不符合實用主義原則**
+
+3. **改動成本 > 收益**：
+   - 需要修改 4-5 個檔案
+   - 可能引入新的 bug
+   - 型別安全性降低（需要手動 mapping）
+
+#### ✅ 可選優化：調整 calculateAlbumPoints 簽名
+
+**做法**：只改 `calculateAlbumPoints` 的簽名，在呼叫處做 mapping
+
+**修改範圍**：
+- `src/features/sorter/utils/calculateAlbumPoints.ts`（函式簽名）
+- `src/features/sorter/actions/completeSubmission.ts`（呼叫處）
+
+**優點**：
+- ✅ 改動最小（只需修改 2 個位置）
+- ✅ 函式簽名更精確（只接收需要的欄位）
+- ✅ 不影響其他使用 `RankingResultData` 的地方
+
+**缺點**：
+- ⚠️ 需要在呼叫處做 mapping（增加一行程式碼）
+
+---
+
+### 【可選實作步驟】
+
+#### 步驟 1：修改 calculateAlbumPoints 簽名
+
+**檔案**：`src/features/sorter/utils/calculateAlbumPoints.ts`
+
+**修改位置**：L18-22（函式簽名）
+
+**當前程式碼**：
+
+```tsx
+export function calculateAlbumPoints(
+    trackRankings: RankingResultData[],
+    albumId: string
+): number {
+    // ...
+}
+```
+
+**修改後**：
+
+```tsx
+export function calculateAlbumPoints(
+    trackRankings: Array<{ albumId: string | null; ranking: number }>,
+    albumId: string
+): number {
+    // ...
+}
+```
+
+**說明**：
+- 移除對 `RankingResultData` 的依賴
+- 使用 inline type，只包含需要的欄位
+
+---
+
+#### 步驟 2：更新 completeSubmission 的呼叫
 
 **檔案**：`src/features/sorter/actions/completeSubmission.ts`
 
-**變更位置**：在 `updateTrackStats` 之後調用 `updateAlbumStats`
+**修改位置**：L94-99（calculateAlbumPoints 呼叫處）
 
-```diff
-import { updateAlbumStats } from "@/services/album/updateAlbumStats";
+**當前程式碼**：
 
-// ... (在 completeSubmission 函式內)
+```tsx
+const albumStats = new Map<string, { totalPoints: number; count: number }>();
 
-// 創建 AlbumRanking 記錄
-if (existingSubmission.type === "ARTIST") {
-    const albumStats = calculateAlbumPoints(trackRankings);
-    const result = albumStats.map((stats, index) => ({
-        submissionId,
-        artistId: existingSubmission.artistId,
-        userId,
-        rank: index + 1,
-        albumId: stats.albumId,
-        points: stats.points,
--       basePoints: stats.basePoints,
-        averageTrackRank: stats.averageTrackRanking,
-    }));
+for (const track of trackRankings) {
+    if (!track.albumId) continue;
 
-    await tx.albumRanking.createMany({
-        data: result,
-    });
-
-    // 更新 TrackStats
-    await updateTrackStats(
-        tx,
-        userId,
-        existingSubmission.artistId,
-        trackRankData.map((t) => ({
-            trackId: t.trackId,
-            rank: t.rank,
-            rankChange: t.rankChange,
-        }))
-    );
-+
-+   // 更新 AlbumStats（基於 TrackStats）
-+   await updateAlbumStats(
-+       tx,
-+       userId,
-+       existingSubmission.artistId
-+   );
+    const points = calculateAlbumPoints(trackRankings, track.albumId);
+    // ...
 }
 ```
 
-**關鍵變更**：
-1. ⏸️ 暫時保留 `basePoints: stats.basePoints`（Phase 5 才移除）
-2. ✅ 新增 `await updateAlbumStats(tx, userId, artistId)`
-3. ✅ 放在 `updateTrackStats` **之後**（因為依賴 TrackStats 資料）
+**修改後**：
 
-**執行順序**：
-```
-1. createMany TrackRanking
-2. createMany AlbumRanking
-3. updateTrackStats (更新 TrackStats.overallRank)
-4. updateAlbumStats (基於 TrackStats 計算 AlbumStats) ✨
-```
+```tsx
+const albumStats = new Map<string, { totalPoints: number; count: number }>();
 
----
+// 將 trackRankings 轉換為 calculateAlbumPoints 需要的格式
+const rankingsForCalc = trackRankings.map(t => ({
+    albumId: t.albumId,
+    ranking: t.ranking,
+}));
 
-#### **任務 3.2：驗證整合**
+for (const track of trackRankings) {
+    if (!track.albumId) continue;
 
-**測試步驟**：
-1. 完成一次排名提交（Artist Sorter）
-2. 檢查資料庫：
-   ```sql
-   -- 檢查 AlbumRanking 是否正確創建（無 basePoints）
-   SELECT * FROM "AlbumRanking" ORDER BY "createdAt" DESC LIMIT 5;
-
-   -- 檢查 AlbumStats 是否正確創建/更新
-   SELECT * FROM "AlbumStat" WHERE "userId" = 'YOUR_USER_ID' ORDER BY "overallRank";
-   ```
-3. 比對 `AlbumStats.points` 與手動計算結果
-4. 確認 `previousPoints`, `pointsChange` 正確更新（第二次提交時）
-
-**驗證項目**：
-- [ ] AlbumRanking 創建成功（basePoints 仍存在）
-- [ ] AlbumStats 創建成功
-- [ ] points 計算正確
-- [ ] overallRank 排序正確
-- [ ] 百分位統計正確
-- [ ] 第二次提交時 previousPoints / pointsChange 正確
-
----
-
-### **Phase 4：重構 getAlbumsStats**
-
-#### **任務 4.1：改寫 getAlbumsStats**
-
-**檔案**：`src/services/album/getAlbumsStats.ts`
-
-**變更前**（簡化版）：
-```typescript
-const getAlbumsStats = cache(async ({ artistId, userId }) => {
-    // 1. 查詢 TrackStats（計算百分位）
-    const allTrackStatsForArtist = await db.trackStat.findMany(...);
-
-    // 2. 查詢 AlbumRanking（聚合平均）
-    const albumPoints = await db.albumRanking.groupBy({
-        _avg: { points: true, basePoints: true, rank: true },
-        _count: { rank: true },
-    });
-
-    // 3. 計算百分位
-    const percentileCounts = getAlbumPercentileCounts(...);
-
-    // 4. 合併資料
-    const result = albumPoints.map(data => ({
-        // Album 欄位
-        id, name, artistId, spotifyUrl, color, img, releaseDate, type,
-        // AlbumRanking 聚合欄位
-        averageRank: data._avg.rank?.toFixed(1),
-        avgPoints: Math.round(data._avg.points),
-        avgBasePoints: Math.round(data._avg.basePoints),
-        submissionCount: data._count.rank,
-        // 百分位統計
-        ...percentileCounts[data.albumId],
-        rank: 0,
-    }));
-
-    // 5. 排序並設定 rank
-    return result.sort((a, b) => b.avgPoints - a.avgPoints)
-        .map((data, index) => ({ ...data, rank: index + 1 }));
-});
-```
-
-**變更後**（超級簡化）：
-```typescript
-import { cache } from "react";
-import { db } from "@/db/client";
-import { AlbumStatsType } from "@/types/album";
-
-type getAlbumsStatsProps = {
-    artistId: string;
-    userId: string;
-};
-
-const getAlbumsStats = cache(async ({
-    artistId,
-    userId,
-}: getAlbumsStatsProps): Promise<AlbumStatsType[]> => {
-    // 直接查詢 AlbumStats（已預先計算好所有資料）
-    const albumStats = await db.albumStat.findMany({
-        where: { artistId, userId },
-        include: {
-            album: {
-                select: {
-                    id: true,
-                    name: true,
-                    artistId: true,
-                    spotifyUrl: true,
-                    color: true,
-                    img: true,
-                    releaseDate: true,
-                    type: true,
-                }
-            }
-        },
-        orderBy: { overallRank: 'asc' }
-    });
-
-    // 轉換成 AlbumStatsType 格式
-    return albumStats.map(stat => ({
-        // Album Model 欄位
-        id: stat.album.id,
-        name: stat.album.name,
-        artistId: stat.album.artistId,
-        spotifyUrl: stat.album.spotifyUrl,
-        color: stat.album.color,
-        img: stat.album.img,
-        releaseDate: stat.album.releaseDate,
-        type: stat.album.type,
-
-        // AlbumStats 欄位
-        rank: stat.overallRank,
-        averageRank: stat.averageTrackRank.toFixed(1),
-        avgPoints: stat.points,
-        submissionCount: stat.submissionCount,
-
-        // 百分位統計（已預先計算）
-        top5PercentCount: stat.top5PercentCount,
-        top10PercentCount: stat.top10PercentCount,
-        top25PercentCount: stat.top25PercentCount,
-        top50PercentCount: stat.top50PercentCount,
-    }));
-});
-
-export default getAlbumsStats;
-```
-
-**關鍵變更**：
-1. ❌ 移除 `getAlbumPercentileCounts` 函式（不再需要）
-2. ❌ 移除 `albumRanking.groupBy` 查詢
-3. ❌ 移除 `allTrackStatsForArtist` 查詢
-4. ❌ 移除手動排序邏輯（`sort` + `map`）
-5. ✅ 改為直接查詢 `albumStat`（1 次 DB query）
-6. ✅ 使用 `orderBy: { overallRank: 'asc' }`（資料庫排序）
-
-**效能提升**：
-- **變更前**：3 次 DB query + O(n) groupBy + O(n) 百分位計算 + O(n log n) 排序
-- **變更後**：1 次 DB query + O(n) map
-- **提升**：~50-100 倍（取決於專輯數量）
-
----
-
-#### **任務 4.2：移除 getAlbumPercentileCounts 函式**
-
-**檔案**：`src/services/album/getAlbumsStats.ts`
-
-**刪除**：
-```diff
-- function getAlbumPercentileCounts(
--     albumIds: string[],
--     allTrackStats: {
--         track: { albumId: string | null };
--         overallRank: number;
--     }[],
--     totalTrackCount: number
-- ) {
--     // ... 40 行程式碼
-- }
-```
-
-**理由**：百分位統計已在 `updateAlbumStats` 中預先計算並存入資料庫
-
----
-
-### **Phase 5：修改 calculateAlbumPoints（移除 basePoints）**
-
-⚠️ **注意**：此階段在第二階段執行（確認 AlbumStats 穩定運作後）
-
-#### **任務 5.1：修改兩份 calculateAlbumPoints 檔案**
-
-**檔案 1**：`src/features/ranking/utils/calculateAlbumPoints.ts`
-**檔案 2**：`src/features/sorter/utils/calculateAlbumPoints.ts`
-
-**變更**：
-
-```diff
-function calculateTrackPoints({
-    trackRanking,
-    trackCount,
-    albumTrackCount,
-    albumCount,
-}: calculateTrackPointsProps) {
-    // 計算百分比排名
-    const percentileRank =
-        (trackCount - trackRanking + 1) / trackCount;
-
-    // 計算分數
-    const score =
-        percentileRank > 0.75
-            ? percentileRank * 1000
-            : percentileRank > 0.5
-                ? percentileRank * 950
-                : percentileRank > 0.25
-                    ? percentileRank * 650
-                    : percentileRank * 500;
-
-    // 引入平滑係數
-    const smoothingFactor =
-        percentileRank > 0.5 && albumTrackCount < 5
-            ? albumTrackCount * 0.15 + 0.25
-            : 1;
-
-    // 調整分數
-    const points = Math.floor((score / albumTrackCount) * smoothingFactor);
--   const basePoints = Math.floor(
--       score / (trackCount / albumCount)
--   );
-
--   return { points, basePoints };
-+   return { points };
+    const points = calculateAlbumPoints(rankingsForCalc, track.albumId);
+    // ...
 }
 ```
 
-**同時修改外層函式**：
-```diff
-result.push({
-    albumId,
-    points: totalPoints,
--   basePoints: totalBasePoints,
-    averageTrackRanking: rankSum / groupedRankings.length
-});
+**說明**：
+- 在迴圈外部做一次 mapping
+- 避免在迴圈內重複 mapping（效能考量）
+
+---
+
+#### 步驟 3：移除不必要的 import
+
+**檔案**：`src/features/sorter/utils/calculateAlbumPoints.ts`
+
+**檢查 import**：
+
+```tsx
+import type { RankingResultData } from "../types"; // ❌ 可能不再需要
 ```
 
-**同時移除 totalBasePoints 累加**：
-```diff
-for (const trackRanking of groupedRankings) {
--   const { points, basePoints } = calculateTrackPoints(...);
-+   const { points } = calculateTrackPoints(...);
-    totalPoints += points;
--   totalBasePoints += basePoints;
-    rankSum += trackRanking.ranking;
-}
-```
+**如果函式簽名已改為 inline type**：
 
-**同時移除變數宣告**：
-```diff
-let totalPoints = 0;
-- let totalBasePoints = 0;
-let rankSum = 0;
+```tsx
+// 移除 import（如果檔案中沒有其他地方使用 RankingResultData）
 ```
 
 ---
 
-#### **任務 5.2：驗證計算邏輯**
+### 【決策建議】
 
-**測試**：
-1. 執行一次排名提交
-2. 檢查 `AlbumRanking.points` 是否正確
-3. 確認沒有 `basePoints` 欄位（TypeScript 編譯錯誤會提示）
+#### 🟢 建議：暫不處理
+
+**理由**：
+
+1. **優先級低**：
+   - 問題 1, 2, 3 是功能性缺陷，影響使用者體驗
+   - 問題 4 是程式碼品質優化，不影響功能
+
+2. **收益有限**：
+   - 只優化一個函式的簽名
+   - 不會提升效能或可維護性
+
+3. **技術債不嚴重**：
+   - `RankingResultData` 的定義清晰
+   - 沒有過度耦合或循環依賴
+
+#### 🟡 可選：納入後續重構
+
+**時機**：
+- 當需要大規模重構 Sorter 模組時
+- 當 `calculateAlbumPoints` 邏輯需要重大修改時
+- 當引入新的計分系統時
+
+**建議做法**：
+- 統一 Sorter 和 Ranking 兩個版本的 `calculateAlbumPoints`
+- 移至共用的 `src/lib/utils/` 資料夾
+- 使用更通用的型別定義
 
 ---
 
-### **Phase 6：更新 TypeScript 類型定義**
+### 【風險評估】
 
-⚠️ **注意**：此階段在第二階段執行（確認 AlbumStats 穩定運作後）
+| 風險 | 影響 | 機率 | 緩解措施 |
+|------|------|------|---------|
+| 型別不匹配 | 中 | 低 | TypeScript 編譯時檢查 |
+| mapping 效能問題 | 低 | 低 | 在迴圈外部做一次 mapping |
+| 其他地方仍使用舊型別 | 低 | 低 | 搜尋所有 `calculateAlbumPoints` 呼叫處 |
 
-#### **任務 6.1：修改 AlbumStatsType**
+---
 
-**檔案**：`src/types/album.ts`
+## 整體修復計畫
 
-**變更**：
+### 【修復順序】
 
-```diff
-/**
- * Album 統計資料型別
- * 用於 My Stats 的 Overview 視圖和圖表
- *
- * 資料來源：
- * - Album Model: id, name, artistId, spotifyUrl, color, img, releaseDate, type
-- * - AlbumRanking (aggregated): averageRank, avgPoints, avgBasePoints, submissionCount
-+ * - AlbumStats: rank, averageRank, avgPoints, submissionCount, top5/10/25/50PercentCount
-- * - 計算欄位: rank, top5PercentCount, top10PercentCount, top25PercentCount, top50PercentCount
- */
-export type AlbumStatsType = {
-    // === Album Model 欄位 ===
-    id: string;
-    name: string;
-    artistId: string;
-    spotifyUrl: string;
-    color: string | null;
-    img: string | null;
-    releaseDate: Date;
-    type: string;
+#### Phase 1：核心功能修復（必做）
 
--   // === AlbumRanking 聚合欄位 ===
-+   // === AlbumStats 欄位 ===
-    averageRank: number | string;
-    avgPoints: number;
--   avgBasePoints: number;
-    submissionCount: number;
+1. **問題 1 + 問題 3（整合）**：DraftPrompt 狀態機重構（30 分鐘）
+   - 一次性重構 `DraftPrompt.tsx` 為清晰的狀態機
+   - 優先判斷 `finishFlag === 1` → 渲染 ResultStage
+   - 其次判斷 `percent === 0` → 渲染 RankingStage（不顯示 Modal）
+   - 最後處理 Modal 和使用者選擇邏輯
+   - 加入 `import ResultStage from "./ResultStage"`
 
--   // === 計算欄位 ===
-    rank: number;
-    top5PercentCount: number;
-    top10PercentCount: number;
-    top25PercentCount: number;
-    top50PercentCount: number;
-};
+2. **問題 2**：拖曳功能修復（30 分鐘）
+   - 移除 `useOptimistic` 和 `initialResult`
+   - 改用 `useState`
+   - 更新所有引用位置
+
+#### Phase 2：測試驗證（必做）
+
+3. **整合測試**（20-30 分鐘）
+   - 測試完整流程（FilterStage → RankingStage → ResultStage → Submit）
+   - 測試拖曳功能
+   - 測試草稿恢復（三種情境：percent=0, 0<percent<100, finishFlag=1）
+
+4. **效能測試**（可選，10-15 分鐘）
+   - 測試不同歌曲數量的拖曳效能
+   - 決定是否需要優化
+
+#### Phase 3：程式碼品質（可選）
+
+5. **問題 4**：型別重構評估（暫不處理）
+   - 納入後續重構計畫
+
+---
+
+### 【預計工時】
+
+| 階段 | 任務 | 預計時間 | 測試時間 | 總計 |
+|------|------|---------|---------|------|
+| Phase 1 | 問題 1+3 + 問題 2 | 60 分鐘 | - | 60 分鐘 |
+| Phase 2 | 整合測試 + 效能測試 | - | 30-45 分鐘 | 30-45 分鐘 |
+| **總計** | | **60 分鐘** | **30-45 分鐘** | **90-105 分鐘** |
+
+**預計總工時**：約 **1.5-2 小時**
+
+---
+
+### 【檔案修改清單】
+
+#### 需要修改的檔案
+
+1. `src/features/sorter/components/DraftPrompt.tsx`
+   - **問題 1 + 問題 3 整合修復**：
+     - 重構為狀態機（5 個互斥狀態）
+     - 優先判斷 `finishFlag === 1` → 渲染 ResultStage
+     - 其次判斷 `percent === 0` → 直接渲染 RankingStage
+     - 最後處理 Modal（有進度時）
+     - Modal 文案加入進度百分比顯示
+   - 加入 `import ResultStage from "./ResultStage"`
+
+2. `src/features/sorter/components/ResultStage.tsx`
+   - **問題 2**：移除 `useOptimistic`, `initialResult`, `startTransition`
+   - **問題 2**：改用單一 `result` state (useState)
+   - **問題 2**：更新所有引用 (handleDragEnd, handleSubmit, 渲染邏輯)
+   - **問題 2**：更新 import（移除 useOptimistic 和 startTransition）
+
+#### 不需修改的檔案
+
+- ✅ `src/app/sorter/album/[albumId]/page.tsx`（頁面邏輯不變）
+- ✅ `src/app/sorter/artist/[artistId]/page.tsx`（頁面邏輯不變）
+- ✅ `src/features/sorter/hooks/useSorter.ts`（排序邏輯不變）
+- ✅ `src/features/sorter/actions/finalizeDraft.ts`（Server action 不變）
+- ✅ `src/features/sorter/types.ts`（型別定義不變）
+
+---
+
+### 【測試策略】
+
+#### 單元測試（可選）
+
+- `convertResult.ts` 的 `generateFinalResult`
+- `calculateAlbumPoints` 的計分邏輯
+
+#### 整合測試（必做）
+
+1. **完整流程測試**：
+   - FilterStage → RankingStage → ResultStage → Submit
+   - 驗證資料正確寫入資料庫
+
+2. **草稿恢復測試**：
+   - 中途離開 → 重新進入 → 繼續排序 → 完成
+   - 驗證進度正確保存與恢復
+
+3. **拖曳功能測試**：
+   - 多次拖曳 → 提交
+   - 驗證最終排名與拖曳結果一致
+
+#### 手動測試（必做）
+
+- 專輯 Sorter 完整流程
+- 藝人 Sorter 完整流程
+- 邊界條件（歌曲數 1, 2, 30+）
+
+---
+
+### 【驗收標準】
+
+#### 問題 1 + 問題 3：DraftPrompt 狀態機
+
+- ✅ RankingStage 完成後能自動進入 ResultStage（問題 1）
+- ✅ 剛開始排序時不顯示 DraftPrompt Modal（問題 3）
+- ✅ 有進度時才顯示 DraftPrompt Modal（問題 3）
+- ✅ 專輯和藝人頁面都能正常進入 ResultStage（問題 1）
+- ✅ 草稿恢復後完成排序能進入 ResultStage（問題 1）
+- ✅ Modal 顯示進度百分比（問題 3）
+- ✅ 狀態判斷順序正確（finishFlag → percent → choice）
+
+#### 問題 2：拖曳功能
+
+- ✅ 拖曳後位置不會回到原位
+- ✅ 排名數字正確更新
+- ✅ 提交的資料與拖曳後的順序一致
+- ✅ 拖曳過程流暢（實測後決定是否需要優化）
+
+#### 程式碼品質
+
+- ✅ `npm run lint` 通過
+- ✅ `npx tsc --noEmit` 通過
+- ✅ 無 console 錯誤或警告
+
+---
+
+### 【回滾計畫】
+
+#### 如果問題 1 + 問題 3 修復失敗
+
+**回滾步驟**：
+1. 還原 `DraftPrompt.tsx` 的修改
+2. 還原 `ResultStage.tsx` 的 props（如果有改）
+
+**替代方案**：
+- 方案 A：新增獨立的 `/sorter/result` 路由
+- 方案 B：改變 `createSubmission` 的初始 `status`（但影響範圍大）
+
+#### 如果問題 2 修復失敗
+
+**回滾步驟**：
+1. 還原 `ResultStage.tsx` 的修改
+2. 保留 `useOptimistic` 實作
+
+**替代方案**：
+- 使用 `useReducer` 取代 `useState`
+- 引入 `@tanstack/react-virtual` 虛擬化列表
+
+---
+
+### 【後續優化建議】
+
+#### 短期（1-2 週內）
+
+1. **加入單元測試**：
+   - `convertResult.ts` 的 `generateFinalResult`
+   - `calculateAlbumPoints` 的計分邏輯
+
+2. **效能監控**：
+   - 在 production 環境加入 performance tracking
+   - 收集真實使用者的拖曳效能數據
+
+#### 中期（1 個月內）
+
+1. **虛擬化列表**：
+   - 如果使用者回報歌曲數 > 50 時有 lag
+   - 引入 `@tanstack/react-virtual`
+
+2. **草稿自動清理**：
+   - 定期清理超過 7 天的未完成草稿
+   - 避免資料庫累積過多無用資料
+
+#### 長期（3 個月內）
+
+1. **統一計分系統**：
+   - 合併 Sorter 和 Ranking 的 `calculateAlbumPoints`
+   - 移至共用的 `src/lib/utils/`
+
+2. **重構 Sorter 架構**：
+   - 考慮使用 State Machine（如 XState）
+   - 更清晰的狀態轉換邏輯
+
+---
+
+## 附錄
+
+### A. 相關檔案清單
+
+#### 需要閱讀的檔案
+
+1. `src/features/sorter/components/DraftPrompt.tsx`（88 行）
+2. `src/features/sorter/components/ResultStage.tsx`（265 行）
+3. `src/features/sorter/components/RankingStage.tsx`（206 行）
+4. `src/features/sorter/hooks/useSorter.ts`（354 行）
+5. `src/features/sorter/actions/createSubmission.ts`（112 行）
+6. `src/features/sorter/actions/finalizeDraft.ts`（44 行）
+7. `src/features/sorter/actions/completeSubmission.ts`（135 行）
+8. `src/features/sorter/utils/convertResult.ts`（87 行）
+9. `src/features/sorter/utils/calculateAlbumPoints.ts`（69 行）
+
+#### 可能受影響的檔案
+
+1. `src/app/sorter/album/[albumId]/page.tsx`（111 行）
+2. `src/app/sorter/artist/[artistId]/page.tsx`（52 行）
+
+---
+
+### B. 資料流程圖
+
+#### 當前流程（有問題）
+
+```mermaid
+graph TD
+    A[FilterStage] --> B[createSubmission]
+    B --> C[status: IN_PROGRESS]
+    C --> D[router.refresh]
+    D --> E[getIncompleteRankingSubmission]
+    E --> F[找到 submission]
+    F --> G[DraftPrompt 顯示]
+    G --> H{使用者選擇}
+    H -->|繼續| I[RankingStage]
+    H -->|重新開始| J[刪除草稿]
+    I --> K[useSorter 排序]
+    K --> L{完成?}
+    L -->|是| M[finalizeDraft]
+    M --> N[status: DRAFT]
+    N --> O[revalidatePath]
+    O --> E
+    E --> F
+    F --> G
+    G --> I
+    I --> P[❌ ResultStage 永遠不會被渲染]
+```
+
+#### 修復後流程（正確）
+
+```mermaid
+graph TD
+    A[FilterStage] --> B[createSubmission]
+    B --> C[status: IN_PROGRESS, percent: 0]
+    C --> D[router.refresh]
+    D --> E[getIncompleteRankingSubmission]
+    E --> F[找到 submission]
+    F --> G{DraftPrompt 判斷}
+    G -->|percent === 0| H[直接渲染 RankingStage]
+    G -->|percent > 0 且 finishFlag === 0| I[顯示 Modal]
+    G -->|finishFlag === 1| J[直接渲染 ResultStage]
+    I --> K{使用者選擇}
+    K -->|繼續| H
+    K -->|重新開始| L[刪除草稿]
+    H --> M[useSorter 排序]
+    M --> N{完成?}
+    N -->|是| O[finalizeDraft]
+    O --> P[status: DRAFT, finishFlag: 1]
+    P --> Q[revalidatePath]
+    Q --> E
+    E --> F
+    F --> G
+    G -->|finishFlag === 1| J
+    J --> R[✅ ResultStage 正確顯示]
+    R --> S[拖曳調整]
+    S --> T[Submit]
+    T --> U[completeSubmission]
+    U --> V[status: COMPLETED]
 ```
 
 ---
 
-#### **任務 6.2：修改 AlbumHistoryType**
+### C. 技術參考
 
-**檔案**：`src/types/album.ts`
+#### React Hooks
 
-**變更**：
+- [useOptimistic](https://react.dev/reference/react/useOptimistic)（React 19）
+- [useState](https://react.dev/reference/react/useState)
+- [React.memo](https://react.dev/reference/react/memo)
 
-```diff
-/**
- * Album 歷史記錄型別
- * 用於 My Stats 的 Snapshot 視圖
- *
- * 資料來源：
- * - Album Model: id, name, artistId, spotifyUrl, color, img, releaseDate, type
-- * - AlbumRanking: rank, totalPoints, totalBasePoints
-+ * - AlbumRanking: rank, totalPoints
- * - RankingSubmission: createdAt
- * - 計算欄位: top25PercentCount, top50PercentCount, previousTotalPoints, pointsChange
- */
-export type AlbumHistoryType = {
-    // === Album Model 欄位 ===
-    id: string;
-    name: string;
-    artistId: string;
-    spotifyUrl: string;
-    color: string | null;
-    img: string | null;
-    releaseDate: Date;
-    type: string;
+#### dnd-kit
 
-    // === AlbumRanking 欄位 ===
-    rank: number;
-    totalPoints: number;
--   totalBasePoints: number;
+- [SortableContext](https://docs.dndkit.com/presets/sortable)
+- [useSortable](https://docs.dndkit.com/presets/sortable/usesortable)
+- [Performance Optimization](https://docs.dndkit.com/api-documentation/sensors#recommendations)
 
-    // === RankingSubmission 欄位 ===
-    submissionId: string;
-    createdAt: Date;
+#### 效能優化
 
-    // === 計算欄位 ===
-    top25PercentCount: number;
-    top50PercentCount: number;
-    previousTotalPoints?: number;
-    pointsChange?: number | null;
-};
-```
+- [React DevTools Profiler](https://react.dev/learn/react-developer-tools)
+- [Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance)
 
 ---
 
-#### **任務 6.3：修改 getAlbumsHistory（移除 basePoints）**
+### D. 問題追蹤
 
-**檔案**：`src/services/album/getAlbumsHistory.ts`
+| 問題編號 | 狀態 | 優先級 | 負責人 | 完成日期 |
+|---------|------|--------|--------|---------|
+| 問題 1 + 問題 3 | 待修復 | P0（致命 + 體驗） | TBD | TBD |
+| 問題 2 | 待修復 | P0（嚴重） | TBD | TBD |
+| 問題 4 | 暫不處理 | P2（可選） | - | - |
 
-**變更**：
-
-```diff
-const result: AlbumHistoryType[] = albumRanking.map((data) => {
-    const prevPoints = prevPointsMap.get(data.albumId);
-
-    return {
-        // Album Model 欄位
-        id: data.album.id,
-        name: data.album.name,
-        artistId: data.album.artistId,
-        spotifyUrl: data.album.spotifyUrl,
-        color: data.album.color,
-        img: data.album.img,
-        releaseDate: data.album.releaseDate,
-        type: data.album.type,
-        // AlbumRanking 欄位
-        rank: data.rank,
-        totalPoints: data.points,
--       totalBasePoints: data.basePoints,
-        // RankingSubmission 欄位
-        submissionId,
-        createdAt: data.submission?.createdAt || new Date(),
-        // 計算欄位
-        top25PercentCount: top25PercentMap.get(data.albumId) ?? 0,
-        top50PercentCount: top50PercentMap.get(data.albumId) ?? 0,
-        previousTotalPoints: prevPoints,
-        pointsChange: calculatePointsChange(data.points, prevPoints),
-    };
-});
-```
-
-**同時修改 query**：
-```diff
-const albumRanking = await db.albumRanking.findMany({
-    where: { artistId, submissionId, userId, submission: { status: "COMPLETED" } },
-    select: {
-        albumId: true,
-        rank: true,
-        points: true,
--       basePoints: true,
-        album: { select: { ... } },
-        submission: { select: { createdAt: true } },
-    },
-    orderBy: { rank: "asc" },
-});
-```
+**註**：問題 1（ResultStage 流程缺失）與問題 3（草稿提示時機不當）已整合為單一修復任務。
 
 ---
 
-### **Phase 7：撰寫 Migration Scripts**
-
-#### **任務 7.1：回填 AlbumStats Script**
-
-**檔案**：`scripts/backfillAlbumStats.ts`（新建）
-
-**用途**：為所有現有使用者回填 `AlbumStats` 資料
-
-**實作**：
-
-```typescript
-import { db } from "@/db/client";
-import { updateAlbumStats } from "@/services/album/updateAlbumStats";
-
-/**
- * 回填所有使用者的 AlbumStats
- *
- * 執行時機：
- * - 首次部署 AlbumStats 功能時
- * - 資料庫 migration 完成後
- *
- * 執行方式：
- * npx tsx scripts/backfillAlbumStats.ts
- */
-async function backfillAlbumStats() {
-    console.log("🔍 Fetching all users with completed submissions...");
-
-    // 取得所有有完成提交的使用者
-    const usersWithSubmissions = await db.user.findMany({
-        where: {
-            submissions: {
-                some: {
-                    status: "COMPLETED",
-                    type: "ARTIST"
-                }
-            }
-        },
-        select: { id: true, name: true }
-    });
-
-    console.log(`✅ Found ${usersWithSubmissions.length} users`);
-
-    // 取得所有藝人
-    const artists = await db.artist.findMany({
-        select: { id: true, name: true }
-    });
-
-    console.log(`✅ Found ${artists.length} artists`);
-
-    let processedCount = 0;
-    let errorCount = 0;
-
-    // 為每個使用者 × 藝人組合建立 AlbumStats
-    for (const user of usersWithSubmissions) {
-        for (const artist of artists) {
-            try {
-                // 檢查該使用者是否有該藝人的 TrackStats
-                const trackStatsCount = await db.trackStat.count({
-                    where: {
-                        userId: user.id,
-                        artistId: artist.id
-                    }
-                });
-
-                if (trackStatsCount === 0) {
-                    continue; // 跳過沒有資料的組合
-                }
-
-                console.log(`📊 Processing ${user.name} × ${artist.name}...`);
-
-                await db.$transaction(async (tx) => {
-                    await updateAlbumStats(tx, user.id, artist.id);
-                });
-
-                processedCount++;
-                console.log(`   ✅ Success (${processedCount} total)`);
-
-            } catch (error) {
-                errorCount++;
-                console.error(`   ❌ Error for ${user.name} × ${artist.name}:`, error);
-            }
-        }
-    }
-
-    console.log("\n" + "=".repeat(50));
-    console.log(`✅ Backfill completed!`);
-    console.log(`   Processed: ${processedCount}`);
-    console.log(`   Errors: ${errorCount}`);
-    console.log("=".repeat(50));
-}
-
-backfillAlbumStats()
-    .then(() => {
-        console.log("✅ Script finished");
-        process.exit(0);
-    })
-    .catch((error) => {
-        console.error("❌ Script failed:", error);
-        process.exit(1);
-    });
-```
-
-**執行**：
-```bash
-npx tsx scripts/backfillAlbumStats.ts
-```
-
-**驗證**：
-```sql
--- 檢查 AlbumStats 記錄數
-SELECT COUNT(*) FROM "AlbumStat";
-
--- 檢查每個使用者的 AlbumStats 數量
-SELECT "userId", COUNT(*)
-FROM "AlbumStat"
-GROUP BY "userId";
-
--- 檢查資料完整性
-SELECT * FROM "AlbumStat"
-WHERE "points" IS NULL
-   OR "overallRank" IS NULL
-   OR "top5PercentCount" IS NULL;
-```
-
----
-
-#### **任務 7.2：重新計算 AlbumRanking 與 AlbumStats Script**
-
-**檔案**：`scripts/recalculateAlbumScores.ts`（新建）
-
-**用途**：當修改 `calculateAlbumPoints` 邏輯後，重新計算所有分數
-
-**實作**：
-
-```typescript
-import { db } from "@/db/client";
-import { calculateAlbumPoints } from "@/features/ranking/utils/calculateAlbumPoints";
-import { updateAlbumStats } from "@/services/album/updateAlbumStats";
-
-/**
- * 重新計算所有 AlbumRanking 和 AlbumStats
- *
- * 使用時機：
- * - 修改 calculateAlbumPoints 的計算邏輯後
- * - 需要統一更新所有歷史分數
- *
- * 執行方式：
- * npx tsx scripts/recalculateAlbumScores.ts
- */
-async function recalculateAll() {
-    console.log("🔍 Step 1: Recalculating AlbumRanking...");
-
-    // 1️⃣ 重新計算所有 AlbumRanking（基於 TrackRanking）
-    const allSubmissions = await db.rankingSubmission.findMany({
-        where: {
-            type: 'ARTIST',
-            status: 'COMPLETED'
-        },
-        select: {
-            id: true,
-            artistId: true,
-            userId: true,
-            createdAt: true
-        }
-    });
-
-    console.log(`   Found ${allSubmissions.length} completed submissions`);
-
-    let albumRankingUpdated = 0;
-
-    for (const submission of allSubmissions) {
-        try {
-            // 查詢該次提交的所有 TrackRanking
-            const trackRankings = await db.trackRanking.findMany({
-                where: { submissionId: submission.id },
-                include: { track: { select: { id: true, albumId: true } } }
-            });
-
-            // 轉換成 calculateAlbumPoints 需要的格式
-            const rankingData = trackRankings
-                .filter(r => r.track.albumId)
-                .map(r => ({
-                    id: r.track.id,
-                    albumId: r.track.albumId!,
-                    ranking: r.rank
-                }));
-
-            if (rankingData.length === 0) continue;
-
-            // 用新規則重新計算
-            const newAlbumPoints = calculateAlbumPoints(rankingData);
-
-            // 更新 AlbumRanking
-            for (const album of newAlbumPoints) {
-                await db.albumRanking.updateMany({
-                    where: {
-                        submissionId: submission.id,
-                        albumId: album.albumId
-                    },
-                    data: {
-                        points: album.points,
-                        averageTrackRank: album.averageTrackRanking
-                    }
-                });
-                albumRankingUpdated++;
-            }
-
-            if (albumRankingUpdated % 10 === 0) {
-                console.log(`   Updated ${albumRankingUpdated} AlbumRanking records...`);
-            }
-
-        } catch (error) {
-            console.error(`   ❌ Error for submission ${submission.id}:`, error);
-        }
-    }
-
-    console.log(`✅ AlbumRanking recalculation completed: ${albumRankingUpdated} records updated\n`);
-
-    // 2️⃣ 重新計算所有 AlbumStats（基於 TrackStats）
-    console.log("🔍 Step 2: Recalculating AlbumStats...");
-
-    const allUsers = await db.user.findMany({
-        where: {
-            trackStats: { some: {} }
-        },
-        select: { id: true, name: true }
-    });
-
-    const allArtists = await db.artist.findMany({
-        select: { id: true, name: true }
-    });
-
-    let albumStatsUpdated = 0;
-
-    for (const user of allUsers) {
-        for (const artist of allArtists) {
-            try {
-                const trackStatsCount = await db.trackStat.count({
-                    where: { userId: user.id, artistId: artist.id }
-                });
-
-                if (trackStatsCount === 0) continue;
-
-                await db.$transaction(async (tx) => {
-                    await updateAlbumStats(tx, user.id, artist.id);
-                });
-
-                albumStatsUpdated++;
-
-                if (albumStatsUpdated % 5 === 0) {
-                    console.log(`   Updated ${albumStatsUpdated} user×artist combinations...`);
-                }
-
-            } catch (error) {
-                console.error(`   ❌ Error for ${user.name} × ${artist.name}:`, error);
-            }
-        }
-    }
-
-    console.log(`✅ AlbumStats recalculation completed: ${albumStatsUpdated} updated\n`);
-
-    console.log("\n" + "=".repeat(50));
-    console.log("✅ All recalculations completed!");
-    console.log(`   AlbumRanking: ${albumRankingUpdated} records`);
-    console.log(`   AlbumStats: ${albumStatsUpdated} user×artist combinations`);
-    console.log("=".repeat(50));
-}
-
-recalculateAll()
-    .then(() => {
-        console.log("✅ Script finished");
-        process.exit(0);
-    })
-    .catch((error) => {
-        console.error("❌ Script failed:", error);
-        process.exit(1);
-    });
-```
-
-**執行**：
-```bash
-npx tsx scripts/recalculateAlbumScores.ts
-```
-
-**適用場景**：
-- 修改 `calculateAlbumPoints` 的分數公式
-- 修改 `smoothingFactor` 的計算邏輯
-- 修改百分位的計算方式
-
----
-
-### **Phase 8：清理與驗證**
-
-#### **任務 8.1：執行 TypeScript 檢查**
-
-```bash
-npx tsc --noEmit
-```
-
-**預期**：0 errors
-
-**如果有錯誤**：
-- 檢查是否有遺漏的 `basePoints` 引用
-- 檢查 `AlbumStatsType` / `AlbumHistoryType` 是否正確更新
-
----
-
-#### **任務 8.2：執行 Linting**
-
-```bash
-npm run lint
-```
-
-**修正**：
-- 移除未使用的 import
-- 修正格式問題
-
----
-
-#### **任務 8.3：搜尋殘留的 basePoints 引用**
-
-```bash
-# 使用 grep 搜尋所有 basePoints 引用
-grep -r "basePoints" src/ --include="*.ts" --include="*.tsx"
-
-# 或使用 Grep tool
-# pattern: "basePoints"
-# glob: "**/*.{ts,tsx}"
-```
-
-**檢查項目**：
-- [ ] `calculateAlbumPoints` 已移除 `basePoints`
-- [ ] `completeSubmission` 已移除 `basePoints`
-- [ ] `AlbumStatsType` 已移除 `avgBasePoints`
-- [ ] `AlbumHistoryType` 已移除 `totalBasePoints`
-- [ ] `getAlbumsStats` 已移除 `avgBasePoints`
-- [ ] `getAlbumsHistory` 已移除 `basePoints` select
-
-**允許保留**：
-- Migration SQL 檔案中的 `DROP COLUMN "basePoints"`（歷史記錄）
-
----
-
-#### **任務 8.4：E2E 測試**
-
-**測試流程**：
-1. 啟動開發伺服器：`npm run dev`
-2. 完成一次完整的排名提交（Artist Sorter）
-3. 檢查 My Stats 頁面：
-   - [ ] 專輯排名正確顯示
-   - [ ] 專輯分數正確顯示
-   - [ ] 百分位統計正確顯示
-   - [ ] 沒有顯示 `basePoints` / `avgBasePoints`
-4. 檢查 Snapshot 頁面：
-   - [ ] 歷史記錄正確顯示
-   - [ ] 沒有顯示 `totalBasePoints`
-5. 檢查 RankingLineChart：
-   - [ ] 趨勢圖正確顯示
-   - [ ] 資料正確載入
-
----
-
-## 📊 影響範圍總覽
-
-### **新增的檔案（4 個）**
-1. ✅ `src/services/album/updateAlbumStats.ts`（~150 行）
-2. ✅ `scripts/test-updateAlbumStats.ts`（~40 行）
-3. ✅ `scripts/backfillAlbumStats.ts`（~80 行）
-4. ✅ `scripts/recalculateAlbumScores.ts`（~180 行）
-
-### **修改的檔案（8 個）**
-1. 🔧 `prisma/schema.prisma`
-   - 變更：移除 `AlbumRanking.basePoints`，新增 `AlbumStat` model
-   - 影響範圍：大（Schema 變更）
-
-2. 🔧 `src/features/sorter/actions/completeSubmission.ts`
-   - 變更：移除 `basePoints`，新增 `updateAlbumStats` 調用
-   - 影響範圍：中（~10 行改動）
-
-3. 🔧 `src/services/album/getAlbumsStats.ts`
-   - 變更：完全重寫（從 140 行簡化為 40 行）
-   - 影響範圍：大（~100 行刪除）
-
-4. 🔧 `src/services/album/getAlbumsHistory.ts`
-   - 變更：移除 `basePoints` select 和回傳
-   - 影響範圍：小（~5 行改動）
-
-5. 🔧 `src/features/ranking/utils/calculateAlbumPoints.ts`
-   - 變更：移除 `basePoints` 計算邏輯
-   - 影響範圍：小（~10 行刪除）
-
-6. 🔧 `src/features/sorter/utils/calculateAlbumPoints.ts`
-   - 變更：移除 `basePoints` 計算邏輯
-   - 影響範圍：小（~10 行刪除）
-
-7. 🔧 `src/types/album.ts`
-   - 變更：移除 `avgBasePoints` 和 `totalBasePoints`
-   - 影響範圍：小（~5 行改動）
-
-8. 🔧 `src/types/data.ts`（如果有相關定義）
-   - 變更：檢查並移除 `basePoints` 相關型別
-   - 影響範圍：極小
-
-### **總計**
-- **新增**：4 個檔案（~450 行）
-- **修改**：8 個檔案（~150 行改動）
-- **刪除**：~100 行（主要是 `getAlbumsStats` 簡化）
-- **淨增加**：~350 行（但大幅提升效能與可維護性）
-
----
-
-## ✅ 預期成果
-
-### **效能提升**
-
-| 操作 | 變更前 | 變更後 | 提升 |
-|------|--------|--------|------|
-| `getAlbumsStats` | 3 次 DB query + O(n) 聚合 + O(n) 百分位 + O(n log n) 排序 | 1 次 DB query + O(n) map | ~50-100x |
-| `completeSubmission` | 寫入 TrackRanking + AlbumRanking + 更新 TrackStats | + 更新 AlbumStats | +5-10% 時間 |
-| 使用者查看統計 | 每次都重新計算 | 直接讀取 | 即時回應 |
-
-### **架構改進**
-- ✅ **架構對稱**：Track 和 Album 都有 Ranking（快照）+ Stats（統計）
-- ✅ **單一資料來源**：`AlbumStats` 是專輯統計的唯一來源
-- ✅ **變化追蹤**：支援 `previousPoints`, `pointsChange`, `previousOverallRank`, `overallRankChange`
-- ✅ **可擴展性**：未來可輕鬆新增 `hotStreak`, `consistency` 等統計
-
-### **程式碼簡化**
-- ✅ `getAlbumsStats` 從 140 行簡化為 40 行（-70%）
-- ✅ 移除 `getAlbumPercentileCounts` 函式（-40 行）
-- ✅ 移除 `basePoints` 相關程式碼（-30 行）
-- ✅ 新增核心邏輯 `updateAlbumStats`（+150 行，但可重用）
-
-### **風險降低**
-- ✅ 移除未使用的欄位（`basePoints`）減少混淆
-- ✅ 預先計算百分位統計，減少查詢時錯誤
-- ✅ Transaction 保證資料一致性
-
----
-
-## 🔍 驗證檢查清單
-
-### **Schema 驗證**
-- [ ] `npx prisma generate` 成功
-- [ ] Migration 成功執行
-- [ ] `AlbumRanking` 不再有 `basePoints` 欄位
-- [ ] `AlbumStat` model 正確創建
-
-### **功能驗證**
-- [ ] 完成排名提交後，`AlbumStats` 正確創建/更新
-- [ ] `AlbumStats.points` 計算正確（與手動計算一致）
-- [ ] `AlbumStats.overallRank` 排序正確（分數高的排前面）
-- [ ] 百分位統計正確（`top5/10/25/50PercentCount`）
-- [ ] 第二次提交後，`previousPoints` / `pointsChange` 正確
-- [ ] `getAlbumsStats` 回傳資料正確
-- [ ] `getAlbumsHistory` 不再回傳 `totalBasePoints`
-- [ ] My Stats 頁面正確顯示專輯排名
-- [ ] RankingLineChart 正確顯示趨勢
-
-### **程式碼品質**
-- [ ] TypeScript 編譯通過（`npx tsc --noEmit`）
-- [ ] ESLint 無錯誤（`npm run lint`）
-- [ ] 無殘留的 `basePoints` 引用（除 migration SQL）
-
-### **效能驗證**
-- [ ] `getAlbumsStats` 查詢時間 < 100ms（vs 舊版的 1-2 秒）
-- [ ] `completeSubmission` 時間增加 < 10%
-- [ ] 資料庫負載無異常
-
----
-
-## 📚 技術決策記錄
-
-### **為什麼保留 AlbumRanking？**
-
-**原因**：
-1. **歷史快照**：`AlbumRanking` 記錄每次提交時的即時專輯分數
-2. **趨勢分析**：`RankingLineChart` 需要歷史資料繪製趨勢圖
-3. **資料來源不同**：
-   - `AlbumRanking.points`：基於 `TrackRanking`（該次提交的即時排名）
-   - `AlbumStats.points`：基於 `TrackStats`（跨提交的綜合排名）
-4. **使用者需求**：可能需要比較「該次提交」vs「目前綜合評價」
-
-### **為什麼新增 AlbumStats 而非即時計算？**
-
-**問題**：
-- 即時計算需要每次查詢都執行 `calculateAlbumPoints`（O(n) 複雜度）
-- 無法追蹤排名變化（`previousRank`, `rankChange`）
-- 無法記錄歷史統計（`highestRank`, `lowestRank`）
-
-**優勢**：
-1. **效能提升 50-100 倍**：從 3 次 DB query + O(n) 運算 → 1 次 DB query
-2. **變化追蹤**：支援 `previousPoints`, `pointsChange`, `previousOverallRank`, `overallRankChange`
-3. **架構一致**：與 `TrackStats` 設計對稱（好品味）
-4. **可擴展**：未來可新增更多統計指標
-
-### **為什麼移除 basePoints？**
-
-**原因**：
-1. **未使用**：只在 `getAlbumsStats` 中被平均後回傳，但前端不需要
-2. **混淆**：開發者不知道何時該用 `points` 還是 `basePoints`
-3. **維護成本**：佔用資料庫空間，增加程式碼複雜度
-4. **使用者確認**：已確認不需要此欄位
-
-**如需加回**：
-- 可從 git history 恢復計算邏輯
-- 重新加入 Schema 欄位
-- 執行 migration 和 recalculate script
-
-### **為什麼百分位統計要存進 AlbumStats？**
-
-**差異**：
-- **Track**：百分位來自 `TrackRanking`（必須即時查詢，無法預先計算）
-- **Album**：百分位來自 `TrackStats`（可以預先計算）
-
-**優勢**：
-1. **效能提升 2-3 倍**：避免每次查詢都重新計算
-2. **與 points 同步**：在同一次 `updateAlbumStats` 中計算，保證一致性
-3. **簡化查詢**：`getAlbumsStats` 只需要一次 query
-
-### **為什麼複用 calculateAlbumPoints？**
-
-**原因**：
-1. **邏輯一致**：`AlbumRanking` 和 `AlbumStats` 都使用相同的分數計算公式
-2. **減少維護**：修改計算邏輯時只需改一處
-3. **虛擬排名**：將 `TrackStats.overallRank` 當作 `ranking` 傳入即可
-
-**關鍵差異**：
-- **輸入來源不同**：
-  - `AlbumRanking`：`TrackRanking.rank`（該次提交的即時排名）
-  - `AlbumStats`：`TrackStats.overallRank`（跨提交的綜合排名）
-- **輸出意義不同**：
-  - `AlbumRanking.points`：該次提交的即時分數
-  - `AlbumStats.points`：基於綜合排名的分數
-
----
-
-## 🚀 實施順序建議
-
-⚠️ **重要提醒**：
-- 本專案處於**開發階段**，資料庫有測試資料**不能遺失**
-- **絕對不能執行 `npx prisma migrate reset`**
-- **絕對不能使用 `npx prisma db push`**（會跳過 migration history）
-- **一律使用 `npx prisma migrate dev --name xxx`**（保留完整 migration 記錄）
-- 採用**兩階段 Migration 策略**：先加後刪，確保資料安全
-
-**實施順序（開發環境，保留資料）**：
-
-### **第一階段：新增功能（不破壞現有功能）**
-
-1. **Phase 1A** → 只新增 `AlbumStat` model（不刪 `basePoints`）→ 執行 Migration
-2. **Phase 2** → 實作 `updateAlbumStats` → 獨立測試驗證
-3. **Phase 3** → 整合到 `completeSubmission`（暫時保留 `basePoints` 寫入）→ E2E 測試
-4. **Phase 4** → 重構 `getAlbumsStats`（改用 `AlbumStats`）→ 驗證查詢效能
-5. **Phase 7** → 執行 `backfillAlbumStats.ts` → 回填現有資料
-
-**驗證點**：此時 `AlbumStats` 已正常運作，`basePoints` 仍存在但不影響功能
-
-### **第二階段：清理舊欄位（確認新功能穩定後）**
-
-6. **Phase 5** → 移除 `basePoints` 計算邏輯 → 驗證分數正確
-7. **Phase 6** → 更新 TypeScript 類型（移除 `basePoints` 相關型別）→ TypeScript 編譯驗證
-8. **Phase 1B** → 執行 Migration 刪除 `basePoints` → 驗證 Prisma 生成成功
-9. **Phase 8** → 清理與最終驗證 → 準備上線
-
-**每個 Phase 的驗證**：
-- 執行 `npx tsc --noEmit`
-- 執行 `npm run lint`
-- 檢查資料庫資料完整性
-
----
-
-## 💡 未來優化（可選）
-
-完成基本重構後，未來可考慮：
-
-1. **使用者設定過濾**（已討論但暫不實作）
-   - 過濾 intro/interlude/reissue 歌曲
-   - `UserPreference.rankingSettings` 已準備好
-   - 在 `updateAlbumStats` 中根據設定過濾 TrackStats
-
-2. **專輯統計擴展**
-   - `hotStreak`：專輯排名連續上升次數
-   - `coldStreak`：專輯排名連續下降次數
-   - `consistency`：專輯分數波動度
-   - `highestRank` / `lowestRank`：歷史最高/最低排名
-
-3. **效能優化**
-   - 使用 `db.$queryRaw` 一次查詢取得所有資料
-   - 使用 Redis 快取 `getAlbumsStats` 結果
-   - 使用 Database Index 優化查詢
-
-4. **錯誤處理**
-   - `updateAlbumStats` 失敗時重試機制
-   - 資料不一致時警告通知
-
----
-
-## 📖 參考資料
-
-### **設計原則**
-- **Single Source of Truth**：`AlbumStats` 是專輯統計的唯一真實來源
-- **Symmetry**：Track 和 Album 架構對稱（Ranking + Stats）
-- **Performance**：預先計算 > 即時計算（當資料穩定時）
-
-### **Prisma 最佳實踐**
-- [Prisma Schema](https://www.prisma.io/docs/concepts/components/prisma-schema)
-- [Prisma Migrations](https://www.prisma.io/docs/concepts/components/prisma-migrate)
-- [Prisma Transactions](https://www.prisma.io/docs/concepts/components/prisma-client/transactions)
-
-### **資料庫設計**
-- 正規化 vs 反正規化：在查詢頻繁時選擇反正規化（預先計算）
-- 索引設計：複合索引 `(userId, albumId)` 加速查詢
+### E. 聯絡資訊
+
+**技術支援**：
+- GitHub Issues（專案 Issues 頁面）
+- 技術文件：`docs/` 資料夾
+
+**相關文件**：
+- `CLAUDE.md`：專案協作指南
+- `prisma/schema.prisma`：資料庫 Schema
 
 ---
 
 **文件版本**：v1.1
-**最後更新**：2025-10-11
-**狀態**：待執行
-
----
-
-## 📋 修訂記錄
-
-### v1.1 (2025-10-11)
-- 🔧 調整實施順序：採用兩階段 Migration 策略（先加後刪）
-- 🔧 優化 `calculatePercentileCounts`：預先計算閾值 + 只遍歷一次（效能提升 4 倍）
-- 🔧 移除 `groupBy` 輔助函式（不再需要）
-- ✅ 新增 `scripts/recalculateAlbumScores.ts`（重新計算所有分數）
-- ✅ 明確 Migration 策略：一律使用 `migrate dev`，禁止 `db push` 和 `migrate reset`
-- ✅ 確認 `updateAlbumStats` 位置：放在 `src/services/album/`（與 `updateTrackStats` 對稱）
-- ✅ 確保資料庫資料不遺失（禁止 migrate reset）
-- ✅ 第一階段只新增功能，不破壞現有功能
-- ✅ 第二階段才清理舊欄位（確認新功能穩定後）
-
-### v1.0 (2025-10-10)
-- 初始版本
-- 定義完整的重構計畫
-- 包含所有 Phase 的詳細步驟
-- 新增 Migration Scripts
-- 新增驗證檢查清單
+**最後更新**：2025-11-19（整合問題 1 和問題 3）
+**下次審查**：修復完成後
