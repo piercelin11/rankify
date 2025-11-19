@@ -1,12 +1,7 @@
 "use client";
 
 import { TrackData } from "@/types/data";
-import React, {
-	startTransition,
-	useEffect,
-	useOptimistic,
-	useState,
-} from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { RankingResultData } from "../types";
@@ -33,22 +28,23 @@ import { PLACEHOLDER_PIC } from "@/constants";
 import { useSorterContext } from "@/contexts/SorterContext";
 import completeSubmission from "../actions/completeSubmission";
 import deleteSubmission from "../actions/deleteSubmission";
+import { useRouter } from "next/navigation";
 
 type ResultStageProps = {
 	draftState: SorterStateType;
 	tracks: TrackData[];
-	userId: string;
 	submissionId: string;
 };
 
 export default function ResultStage({
 	draftState,
 	tracks,
-	userId: _userId,
 	submissionId,
 }: ResultStageProps) {
 	const { showAlert } = useModal();
 	const { setPercentage } = useSorterContext();
+	const router = useRouter();
+
 
 	// 配置拖曳感測器
 	const sensors = useSensors(
@@ -60,11 +56,7 @@ export default function ResultStage({
 	);
 
 	// 解析 draftState 並生成初始結果
-	const [initialResult, setInitialResult] = useState<RankingResultData[]>([]);
-	const [optimisticResult, setOptimisticResult] = useOptimistic(
-		initialResult,
-		(_, newResult: RankingResultData[]) => newResult
-	);
+	const [result, setResult] = useState<RankingResultData[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 
 	// 初始化結果數據
@@ -76,7 +68,7 @@ export default function ResultStage({
 					return;
 				}
 				const finalResult = generateFinalResult(draftState, tracks);
-				setInitialResult(finalResult);
+				setResult(finalResult);
 				setIsLoading(false);
 			} catch (error) {
 				console.error("Failed to generate result:", error);
@@ -97,7 +89,6 @@ export default function ResultStage({
 	useEffect(() => {
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
 			e.preventDefault();
-			e.returnValue = '';
 		};
 
 		window.addEventListener('beforeunload', handleBeforeUnload);
@@ -112,17 +103,15 @@ export default function ResultStage({
 			return;
 		}
 
-		const oldIndex = optimisticResult.findIndex(
-			(item) => item.id === active.id
-		);
-		const newIndex = optimisticResult.findIndex((item) => item.id === over.id);
+		const oldIndex = result.findIndex((item) => item.id === active.id);
+		const newIndex = result.findIndex((item) => item.id === over.id);
 
 		if (oldIndex === -1 || newIndex === -1) {
 			return;
 		}
 
 		// 重新排列數組
-		const newResult = [...optimisticResult];
+		const newResult = [...result];
 		const [movedItem] = newResult.splice(oldIndex, 1);
 		newResult.splice(newIndex, 0, movedItem);
 
@@ -132,15 +121,13 @@ export default function ResultStage({
 			ranking: index + 1,
 		}));
 
-		// 樂觀更新
-		startTransition(() => {
-			setOptimisticResult(updatedResult);
-		});
+		// 直接更新本地狀態
+		setResult(updatedResult);
 	};
 
 	const handleSubmit = () => {
-		completeSubmission({ trackRankings: optimisticResult, submissionId });
-		//TODO: 導向正確路由
+		completeSubmission({ trackRankings: result, submissionId });
+		router.push(`/artist/${tracks[0].artistId}/my-stats/${submissionId}`)
 	};
 
 	const handleDelete = () => {
@@ -150,7 +137,7 @@ export default function ResultStage({
 			confirmText: "Delete Record",
 			onConfirm: () => {
 				deleteSubmission({ submissionId });
-				//TODO: 導向正確路由
+				router.push(`/artist/${tracks[0].artistId}/my-stats`)
 			}
 		});
 	};
@@ -181,11 +168,11 @@ export default function ResultStage({
 					onDragEnd={handleDragEnd}
 				>
 					<SortableContext
-						items={optimisticResult.map((item) => item.id)}
+						items={result.map((item) => item.id)}
 						strategy={verticalListSortingStrategy}
 					>
 						<div>
-							{optimisticResult.map((data, index) => (
+							{result.map((data, index) => (
 								<SortableResultItem
 									key={data.id}
 									data={data}

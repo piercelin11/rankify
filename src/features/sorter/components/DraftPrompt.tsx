@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import deleteSubmission from "../actions/deleteSubmission";
 import { dateToDashFormat } from "@/lib/utils/date.utils";
 import RankingStage from "./RankingStage";
+import ResultStage from "./ResultStage";
 import type { SorterStateType } from "@/lib/schemas/sorter";
 import type { TrackData } from "@/types/data";
 
@@ -36,7 +37,27 @@ export function DraftPrompt({
 		});
 	};
 
-	// 使用者尚未選擇 → 顯示 Modal
+	if (draftState.finishFlag === 1) {
+		return (
+			<ResultStage
+				draftState={draftState}
+				tracks={tracks}
+				submissionId={submissionId}
+			/>
+		);
+	}
+
+	if (draftState.percent === 0) {
+		return (
+			<RankingStage
+				initialState={draftState}
+				tracks={tracks}
+				submissionId={submissionId}
+				userId={userId}
+			/>
+		);
+	}
+
 	if (choice === null) {
 		return (
 			<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -44,7 +65,8 @@ export function DraftPrompt({
 					<h2 className="text-xl font-semibold">Unfinished Draft Found</h2>
 					<p className="text-muted-foreground">
 						You have an incomplete draft from {dateToDashFormat(draftDate)}.
-						Would you like to continue?
+						Progress: {Math.round(draftState.percent)}%. Would you like to
+						continue?
 					</p>
 					<div className="flex gap-3 justify-end">
 						<Button
@@ -66,7 +88,6 @@ export function DraftPrompt({
 		);
 	}
 
-	// 使用者選擇重新開始 → 顯示刪除中畫面
 	if (choice === "restart") {
 		return (
 			<div className="flex items-center justify-center py-20">
@@ -75,7 +96,6 @@ export function DraftPrompt({
 		);
 	}
 
-	// 使用者選擇繼續 → 顯示 RankingStage
 	return (
 		<RankingStage
 			initialState={draftState}

@@ -35,7 +35,9 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 	const dateRange = calculateDateRangeFromSlug(range);
 
 	const submissions = await getArtistRankingSubmissions({ artistId, userId });
-	const latestSubmissionId = submissions[0].id;
+	const latestSubmissionId = submissions[0]?.id;
+	//TODO:處理沒有資料的回傳畫面
+	if (!latestSubmissionId) return null;
 
 	let content: React.ReactNode;
 
