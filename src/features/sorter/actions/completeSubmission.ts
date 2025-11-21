@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client";
 import { RankingResultData } from "../types";
 import { getUserSession } from "@/../auth";
 import { revalidatePath } from "next/cache";
-import { calculateAlbumPoints } from "../utils/calculateAlbumPoints";
+import { calculateAlbumPoints } from "@/features/ranking/utils/calculateAlbumPoints";
 import { updateAlbumStats } from "@/services/album/updateAlbumStats";
 import { updateTrackStats } from "@/services/track/updateTrackStats";
 
@@ -93,7 +93,12 @@ export default async function completeSubmission({
 
 			// 創建 AlbumRanking 記錄
 			if (existingSubmission.type === "ARTIST") {
-				const albumStats = calculateAlbumPoints(trackRankings);
+				const albumStats = calculateAlbumPoints(
+					trackRankings.map((t) => ({
+						albumId: t.albumId,
+						rank: t.ranking,
+					}))
+				);
 				const result = albumStats.map((stats, index) => ({
 					submissionId,
 					artistId: existingSubmission.artistId,
