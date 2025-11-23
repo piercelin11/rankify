@@ -47,7 +47,14 @@ export function DraftPrompt({
 		);
 	}
 
-	if (draftState.percent === 0) {
+	// 檢查是否剛從 FilterStage 進來
+	const justFiltered = typeof window !== 'undefined' ? sessionStorage.getItem('justFiltered') : null;
+	if (justFiltered) {
+		sessionStorage.removeItem('justFiltered');
+	}
+
+	if (draftState.percent === 0 && justFiltered) {
+		// 剛從 FilterStage 進來，直接進入排序
 		return (
 			<RankingStage
 				initialState={draftState}

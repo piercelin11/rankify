@@ -45,7 +45,6 @@ export default function ResultStage({
 	const { setPercentage } = useSorterContext();
 	const router = useRouter();
 
-
 	// 配置拖曳感測器
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
@@ -89,11 +88,21 @@ export default function ResultStage({
 	useEffect(() => {
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
 			e.preventDefault();
+			e.returnValue = '';
 		};
 
 		window.addEventListener('beforeunload', handleBeforeUnload);
 		return () => window.removeEventListener('beforeunload', handleBeforeUnload);
 	}, []);
+
+	// Fail-fast 檢查: tracks 不應為空
+	if (tracks.length === 0) {
+		console.error('ResultStage: tracks array is empty - this should not happen');
+		router.push('/');
+		return null;
+	}
+
+	const artistId = tracks[0].artistId;
 
 	// 拖曳結束處理
 	const handleDragEnd = (event: DragEndEvent) => {
@@ -125,9 +134,9 @@ export default function ResultStage({
 		setResult(updatedResult);
 	};
 
-	const handleSubmit = () => {
-		completeSubmission({ trackRankings: result, submissionId });
-		router.push(`/artist/${tracks[0].artistId}/my-stats/${submissionId}`)
+	const handleSubmit = async () => {
+		await completeSubmission({ trackRankings: result, submissionId });
+		router.push(`/artist/${artistId}/my-stats/${submissionId}`)
 	};
 
 	const handleDelete = () => {
@@ -137,7 +146,7 @@ export default function ResultStage({
 			confirmText: "Delete Record",
 			onConfirm: () => {
 				deleteSubmission({ submissionId });
-				router.push(`/artist/${tracks[0].artistId}/my-stats`)
+				router.push(`/artist/${artistId}/my-stats`)
 			}
 		});
 	};

@@ -50,8 +50,9 @@ export default function FilterStage({ albums, singles }: FilterStageProps) {
 				artistId,
 			});
 
-			// 成功後 refresh 以獲取最新資料
+			// 成功後設置 flag 並 refresh 以獲取最新資料
 			if (result.data && "id" in result.data) {
+				sessionStorage.setItem('justFiltered', 'true');
 				router.refresh();
 			}
 		} catch (error) {
