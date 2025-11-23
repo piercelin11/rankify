@@ -1,528 +1,277 @@
-# calculateAlbumPoints 遷移計劃
+# Code Review - feat/sorter-optimization 分支
 
-**建立時間**：2025-11-20
-**負責人**：Linus AI
-**預計工時**：15 分鐘
-
----
-
-## 執行摘要
-
-統一 `calculateAlbumPoints` 演算法，消除新舊兩版本並存的技術債。
-
-**當前狀況**：
-- ✅ **新版**：`src/features/ranking/utils/calculateAlbumPoints.ts`（已被 80% 模組採用）
-- ❌ **舊版**：`src/features/sorter/utils/calculateAlbumPoints.ts`（僅 `completeSubmission` 使用）
-
-**目標**：
-1. 遷移 `completeSubmission.ts` 到新版演算法
-2. 刪除舊版檔案
-3. 執行數據遷移腳本統一歷史數據
+**審查日期**：2025-11-21
+**審查範圍**：當前分支相對於 main 的所有變更
 
 ---
 
-## 問題診斷
+## 變更摘要
 
-### 【當前狀況】
+### Commits
+1. `9651181` - fix(sorter): 修復排序系統流程與拖曳功能的關鍵問題
+2. `2ede6a8` - refactor(ranking): 統一 calculateAlbumPoints 演算法
 
-#### 檔案分佈
-
-| 檔案 | 使用者 | 狀態 |
-|------|--------|------|
-| `src/features/ranking/utils/calculateAlbumPoints.ts` | `updateAlbumStats.ts`<br>`recalculateAlbumScores.ts` | ✅ 新版 |
-| `src/features/sorter/utils/calculateAlbumPoints.ts` | `completeSubmission.ts` | ❌ 舊版 |
-
-#### 核心問題
-
-**技術債**：兩套演算法並存，違反「單一真相來源」原則
-
-```typescript
-// completeSubmission.ts (舊演算法)
-calculateAlbumPoints(trackRankings)
-
-// updateAlbumStats.ts (新演算法)
-calculateAlbumPoints(virtualRankings)
-
-// recalculateAlbumScores.ts (新演算法)
-calculateAlbumPoints(...)
-```
+### 變更檔案
+- `src/features/sorter/actions/completeSubmission.ts`
+- `src/features/sorter/components/DraftPrompt.tsx`
+- `src/features/sorter/components/ResultStage.tsx`
+- `src/app/(main)/artist/[artistId]/(artist)/my-stats/page.tsx`
 
 ---
 
-## 新舊版本差異分析
+## 【品味評分】 🟡 湊合
 
-### 【函式簽名】
-
-**舊版**：
-```typescript
-function calculateAlbumPoints(trackRankings: RankingResultData[])
-//                                           ^^^^^^^^^^^^^^^^^^
-//                                           完整 TrackData + ranking
-```
-
-**新版**：
-```typescript
-function calculateAlbumPoints(trackRankings: TrackRankingsType[])
-//                                           ^^^^^^^^^^^^^^^^^^
-//                                           {albumId, rank}[]
-```
-
-### 【參數差異】
-
-| 特徵 | 舊版 (`RankingResultData`) | 新版 (`TrackRankingsType`) |
-|------|---------------------------|---------------------------|
-| 型別定義 | `TrackData & {ranking: number}` | `{albumId: string \| null, rank: number}` |
-| 繼承關係 | 繼承完整 TrackData | 無繼承，inline 定義 |
-| 必要欄位 | `albumId`, `ranking` | `albumId`, `rank` |
-| 額外欄位 | name, img, artistId, album, artist, etc. | 無 |
-| 欄位名稱 | `ranking` | `rank` |
-
-### 【演算法差異】
-
-#### 1. 分數係數調整（防止神曲主導）
-
-**舊版**：
-```typescript
-const score =
-    percentileRank > 0.75 ? percentileRank * 1000
-  : percentileRank > 0.5  ? percentileRank * 950
-  : percentileRank > 0.25 ? percentileRank * 650
-  :                         percentileRank * 500;
-```
-
-**新版**：
-```typescript
-const score =
-    percentileRank > 0.75 ? percentileRank * 900   // ↓ 降低 100
-  : percentileRank > 0.5  ? percentileRank * 700   // ↓ 降低 250
-  : percentileRank > 0.25 ? percentileRank * 500   // ↓ 降低 150
-  :                         percentileRank * 400;  // ↓ 降低 100
-```
-
-**目的**：降低頂級歌曲的分數優勢，讓專輯整體品質更重要
-
-#### 2. 短專輯懲罰減輕（給單曲機會）
-
-**舊版**：
-```typescript
-const smoothingFactor =
-    percentileRank > 0.5 && albumTrackCount < 5
-        ? albumTrackCount * 0.15 + 0.25  // 1 track: 0.40
-        : 1;
-```
-
-**新版**：
-```typescript
-const smoothingFactor =
-    percentileRank > 0.5 && albumTrackCount < 5
-        ? albumTrackCount * 0.10 + 0.45  // 1 track: 0.55
-        : 1;
-```
-
-**目的**：提高單曲基準線（0.40 → 0.55），即使是神曲也能有機會
-
-#### 3. 長專輯懲罰改用冪次（更平滑）
-
-**舊版**（線性懲罰）：
-```typescript
-const points = Math.floor((score / albumTrackCount) * smoothingFactor);
-//                                  ^^^^^^^^^^^^^^
-//                                  20 首 → 除以 20
-```
-
-**新版**（冪次懲罰）：
-```typescript
-const points = Math.floor((score / Math.pow(albumTrackCount, 0.8)) * smoothingFactor);
-//                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//                                  20 首 → 除以 10.99
-```
-
-**效果對比**：
-
-| 歌曲數 | 舊版除數 | 新版除數 | 懲罰減輕 |
-|--------|---------|---------|---------|
-| 5 首   | 5       | 3.62    | 27.6%   |
-| 10 首  | 10      | 6.31    | 36.9%   |
-| 20 首  | 20      | 10.99   | 45.1%   |
-
-**目的**：讓長專輯不會因為歌曲多而被過度懲罰
+變更解決了真實問題（演算法統一、流程修復），但有幾個技術細節需要調整。
 
 ---
 
-## Linus 式評估
+## 需要調整的項目
 
-### 【核心判斷】
+### 1. ❌ ResultStage.tsx - `handleSubmit` 缺少 await
 
-✅ **值得做，必須完成**
-
-這不是「要不要遷移」的問題，而是「如何正確完成遷移」的問題。你已經完成了 80% 的工作（`updateAlbumStats` 和 `recalculateAlbumScores` 已遷移），但留下了一個**關鍵的不一致性**：`completeSubmission` 還在用舊演算法。
-
-### 【關鍵洞察】
-
-#### 1️⃣ 資料結構：新版是好品味
-
-**新版型別** (`TrackRankingsType`) 體現了**最小化介面**原則：
-- **消除依賴**：不再依賴龐大的 `RankingResultData`
-- **只要求需要的欄位**：`albumId`, `rank`
-- **去耦合**：`calculateAlbumPoints` 不再綁定 sorter 模組
-
-**舊版的問題**：
-```typescript
-// 舊版：要求完整的 TrackData，但只用到 2 個欄位
-calculateAlbumPoints(trackRankings: RankingResultData[])
-//                                  ^^^^^^^^^^^^^^^^^^
-//                                  包含 name, img, artist, album...
-//                                  但實際只用 albumId 和 ranking
-```
-
-這是**過度耦合**。函式應該做一件事，並把它做好。
-
-#### 2️⃣ 複雜度：演算法調整基於真實需求
-
-三個公式改動都有明確目的：
-
-1. **降低分數係數**：防止「一兩首神曲」主導排名
-2. **減輕短專輯懲罰**：讓單曲有機會（0.4× → 0.55×）
-3. **引入冪次懲罰**：讓長專輯懲罰更平滑
-
-**這不是過度設計，而是基於真實數據的優化。**
-
-#### 3️⃣ 特殊情況：兩套演算法並行
-
-當前狀況：
-
-```
-completeSubmission.ts (舊演算法)
-    ↓
-calculateAlbumPoints (舊版)
-    ↓
-舊分數計算
-
-updateAlbumStats.ts (新演算法)
-    ↓
-calculateAlbumPoints (新版)
-    ↓
-新分數計算
-```
-
-這就是**特殊情況**：你有兩套演算法並行。這違反了「單一真相來源」原則。
-
-#### 4️⃣ 破壞性分析：需要數據遷移
-
-**風險點**：
-- 新舊演算法會產生**不同的排名結果**
-- 如果不處理舊數據，會有**不一致性**
-
-**你已經準備好了**：
-- `recalculateAlbumScores.ts` 腳本會重算所有舊數據 ✅
-- 採用「刪除後重建」邏輯，確保乾淨狀態 ✅
-
-#### 5️⃣ 實用性驗證：這是真實問題
-
-**你在解決的是**：
-- 短專輯被過度懲罰（真實問題）
-- 長專輯僅靠數量取勝（真實問題）
-- 一兩首神曲主導排名（真實問題）
-
-**不是**：
-- 為了重構而重構 ❌
-- 純理論的「更優雅」 ❌
-
-### 【品味評分】
-
-🟢 **好品味**（完成遷移後）
-
-這次重構的核心是**簡化**和**統一**，這是好的工程實踐。
-
----
-
-## 實作步驟
-
-### 【Phase 1：修改程式碼】（10 分鐘）
-
-#### 步驟 1：修改 completeSubmission.ts 的 import
-
-**檔案**：`src/features/sorter/actions/completeSubmission.ts`
-
-**修改位置**：L8
+**檔案**：`src/features/sorter/components/ResultStage.tsx`
+**行號**：~L128
 
 **當前程式碼**：
 ```typescript
-import { calculateAlbumPoints } from "../utils/calculateAlbumPoints";
+const handleSubmit = () => {
+    completeSubmission({ trackRankings: result, submissionId });
+    router.push(`/artist/${tracks[0].artistId}/my-stats/${submissionId}`)
+};
 ```
 
-**修改後**：
+**問題**：
+- `completeSubmission` 是 async server action，但沒有 `await`
+- 導航可能在資料庫寫入完成前就發生
+- 可能導致使用者看到舊資料或錯誤
+
+**建議修復**：
 ```typescript
-import { calculateAlbumPoints } from "@/features/ranking/utils/calculateAlbumPoints";
+const handleSubmit = async () => {
+    await completeSubmission({ trackRankings: result, submissionId });
+    router.push(`/artist/${tracks[0].artistId}/my-stats/${submissionId}`)
+};
 ```
+
+**優先級**：🔴 高
 
 ---
 
-#### 步驟 2：轉換資料格式
+### 2. ❌ ResultStage.tsx - `tracks[0]` 無防禦性檢查
 
-**檔案**：`src/features/sorter/actions/completeSubmission.ts`
-
-**修改位置**：L96（`calculateAlbumPoints` 呼叫處）
+**檔案**：`src/features/sorter/components/ResultStage.tsx`
+**行號**：L129, L143
 
 **當前程式碼**：
 ```typescript
-const albumStats = calculateAlbumPoints(trackRankings);
+router.push(`/artist/${tracks[0].artistId}/my-stats/${submissionId}`)
+// ...
+router.push(`/artist/${tracks[0].artistId}/my-stats`)
 ```
 
-**修改後**：
+**問題**：
+- 如果 `tracks` 為空陣列，`tracks[0]` 會是 `undefined`
+- 會導致 `Cannot read property 'artistId' of undefined` 錯誤
+
+**建議修復**：
 ```typescript
-const albumStats = calculateAlbumPoints(
-    trackRankings.map(t => ({
-        albumId: t.albumId,
-        rank: t.ranking  // 注意：欄位名稱從 ranking 改為 rank
-    }))
-);
+// 在 component 入口處加 fail-fast 檢查
+if (tracks.length === 0) {
+    console.error('ResultStage: tracks array is empty - this should not happen');
+    router.push('/');
+    return null;
+}
+
+// 提取 artistId 常數，避免重複存取
+const artistId = tracks[0].artistId;
+
+// 之後統一使用
+router.push(`/artist/${artistId}/my-stats/${submissionId}`)
+router.push(`/artist/${artistId}/my-stats`)
 ```
 
 **說明**：
-- 新版需要 `{albumId, rank}[]`，不是完整的 `RankingResultData[]`
-- 欄位名稱：`ranking` → `rank`
-- 透過 `.map()` 轉換，保持外部介面不變
+- 理論上不會發生，但加上防禦性檢查
+- 使用 console.error 在開發時能快速發現問題
+- 導回首頁避免使用者卡在錯誤狀態
+
+**優先級**：🔴 高
 
 ---
 
-#### 步驟 3：刪除舊版檔案
+### 3. ✅ ResultStage.tsx - beforeunload handler 需加回 returnValue
 
-**檔案**：`src/features/sorter/utils/calculateAlbumPoints.ts`
+**檔案**：`src/features/sorter/components/ResultStage.tsx`
+**行號**：L89-91
 
-**操作**：刪除整個檔案
-
-```bash
-rm src/features/sorter/utils/calculateAlbumPoints.ts
+**當前程式碼**：
+```typescript
+const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    e.preventDefault();
+};
 ```
 
----
-
-### 【Phase 2：品質檢查】（3 分鐘）
-
-#### 步驟 4：執行 TypeScript 檢查
-
-```bash
-npx tsc --noEmit
+**修復方案**：
+```typescript
+const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    e.preventDefault();
+    e.returnValue = ''; // 跨瀏覽器相容，值會被忽略但設值動作必要
+};
 ```
 
-**預期結果**：✅ 無型別錯誤
+**說明**：VSCode 標示「廢除」是指自訂訊息功能，但設值動作仍是觸發警告的必要條件。
+
+**優先級**：🟢 確認修復
 
 ---
 
-#### 步驟 5：執行 Linting
+### 4. ✅ DraftPrompt.tsx - percent === 0 時跳過 Modal 的邏輯
 
-```bash
-npm run lint
-```
+**檔案**：`src/features/sorter/components/DraftPrompt.tsx`
+**行號**：L47-55
 
-**預期結果**：✅ 無 lint 錯誤
+**背景**：
+- 使用者從 FilterStage 進入 RankingStage 時，草稿 percent = 0
+- 原本會跳出「是否繼續？」的 Modal，流程不直觀
+- 現在改為直接進入排序
 
----
+**問題**：
+- 如果使用者過濾完成後離開，再重新進入同歌手排名，應該要詢問是否有草稿
+- 需要區分「剛從 FilterStage 進來」vs「離開後重新進入」
 
-### 【Phase 3：數據遷移】（可選，5 分鐘）
-
-#### 步驟 6：執行遷移腳本
-
-```bash
-npx tsx scripts/recalculateAlbumScores.ts
-```
-
-**作用**：
-- 刪除所有舊的 `AlbumRanking` 資料
-- 用新演算法重新計算所有專輯分數
-- 確保歷史數據與新演算法一致
-
-**注意**：
-- 此步驟可選（如果不在意歷史數據的演算法差異）
-- 建議在低流量時段執行
-- 腳本已有錯誤處理和事務保護
-
----
-
-## 測試計畫
-
-### 【測試案例 1：基本功能】
-
-1. 建立新的排序提交
-2. 完成排序並提交
-3. 檢查 `AlbumRanking` 表的 `points` 欄位
-4. **預期結果**：
-   - 分數使用新演算法計算
-   - 短專輯分數提高（相對於舊版）
-   - 長專輯分數提高（相對於舊版）
-
-### 【測試案例 2：型別安全】
-
-1. 檢查 TypeScript 編譯
-2. **預期結果**：
-   - ✅ 無型別錯誤
-   - ✅ `.map()` 轉換正確處理欄位名稱差異
-
-### 【測試案例 3：數據一致性】（如果執行遷移腳本）
-
-1. 執行 `recalculateAlbumScores.ts`
-2. 比較遷移前後的 `AlbumRanking` 資料
-3. **預期結果**：
-   - 所有專輯分數被重新計算
-   - 使用新演算法
-   - 排名順序可能改變（符合預期）
-
----
-
-## 風險評估
-
-| 風險 | 影響 | 機率 | 緩解措施 |
-|------|------|------|---------|
-| 欄位名稱錯誤 (`ranking` vs `rank`) | 高 | 低 | TypeScript 會在編譯時報錯 ✅ |
-| 演算法變更導致排名改變 | 中 | 高 | 符合預期，執行遷移腳本統一歷史數據 |
-| 遷移腳本執行失敗 | 中 | 低 | 腳本已有錯誤處理和事務保護 |
-| 舊版檔案被其他地方引用 | 高 | 極低 | 已確認只有 `completeSubmission` 使用 |
-
----
-
-## 影響範圍
-
-### 【直接影響】
-
-#### 修改的檔案（2 個）
-
-1. `src/features/sorter/actions/completeSubmission.ts`
-   - L8：更新 import
-   - L96：新增資料轉換
-
-2. `src/features/sorter/utils/calculateAlbumPoints.ts`
-   - **刪除整個檔案**
-
-### 【間接影響】
-
-#### 演算法變更的影響
-
-所有未來建立的 `AlbumRanking` 都會使用新演算法：
-
-**分數變化預期**：
-- **短專輯**（1-4 首）：分數**提高**（懲罰減輕）
-- **長專輯**（10+ 首）：分數**提高**（懲罰更平滑）
-- **神曲專輯**（1-2 首頂級歌）：分數**降低**（係數降低）
-
-**排名變化**：
-- 原本靠神曲主導的專輯可能排名下降
-- 整體品質高的專輯可能排名上升
-
-### 【不受影響】
-
-- `src/features/sorter/types.ts`（`RankingResultData` 型別保持不變）
-- `src/features/sorter/components/ResultStage.tsx`（UI 不變）
-- `src/features/sorter/utils/convertResult.ts`（轉換邏輯不變）
-
----
-
-## 驗收標準
-
-### 【必須達成】
-
-- ✅ `completeSubmission.ts` 使用新版 `calculateAlbumPoints`
-- ✅ 舊版檔案已刪除
-- ✅ `npx tsc --noEmit` 通過
-- ✅ `npm run lint` 通過
-- ✅ 新建立的排序提交使用新演算法
-
-### 【可選達成】
-
-- ✅ 執行 `recalculateAlbumScores.ts` 重算歷史數據
-- ✅ 所有 `AlbumRanking` 使用統一演算法
-
----
-
-## 回滾計畫
-
-### 【如果遷移失敗】
-
-#### 回滾步驟
-
-1. 還原 `completeSubmission.ts` 的修改
-2. 從 git history 恢復舊版 `calculateAlbumPoints.ts`
-
-```bash
-git restore src/features/sorter/actions/completeSubmission.ts
-git restore src/features/sorter/utils/calculateAlbumPoints.ts
-```
-
-#### 替代方案
-
-**方案 A**：保留兩個版本，但重命名以區分
+**解決方案：sessionStorage flag**
 
 ```typescript
-// 舊版改名
-import { calculateAlbumPoints as calculateAlbumPointsLegacy } from "../utils/calculateAlbumPointsLegacy";
+// FilterStage.tsx - 進入排序時設置 flag
+const handleStartRanking = () => {
+    sessionStorage.setItem('justFiltered', 'true');
+    // ... 建立草稿並導向
+};
+
+// DraftPrompt.tsx - 檢查並清除 flag
+const justFiltered = sessionStorage.getItem('justFiltered');
+if (justFiltered) {
+    sessionStorage.removeItem('justFiltered');
+}
+
+if (draftState.percent === 0 && justFiltered) {
+    // 剛從 FilterStage 來，直接進入排序
+    return <RankingStage ... />;
+}
+// 否則顯示 Modal 詢問
+```
+
+**優點**：
+- 直接表達意圖：「我剛從 FilterStage 來」
+- 不依賴時間計算，避免 magic number 和時鐘問題
+- 頁面重整或關閉後 flag 自動清除
+
+**優先級**：🟢 確認修復
+
+---
+
+### 5. 🔵 my-stats/page.tsx - return null（暫不處理）
+
+**檔案**：`src/app/(main)/artist/[artistId]/(artist)/my-stats/page.tsx`
+
+**狀態**：已有 TODO 標記，使用者確認之後再處理。
+
+**優先級**：🔵 延後
+
+---
+
+### 6. 💭 ResultStage.tsx - useOptimistic 被移除的決策
+
+**檔案**：`src/features/sorter/components/ResultStage.tsx`
+
+**變更**：
+```typescript
+// 舊版
+const [initialResult, setInitialResult] = useState<RankingResultData[]>([]);
+const [optimisticResult, setOptimisticResult] = useOptimistic(
+    initialResult,
+    (_, newResult: RankingResultData[]) => newResult
+);
 
 // 新版
+const [result, setResult] = useState<RankingResultData[]>([]);
+```
+
+**分析**：
+- 拖曳操作目前是純本地狀態，不需要 `useOptimistic`
+- 移除是合理的簡化
+- ✅ 這是好品味
+
+**但要注意**：
+- 如果未來要加入「拖曳後自動儲存」功能，需要重新考慮
+
+**優先級**：✅ 已是好的決策
+
+---
+
+## 好的變更（不需調整）
+
+### ✅ calculateAlbumPoints 演算法統一
+
+```typescript
+// 從
+import { calculateAlbumPoints } from "../utils/calculateAlbumPoints";
+
+// 改為
 import { calculateAlbumPoints } from "@/features/ranking/utils/calculateAlbumPoints";
 ```
 
-**方案 B**：在 `completeSubmission` 中內聯舊版邏輯
+**評價**：
+- 消除技術債
+- 單一真相來源
+- 資料轉換乾淨：`.map(t => ({ albumId: t.albumId, rank: t.ranking }))`
 
-（不推薦，增加維護成本）
+### ✅ DraftPrompt 處理 finishFlag 的邏輯
 
----
+```typescript
+if (draftState.finishFlag === 1) {
+    return <ResultStage ... />
+}
+```
 
-## 後續優化建議
+**評價**：
+- 處理「排序完成但未提交」的草稿
+- 直接進入結果頁面，合理
 
-### 【短期】（本次遷移完成後）
+### ✅ Modal 顯示進度百分比
 
-1. **監控分數變化**：
-   - 記錄遷移前後的分數分佈
-   - 確認變化符合預期
+```typescript
+Progress: {Math.round(draftState.percent)}%. Would you like to continue?
+```
 
-2. **使用者回饋**：
-   - 觀察使用者對新排名的反應
-   - 收集關於專輯排名的意見
-
-### 【中期】（1 個月內）
-
-1. **定期執行遷移腳本**：
-   - 如果發現有遺漏的舊數據
-   - 腳本設計為冪等，可重複執行
-
-2. **演算法微調**：
-   - 根據真實數據調整係數
-   - 考慮引入更多因素（如專輯類型、發行年份）
-
-### 【長期】（3 個月內）
-
-1. **統一計分系統**：
-   - 將 `calculateAlbumPoints` 移至 `src/lib/utils/ranking/`
-   - 成為所有模組共用的標準函式
-
-2. **加入單元測試**：
-   - 測試邊界情況（1 首歌、100 首歌）
-   - 測試分數計算公式
-   - 測試冪次懲罰邏輯
+**評價**：
+- 使用者可以看到上次進度
+- 幫助決策是否繼續
 
 ---
 
-## 附錄
+## 建議的修復優先級
 
-### A. 檔案清單
+| # | 問題 | 優先級 | 估計時間 |
+|---|------|--------|---------|
+| 1 | handleSubmit 缺少 await | 🟢 確認 | 2 分鐘 |
+| 2 | tracks[0] 無防禦性檢查 | 🟢 確認 | 3 分鐘 |
+| 3 | beforeunload 加回 returnValue | 🟢 確認 | 1 分鐘 |
+| 4 | percent === 0 加時間戳檢查 | 🟢 確認 | 5 分鐘 |
+| 5 | return null 改為友善 UI | 🔵 延後 | - |
 
-#### 需要修改
-
-1. `src/features/sorter/actions/completeSubmission.ts`（135 行）
-2. `src/features/sorter/utils/calculateAlbumPoints.ts`（69 行，**刪除**）
-
-#### 參考檔案
-
-1. `src/features/ranking/utils/calculateAlbumPoints.ts`（新版演算法）
-2. `scripts/recalculateAlbumScores.ts`（數據遷移腳本）
-3. `src/services/album/updateAlbumStats.ts`（已使用新版）
-
-### B. 相關技術文件
-
-- **TypeScript Handbook**: [Mapped Types](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html)
-- **Prisma Docs**: [Transactions](https://www.prisma.io/docs/orm/prisma-client/queries/transactions)
+**本次修復**：#1, #2, #3, #4（約 11 分鐘）
 
 ---
 
-**文件版本**：v2.0
-**最後更新**：2025-11-20
-**下次審查**：遷移完成後
+## 後續建議
+
+1. **修復高優先級問題後再 merge**
+2. **考慮加入 loading 狀態**：handleSubmit 執行時顯示 loading
+3. **統一 artistId 的取得方式**：考慮從 props 或 context 取得，而非 `tracks[0]`
+
+---
+
+**文件版本**：v1.0
+**審查者**：Linus AI
+**狀態**：待修復
