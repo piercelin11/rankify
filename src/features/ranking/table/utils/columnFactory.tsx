@@ -13,14 +13,16 @@ export type ColumnConfig = {
 	type: ColumnType;
 	size?: number;
 	className?: string;
+	sortable?: boolean;
+	sortDescFirst?: boolean;
 };
 
 const NUMBER_SIZE = 140;
 
 // 欄位配置定義
 export const COLUMN_CONFIGS: Record<string, ColumnConfig> = {
-	rank: { key: "rank", header: "", type: "rank", size: 45 },
-	name: { key: "name", header: "Track", type: "track" },
+	rank: { key: "rank", header: "#", type: "rank", size: 45, sortable: false },
+	name: { key: "name", header: "Track", type: "track", sortDescFirst: false },
 	rankChange: { key: "rankChange", header: "", type: "change", size: 45 },
 	overallRankChange: {
 		key: "overallRankChange",
@@ -33,48 +35,56 @@ export const COLUMN_CONFIGS: Record<string, ColumnConfig> = {
 		header: "Peak",
 		type: "number",
 		size: NUMBER_SIZE,
+		sortDescFirst: false,
 	},
 	hotStreak: {
 		key: "hotStreak",
 		header: "Hot Streak",
 		type: "number",
 		size: NUMBER_SIZE,
+		sortDescFirst: true,
 	},
 	coldStreak: {
 		key: "coldStreak",
 		header: "Cold Streak",
 		type: "number",
 		size: NUMBER_SIZE,
+		sortDescFirst: true,
 	},
 	averageRank: {
 		key: "averageRank",
 		header: "Avg.",
 		type: "number",
 		size: NUMBER_SIZE,
+		sortDescFirst: false,
 	},
 	top50PercentCount: {
 		key: "top50PercentCount",
 		header: "Top 50%",
 		type: "number",
 		size: NUMBER_SIZE,
+		sortDescFirst: true,
 	},
 	top25PercentCount: {
 		key: "top25PercentCount",
 		header: "Top 25%",
 		type: "number",
 		size: NUMBER_SIZE,
+		sortDescFirst: true,
 	},
 	top5PercentCount: {
 		key: "top5PercentCount",
 		header: "Top 5%",
 		type: "number",
 		size: NUMBER_SIZE,
+		sortDescFirst: true,
 	},
 	achievement: {
 		key: "achievement",
 		header: "Achievement",
 		type: "achievement",
 		size: NUMBER_SIZE,
+		sortDescFirst: true,
 	},
 };
 
@@ -85,6 +95,8 @@ export const createRankingColumn = (
 	accessorKey: config.key,
 	header: () => config.header,
 	size: config.size,
+	enableSorting: config.sortable ?? true,
+	sortDescFirst: config.sortDescFirst ?? false,
 });
 
 export const createTrackColumn = (
@@ -92,6 +104,8 @@ export const createTrackColumn = (
 ): ColumnDef<RankingListDataTypeExtend> => ({
 	accessorKey: config.key,
 	header: config.header,
+	enableSorting: config.sortable ?? true,
+	sortDescFirst: config.sortDescFirst ?? false,
 	cell: ({ row }) => <TrackCell item={row.original} />,
 });
 
@@ -104,6 +118,8 @@ export const createNumberColumn = (
 		<div className="font-mono text-right">{getValue() as number}</div>
 	),
 	size: config.size,
+	enableSorting: config.sortable ?? true,
+	sortDescFirst: config.sortDescFirst ?? false,
 });
 
 export const createChangeColumn = (
@@ -111,6 +127,8 @@ export const createChangeColumn = (
 ): ColumnDef<RankingListDataTypeExtend> => ({
 	accessorKey: config.key,
 	header: () => <div className="text-right">{config.header}</div>,
+	enableSorting: config.sortable ?? true,
+	sortDescFirst: config.sortDescFirst ?? false,
 	cell: ({ getValue }) => {
 		const change = getValue() as number;
 		if (change === undefined || change === 0)
@@ -144,6 +162,8 @@ export const createAchievementColumn = (
 ): ColumnDef<RankingListDataTypeExtend> => ({
 	accessorKey: config.key,
 	header: () => <div className="text-right">{config.header}</div>,
+	enableSorting: config.sortable ?? true,
+	sortDescFirst: config.sortDescFirst ?? false,
 	cell: ({ getValue }) => {
 		const achievemts = getValue() as string[];
 		return (

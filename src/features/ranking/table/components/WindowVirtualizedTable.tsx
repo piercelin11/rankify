@@ -164,18 +164,25 @@ export default function WindowVirtualizedTable<
 												<div
 													className={cn(
 														"flex items-center gap-2 text-secondary-foreground",
-														isLeftAligned ? "" : "justify-end",
-														canSort &&
-															"-m-1 cursor-pointer select-none rounded p-1 hover:text-foreground"
+														isLeftAligned ? "" : "justify-end"
 													)}
-													onClick={header.column.getToggleSortingHandler()}
 												>
-													{flexRender(
-														header.column.columnDef.header,
-														header.getContext()
-													)}
-													{canSort && (
-														<div>
+													{canSort ? (
+														<button
+															type="button"
+															onClick={header.column.getToggleSortingHandler()}
+															className={cn(
+																"flex items-center gap-1.5",
+																"appearance-none bg-transparent border-0 p-0",
+																"cursor-pointer hover:text-foreground transition-colors"
+															)}
+														>
+															<span>
+																{flexRender(
+																	header.column.columnDef.header,
+																	header.getContext()
+																)}
+															</span>
 															{sortState === "asc" && (
 																<ArrowUp className="h-4 w-4" />
 															)}
@@ -185,7 +192,14 @@ export default function WindowVirtualizedTable<
 															{!sortState && (
 																<ArrowUpDown className="h-4 w-4 opacity-50" />
 															)}
-														</div>
+														</button>
+													) : (
+														<span>
+															{flexRender(
+																header.column.columnDef.header,
+																header.getContext()
+															)}
+														</span>
 													)}
 												</div>
 											)}
