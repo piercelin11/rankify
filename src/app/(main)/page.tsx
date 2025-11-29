@@ -8,7 +8,6 @@ export default async function HomePage() {
 	const { id: userId } = await getUserSession();
 	const unloggedArtists = await getUnloggedArtists({ userId });
 	
-
 	return (
 		<PageContainer>
 			<div className="space-y-8">
