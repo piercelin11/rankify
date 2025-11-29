@@ -66,6 +66,8 @@ model Artist {
   submissions      RankingSubmission[]
   tracks           Track[]
   trackStats       TrackStat[]
+
+  @@index([name])
 }
 
 model Album {
@@ -85,6 +87,7 @@ model Album {
 
   @@unique([name, artistId])
   @@index([artistId])
+  @@index([name])
 }
 
 model Track {
