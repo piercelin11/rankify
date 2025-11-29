@@ -44,6 +44,7 @@
 		"clsx": "^2.1.1",
 		"color-convert": "^3.0.1",
 		"compressorjs": "^1.2.1",
+		"date-fns": "^4.1.0",
 		"lucide-react": "^0.544.0",
 		"nanoid": "^5.1.5",
 		"next": "^15.1.1-canary.23",

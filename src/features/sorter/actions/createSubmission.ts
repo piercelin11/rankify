@@ -27,6 +27,14 @@ export async function createSubmission({
 	try {
 		const { id: userId } = await getUserSession();
 
+		// 🔧 防禦性驗證: 確保 ALBUM 類型必須有 albumId
+		if (type === "ALBUM" && !albumId) {
+			return {
+				type: "error",
+				message: "Album sorter requires albumId",
+			};
+		}
+
 		// Album Sorter 只有 1 個專輯，跳過 schema 驗證
 		// Artist Sorter 需要至少 2 個專輯
 		let validatedData = { selectedAlbumIds, selectedTrackIds };
