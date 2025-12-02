@@ -15,9 +15,9 @@ export default function DraftsSection({ drafts }: DraftsSectionProps) {
 
 	return (
 		<section className="space-y-4">
-			<h2 className="text-2xl font-bold">繼續你的排名</h2>
+			<h2 className="text-2xl font-bold">Continue Your Rankings</h2>
 
-			{/* 橫向捲動容器 */}
+			{/* Horizontal scroll container */}
 			<div className="flex gap-4 overflow-x-auto pb-4">
 				{drafts.map((draft) => {
 					// 🟢 信任過濾邏輯,簡化型別守衛
@@ -43,7 +43,7 @@ export default function DraftsSection({ drafts }: DraftsSectionProps) {
 						>
 							<Card className="w-[200px] flex-shrink-0 transition-transform hover:scale-105">
 								<CardContent className="space-y-3 p-4">
-									{/* 封面 */}
+									{/* Cover */}
 									<div className="relative aspect-square overflow-hidden rounded-lg">
 										<Image
 											src={displayImg || PLACEHOLDER_PIC}
@@ -53,10 +53,10 @@ export default function DraftsSection({ drafts }: DraftsSectionProps) {
 										/>
 									</div>
 
-									{/* 標題 */}
+									{/* Title */}
 									<h3 className="truncate font-semibold">{displayName}</h3>
 
-									{/* 進度條 */}
+									{/* Progress bar */}
 									<div className="space-y-1">
 										<Progress value={progress} />
 										<p className="text-xs text-muted-foreground">
