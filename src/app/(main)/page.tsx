@@ -23,22 +23,16 @@ export default async function HomePage() {
 	]);
 
 	return (
-		<div className="container mx-auto space-y-12 py-8">
-			{/* 個人儀表板 */}
-			<DashboardSection stats={stats} userName={user.name} />
+		<div className="space-y-12 p-content">
+			<DashboardSection stats={stats} />
 
-			{/* 全域搜尋列 (⚠️ Phase 2 可復用) */}
 			<div className="mx-auto max-w-2xl">
 				<GlobalSearch />
 			</div>
-
-			{/* 待辦事項（有草稿時顯示） */}
 			{drafts.length > 0 && <DraftsSection drafts={drafts} />}
 
-			{/* 最近活動（有完成記錄時顯示） */}
 			{history.length > 0 && <HistorySection history={history} />}
 
-			{/* 熱門歌手 (⚠️ Phase 2 可復用) */}
 			<TrendingSection artists={trending} />
 		</div>
 	);

@@ -9,7 +9,7 @@ type TrendingSectionProps = {
 export default function TrendingSection({ artists }: TrendingSectionProps) {
 	return (
 		<section className="space-y-4">
-			<h2 className="text-2xl font-bold">熱門歌手</h2>
+			<h2 className="text-2xl font-bold">Trending Artists</h2>
 
 			<GalleryWrapper>
 				{artists.map((artist) => (

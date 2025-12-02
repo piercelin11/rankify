@@ -11,7 +11,7 @@ export default function HistorySection({ history }: HistorySectionProps) {
 
 	return (
 		<section className="space-y-4">
-			<h2 className="text-2xl font-bold">最近完成</h2>
+			<h2 className="text-2xl font-bold">Recently Completed</h2>
 
 			<div className="flex gap-4 overflow-x-auto pb-4">
 				{history.map((item) => {

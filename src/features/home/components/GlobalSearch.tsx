@@ -3,10 +3,15 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import {
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+	CommandSeparator,
+} from "@/components/ui/command";
 import searchArtistsAndAlbums from "@/features/home/actions/searchArtistsAndAlbums";
 import type { SearchResultType } from "@/types/home";
 import { PLACEHOLDER_PIC } from "@/constants/placeholder.constants";
@@ -18,7 +23,6 @@ export default function GlobalSearch() {
 	const [isSearching, setIsSearching] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
 
-	// Debounce 搜尋 + 🟢 Race Condition 防護
 	useEffect(() => {
 		if (!inputValue.trim()) {
 			setResults(null);
@@ -48,132 +52,124 @@ export default function GlobalSearch() {
 					setIsSearching(false);
 				}
 			}
-		}, 1000); // 1 秒 debounce
+		}, 500);
 
 		return () => {
 			clearTimeout(timer);
-			abortController.abort(); // 🟢 清理時取消請求
+			abortController.abort();
 		};
 	}, [inputValue]);
 
-	const handleNavigate = (
+	function handleNavigate(
 		type: "artist" | "album",
 		id: string,
-		artistId?: string,
-	) => {
+		artistId?: string
+	) {
 		setIsOpen(false);
 		setInputValue("");
 
 		if (type === "artist") {
 			router.push(`/artist/${id}/my-stats`);
 		} else if (artistId) {
-			// ✅ 修正: 跳轉到正確的 Album 頁面
 			router.push(`/artist/${artistId}/album/${id}`);
 		}
-	};
+	}
 
 	const hasResults =
 		results && (results.artists.length > 0 || results.albums.length > 0);
 
 	return (
-		<Popover open={isOpen && !!hasResults} onOpenChange={setIsOpen}>
-			<div className="relative w-full">
-				<MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-				<Input
-					value={inputValue}
-					onChange={(e) => setInputValue(e.target.value)}
-					placeholder="Search for artists or albums..."
-					className="pl-9"
-					autoComplete="off"
-				/>
-			</div>
+		<Command
+			shouldFilter={false}
+			loop
+			className="relative overflow-visible rounded-lg border"
+		>
+			<CommandInput
+				value={inputValue}
+				onValueChange={setInputValue}
+				placeholder="Search for artists or albums..."
+				className="border-none"
+			/>
 
-			<PopoverContent
-				className="w-[var(--radix-popover-trigger-width)] p-0"
-				align="start"
-				onOpenAutoFocus={(e) => e.preventDefault()}
+			<CommandList
+				className={`absolute top-full z-50 mt-1 max-h-[300px] w-full overflow-y-auto rounded-md border bg-popover shadow-md ${
+					isOpen && !!hasResults ? "block" : "hidden"
+				}`}
 			>
-				<div className="max-h-[400px] overflow-y-auto">
-					{/* Artists */}
-					{results?.artists && results.artists.length > 0 && (
-						<div className="p-2">
-							<p className="mb-2 px-2 text-xs font-semibold text-muted-foreground">
-								Artists
-							</p>
-							{results.artists.map((artist) => (
-								<div
-									key={artist.id}
-									onClick={() => handleNavigate("artist", artist.id)}
-									className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-accent"
-								>
-									<Image
-										src={artist.img || PLACEHOLDER_PIC}
-										alt={artist.name}
-										width={40}
-										height={40}
-										className="rounded-full"
-									/>
-									<div>
-										<p className="font-medium">{artist.name}</p>
-										<p className="text-xs text-muted-foreground">Artist</p>
-									</div>
+				{/* Loading */}
+				{isSearching && !results && (
+					<div className="p-4 text-center text-sm text-muted-foreground">
+						Searching...
+					</div>
+				)}
+
+				{/* No results */}
+				{!isSearching && results && !hasResults && (
+					<CommandEmpty>No results found</CommandEmpty>
+				)}
+
+				{/* Artists */}
+				{results?.artists && results.artists.length > 0 && (
+					<CommandGroup heading="Artists">
+						{results.artists.map((artist) => (
+							<CommandItem
+								key={artist.id}
+								value={artist.name}
+								onSelect={() => handleNavigate("artist", artist.id)}
+								className="flex cursor-pointer items-center gap-3"
+							>
+								<Image
+									src={artist.img || PLACEHOLDER_PIC}
+									alt={artist.name}
+									width={40}
+									height={40}
+									className="rounded-full"
+								/>
+								<div>
+									<p className="font-medium">{artist.name}</p>
+									<p className="text-xs text-muted-foreground">Artist</p>
 								</div>
-							))}
-						</div>
-					)}
+							</CommandItem>
+						))}
+					</CommandGroup>
+				)}
 
-					{/* Separator */}
-					{results?.artists && results.artists.length > 0 && results?.albums && results.albums.length > 0 && (
-						<Separator />
-					)}
+				{/* Separator */}
+				{results?.artists &&
+					results.artists.length > 0 &&
+					results?.albums &&
+					results.albums.length > 0 && <CommandSeparator />}
 
-					{/* Albums */}
-					{results?.albums && results.albums.length > 0 && (
-						<div className="p-2">
-							<p className="mb-2 px-2 text-xs font-semibold text-muted-foreground">
-								Albums
-							</p>
-							{results.albums.map((album) => (
-								<div
-									key={album.id}
-									onClick={() =>
-										handleNavigate("album", album.id, album.artistId)
-									}
-									className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-accent"
-								>
-									<Image
-										src={album.img || PLACEHOLDER_PIC}
-										alt={album.name}
-										width={40}
-										height={40}
-										className="rounded-lg"
-									/>
-									<div className="overflow-hidden">
-										<p className="truncate font-medium">{album.name}</p>
-										<p className="truncate text-xs text-muted-foreground">
-											{album.artistName}
-										</p>
-									</div>
+				{/* Albums */}
+				{results?.albums && results.albums.length > 0 && (
+					<CommandGroup heading="Albums">
+						{results.albums.map((album) => (
+							<CommandItem
+								key={album.id}
+								value={album.name}
+								onSelect={() =>
+									handleNavigate("album", album.id, album.artistId)
+								}
+								className="flex cursor-pointer items-center gap-3"
+							>
+								<Image
+									src={album.img || PLACEHOLDER_PIC}
+									alt={album.name}
+									width={40}
+									height={40}
+									className="rounded-lg"
+								/>
+								<div className="overflow-hidden">
+									<p className="truncate font-medium">{album.name}</p>
+									<p className="truncate text-xs text-muted-foreground">
+										{album.artistName}
+									</p>
 								</div>
-							))}
-						</div>
-					)}
-
-					{/* No results */}
-					{!isSearching && results && !hasResults && (
-						<div className="p-4 text-center text-sm text-muted-foreground">
-							No results found
-						</div>
-					)}
-
-					{/* Loading - 🟢 避免閃爍 */}
-					{isSearching && !results && (
-						<div className="p-4 text-center text-sm text-muted-foreground">
-							Searching...
-						</div>
-					)}
-				</div>
-			</PopoverContent>
-		</Popover>
+							</CommandItem>
+						))}
+					</CommandGroup>
+				)}
+			</CommandList>
+		</Command>
 	);
 }
