@@ -2,25 +2,44 @@ import { getUserSession } from "@/../auth";
 import { getUserDashboardStats } from "@/services/home/getUserDashboardStats";
 import { getUserDrafts } from "@/services/home/getUserDrafts";
 import { getUserHistory } from "@/services/home/getUserHistory";
-import { getTrendingArtists } from "@/services/home/getTrendingArtists";
+import { getHeroItem } from "@/services/home/getHeroItem";
+import { getDiscoveryArtists } from "@/services/home/getDiscoveryArtists";
 import DashboardSection from "@/features/home/components/DashboardSection";
 import GlobalSearch from "@/features/home/components/GlobalSearch";
+import HeroSection from "@/features/home/components/HeroSection";
 import DraftsSection from "@/features/home/components/DraftsSection";
 import HistorySection from "@/features/home/components/HistorySection";
-import TrendingSection from "@/features/home/components/TrendingSection";
+import DiscoverySection from "@/features/home/components/DiscoverySection";
 
 export default async function HomePage() {
-	// ✅ Phase 1: 使用 getUserSession (middleware 保證使用者已登入)
 	const user = await getUserSession();
 	const userId = user.id;
 
 	// 並行查詢所有資料
-	const [stats, drafts, history, trending] = await Promise.all([
+	const [stats, drafts, history, hero, discovery] = await Promise.all([
 		getUserDashboardStats({ userId }),
 		getUserDrafts({ userId }),
-		getUserHistory({ userId, limit: 5 }),
-		getTrendingArtists(),
+		getUserHistory({ userId, limit: 15 }),
+		getHeroItem({ userId }),
+		getDiscoveryArtists({ userId }),
 	]);
+
+	// Hero 過濾邏輯: 避免重複顯示
+	let filteredDrafts = drafts;
+	let filteredHistory = history;
+
+	if (hero) {
+		const { type, data } = hero;
+		const submissionId = data.submissionId;
+
+		if (type === "resume" && submissionId) {
+			// Hero 顯示草稿 → Drafts Section 過濾該筆
+			filteredDrafts = drafts.filter((d) => d.id !== submissionId);
+		} else if (type === "achievement" && submissionId) {
+			// Hero 顯示戰績 → History Section 過濾該筆
+			filteredHistory = history.filter((h) => h.id !== submissionId);
+		}
+	}
 
 	return (
 		<div className="space-y-12 p-content">
@@ -29,11 +48,16 @@ export default async function HomePage() {
 			<div className="mx-auto max-w-2xl">
 				<GlobalSearch />
 			</div>
-			{drafts.length > 0 && <DraftsSection drafts={drafts} />}
 
-			{history.length > 0 && <HistorySection history={history} />}
+			<HeroSection hero={hero} />
 
-			<TrendingSection artists={trending} />
+			{filteredDrafts.length > 0 && <DraftsSection drafts={filteredDrafts} />}
+
+			{filteredHistory.length > 0 && (
+				<HistorySection history={filteredHistory} />
+			)}
+
+			<DiscoverySection artists={discovery} />
 		</div>
 	);
 }

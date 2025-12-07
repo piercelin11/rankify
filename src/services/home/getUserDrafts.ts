@@ -18,6 +18,7 @@ export const getUserDrafts = cache(
 				},
 			},
 			orderBy: { updatedAt: "desc" },
+			take: 15, // 限制 15 筆
 		});
 
 		// 🔧 防禦性過濾: 移除無效資料
