@@ -85,7 +85,7 @@ export default {
 			spacing: {
 				"18": "4.5rem",
 				"22": "5.5rem",
-				content: "2rem",
+				content: "3rem",
 			},
 			backgroundImage: {
 				glow: "`radial-gradient(ellipse farthest-side at top, ${colors.neutral[800]}40, ${colors.neutral[950]}CC)`",
@@ -100,6 +100,9 @@ export default {
 				"2xl": ["var(--font-size-2xl)", { lineHeight: "2rem" }],
 				"3xl": ["var(--font-size-3xl)", { lineHeight: "var(--font-size-3xl)" }],
 				"4xl": ["var(--font-size-4xl)", { lineHeight: "4rem" }],
+			},
+			flexBasis: {
+				"1/8": "12.5%",
 			},
 		},
 	},

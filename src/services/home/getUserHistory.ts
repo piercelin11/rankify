@@ -5,7 +5,7 @@ import type { HistoryItemType } from "@/types/home";
 export const getUserHistory = cache(
 	async ({
 		userId,
-		limit = 5,
+		limit = 15,
 	}: {
 		userId: string;
 		limit?: number;

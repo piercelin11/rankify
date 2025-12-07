@@ -28,12 +28,30 @@ export type HistoryItemType = Pick<
 	album: Pick<Album, "id" | "name" | "img"> | null;
 };
 
-// ========== Trending ==========
-export type TrendingArtistType = {
+// ========== Hero ==========
+export type HeroItemType = {
+	type: "achievement" | "resume" | "top_artist" | "discovery";
+	data: {
+		id: string;
+		name: string;
+		img: string | null;
+		submissionId?: string;
+		completedAt?: Date;
+		progress?: number;
+		artistId?: string;
+		type?: "ARTIST" | "ALBUM"; // Resume/Achievement 專用 (用於判斷路由)
+	};
+};
+
+// ========== Discovery ==========
+export type DiscoveryArtistType = {
 	id: string;
 	name: string;
 	img: string | null;
 };
+
+// ========== Trending (保留向後相容) ==========
+export type TrendingArtistType = DiscoveryArtistType;
 
 // ========== Search ==========
 export type SearchResultType = {
