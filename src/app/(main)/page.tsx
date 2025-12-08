@@ -33,31 +33,31 @@ export default async function HomePage() {
 		const submissionId = data.submissionId;
 
 		if (type === "resume" && submissionId) {
-			// Hero 顯示草稿 → Drafts Section 過濾該筆
 			filteredDrafts = drafts.filter((d) => d.id !== submissionId);
 		} else if (type === "achievement" && submissionId) {
-			// Hero 顯示戰績 → History Section 過濾該筆
 			filteredHistory = history.filter((h) => h.id !== submissionId);
 		}
 	}
 
 	return (
 		<div className="space-y-12 p-content">
-			<DashboardSection stats={stats} />
-
 			<div className="mx-auto max-w-2xl">
 				<GlobalSearch />
 			</div>
+			<div className="space-y-4">
+				<HeroSection hero={hero} />
+				<DashboardSection stats={stats} />
+			</div>
 
-			<HeroSection hero={hero} />
+			<div className="space-y-12">
+				{filteredDrafts.length > 0 && <DraftsSection drafts={filteredDrafts} />}
 
-			{filteredDrafts.length > 0 && <DraftsSection drafts={filteredDrafts} />}
+				{filteredHistory.length > 0 && (
+					<HistorySection history={filteredHistory} />
+				)}
 
-			{filteredHistory.length > 0 && (
-				<HistorySection history={filteredHistory} />
-			)}
-
-			<DiscoverySection artists={discovery} />
+				<DiscoverySection artists={discovery} />
+			</div>
 		</div>
 	);
 }
