@@ -98,7 +98,7 @@ export default {
 				lg: ["var(--font-size-lg)", { lineHeight: "1.75rem" }],
 				xl: ["var(--font-size-xl)", { lineHeight: "1.75rem" }],
 				"2xl": ["var(--font-size-2xl)", { lineHeight: "2rem" }],
-				"3xl": ["var(--font-size-3xl)", { lineHeight: "var(--font-size-3xl)" }],
+				"3xl": ["var(--font-size-3xl)", { lineHeight: "1.3" }],
 				"4xl": ["var(--font-size-4xl)", { lineHeight: "4rem" }],
 			},
 			flexBasis: {
