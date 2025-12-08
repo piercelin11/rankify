@@ -8,6 +8,7 @@ type GalleryItemProps = {
 	img: string | null;
 	title: string;
 	subTitle: string;
+	type?: "ARTIST" | "ALBUM"
 };
 
 export default function GalleryItem({
@@ -15,6 +16,7 @@ export default function GalleryItem({
 	img,
 	title,
 	subTitle,
+	type = "ARTIST"
 }: GalleryItemProps) {
 	return (
 		<div className="rounded-lg p-3 hover:bg-accent">
@@ -22,8 +24,8 @@ export default function GalleryItem({
 				<div className="relative mb-4 aspect-square h-auto w-full">
 					<Image
 						className={cn("rounded", {
-							rounded: subTitle !== "Artist",
-							"rounded-full": subTitle === "Artist",
+							rounded: type !== "ARTIST",
+							"rounded-full": type === "ARTIST",
 						})}
 						src={img ?? PLACEHOLDER_PIC}
 						alt={title}
@@ -31,8 +33,8 @@ export default function GalleryItem({
 						sizes="500px"
 					/>
 				</div>
-				<p className="line-clamp-2">{title}</p>
-				<p className="text-sm text-secondary-foreground">{subTitle}</p>
+				<p className="font-bold line-clamp-1 mb-1">{title}</p>
+				<p className="text-sm text-secondary-foreground line-clamp-1">{subTitle}</p>
 			</Link>
 		</div>
 	);

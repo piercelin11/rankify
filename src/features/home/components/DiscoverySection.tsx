@@ -16,15 +16,15 @@ export default function DiscoverySection({ artists }: DiscoverySectionProps) {
 	if (artists.length === 0) return null;
 
 	return (
-		<section className="space-y-4">
+		<section className="space-y-3">
 			<h2 className="text-2xl font-bold">Discover New Artists</h2>
 
 			<Carousel opts={{ align: "start", loop: false }} className="w-full">
-				<CarouselContent className="-ml-4">
+				<CarouselContent>
 					{artists.map((artist) => (
 						<CarouselItem
 							key={artist.id}
-							className="pl-4 basis-1/2 md:basis-1/3 lg:basis-1/5 2xl:basis-1/6"
+							className="basis-1/2 md:basis-1/3 xl:basis-1/6 2xl:basis-1/8"
 						>
 							<GalleryItem
 								href={`/artist/${artist.id}`}
@@ -35,8 +35,8 @@ export default function DiscoverySection({ artists }: DiscoverySectionProps) {
 						</CarouselItem>
 					))}
 				</CarouselContent>
-				<CarouselPrevious className="hidden md:flex" />
-				<CarouselNext className="hidden md:flex" />
+				<CarouselPrevious variant={"ghost"} className="hidden md:flex" />
+				<CarouselNext variant={"ghost"} className="hidden md:flex" />
 			</Carousel>
 		</section>
 	);
