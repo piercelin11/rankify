@@ -40,16 +40,15 @@ export default async function HomePage() {
 	}
 
 	return (
-		<div className="space-y-12 p-content">
+		<div className="space-y-14 p-content">
 			<div className="mx-auto max-w-2xl">
 				<GlobalSearch />
 			</div>
-			<div className="space-y-4">
+			<div className="space-y-8">
 				<HeroSection hero={hero} />
 				<DashboardSection stats={stats} />
 			</div>
-
-			<div className="space-y-12">
+			<div className="space-y-14">
 				{filteredDrafts.length > 0 && <DraftsSection drafts={filteredDrafts} />}
 
 				{filteredHistory.length > 0 && (

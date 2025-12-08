@@ -8,11 +8,26 @@ type DashboardSectionProps = {
 export default function DashboardSection({ stats }: DashboardSectionProps) {
 	return (
 		<section className="space-y-6">
-			<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+			<div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+				{/* Top Artist */}
+				<Card>
+					<CardHeader>
+						<CardTitle className="text-sm font-bold uppercase text-foreground">
+							Top Artist
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="text-3xl font-bold">
+							{stats.topArtist?.name || "—"}
+						</div>
+						<p className="text-sm text-muted-foreground">most ranked</p>
+					</CardContent>
+				</Card>
+
 				{/* Completed Rankings */}
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-sm uppercase font-bold text-foreground">
+						<CardTitle className="text-sm font-bold uppercase text-foreground">
 							Completed Rankings
 						</CardTitle>
 					</CardHeader>
@@ -27,7 +42,7 @@ export default function DashboardSection({ stats }: DashboardSectionProps) {
 				{/* Total Songs Rated */}
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-sm uppercase font-bold text-foreground">
+						<CardTitle className="text-sm font-bold uppercase text-foreground">
 							Total Songs Rated
 						</CardTitle>
 					</CardHeader>
@@ -36,21 +51,6 @@ export default function DashboardSection({ stats }: DashboardSectionProps) {
 							{stats.songCount}
 						</div>
 						<p className="text-sm text-muted-foreground">songs rated</p>
-					</CardContent>
-				</Card>
-
-				{/* Top Artist */}
-				<Card>
-					<CardHeader>
-						<CardTitle className="text-sm uppercase font-bold text-foreground">
-							Top Artist
-						</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<div className="text-3xl font-bold">
-							{stats.topArtist?.name || "—"}
-						</div>
-						<p className="text-sm text-muted-foreground">most ranked</p>
 					</CardContent>
 				</Card>
 			</div>

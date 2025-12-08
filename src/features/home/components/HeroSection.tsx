@@ -59,7 +59,7 @@ export default function HeroSection({ hero }: HeroSectionProps) {
 				return {
 					badge: "Your Top Artist",
 					badgeVariant: "outline" as const,
-					title: `Your top artist is "${data.name}"`,
+					title: `${data.name}`,
 					description: (
 						<p className="text-sm text-muted-foreground">Most frequently ranked artist</p>
 					),
@@ -107,7 +107,7 @@ export default function HeroSection({ hero }: HeroSectionProps) {
 						/>
 
 						{/* 內容層 */}
-						<div className="relative z-10 flex items-center h-full p-8">
+						<div className="relative z-10 flex items-center h-full p-10">
 							<div className="space-y-2 text-center md:text-left w-full">
 								<p className="uppercase font-bold text-sm">{config.badge}</p>
 								<h2 className="text-3xl font-bold">{config.title}</h2>
