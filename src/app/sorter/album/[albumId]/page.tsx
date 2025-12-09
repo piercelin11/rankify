@@ -12,10 +12,13 @@ import { Button } from "@/components/ui/button";
 
 type pageProps = {
 	params: Promise<{ albumId: string }>;
+	searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export default async function page({ params }: pageProps) {
+export default async function page({ params, searchParams }: pageProps) {
 	const { albumId } = await params;
+	const search = await searchParams;
+	const fromHome = search?.resume === "true";
 	const { id: userId } = await getUserSession();
 
 	const album = await getAlbumById({ albumId });
@@ -30,7 +33,7 @@ export default async function page({ params }: pageProps) {
 
 	const tracks = await getTracksByAlbumId({ albumId });
 
-	// 🟢 Server Component 條件渲染：沒有草稿 → 自動建立（不 redirect）
+	// 沒有草稿 → 自動建立（不 redirect）
 	if (!submission) {
 		if (tracks.length === 0) {
 			return (
@@ -81,11 +84,12 @@ export default async function page({ params }: pageProps) {
 				draftDate={submissionResult.data.updatedAt || submissionResult.data.createdAt}
 				tracks={tracks}
 				userId={userId}
+				fromHome={fromHome}
 			/>
 		);
 	}
 
-	// 🟢 驗證既有草稿資料
+	// 驗證既有草稿資料
 	const validation = sorterStateSchema.safeParse(submission.draftState);
 	if (!validation.success) {
 		// 資料損毀 → 用 Client Component 處理刪除 + Loading 狀態
@@ -97,7 +101,7 @@ export default async function page({ params }: pageProps) {
 		);
 	}
 
-	// 🟢 Server Component 條件渲染：有草稿 → 渲染 DraftPrompt
+	// 有草稿 → 渲染 DraftPrompt
 	return (
 		<DraftPrompt
 			submissionId={submission.id}
@@ -105,6 +109,7 @@ export default async function page({ params }: pageProps) {
 			draftDate={submission.updatedAt || submission.createdAt}
 			tracks={tracks}
 			userId={userId}
+			fromHome={fromHome}
 		/>
 	);
 }

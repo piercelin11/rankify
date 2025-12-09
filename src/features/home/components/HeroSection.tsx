@@ -42,8 +42,8 @@ export default function HeroSection({ hero }: HeroSectionProps) {
 					title: `${data.name}`,
 					description: (
 						<div className="flex items-center gap-3 w-full max-w-lg">
-							<Progress value={data.progress || 0} className="h-2 flex-1 bg-foreground/10" />
-							<span className="text-sm text-muted-foreground shrink-0">
+							<Progress value={data.progress || 0} className="h-2 flex-1 bg-foreground/20" />
+							<span className="text-sm text-secondary-foreground shrink-0">
 								{Math.round(data.progress || 0)}% completed
 							</span>
 						</div>
@@ -51,8 +51,8 @@ export default function HeroSection({ hero }: HeroSectionProps) {
 					ctaText: "Continue Ranking",
 					ctaHref:
 						data.type === "ARTIST"
-							? `/sorter/artist/${data.id}`
-							: `/sorter/album/${data.id}`,
+							? `/sorter/artist/${data.id}?resume=true`
+							: `/sorter/album/${data.id}?resume=true`,
 				};
 
 			case "top_artist":
@@ -86,9 +86,9 @@ export default function HeroSection({ hero }: HeroSectionProps) {
 	return (
 		<section className="w-full">
 			<Card className="relative overflow-hidden border-2">
-				<div className="flex flex-col md:flex-row items-stretch min-h-[20rem]">
+				<div className="flex flex-col md:flex-row items-stretch min-h-[25rem]">
 					{/* 左側圖片 */}
-					<div className="relative w-full md:w-1/3 aspect-square md:aspect-auto md:h-auto flex-shrink-0">
+					<div className="relative w-full md:w-1/2 aspect-square md:aspect-auto md:h-auto flex-shrink-0">
 						<Image
 							src={data.img || PLACEHOLDER_PIC}
 							alt={data.name}

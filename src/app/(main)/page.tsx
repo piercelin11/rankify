@@ -44,7 +44,7 @@ export default async function HomePage() {
 			<div className="mx-auto max-w-2xl">
 				<GlobalSearch />
 			</div>
-			<div className="space-y-8">
+			<div className="space-y-4">
 				<HeroSection hero={hero} />
 				<DashboardSection stats={stats} />
 			</div>

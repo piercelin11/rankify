@@ -9,10 +9,13 @@ import { sorterStateSchema } from "@/lib/schemas/sorter";
 
 type pageProps = {
 	params: Promise<{ artistId: string }>;
+	searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export default async function page({ params }: pageProps) {
+export default async function page({ params, searchParams }: pageProps) {
 	const { artistId } = await params;
+	const search = await searchParams;
+	const fromHome = search?.resume === "true";
 	const { id: userId } = await getUserSession();
 	const submission = await getIncompleteRankingSubmission({ artistId, userId });
 
@@ -20,15 +23,14 @@ export default async function page({ params }: pageProps) {
 	const albums = await getAlbumsByArtistId({ artistId });
 	const tracks = await getTracksByArtistId({ artistId });
 
-	// 🟢 Server Component 條件渲染：沒有草稿 → 直接顯示 FilterStage
+	// 沒有草稿 → 直接顯示 FilterStage
 	if (!submission) {
 		return <FilterStage albums={albums} singles={singles} />;
 	}
 
-	// 🟢 驗證草稿資料
+	// 驗證草稿資料
 	const validation = sorterStateSchema.safeParse(submission.draftState);
 	if (!validation.success) {
-		// 資料損毀 → 用 Client Component 處理刪除 + Loading 狀態
 		return (
 			<CorruptedDraftFallback
 				submissionId={submission.id}
@@ -37,7 +39,7 @@ export default async function page({ params }: pageProps) {
 		);
 	}
 
-	// 🟢 Server Component 條件渲染：有草稿 → 渲染 DraftPrompt
+	// 有草稿 → 渲染 DraftPrompt
 	// DraftPrompt 內部處理 Modal 與 RankingStage 的切換
 	return (
 		<DraftPrompt
@@ -46,6 +48,7 @@ export default async function page({ params }: pageProps) {
 			draftDate={submission.updatedAt || submission.createdAt}
 			tracks={tracks}
 			userId={userId}
+			fromHome={fromHome}
 		/>
 	);
 }
