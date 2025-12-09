@@ -16,6 +16,7 @@ type DraftPromptProps = {
 	draftDate: Date;
 	tracks: TrackData[];
 	userId: string;
+	fromHome?: boolean;
 };
 
 export function DraftPrompt({
@@ -24,6 +25,7 @@ export function DraftPrompt({
 	draftDate,
 	tracks,
 	userId,
+	fromHome = false,
 }: DraftPromptProps) {
 	const [choice, setChoice] = useState<"continue" | "restart" | null>(null);
 	const [isPending, startTransition] = useTransition();
@@ -33,10 +35,11 @@ export function DraftPrompt({
 		setChoice("restart");
 		startTransition(async () => {
 			await deleteSubmission({ submissionId });
-			router.refresh(); // 觸發 RSC refresh，會被 transition 追蹤
+			router.refresh();
 		});
 	};
 
+	// 已完成 → 顯示結果
 	if (draftState.finishFlag === 1) {
 		return (
 			<ResultStage
@@ -47,14 +50,8 @@ export function DraftPrompt({
 		);
 	}
 
-	// 檢查是否剛從 FilterStage 進來
-	const justFiltered = typeof window !== 'undefined' ? sessionStorage.getItem('justFiltered') : null;
-	if (justFiltered) {
-		sessionStorage.removeItem('justFiltered');
-	}
-
-	if (draftState.percent === 0 && justFiltered) {
-		// 剛從 FilterStage 進來，直接進入排序
+	// 從首頁點擊進來 → 直接繼續
+	if (fromHome) {
 		return (
 			<RankingStage
 				initialState={draftState}
@@ -65,6 +62,19 @@ export function DraftPrompt({
 		);
 	}
 
+	// 使用者從未做過任何選擇 → 直接開始
+	if (draftState.history.length === 0) {
+		return (
+			<RankingStage
+				initialState={draftState}
+				tracks={tracks}
+				submissionId={submissionId}
+				userId={userId}
+			/>
+		);
+	}
+
+	// 其他情況 → 顯示 modal 讓使用者選擇
 	if (choice === null) {
 		return (
 			<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
