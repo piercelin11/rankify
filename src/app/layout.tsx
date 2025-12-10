@@ -3,6 +3,7 @@ import { Geist_Mono, Outfit, Inter } from "next/font/google";
 import "./globals.css";
 import { ModalManager } from "@/components/modals/ModalManager";
 import { ModalProvider } from "@/contexts";
+import { Suspense } from "react";
 
 const serif = Geist_Mono({
 	variable: "--font-serif",
@@ -34,14 +35,16 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" className="dark">
-			<ModalProvider>
-				<body
-					className={`${serif.variable} ${sans.variable} ${numeric.variable} font-poppins antialiased`}
-				>
-					{children}
-					<ModalManager />
-				</body>
-			</ModalProvider>
+			<Suspense>
+				<ModalProvider>
+					<body
+						className={`${serif.variable} ${sans.variable} ${numeric.variable} font-poppins antialiased`}
+					>
+						{children}
+						<ModalManager />
+					</body>
+				</ModalProvider>
+			</Suspense>
 		</html>
 	);
 }

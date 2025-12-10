@@ -1,1537 +1,2109 @@
-# Home Page (探索大廳) 實作計劃
+# Next.js 15 `use cache` 實驗計畫
 
-**版本**: 3.1 (PRD-001c v1.4 完整實作版 - Code Review 修正版)
-**PRD 版本**: PRD-001c v1.4 (Performance & Collection Update)
-**負責人**: Claude (Linus Mode)
-**技術架構**: Next.js 15 App Router + Prisma + Shadcn UI Carousel
-**預計完成時間**: 8-10 小時
-
----
-
-## ⚠️ 重要說明
-
-此版本是基於 **PRD-001c v1.4** 的**完整實作計劃**,相較於 v2.1 (簡化版),補齊了以下關鍵功能:
-
-| 功能項目 | v2.1 (簡化版) | v3.1 (完整版) | 變更原因 |
-|---------|--------------|--------------|---------|
-| **Dynamic Hero Section** | ❌ 缺失 | ✅ 實作 24h Rule | PRD 核心需求 |
-| **橫向捲動 UI** | 原生 `overflow-x-auto` | ✅ Shadcn UI Carousel | PRD 明確指定 |
-| **歌手探索** | Trending (寫死 ID) | ✅ Discovery (動態計算) | PRD v1.4 核心變更 |
-| **Hero 過濾邏輯** | ❌ 無 | ✅ 從 Carousel 剔除 | PRD 明確要求 |
-| **資料量限制** | History=5, Drafts=無限 | ✅ 統一 15 筆 | PRD 明確指定 |
-
-**關鍵決策記錄** (使用者確認):
-1. ✅ 使用 Shadcn UI Carousel (含左右箭頭)
-2. ✅ 必須實作 Dynamic Hero Section
-3. ✅ 實作 Discovery Section (動態計算未排名歌手)
-4. ✅ 24h 戰績定義: `completedAt` 在 24h 內 **且** `status = 'COMPLETED'`
-5. ✅ Hero 過濾: 只影響 Drafts 和 History (不影響 Discovery)
-6. ✅ Discovery 數量: 全部拿 (目前歌手數量少)
-7. ✅ Carousel 數量: 統一 15 筆上限
-8. ✅ **所有 UI 文字統一使用英文** (v3.1 新增)
-
-**v3.1 版本更新** (Code Review 修正):
-- 🔧 修正 Hero Resume/Achievement 的路由邏輯 (動態判斷 ARTIST/ALBUM)
-- 🔧 修正 `HeroItemType` 型別定義 (新增 `type` 欄位)
-- 🔧 修正 `getHeroItem.ts` 的 P1/P2 邏輯 (返回 `artistId` 和 `type`)
-- 🔧 優化 `getHeroItem.ts` 的 P3 備用邏輯 (復用 `getDiscoveryArtists`)
-- 🔧 優化 `page.tsx` 的過濾邏輯 (提取變數提升可讀性)
-- 📝 新增 TODO: ALBUM 結果頁面路由 (待專輯頁面完成後更新)
-- 🌐 所有 UI 文字改為英文
+**版本**: 1.0
+**分支**: `feat/exp-next-use-cache`
+**作者**: Claude (Linus Mode)
+**日期**: 2025-12-09
+**目標**: 驗證 Next.js 15 `use cache` 在真實專案的可行性，解決 Suspense 錯誤，建立完整快取策略
 
 ---
 
 ## 目錄
 
-1. [專案概述](#1-專案概述)
-2. [技術規格摘要](#2-技術規格摘要)
-3. [核心功能實作](#3-核心功能實作)
-   - 3.1 [Dynamic Hero Section](#31-dynamic-hero-section-24h-rule)
-   - 3.2 [Discovery Section](#32-discovery-section-未排名歌手)
-   - 3.3 [Carousel 重構](#33-carousel-重構)
-   - 3.4 [資料層調整](#34-資料層調整)
-4. [實作順序與檢查點](#4-實作順序與檢查點)
-5. [測試計劃](#5-測試計劃)
-6. [風險與注意事項](#6-風險與注意事項)
-7. [檔案清單總覽](#7-檔案清單總覽)
+1. [專案背景](#一專案背景)
+2. [核心目標](#二核心目標)
+3. [快取策略設計](#三快取策略設計)
+4. [實作範圍總覽](#四實作範圍總覽)
+5. [詳細實作流程](#五詳細實作流程)
+6. [Server Actions 快取失效策略](#六server-actions-快取失效策略)
+7. [Layout 重構方案](#七layout-重構方案)
+8. [測試計劃](#八測試計劃)
+9. [風險與對策](#九風險與對策)
+10. [檔案清單](#十檔案清單)
+11. [Linus 式總結](#十一linus-式總結)
 
 ---
 
-## 1. 專案概述
+## 一、專案背景
 
-### 1.1 核心目標
+### 1.1 遇到的問題
 
-> 透過 **Dynamic Hero** 引導使用者「當下最重要的一件事」,利用 **Discovery Section** 驅動「收集心理」,並以 **Shadcn UI Carousel** 建立流暢的 App Store 風格瀏覽體驗。
-
-### 1.2 頁面結構
-
+**問題 1: Suspense 錯誤**
 ```
-┌─────────────────────────────────────────────┐
-│  Dynamic Hero Section (全寬動態看板)         │  ← 🆕 新增 (24h Rule)
-│  - P1: 24h 內新戰績 → Achievement           │
-│  - P2: 有未完成草稿 → Resume                │
-│  - P3: 預設 → Top Artist / Discovery        │
-├─────────────────────────────────────────────┤
-│  Global Search (全域搜尋)                   │  ← ✅ 已完成
-├─────────────────────────────────────────────┤
-│  Drafts Section (Carousel 橫向捲動)         │  ← 🔧 重構為 Carousel
-│  - 方形專輯封面 + 進度條                     │     限制 15 筆
-│  - Hero 顯示的項目會被過濾                  │  ← 🆕 新增過濾邏輯
-├─────────────────────────────────────────────┤
-│  History Section (Carousel 橫向捲動)        │  ← 🔧 重構為 Carousel
-│  - 方形專輯封面 + 完成時間                   │     限制 15 筆
-│  - Hero 顯示的項目會被過濾                  │  ← 🆕 新增過濾邏輯
-├─────────────────────────────────────────────┤
-│  Discovery Section (Carousel 橫向捲動)      │  ← 🆕 新增 (替代 Trending)
-│  - 圓形歌手頭像 (與方形專輯形成對比)        │
-│  - 未排名歌手 = All - (History + Drafts)    │
-└─────────────────────────────────────────────┘
+Error: Route "/": Uncached data or `connection()` was accessed outside of `<Suspense>`.
+This delays the entire page from rendering, resulting in a slow user experience.
+
+at MainLayout (src/app/(main)/layout.tsx:13:15)
+  12 | export default async function MainLayout({ children }: AdminLayoutProps) {
+> 13 |  const user = await getUserSession();
+     |               ^
+  14 |  const loggedArtists = await getRecentLoggedArtists({ userId: user.id });
 ```
 
-### 1.3 與 v2.1 的差異總結
+**根本原因**:
+- Next.js 15 的新快取機制要求所有動態資料操作必須：
+  1. 加上 `use cache` 快取
+  2. 或包在 `<Suspense>` 裡做串流渲染
 
-| 區塊 | v2.1 實作 | v3.1 目標 | 工作量 |
-|------|----------|----------|--------|
-| Dashboard | ✅ 完成 | ✅ 保持不變 | 0h |
-| Global Search | ✅ 完成 (含 AbortController) | ✅ 保持不變 | 0h |
-| **Dynamic Hero** | ❌ 缺失 | 🆕 實作 24h Rule | 3-4h |
-| **Drafts Section** | overflow-x-auto | 🔧 改為 Carousel + 過濾 | 1h |
-| **History Section** | overflow-x-auto | 🔧 改為 Carousel + 過濾 | 1h |
-| **Trending Section** | ✅ 完成 (寫死 ID) | 🔄 替換為 Discovery | 2h |
-| 資料層 | ✅ 大部分完成 | 🔧 新增/調整 3 個函式 | 2h |
+**問題 2: `getUserSession` 不能快取**
+```
+Route / used `headers()` inside "use cache". Accessing Dynamic data sources
+inside a cache scope is not supported.
 
-**總預估工作量**: 8-10 小時
+auth.ts (55:24) @ getUserSession
+```
 
----
+**根本原因**:
+- `getUserSession()` 內部呼叫 `auth()`
+- `auth()` 會讀取 `headers()` 來驗證 session
+- `headers()` 是動態資料來源，在 `use cache` 裡是禁止的
 
-## 2. 技術規格摘要
+### 1.2 解決方向
 
-### 2.1 技術棧
+**核心思路：分離動態與靜態資料**
 
-- **前端框架**: Next.js 15 (App Router)
-- **資料庫**: PostgreSQL + Prisma ORM
-- **UI 元件**: Shadcn UI (特別是 **Carousel**)
-- **狀態管理**: Server Components (無需 Client State)
-- **時間格式化**: date-fns
-- **驗證**: NextAuth.js (middleware 層級)
-
-### 2.2 關鍵技術決策
-
-| 項目 | 決策 | 理由 |
-|------|------|------|
-| **Carousel 套件** | Shadcn UI Carousel | PRD 明確指定,提供左右箭頭導航 |
-| **Hero 優先級** | P1 > P2 > P3 (24h Rule) | PRD 明確定義,提升「繼續任務」可見性 |
-| **Discovery 邏輯** | `NOT IN` 或 `LEFT JOIN` | 排除已互動歌手,驅動「收集心理」 |
-| **過濾策略** | Hero 項目從 Carousel 剔除 | 避免重複顯示,PRD 明確要求 |
-| **資料量限制** | 統一 15 筆 | PRD 明確指定 10-15 筆 |
-| **24h 判斷** | `completedAt >= now() - 24h AND status = 'COMPLETED'` | 雙重檢查確保資料正確性 |
-
-### 2.3 依賴套件檢查
-
-**✅ 已安裝**:
-- `date-fns` (v2.1 已安裝)
-- `@radix-ui/react-*` (UI 基礎元件)
-
-**🔧 需要安裝**:
-```bash
-npx shadcn@latest add carousel
+```
+┌─────────────────────────────────────┐
+│ Layout (不能 cache)                  │
+│  ├─ 取得 session (動態)              │
+│  └─ 包在 <Suspense> 裡               │
+└─────────────────────────────────────┘
+          │
+          ↓
+┌─────────────────────────────────────┐
+│ 資料查詢函式 (可以 cache)            │
+│  ← 接收 userId 作為參數              │
+│  ← 這些是純函式，可以快取            │
+└─────────────────────────────────────┘
 ```
 
 ---
 
-## 3. 核心功能實作
+## 二、核心目標
 
-### 3.1 Dynamic Hero Section (24h Rule)
+### 2.1 主要目標
 
-#### 3.1.1 功能概述
+1. **✅ 解決 Suspense 錯誤** - 修正 Layout 結構
+2. **✅ 建立快取策略** - LONG/SHORT 兩層快取時間
+3. **✅ 實作快取失效** - 在關鍵 Server Actions 加上 `revalidateTag`
+4. **✅ 通用化 use cache** - 為所有適合快取的查詢函式加上 `use cache`
 
-**目的**: 根據使用者最近的活動狀態,動態顯示「當下最重要的一件事」。
+### 2.2 次要目標
 
-**優先級邏輯**:
-```
-P1 (最高): 24h 內有新完成的排名 → 顯示 Achievement (慶祝)
-P2: 有未完成的草稿 → 顯示 Resume (繼續)
-P3 (預設): 以上皆非 → 顯示 Top Artist 或 Discovery (推薦)
-```
+- 更新 shadcn UI 新元件 (spinner, empty, field, button-group)
+- 統一 UI 一致性
+- 建立快取監控機制
 
-**視覺設計**:
-- 全寬看板 (Hero Banner)
-- 大尺寸圖片 + 標題 + 描述 + CTA 按鈕
-- 根據類型調整配色 (Achievement: 金色, Resume: 藍色, Discovery: 灰色)
+### 2.3 成功標準
 
-#### 3.1.2 資料層實作
+**必須達成**:
+- ✅ 所有 "Uncached data outside Suspense" 錯誤消失
+- ✅ 首頁統計數字有快取且能正確失效
+- ✅ 完成排名後數字立即更新
+- ✅ Layout 正常渲染無錯誤
 
-##### 📁 `src/services/home/getHeroItem.ts`
+**期望達成**:
+- 🎯 首頁載入速度提升 20%+
+- 🎯 資料庫查詢次數減少 50%+
+- 🎯 快取策略清晰易維護
 
-**功能**: 根據 24h Rule 取得 Hero 要顯示的項目。
+---
 
-**型別定義** (已修正):
+## 三、快取策略設計
+
+### 3.1 快取時間分層
+
+**設計原則**: 只用 LONG/SHORT 兩層，簡單直觀
+
 ```typescript
-export type HeroItemType = {
-  type: "achievement" | "resume" | "top_artist" | "discovery";
-  data: {
-    id: string;
-    name: string;
-    img: string | null;
-    // Achievement/Resume 專用
-    submissionId?: string;
-    completedAt?: Date;
-    progress?: number;
-    // Top Artist/Discovery 專用
-    artistId?: string;
-    // 🔧 v3.1 新增: Resume/Achievement 專用 (用於判斷路由)
-    type?: "ARTIST" | "ALBUM";
-  };
-};
+// src/constants/cache.ts (新建)
+export const CACHE_TIMES = {
+  LONG: 'hours',   // 1 小時：統計、歷史、歌手資料
+  SHORT: 'minutes' // 幾分鐘：最近活動、草稿清單
+} as const;
 ```
 
-**實作邏輯** (已優化):
+**為什麼只有兩層？**
+- ✅ 簡單：開發者不用糾結「這個該用哪一層」
+- ✅ 靈活：搭配 `revalidateTag` 主動失效，不需要更細粒度
+- ✅ 實用：覆蓋 95% 的使用情境
+
+### 3.2 快取時間選擇指南
+
+| 資料類型 | 快取時間 | 理由 |
+|---------|---------|------|
+| 統計數字 (dashboard stats) | LONG | 幾小時才變一次，允許延遲 |
+| 歷史記錄 (history) | LONG | 已完成的記錄不會改變 |
+| 歌手資料 (artist info) | LONG | 很少變動 |
+| 草稿清單 (drafts) | SHORT | 使用者頻繁操作，需要即時 |
+| 未完成提交 (incomplete submission) | SHORT | 進行中的狀態，需要即時 |
+| Hero 顯示 (hero item) | SHORT | 依賴最新的草稿和戰績 |
+| 使用者 session | ❌ 不快取 | 每個 request 都不同 |
+
+### 3.3 Cache Tag 命名規範
+
+**設計原則**:
+- 使用函式生成，避免 typo
+- **必須包含 userId**: Next.js 的 `use cache` 是全域快取,不是 per-user 的,所以必須在 tag 裡區分使用者
+- 包含所有影響查詢結果的參數
+- 清晰的層級結構
+- **只用細粒度 tag**: 不使用粗粒度 tag (如 `home-${userId}`),因為已有 `invalidateRankingCache()` 集中管理
+
 ```typescript
-import { cache } from "react";
-import { db } from "@/db/client";
-import type { HeroItemType } from "@/types/home";
+// src/constants/cache-tags.ts (新建)
+export const CACHE_TAGS = {
+  // ========== 用戶相關 ==========
+  USER: (userId: string) => `user-${userId}`,
+  USER_PREFERENCE: (userId: string) => `user-preference-${userId}`,
 
-export const getHeroItem = cache(
-  async ({ userId }: { userId: string }): Promise<HeroItemType | null> => {
-    // P1: 24h 內有新戰績 (Achievement)
-    const recentAchievement = await db.rankingSubmission.findFirst({
-      where: {
-        userId,
-        status: "COMPLETED",
-        completedAt: {
-          gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // 24h 前
-          not: null,
-        },
-      },
-      include: {
-        artist: {
-          select: { id: true, name: true, img: true },
-        },
-        album: {
-          select: { id: true, name: true, img: true },
-        },
-      },
-      orderBy: { completedAt: "desc" },
-      take: 1,
-    });
+  // ========== 首頁相關 ==========
+  DASHBOARD_STATS: (userId: string) => `dashboard-stats-${userId}`,
+  HISTORY: (userId: string) => `history-${userId}`,
+  DRAFTS: (userId: string) => `drafts-${userId}`,
+  HERO: (userId: string) => `hero-${userId}`,
+  DISCOVERY: (userId: string) => `discovery-${userId}`,
 
-    if (recentAchievement) {
-      const displayName = recentAchievement.type === "ARTIST"
-        ? recentAchievement.artist.name
-        : recentAchievement.album?.name || "Unknown";
-      const displayImg = recentAchievement.type === "ARTIST"
-        ? recentAchievement.artist.img
-        : recentAchievement.album?.img;
+  // ========== 排名相關 ==========
+  RANKING_SUBMISSIONS: (userId: string, artistId: string) =>
+    `ranking-submissions-${userId}-${artistId}`,
+  INCOMPLETE_SUBMISSION: (userId: string, artistId: string) =>
+    `incomplete-submission-${userId}-${artistId}`,
+  LATEST_SUBMISSION: (userId: string, artistId: string) =>
+    `latest-submission-${userId}-${artistId}`,
 
-      return {
-        type: "achievement",
-        data: {
-          id: recentAchievement.id,
-          name: displayName,
-          img: displayImg,
-          submissionId: recentAchievement.id,
-          completedAt: recentAchievement.completedAt!,
-          artistId: recentAchievement.artistId, // 🔧 v3.1 新增: 用於路由
-          type: recentAchievement.type, // 🔧 v3.1 新增: 用於判斷路由
-        },
-      };
-    }
+  // ========== 統計相關 ==========
+  TRACK_STATS: (userId: string, artistId: string) =>
+    `track-stats-${userId}-${artistId}`,
+  ALBUM_STATS: (userId: string, artistId: string) =>
+    `album-stats-${userId}-${artistId}`,
+  TRACK_HISTORY: (userId: string, submissionId: string) =>
+    `track-history-${userId}-${submissionId}`,
+  ALBUM_HISTORY: (userId: string, submissionId: string) =>
+    `album-history-${userId}-${submissionId}`,
 
-    // P2: 有未完成草稿 (Resume)
-    const draft = await db.rankingSubmission.findFirst({
-      where: {
-        userId,
-        status: { in: ["IN_PROGRESS", "DRAFT"] },
-      },
-      include: {
-        artist: {
-          select: { id: true, name: true, img: true },
-        },
-        album: {
-          select: { id: true, name: true, img: true },
-        },
-      },
-      orderBy: { updatedAt: "desc" },
-      take: 1,
-    });
+  // ========== 內容相關 ==========
+  ARTIST: (artistId: string) => `artist-${artistId}`,
+  LOGGED_ARTISTS: (userId: string) => `logged-artists-${userId}`,
+  RECENT_ARTISTS: (userId: string) => `recent-artists-${userId}`,
+  ALBUM: (albumId: string) => `album-${albumId}`,
+  ALBUMS_BY_ARTIST: (artistId: string) => `albums-${artistId}`,
+  TRACK: (trackId: string) => `track-${trackId}`,
+  TRACKS_BY_ARTIST: (artistId: string) => `tracks-${artistId}`,
+  TRACKS_BY_ALBUM: (albumId: string) => `tracks-album-${albumId}`,
+  TRACK_RANKING: (userId: string, trackId: string) =>
+    `track-ranking-${userId}-${trackId}`,
 
-    if (draft && draft.draftState && typeof draft.draftState === 'object') {
-      const displayName = draft.type === "ARTIST"
-        ? draft.artist.name
-        : draft.album?.name || "Unknown";
-      const displayImg = draft.type === "ARTIST"
-        ? draft.artist.img
-        : draft.album?.img;
-      const progress = (draft.draftState as any).percent || 0;
+  // ========== 管理端 ==========
+  ADMIN_DATA: 'admin-data',
+} as const;
+```
 
-      return {
-        type: "resume",
-        data: {
-          id: draft.type === "ARTIST" ? draft.artistId : draft.albumId!,
-          name: displayName,
-          img: displayImg,
-          submissionId: draft.id,
-          progress,
-          type: draft.type, // 🔧 v3.1 新增: 用於判斷路由
-        },
-      };
-    }
+---
 
-    // P3: 顯示 Top Artist (本命歌手)
-    const topArtistData = await db.rankingSubmission.groupBy({
-      by: ["artistId"],
-      where: { userId, status: "COMPLETED" },
-      _count: { id: true },
-      orderBy: { _count: { id: "desc" } },
-      take: 1,
-    });
+## 四、實作範圍總覽
 
-    if (topArtistData.length > 0) {
-      const artist = await db.artist.findUnique({
-        where: { id: topArtistData[0].artistId },
-        select: { id: true, name: true, img: true },
-      });
+### 4.1 需要加 `use cache` 的檔案 (約 25 個函式)
 
-      if (artist) {
-        return {
-          type: "top_artist",
-          data: {
-            id: artist.id,
-            name: artist.name,
-            img: artist.img,
-            artistId: artist.id,
-          },
-        };
-      }
-    }
+#### ✅ 已完成
+- `src/services/home/getUserDashboardStats.ts` - 使用者已加上
 
-    // P3 備用: 顯示 Discovery (隨機未排名歌手)
-    // 🔧 v3.1 優化: 復用 getDiscoveryArtists,減少重複程式碼
-    const { getDiscoveryArtists } = await import("./getDiscoveryArtists");
-    const discoveryArtists = await getDiscoveryArtists({ userId });
+#### 📋 待處理
 
-    if (discoveryArtists.length > 0) {
-      // 簡易版: 取第一筆 (未來可改用隨機)
-      const discoveryArtist = discoveryArtists[0];
+**A. 首頁相關 (5 個)**
+- `src/services/home/getUserHistory.ts` - LONG
+- `src/services/home/getUserDrafts.ts` - SHORT
+- `src/services/home/getHeroItem.ts` - SHORT
+- `src/services/home/getDiscoveryArtists.ts` - LONG
+- `src/services/home/getTrendingArtists.ts` - LONG (如果還存在)
 
-      return {
-        type: "discovery",
-        data: {
-          id: discoveryArtist.id,
-          name: discoveryArtist.name,
-          img: discoveryArtist.img,
-          artistId: discoveryArtist.id,
-        },
-      };
-    }
+**B. 資料庫查詢層 (15 個)**
 
-    // 若完全沒資料,返回 null
-    return null;
+`src/db/artist.ts`:
+- `getArtistById` - LONG
+- `getLoggedArtists` - LONG
+- `getRecentLoggedArtists` - LONG
+
+`src/db/album.ts`:
+- `getAlbumById` - LONG
+- `getAlbumsByArtistId` - LONG
+
+`src/db/track.ts`:
+- `getTrackForTrackPage` - LONG
+- `getTracksByArtistId` - LONG
+- `getTracksByAlbumId` - LONG
+- `getSinglesByArtistId` - LONG
+- `getTrackRanking` - LONG
+
+`src/db/ranking.ts`:
+- `getIncompleteRankingSubmission` - SHORT
+- `getArtistRankingSubmissions` - LONG
+- `getLatestArtistRankingSubmissions` - LONG
+
+`src/db/user.ts`:
+- `getUserPreference` - LONG
+
+**C. 統計服務層 (4 個)**
+- `src/services/track/getTracksStats.ts` - LONG
+- `src/services/track/getTracksHistory.ts` - LONG
+- `src/services/album/getAlbumsStats.ts` - LONG
+- `src/services/album/getAlbumsHistory.ts` - LONG
+
+### 4.2 需要加 `revalidateTag` 的 Server Actions (約 15 個)
+
+#### 優先處理 (核心邏輯，5 個)
+1. `src/features/sorter/actions/completeSubmission.ts` - ⚠️ 最複雜
+2. `src/features/sorter/actions/createSubmission.ts`
+3. `src/features/sorter/actions/saveDraft.ts`
+4. `src/features/sorter/actions/finalizeDraft.ts`
+5. `src/features/sorter/actions/deleteSubmission.ts`
+
+#### 次要處理 (管理端，10 個)
+6. `src/features/admin/addContent/actions/addArtist.ts`
+7. `src/features/admin/addContent/actions/addAlbum.ts`
+8. `src/features/admin/addContent/actions/addSingle.ts`
+9. `src/features/admin/editContent/actions/updateArtist.ts`
+10. `src/features/admin/editContent/actions/updateAlbum.ts`
+11. `src/features/admin/editContent/actions/updateInfo.ts`
+12. `src/features/admin/editContent/actions/deleteItem.ts`
+13. `src/features/admin/user/actions/updateUser.ts`
+14. `src/features/settings/actions/saveProfileSettings.ts`
+15. `src/features/settings/actions/saveRankingSettings.ts`
+
+### 4.3 需要新建的檔案 (4 個)
+
+1. `src/constants/cache.ts` - 快取時間常數
+2. `src/constants/cache-tags.ts` - Cache Tag 命名函式
+3. `src/lib/cache-invalidation.ts` - 集中的快取失效邏輯
+4. `src/components/layout/SidebarSkeleton.tsx` - Sidebar Loading 狀態
+
+### 4.4 需要修改的檔案 (1 個)
+
+1. `src/app/(main)/layout.tsx` - 加上 Suspense 包裹
+
+---
+
+## 五、詳細實作流程
+
+### 階段 1: 基礎建設 (30 分鐘)
+
+**目標**: 建立快取相關的基礎設施
+
+#### 步驟 1.1: 建立快取時間常數
+
+**檔案**: `src/constants/cache.ts` (新建)
+
+```typescript
+/**
+ * 快取時間策略
+ *
+ * LONG: 用於相對穩定的資料（統計、歷史、內容資料）
+ * SHORT: 用於頻繁變動的資料（草稿、進行中的操作）
+ */
+export const CACHE_TIMES = {
+  LONG: 'hours',   // Next.js 預設 1 小時
+  SHORT: 'minutes' // Next.js 預設 5-15 分鐘
+} as const;
+```
+
+#### 步驟 1.2: 建立 Cache Tag 命名函式
+
+**檔案**: `src/constants/cache-tags.ts` (新建)
+
+```typescript
+/**
+ * Cache Tag 命名規範
+ *
+ * 設計原則:
+ * 1. 使用函式生成，避免 typo
+ * 2. 包含所有影響查詢結果的參數
+ * 3. 清晰的層級結構（領域 - 具體資源）
+ */
+export const CACHE_TAGS = {
+  // 用戶相關
+  USER: (userId: string) => `user-${userId}`,
+  USER_PREFERENCE: (userId: string) => `user-preference-${userId}`,
+
+  // 首頁相關
+  DASHBOARD_STATS: (userId: string) => `dashboard-stats-${userId}`,
+  HISTORY: (userId: string) => `history-${userId}`,
+  DRAFTS: (userId: string) => `drafts-${userId}`,
+  HERO: (userId: string) => `hero-${userId}`,
+  DISCOVERY: (userId: string) => `discovery-${userId}`,
+
+  // 排名相關
+  RANKING_SUBMISSIONS: (userId: string, artistId: string) =>
+    `ranking-submissions-${userId}-${artistId}`,
+  INCOMPLETE_SUBMISSION: (userId: string, artistId: string) =>
+    `incomplete-submission-${userId}-${artistId}`,
+  LATEST_SUBMISSION: (userId: string, artistId: string) =>
+    `latest-submission-${userId}-${artistId}`,
+
+  // 統計相關
+  TRACK_STATS: (userId: string, artistId: string) =>
+    `track-stats-${userId}-${artistId}`,
+  ALBUM_STATS: (userId: string, artistId: string) =>
+    `album-stats-${userId}-${artistId}`,
+  TRACK_HISTORY: (userId: string, submissionId: string) =>
+    `track-history-${userId}-${submissionId}`,
+  ALBUM_HISTORY: (userId: string, submissionId: string) =>
+    `album-history-${userId}-${submissionId}`,
+
+  // 內容相關
+  ARTIST: (artistId: string) => `artist-${artistId}`,
+  LOGGED_ARTISTS: (userId: string) => `logged-artists-${userId}`,
+  RECENT_ARTISTS: (userId: string) => `recent-artists-${userId}`,
+  ALBUM: (albumId: string) => `album-${albumId}`,
+  ALBUMS_BY_ARTIST: (artistId: string) => `albums-${artistId}`,
+  TRACK: (trackId: string) => `track-${trackId}`,
+  TRACKS_BY_ARTIST: (artistId: string) => `tracks-${artistId}`,
+  TRACKS_BY_ALBUM: (albumId: string) => `tracks-album-${albumId}`,
+  TRACK_RANKING: (userId: string, trackId: string) =>
+    `track-ranking-${userId}-${trackId}`,
+
+  // 管理端
+  ADMIN_DATA: 'admin-data',
+} as const;
+```
+
+#### 步驟 1.3: 建立集中的快取失效函式
+
+**檔案**: `src/lib/cache-invalidation.ts` (新建)
+
+```typescript
+'use server'
+
+import { revalidateTag } from 'next/cache';
+import { CACHE_TAGS } from '@/constants/cache-tags';
+
+/**
+ * 完成排名後的快取失效
+ *
+ * 這是最複雜的快取失效操作，會影響:
+ * - 使用者統計 (dashboard stats)
+ * - 歷史記錄 (history)
+ * - Hero 顯示 (hero)
+ * - 曲目/專輯統計 (track/album stats)
+ * - 排名提交記錄 (ranking submissions)
+ * - 歌手清單 (logged/recent artists)
+ */
+export async function invalidateRankingCache(userId: string, artistId: string) {
+  // 首頁相關
+  revalidateTag(CACHE_TAGS.DASHBOARD_STATS(userId));
+  revalidateTag(CACHE_TAGS.HISTORY(userId));
+  revalidateTag(CACHE_TAGS.HERO(userId));
+
+  // 統計相關
+  revalidateTag(CACHE_TAGS.TRACK_STATS(userId, artistId));
+  revalidateTag(CACHE_TAGS.ALBUM_STATS(userId, artistId));
+
+  // 排名相關
+  revalidateTag(CACHE_TAGS.RANKING_SUBMISSIONS(userId, artistId));
+  revalidateTag(CACHE_TAGS.LATEST_SUBMISSION(userId, artistId));
+
+  // 歌手清單
+  revalidateTag(CACHE_TAGS.LOGGED_ARTISTS(userId));
+  revalidateTag(CACHE_TAGS.RECENT_ARTISTS(userId));
+
+  console.log(`[CACHE] Invalidated ranking cache for user=${userId}, artist=${artistId}`);
+}
+
+/**
+ * 草稿操作後的快取失效
+ *
+ * 影響:
+ * - 草稿清單 (drafts)
+ * - Hero 顯示 (hero)
+ * - 未完成提交 (incomplete submission)
+ */
+export async function invalidateDraftCache(userId: string, artistId: string) {
+  revalidateTag(CACHE_TAGS.DRAFTS(userId));
+  revalidateTag(CACHE_TAGS.HERO(userId));
+  revalidateTag(CACHE_TAGS.INCOMPLETE_SUBMISSION(userId, artistId));
+
+  console.log(`[CACHE] Invalidated draft cache for user=${userId}, artist=${artistId}`);
+}
+
+/**
+ * 管理端內容編輯後的快取失效
+ *
+ * 影響:
+ * - 全域管理端資料 (admin data)
+ * - 特定歌手/專輯/曲目
+ */
+export async function invalidateAdminCache(type: 'artist' | 'album' | 'track', id: string) {
+  revalidateTag(CACHE_TAGS.ADMIN_DATA);
+
+  switch (type) {
+    case 'artist':
+      revalidateTag(CACHE_TAGS.ARTIST(id));
+      revalidateTag(CACHE_TAGS.ALBUMS_BY_ARTIST(id));
+      revalidateTag(CACHE_TAGS.TRACKS_BY_ARTIST(id));
+      break;
+    case 'album':
+      revalidateTag(CACHE_TAGS.ALBUM(id));
+      revalidateTag(CACHE_TAGS.TRACKS_BY_ALBUM(id));
+      break;
+    case 'track':
+      revalidateTag(CACHE_TAGS.TRACK(id));
+      break;
   }
-);
-```
 
-**檔案位置**: `src/services/home/getHeroItem.ts`
-
-**Linus 評價**: 🟢 好品味 (v3.1 優化後)
-- ✅ 單一職責: 一個函式解決 Hero 的所有邏輯
-- ✅ 消除特殊情況: 用優先級順序取代複雜的 if/else
-- ✅ 防禦性設計: 每一步都檢查資料有效性
-- ✅ DRY: 復用 `getDiscoveryArtists` 減少重複程式碼
-
----
-
-#### 3.1.3 UI 元件實作
-
-##### 📁 `src/features/home/components/HeroSection.tsx`
-
-**功能**: 根據 Hero 類型顯示對應的視覺設計與 CTA。
-
-**實作** (已修正 + 英文化):
-```tsx
-import Link from "next/link";
-import Image from "next/image";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import type { HeroItemType } from "@/types/home";
-import { PLACEHOLDER_PIC } from "@/constants";
-import { formatDistanceToNow } from "date-fns";
-
-type HeroSectionProps = {
-  hero: HeroItemType | null;
-};
-
-export default function HeroSection({ hero }: HeroSectionProps) {
-  if (!hero) return null;
-
-  const { type, data } = hero;
-
-  // 根據類型定義內容
-  const config = {
-    achievement: {
-      badge: "🎉 Recent Achievement",
-      badgeVariant: "default" as const,
-      title: `Congratulations! You completed "${data.name}"`,
-      description: `Completed ${formatDistanceToNow(data.completedAt!, { addSuffix: true })}`,
-      ctaText: "View Results",
-      // 🔧 v3.1 修正: 根據 type 動態判斷路由
-      ctaHref: data.type === "ARTIST"
-        ? `/artist/${data.artistId}/my-stats?submissionId=${data.submissionId}`
-        : `/artist/${data.artistId}/album/${data.id}`, // TODO: 待專輯頁面完成後更新為正確的結果頁面路由
-      bgGradient: "from-yellow-500/20 to-orange-500/20",
-    },
-    resume: {
-      badge: "⏸️ In Progress",
-      badgeVariant: "secondary" as const,
-      title: `Continue ranking "${data.name}"`,
-      description: `${Math.round(data.progress || 0)}% complete`,
-      ctaText: "Continue Ranking",
-      // 🔧 v3.1 修正: 根據 type 動態判斷路由
-      ctaHref: data.type === "ARTIST"
-        ? `/sorter/artist/${data.id}`
-        : `/sorter/album/${data.id}`,
-      bgGradient: "from-blue-500/20 to-cyan-500/20",
-    },
-    top_artist: {
-      badge: "⭐ Your Top Artist",
-      badgeVariant: "outline" as const,
-      title: `Your top artist is "${data.name}"`,
-      description: "Most frequently ranked artist",
-      ctaText: "View Details",
-      ctaHref: `/artist/${data.artistId}`,
-      bgGradient: "from-purple-500/20 to-pink-500/20",
-    },
-    discovery: {
-      badge: "🔍 Discover New Artists",
-      badgeVariant: "outline" as const,
-      title: `How about ranking "${data.name}"?`,
-      description: "Artist you haven't ranked yet",
-      ctaText: "Start Ranking",
-      ctaHref: `/artist/${data.artistId}`,
-      bgGradient: "from-gray-500/20 to-slate-500/20",
-    },
-  }[type];
-
-  return (
-    <section className="w-full">
-      <Card className={`relative overflow-hidden border-2 bg-gradient-to-br ${config.bgGradient}`}>
-        <div className="flex flex-col md:flex-row items-center gap-6 p-8">
-          {/* 左側圖片 */}
-          <div className="relative h-48 w-48 flex-shrink-0">
-            <Image
-              src={data.img || PLACEHOLDER_PIC}
-              alt={data.name}
-              fill
-              className="rounded-lg object-cover shadow-lg"
-            />
-          </div>
-
-          {/* 右側內容 */}
-          <div className="flex-1 space-y-4 text-center md:text-left">
-            <Badge variant={config.badgeVariant}>{config.badge}</Badge>
-            <h2 className="text-3xl font-bold">{config.title}</h2>
-            <p className="text-lg text-muted-foreground">{config.description}</p>
-            <Link href={config.ctaHref}>
-              <Button size="lg" className="mt-4">
-                {config.ctaText}
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </Card>
-    </section>
-  );
+  console.log(`[CACHE] Invalidated admin cache for ${type}=${id}`);
 }
 ```
-
-**檔案位置**: `src/features/home/components/HeroSection.tsx`
-
-**v3.1 變更說明**:
-- 🔧 修正 Achievement 的 `ctaHref` (根據 `data.type` 動態判斷)
-- 🔧 修正 Resume 的 `ctaHref` (根據 `data.type` 動態判斷)
-- 📝 新增 TODO: ALBUM 結果頁面路由待專輯頁面完成後更新
-- 🌐 所有文字改為英文
-
-**Linus 評價**: 🟢 好品味
-- ✅ 簡潔: 用 config 物件消除重複的 if/else
-- ✅ 可讀性: 每個類型的配置一目了然
-- ✅ 型別安全: 路由邏輯根據資料動態判斷
-
----
-
-### 3.2 Discovery Section (未排名歌手)
-
-#### 3.2.1 功能概述
-
-**目的**: 顯示使用者尚未排名過的歌手,驅動「收集/解鎖」心理。
-
-**資料邏輯**:
-```
-Discovery Artists = All Artists - (User's History Artists + User's Draft Artists)
-```
-
-**視覺特色**:
-- **圓形歌手頭像** (與方形專輯封面形成對比)
-- Carousel 橫向捲動
-- 前端載入所有未排名歌手 (目前數量少)
-
-#### 3.2.2 資料層實作
-
-##### 📁 `src/services/home/getDiscoveryArtists.ts`
-
-**功能**: 取得使用者尚未排名過的歌手。
-
-**型別定義**:
-```typescript
-export type DiscoveryArtistType = {
-  id: string;
-  name: string;
-  img: string | null;
-};
-```
-
-**實作邏輯**:
-```typescript
-import { cache } from "react";
-import { db } from "@/db/client";
-import type { DiscoveryArtistType } from "@/types/home";
-
-export const getDiscoveryArtists = cache(
-  async ({ userId }: { userId: string }): Promise<DiscoveryArtistType[]> => {
-    // 取得使用者已互動的歌手 ID (包含草稿和完成記錄)
-    const interactedArtistIds = await db.rankingSubmission.findMany({
-      where: { userId },
-      select: { artistId: true },
-      distinct: ["artistId"],
-    }).then(results => results.map(r => r.artistId));
-
-    // 取得未排名的歌手 (使用 NOT IN)
-    const discoveryArtists = await db.artist.findMany({
-      where: {
-        id: { notIn: interactedArtistIds },
-      },
-      select: {
-        id: true,
-        name: true,
-        img: true,
-      },
-      // 目前歌手數量少,全部拿 (不限制數量)
-      // 未來可加入: take: 15, orderBy: { name: 'asc' }
-    });
-
-    return discoveryArtists;
-  }
-);
-```
-
-**檔案位置**: `src/services/home/getDiscoveryArtists.ts`
-
-**Linus 評價**: 🟢 好品味
-- ✅ 簡潔: 兩次查詢,邏輯清晰
-- ✅ 效能: 使用 `notIn` 而非 LEFT JOIN (Prisma 自動優化)
-- ✅ 可擴展: 未來可輕鬆加入 limit 和排序
-
----
-
-#### 3.2.3 UI 元件實作
-
-##### 📁 `src/features/home/components/DiscoverySection.tsx`
-
-**功能**: 使用 Shadcn UI Carousel 顯示未排名歌手 (圓形頭像)。
-
-**實作** (英文化):
-```tsx
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import GalleryItem from "@/components/presentation/GalleryItem";
-import type { DiscoveryArtistType } from "@/types/home";
-
-type DiscoverySectionProps = {
-  artists: DiscoveryArtistType[];
-};
-
-export default function DiscoverySection({ artists }: DiscoverySectionProps) {
-  if (artists.length === 0) return null;
-
-  return (
-    <section className="space-y-4">
-      <h2 className="text-2xl font-bold">Discover New Artists</h2>
-
-      <Carousel
-        opts={{ align: "start", loop: false }}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-4">
-          {artists.map((artist) => (
-            <CarouselItem
-              key={artist.id}
-              className="pl-4 basis-1/2 md:basis-1/3 lg:basis-1/5 2xl:basis-1/6"
-            >
-              <GalleryItem
-                href={`/artist/${artist.id}`}
-                img={artist.img}
-                title={artist.name}
-                subTitle="Artist" // 🟢 subTitle="Artist" 觸發圓形顯示
-              />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious className="hidden md:flex" />
-        <CarouselNext className="hidden md:flex" />
-      </Carousel>
-    </section>
-  );
-}
-```
-
-**檔案位置**: `src/features/home/components/DiscoverySection.tsx`
-
-**v3.1 變更說明**:
-- 🌐 標題改為英文: "Discover New Artists"
-
-**Linus 評價**: 🟢 好品味
-- ✅ 復用 GalleryItem: 不重複造輪子
-- ✅ RWD 設定: 符合 PRD 的 Carousel 規格
-- ✅ 圓形頭像: 利用 `subTitle="Artist"` 觸發 GalleryItem 的圓形顯示邏輯
-
----
-
-### 3.3 Carousel 重構
-
-#### 3.3.1 重構目標
-
-將以下 3 個 Section 從 `overflow-x-auto` 改為 **Shadcn UI Carousel**:
-1. `DraftsSection`
-2. `HistorySection`
-3. `TrendingSection` (已被 `DiscoverySection` 替代,可刪除)
-
-#### 3.3.2 DraftsSection 重構
-
-##### 📁 `src/features/home/components/DraftsSection.tsx` (修改)
-
-**變更重點**:
-- ❌ 移除: `<div className="flex gap-4 overflow-x-auto pb-4">`
-- ✅ 新增: Shadcn UI Carousel 結構
-- ✅ 新增: 15 筆上限 (在資料層控制)
-- 🌐 文字英文化
-
-**修改後的實作**:
-```tsx
-import Link from "next/link";
-import Image from "next/image";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import type { DraftItemType } from "@/types/home";
-import { PLACEHOLDER_PIC } from "@/constants";
-
-type DraftsSectionProps = {
-  drafts: DraftItemType[];
-};
-
-export default function DraftsSection({ drafts }: DraftsSectionProps) {
-  if (drafts.length === 0) return null;
-
-  return (
-    <section className="space-y-4">
-      <h2 className="text-2xl font-bold">Continue Your Rankings</h2>
-
-      <Carousel
-        opts={{ align: "start", loop: false }}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-4">
-          {drafts.map((draft) => {
-            const progress = Math.round(draft.draftState.percent);
-            const targetType = draft.type.toLowerCase();
-            const targetId = draft.type === "ARTIST" ? draft.artistId : draft.albumId;
-            const displayName = draft.type === "ARTIST"
-              ? draft.artist.name
-              : draft.album?.name || "Unknown";
-            const displayImg = draft.type === "ARTIST"
-              ? draft.artist.img
-              : draft.album?.img;
-
-            return (
-              <CarouselItem
-                key={draft.id}
-                className="pl-4 basis-1/2 md:basis-1/3 lg:basis-1/5 2xl:basis-1/6"
-              >
-                <Link
-                  href={`/sorter/${targetType}/${targetId}`}
-                  className="group"
-                >
-                  <Card className="transition-transform hover:scale-105">
-                    <CardContent className="space-y-3 p-4">
-                      {/* 封面 */}
-                      <div className="relative aspect-square overflow-hidden rounded-lg">
-                        <Image
-                          src={displayImg || PLACEHOLDER_PIC}
-                          alt={displayName}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-
-                      {/* 標題 */}
-                      <h3 className="truncate font-semibold">{displayName}</h3>
-
-                      {/* 進度條 */}
-                      <div className="space-y-1">
-                        <Progress value={progress} />
-                        <p className="text-xs text-muted-foreground">{progress}% complete</p>
-                      </div>
-
-                      {/* Badge */}
-                      <Badge variant="secondary">Draft</Badge>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </CarouselItem>
-            );
-          })}
-        </CarouselContent>
-        <CarouselPrevious className="hidden md:flex" />
-        <CarouselNext className="hidden md:flex" />
-      </Carousel>
-    </section>
-  );
-}
-```
-
-**檔案位置**: `src/features/home/components/DraftsSection.tsx`
-
-**v3.1 變更說明**:
-- 🌐 標題改為英文: "Continue Your Rankings"
-
----
-
-#### 3.3.3 HistorySection 重構
-
-##### 📁 `src/features/home/components/HistorySection.tsx` (修改)
-
-**變更重點**:
-- ❌ 移除: `<div className="flex gap-4 overflow-x-auto pb-4">`
-- ✅ 新增: Shadcn UI Carousel 結構
-- ✅ 保持: 使用 GalleryItem (方形專輯封面)
-- 🌐 文字英文化
-
-**修改後的實作**:
-```tsx
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import GalleryItem from "@/components/presentation/GalleryItem";
-import type { HistoryItemType } from "@/types/home";
-import { formatDistanceToNow } from "date-fns";
-
-type HistorySectionProps = {
-  history: HistoryItemType[];
-};
-
-export default function HistorySection({ history }: HistorySectionProps) {
-  if (history.length === 0) return null;
-
-  return (
-    <section className="space-y-4">
-      <h2 className="text-2xl font-bold">Recently Completed</h2>
-
-      <Carousel
-        opts={{ align: "start", loop: false }}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-4">
-          {history.map((item) => {
-            const displayName = item.type === "ARTIST"
-              ? item.artist.name
-              : item.album?.name || "Unknown";
-            const displayImg = item.type === "ARTIST"
-              ? item.artist.img
-              : item.album?.img;
-            const relativeTime = item.completedAt
-              ? formatDistanceToNow(new Date(item.completedAt), { addSuffix: true })
-              : "";
-
-            return (
-              <CarouselItem
-                key={item.id}
-                className="pl-4 basis-1/2 md:basis-1/3 lg:basis-1/5 2xl:basis-1/6"
-              >
-                <GalleryItem
-                  href={`/artist/${item.artistId}/my-stats?submissionId=${item.id}`}
-                  img={displayImg}
-                  title={displayName}
-                  subTitle={relativeTime}
-                />
-              </CarouselItem>
-            );
-          })}
-        </CarouselContent>
-        <CarouselPrevious className="hidden md:flex" />
-        <CarouselNext className="hidden md:flex" />
-      </Carousel>
-    </section>
-  );
-}
-```
-
-**檔案位置**: `src/features/home/components/HistorySection.tsx`
-
-**v3.1 變更說明**:
-- 🌐 標題改為英文: "Recently Completed"
-
----
-
-### 3.4 資料層調整
-
-#### 3.4.1 調整數量限制
-
-##### 📁 `src/services/home/getUserDrafts.ts` (修改)
-
-**變更**: 加入 15 筆上限。
-
-```typescript
-// 修改前
-orderBy: { updatedAt: "desc" },
-
-// 修改後
-orderBy: { updatedAt: "desc" },
-take: 15, // 🔧 新增: 限制 15 筆
-```
-
-##### 📁 `src/services/home/getUserHistory.ts` (修改)
-
-**變更**: 預設 limit 從 5 改為 15。
-
-```typescript
-// 修改前
-export const getUserHistory = cache(
-  async ({
-    userId,
-    limit = 5  // ❌ 舊值
-  }: {
-
-// 修改後
-export const getUserHistory = cache(
-  async ({
-    userId,
-    limit = 15  // ✅ 新值
-  }: {
-```
-
-#### 3.4.2 Hero 過濾邏輯
-
-**實作策略**: 在頁面層級處理過濾,而非資料層。
-
-##### 📁 `src/app/(main)/page.tsx` (修改)
-
-**變更**: 新增 Hero 過濾邏輯 (已優化)。
-
-```typescript
-// 取得 Hero 項目
-const hero = await getHeroItem({ userId });
-
-// 🔧 v3.1 優化: 提取變數提升可讀性
-// 根據 Hero 類型過濾 Drafts 和 History
-let filteredDrafts = drafts;
-let filteredHistory = history;
-
-if (hero) {
-  const { type, data } = hero;
-  const submissionId = data.submissionId;
-
-  if (type === "resume" && submissionId) {
-    // Hero 顯示草稿 → Drafts Section 過濾該筆
-    filteredDrafts = drafts.filter(d => d.id !== submissionId);
-  } else if (type === "achievement" && submissionId) {
-    // Hero 顯示戰績 → History Section 過濾該筆
-    filteredHistory = history.filter(h => h.id !== submissionId);
-  }
-}
-```
-
-**v3.1 優化說明**:
-- 🔧 提取變數 `submissionId`,減少重複屬性訪問
-- 🔧 解構 `{ type, data }`,提升可讀性
-
-**Linus 評價**: 🟢 好品味
-- ✅ 簡潔: 過濾邏輯在頁面層,不污染資料層
-- ✅ 清晰: 一眼看出過濾規則
-- ✅ 型別安全: 變數提取減少錯誤
-
----
-
-#### 3.4.3 型別定義更新
-
-##### 📁 `src/types/home.ts` (修改)
-
-**變更**: 新增 Hero 和 Discovery 型別 (已修正)。
-
-```typescript
-// ========== 新增: Hero ==========
-export type HeroItemType = {
-  type: "achievement" | "resume" | "top_artist" | "discovery";
-  data: {
-    id: string;
-    name: string;
-    img: string | null;
-    submissionId?: string;
-    completedAt?: Date;
-    progress?: number;
-    artistId?: string;
-    type?: "ARTIST" | "ALBUM"; // 🔧 v3.1 新增: Resume/Achievement 專用 (用於判斷路由)
-  };
-};
-
-// ========== 新增: Discovery ==========
-export type DiscoveryArtistType = {
-  id: string;
-  name: string;
-  img: string | null;
-};
-
-// ========== 修改: Trending 改名為 Discovery (可選) ==========
-// 若要保持向後相容,可保留 TrendingArtistType 作為 alias
-export type TrendingArtistType = DiscoveryArtistType;
-```
-
-**檔案位置**: `src/types/home.ts`
-
-**v3.1 變更說明**:
-- 🔧 新增 `type?: "ARTIST" | "ALBUM"` 欄位
-
----
-
-## 4. 實作順序與檢查點
-
-**🎯 當前進度**: 階段 0 完成,階段 1 待執行
-
----
-
-### 階段 0: 前置準備 ✅ **已完成**
-
-#### 4.0.1 安裝 Carousel 元件 ✅
-
-```bash
-npx shadcn@latest add carousel
-```
-
-**檢查點 0.1**: ✅ **已通過**
-```bash
-# 確認 Carousel 元件已安裝
-ls src/components/ui/carousel.tsx
-# ✅ 檔案已存在: src/components/ui/carousel.tsx
-```
-
-#### 4.0.2 建立目錄結構 (若尚未存在) ✅
-
-```bash
-# 確認目錄存在
-ls src/services/home
-ls src/features/home/components
-# ✅ 目錄已存在
-```
-
-**檢查點 0.2**: ⏳ **待執行**
-```bash
-npx tsc --noEmit  # 確認無型別錯誤
-pnpm lint         # 確認無 linting 錯誤
-```
-
----
-
-### 階段 1: 資料層實作 (2 小時)
-
-#### 4.1.1 新增 Hero 資料查詢
-
-- [ ] **1.1** 更新 `src/types/home.ts` (新增 `HeroItemType` 和 `DiscoveryArtistType`,修正 `type` 欄位)
-- [ ] **1.2** 實作 `src/services/home/getHeroItem.ts` (v3.1 修正版)
-- [ ] **1.3** 實作 `src/services/home/getDiscoveryArtists.ts`
 
 **檢查點 1**:
 ```bash
 npx tsc --noEmit  # 確認無型別錯誤
 ```
 
-#### 4.1.2 調整現有查詢函式
-
-- [ ] **1.4** 修改 `src/services/home/getUserDrafts.ts` (加入 `take: 15`)
-- [ ] **1.5** 修改 `src/services/home/getUserHistory.ts` (改預設 `limit = 15`)
-
-**檢查點 1.1**:
-```bash
-npx tsc --noEmit  # 再次確認無型別錯誤
-```
-
 ---
 
-### 階段 2: UI 元件實作 (3 小時)
+### 階段 2: 資料層快取化 (2 小時)
 
-#### 4.2.1 新增 Hero 和 Discovery
+**目標**: 為所有查詢函式加上 `use cache` 和對應的 cache tag
 
-- [ ] **2.1** 實作 `src/features/home/components/HeroSection.tsx` (v3.1 修正版 + 英文化)
-- [ ] **2.2** 實作 `src/features/home/components/DiscoverySection.tsx` (英文化)
+#### 步驟 2.1: 首頁服務層 (5 個檔案)
 
-#### 4.2.2 重構現有 Section 為 Carousel
+##### 檔案 1: `src/services/home/getUserHistory.ts`
 
-- [ ] **2.3** 修改 `src/features/home/components/DraftsSection.tsx`
-  - 替換 `overflow-x-auto` 為 Carousel
-  - 保持原有邏輯不變
-  - 英文化標題
+**修改前**:
+```typescript
+import { cache } from "react";
+import { db } from "@/db/client";
 
-- [ ] **2.4** 修改 `src/features/home/components/HistorySection.tsx`
-  - 替換 `overflow-x-auto` 為 Carousel
-  - 保持原有邏輯不變
-  - 英文化標題
+export const getUserHistory = cache(
+  async ({
+    userId,
+    limit = 15,
+  }: {
+    userId: string;
+    limit?: number;
+  }) => {
+    // ...
+  }
+);
+```
+
+**修改後**:
+```typescript
+'use cache'  // ← 加這行
+
+import { cacheLife, cacheTag } from "next/cache";  // ← 加這行
+import { db } from "@/db/client";
+import { CACHE_TIMES } from "@/constants/cache";  // ← 加這行
+import { CACHE_TAGS } from "@/constants/cache-tags";  // ← 加這行
+
+export async function getUserHistory({  // ← 移除 cache() wrapper
+  userId,
+  limit = 15,
+}: {
+  userId: string;
+  limit?: number;
+}) {
+  cacheLife(CACHE_TIMES.LONG);  // ← 加這行
+  cacheTag(CACHE_TAGS.HISTORY(userId));  // ← 加這行
+
+  console.log('[CACHE] getUserHistory called for', userId);  // ← 加這行（除錯用）
+
+  const history = await db.rankingSubmission.findMany({
+    where: {
+      userId,
+      status: "COMPLETED",
+    },
+    include: {
+      artist: {
+        select: { id: true, name: true, img: true },
+      },
+      album: {
+        select: { id: true, name: true, img: true },
+      },
+    },
+    orderBy: { completedAt: "desc" },
+    take: limit,
+  });
+
+  return history;
+}
+```
+
+**關鍵變更說明**:
+1. ✅ 加上 `'use cache'` directive
+2. ✅ 移除 React 的 `cache()` wrapper（Next.js 15 不需要）
+3. ✅ 加上 `cacheLife(CACHE_TIMES.LONG)` - 設定快取時間
+4. ✅ 加上 `cacheTag(CACHE_TAGS.HISTORY(userId))` - 設定快取標籤
+5. ✅ 加上 console.log 除錯資訊
+
+##### 檔案 2: `src/services/home/getUserDrafts.ts`
+
+**修改重點**: 使用 SHORT cache（草稿需要即時更新）
+
+```typescript
+'use cache'
+
+import { cacheLife, cacheTag } from "next/cache";
+import { db } from "@/db/client";
+import { CACHE_TIMES } from "@/constants/cache";
+import { CACHE_TAGS } from "@/constants/cache-tags";
+
+export async function getUserDrafts({ userId }: { userId: string }) {
+  cacheLife(CACHE_TIMES.SHORT);  // ← SHORT（草稿需即時）
+  cacheTag(CACHE_TAGS.DRAFTS(userId));
+
+  console.log('[CACHE] getUserDrafts called for', userId);
+
+  const drafts = await db.rankingSubmission.findMany({
+    where: {
+      userId,
+      status: { in: ["IN_PROGRESS", "DRAFT"] },
+    },
+    include: {
+      artist: {
+        select: { id: true, name: true, img: true },
+      },
+      album: {
+        select: { id: true, name: true, img: true },
+      },
+    },
+    orderBy: { updatedAt: "desc" },
+    take: 15,
+  });
+
+  return drafts;
+}
+```
+
+##### 檔案 3: `src/services/home/getHeroItem.ts`
+
+**修改重點**: 使用 SHORT cache（依賴最新的草稿和戰績）
+
+```typescript
+'use cache'
+
+import { cacheLife, cacheTag } from "next/cache";
+import { db } from "@/db/client";
+import type { HeroItemType } from "@/types/home";
+import { CACHE_TIMES } from "@/constants/cache";
+import { CACHE_TAGS } from "@/constants/cache-tags";
+
+export async function getHeroItem({ userId }: { userId: string }): Promise<HeroItemType | null> {
+  cacheLife(CACHE_TIMES.SHORT);  // ← SHORT（依賴最新狀態）
+  cacheTag(CACHE_TAGS.HERO(userId));
+
+  console.log('[CACHE] getHeroItem called for', userId);
+
+  // P1: 24h 內有新戰績
+  const recentAchievement = await db.rankingSubmission.findFirst({
+    where: {
+      userId,
+      status: "COMPLETED",
+      completedAt: {
+        gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        not: null,
+      },
+    },
+    // ... 其他邏輯保持不變
+  });
+
+  // ... 其他邏輯保持不變
+}
+```
+
+##### 檔案 4: `src/services/home/getDiscoveryArtists.ts`
+
+```typescript
+'use cache'
+
+import { cacheLife, cacheTag } from "next/cache";
+import { db } from "@/db/client";
+import { CACHE_TIMES } from "@/constants/cache";
+import { CACHE_TAGS } from "@/constants/cache-tags";
+
+export async function getDiscoveryArtists({ userId }: { userId: string }) {
+  cacheLife(CACHE_TIMES.LONG);  // ← LONG（歌手清單相對穩定）
+  cacheTag(CACHE_TAGS.DISCOVERY(userId));
+
+  console.log('[CACHE] getDiscoveryArtists called for', userId);
+
+  // 取得已互動的歌手
+  const interactedArtistIds = await db.rankingSubmission.findMany({
+    where: { userId },
+    select: { artistId: true },
+    distinct: ["artistId"],
+  }).then(results => results.map(r => r.artistId));
+
+  // 取得未排名的歌手
+  const discoveryArtists = await db.artist.findMany({
+    where: {
+      id: { notIn: interactedArtistIds },
+    },
+    select: {
+      id: true,
+      name: true,
+      img: true,
+    },
+  });
+
+  return discoveryArtists;
+}
+```
+
+**注意**: `getUserDashboardStats` 已經完成，跳過。
+
+#### 步驟 2.2: 資料庫查詢層 - Artist (3 個函式)
+
+**檔案**: `src/db/artist.ts`
+
+**修改前**:
+```typescript
+import { db } from "./client";
+
+export async function getArtistById({ artistId }: { artistId: string }) {
+  // ...
+}
+
+export async function getLoggedArtists({ userId }: { userId: string }) {
+  // ...
+}
+
+export async function getRecentLoggedArtists({ userId }: { userId: string }) {
+  // ...
+}
+```
+
+**修改後**:
+```typescript
+'use cache'  // ← 加在檔案最上方
+
+import { cacheLife, cacheTag } from "next/cache";
+import { db } from "./client";
+import { CACHE_TIMES } from "@/constants/cache";
+import { CACHE_TAGS } from "@/constants/cache-tags";
+
+export async function getArtistById({ artistId }: { artistId: string }) {
+  cacheLife(CACHE_TIMES.LONG);
+  cacheTag(CACHE_TAGS.ARTIST(artistId));
+
+  console.log('[CACHE] getArtistById called for', artistId);
+
+  const artist = await db.artist.findFirst({
+    where: {
+      id: artistId,
+    },
+  });
+  return artist;
+}
+
+export async function getLoggedArtists({ userId }: { userId: string }) {
+  cacheLife(CACHE_TIMES.LONG);
+  cacheTag(CACHE_TAGS.LOGGED_ARTISTS(userId));
+
+  console.log('[CACHE] getLoggedArtists called for', userId);
+
+  const artists = await db.artist.findMany({
+    where: {
+      submissions: {
+        some: {
+          userId,
+          status: "COMPLETED",
+        },
+      },
+    },
+    orderBy: {
+      submissions: {
+        _count: "desc",
+      },
+    },
+  });
+
+  return artists;
+}
+
+export async function getRecentLoggedArtists({ userId }: { userId: string }) {
+  cacheLife(CACHE_TIMES.LONG);
+  cacheTag(CACHE_TAGS.RECENT_ARTISTS(userId));
+
+  console.log('[CACHE] getRecentLoggedArtists called for', userId);
+
+  // ... 原本的邏輯保持不變
+  const artistsWithLatestSubmission = await db.artist.findMany({
+    where: {
+      submissions: {
+        some: {
+          userId,
+          status: "COMPLETED",
+        },
+      },
+    },
+    include: {
+      submissions: {
+        where: {
+          userId,
+          status: "COMPLETED",
+        },
+        orderBy: {
+          completedAt: "desc",
+        },
+        take: 1,
+        select: {
+          completedAt: true,
+        },
+      },
+    },
+  });
+
+  const sortedArtists = artistsWithLatestSubmission
+    .filter(artist => artist.submissions.length > 0)
+    .sort((a, b) => {
+      const aTime = a.submissions[0]?.completedAt;
+      const bTime = b.submissions[0]?.completedAt;
+
+      if (!aTime || !bTime) return 0;
+
+      return bTime.getTime() - aTime.getTime();
+    })
+    .map(({ submissions: _, ...artist }) => artist);
+
+  return sortedArtists;
+}
+```
+
+#### 步驟 2.3: 資料庫查詢層 - Ranking (3 個函式)
+
+**檔案**: `src/db/ranking.ts`
+
+**注意**: 這個檔案有 SHORT/LONG 混用,需特別注意。
+
+```typescript
+'use cache'  // ← 加在檔案最上方
+
+import { cacheLife, cacheTag } from "next/cache";
+import { $Enums } from "@prisma/client";
+import { db } from "./client";
+import { CACHE_TIMES } from "@/constants/cache";
+import { CACHE_TAGS } from "@/constants/cache-tags";
+
+// ========== SHORT: 進行中的 submission ==========
+export async function getIncompleteRankingSubmission({
+  artistId,
+  userId,
+  type = "ARTIST",
+  albumId,
+}: {
+  artistId: string;
+  userId: string;
+  type?: $Enums.SubmissionType;
+  albumId?: string;
+}) {
+  cacheLife(CACHE_TIMES.SHORT);  // ← SHORT (進行中會頻繁變動)
+  cacheTag(CACHE_TAGS.INCOMPLETE_SUBMISSION(userId, artistId));
+
+  console.log('[CACHE] getIncompleteRankingSubmission called');
+
+  const submissions = await db.rankingSubmission.findMany({
+    where: {
+      artistId,
+      userId,
+      type,
+      status: { not: "COMPLETED" },
+      albumId,
+    },
+  });
+
+  if (submissions.length > 1) {
+    throw new Error(
+      `Data integrity error: Found ${submissions.length} incomplete submissions for artist ${artistId}, expected 0 or 1`
+    );
+  }
+
+  return submissions[0];
+}
+
+// ========== LONG: 最新完成的 submission ==========
+export async function getLatestArtistRankingSubmissions({
+  artistId,
+  userId,
+}: {
+  artistId: string;
+  userId: string;
+}) {
+  cacheLife(CACHE_TIMES.LONG);  // ← LONG (已完成的記錄)
+  cacheTag(CACHE_TAGS.LATEST_SUBMISSION(userId, artistId));
+
+  console.log('[CACHE] getLatestArtistRankingSubmissions called');
+
+  const latestSubmission = await db.rankingSubmission.findFirst({
+    where: {
+      artistId,
+      userId,
+      type: "ARTIST",
+      status: "COMPLETED",
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      id: true,
+      createdAt: true,
+    },
+  });
+
+  return latestSubmission
+    ? {
+        id: latestSubmission.id,
+        date: latestSubmission.createdAt,
+      }
+    : null;
+}
+
+// ========== LONG: 所有完成的 submissions ==========
+export async function getArtistRankingSubmissions({
+  artistId,
+  userId,
+}: {
+  artistId: string;
+  userId: string;
+}) {
+  cacheLife(CACHE_TIMES.LONG);  // ← LONG (已完成的記錄)
+  cacheTag(CACHE_TAGS.RANKING_SUBMISSIONS(userId, artistId));
+
+  console.log('[CACHE] getArtistRankingSubmissions called');
+
+  const submissions = await db.rankingSubmission.findMany({
+    where: {
+      artistId,
+      userId,
+      type: "ARTIST",
+      status: "COMPLETED",
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      id: true,
+      createdAt: true,
+    },
+  });
+
+  return submissions.map((submission) => ({
+    id: submission.id,
+    date: submission.createdAt,
+  }));
+}
+```
+
+#### 步驟 2.4: 資料庫查詢層 - Album, Track, User
+
+**套用模式** (全部 LONG):
+
+##### 檔案: `src/db/album.ts`
+
+重點函式:
+- `getAlbumById` - LONG + CACHE_TAGS.ALBUM(albumId)
+- `getAlbumsByArtistId` - LONG + CACHE_TAGS.ALBUMS_BY_ARTIST(artistId)
+
+所有其他函式依此類推,全部使用 LONG cache。
+
+##### 檔案: `src/db/track.ts`
+
+重點函式:
+- `getTrackForTrackPage` - LONG + CACHE_TAGS.TRACK(trackId)
+- `getTracksByArtistId` - LONG + CACHE_TAGS.TRACKS_BY_ARTIST(artistId)
+- `getTracksByAlbumId` - LONG + CACHE_TAGS.TRACKS_BY_ALBUM(albumId)
+- `getTrackRanking` - LONG + CACHE_TAGS.TRACK_RANKING(userId, trackId)
+- `getSinglesByArtistId` - LONG + CACHE_TAGS.TRACKS_BY_ARTIST(artistId)
+
+所有函式全部使用 LONG cache。
+
+##### 檔案: `src/db/user.ts`
+
+```typescript
+'use cache'
+
+import { cacheLife, cacheTag } from "next/cache";
+import { db } from "@/db/client";
+import { UserPreferenceData } from "@/types/data";
+import { CACHE_TIMES } from "@/constants/cache";
+import { CACHE_TAGS } from "@/constants/cache-tags";
+
+export default async function getUserPreference({
+  userId,
+}: {
+  userId: string;
+}): Promise<UserPreferenceData | null> {
+  cacheLife(CACHE_TIMES.LONG);
+  cacheTag(CACHE_TAGS.USER_PREFERENCE(userId));
+
+  console.log('[CACHE] getUserPreference called for', userId);
+
+  const userPreference = (await db.userPreference.findFirst({
+    where: {
+      userId,
+    },
+  })) as UserPreferenceData | null;
+
+  return userPreference;
+}
+```
+
+#### 步驟 2.5: 統計服務層 (4 個檔案)
+
+**套用模式**:
+- 所有統計函式使用 LONG cache
+- 使用對應的 TRACK_STATS / ALBUM_STATS / TRACK_HISTORY / ALBUM_HISTORY tags
+- **重點**: `getTracksHistory` 和 `getAlbumsHistory` 需要掛兩個 tags,因為它們依賴 `UserPreference`
+
+##### 範例: `src/services/track/getTracksHistory.ts`
+
+```typescript
+'use cache'
+
+import { cacheLife, cacheTag } from "next/cache";
+// ... 其他 imports
+import { CACHE_TIMES } from "@/constants/cache";
+import { CACHE_TAGS } from "@/constants/cache-tags";
+
+export async function getTracksHistory({
+  userId,
+  submissionId,
+}: {
+  userId: string;
+  submissionId: string;
+}) {
+  cacheLife(CACHE_TIMES.LONG);
+  cacheTag(CACHE_TAGS.TRACK_HISTORY(userId, submissionId));
+  cacheTag(CACHE_TAGS.USER_PREFERENCE(userId));  // ← 掛第二個 tag!
+
+  console.log('[CACHE] getTracksHistory called');
+
+  // 這個函式會讀取 UserPreference 來決定顯示方式
+  const preference = await getUserPreference({ userId });
+
+  // ... 根據 preference.displayMode 過濾資料
+}
+```
+
+**為什麼要掛兩個 tags?**
+- 當使用者在「設定頁」改 `displayMode` 時
+- `saveRankingSettings` 會失效 `USER_PREFERENCE(userId)` tag
+- 因為 `getTracksHistory` 也掛了這個 tag,它的快取會自動失效
+- 使用者立即看到新的顯示方式 ✅
+
+同樣的邏輯套用到 `getAlbumsHistory`。
 
 **檢查點 2**:
 ```bash
-pnpm lint         # 確認無 linting 錯誤
 npx tsc --noEmit  # 確認無型別錯誤
+pnpm lint         # 確認無 linting 錯誤
 ```
 
 ---
 
-### 階段 3: 頁面整合 (2 小時)
+### 階段 3: Server Actions 快取失效 (2 小時)
 
-#### 4.3.1 修改首頁
+**目標**: 在所有修改資料的 Server Actions 加上 `revalidateTag`
 
-- [ ] **3.1** 修改 `src/app/(main)/page.tsx`
-  - 新增 `getHeroItem` 查詢
-  - 新增 `getDiscoveryArtists` 查詢 (替代 `getTrendingArtists`)
-  - 實作 Hero 過濾邏輯 (v3.1 優化版)
-  - 整合 HeroSection 和 DiscoverySection
-  - 移除 `userName` prop (已在 v2.1 完成)
+#### 步驟 3.1: 最關鍵 - completeSubmission
 
-**修改範例**:
+**檔案**: `src/features/sorter/actions/completeSubmission.ts`
+
+**修改位置**: 在成功完成排名後，呼叫集中的快取失效函式
+
+**修改前**:
+```typescript
+export async function completeSubmission(submissionId: string) {
+  // ... 更新資料庫邏輯
+
+  // 更新統計
+  await updateTrackStats({ userId, artistId });
+  await updateAlbumStats({ userId, artistId });
+
+  // 返回結果
+  return { success: true, artistId };
+}
+```
+
+**修改後**:
+```typescript
+import { invalidateRankingCache } from "@/lib/cache-invalidation";  // ← 加這行
+import { revalidatePath } from "next/cache";  // ← 如果還沒有
+
+export async function completeSubmission(submissionId: string) {
+  // ... 更新資料庫邏輯
+
+  // 更新統計
+  await updateTrackStats({ userId, artistId });
+  await updateAlbumStats({ userId, artistId });
+
+  // ========== 快取失效 ========== ← 加這段
+  // 失效所有相關的快取
+  await invalidateRankingCache(userId, artistId);
+
+  // 重新驗證歌手頁面（如果有）
+  revalidatePath(`/artist/${artistId}`);
+
+  console.log(`[CACHE] Completed submission for user=${userId}, artist=${artistId}`);
+  // ========== 快取失效結束 ==========
+
+  // 返回結果
+  return { success: true, artistId };
+}
+```
+
+**關鍵說明**:
+- ✅ 使用 `invalidateRankingCache()` 一次失效所有相關快取
+- ✅ 這會失效 8+ 個 cache tags（dashboard stats, history, hero, track/album stats, etc.）
+- ✅ 完成排名後使用者立即看到更新的數字
+
+#### 步驟 3.2: 草稿相關 Actions (4 個)
+
+##### 檔案 1: `src/features/sorter/actions/createSubmission.ts`
+
+```typescript
+import { invalidateDraftCache } from "@/lib/cache-invalidation";
+import { CACHE_TAGS } from "@/constants/cache-tags";
+import { revalidateTag } from "next/cache";
+
+export async function createSubmission(/* ... */) {
+  // ... 建立 submission 邏輯
+
+  // ========== 快取失效 ==========
+  await invalidateDraftCache(userId, artistId);
+  revalidateTag(CACHE_TAGS.DISCOVERY(userId));  // Discovery 也要更新
+
+  console.log(`[CACHE] Created submission for user=${userId}, artist=${artistId}`);
+  // ========== 快取失效結束 ==========
+
+  return { success: true, submissionId };
+}
+```
+
+##### 檔案 2: `src/features/sorter/actions/saveDraft.ts`
+
+```typescript
+import { CACHE_TAGS } from "@/constants/cache-tags";
+import { revalidateTag } from "next/cache";
+
+export async function saveDraft(/* ... */) {
+  // ... 儲存草稿邏輯
+
+  // ========== 快取失效 ==========
+  // saveDraft 只更新 draftState，但為了即時性也失效快取
+  revalidateTag(CACHE_TAGS.INCOMPLETE_SUBMISSION(userId, artistId));
+
+  console.log(`[CACHE] Saved draft for user=${userId}, artist=${artistId}`);
+  // ========== 快取失效結束 ==========
+
+  return { success: true };
+}
+```
+
+##### 檔案 3: `src/features/sorter/actions/finalizeDraft.ts`
+
+```typescript
+import { invalidateDraftCache } from "@/lib/cache-invalidation";
+import { revalidatePath } from "next/cache";
+
+export async function finalizeDraft(/* ... */) {
+  // ... 定案草稿邏輯（status → DRAFT）
+
+  // ========== 快取失效 ==========
+  await invalidateDraftCache(userId, artistId);
+  revalidatePath("/sorter");
+
+  console.log(`[CACHE] Finalized draft for user=${userId}, artist=${artistId}`);
+  // ========== 快取失效結束 ==========
+
+  return { success: true };
+}
+```
+
+##### 檔案 4: `src/features/sorter/actions/deleteSubmission.ts`
+
+```typescript
+import { invalidateDraftCache } from "@/lib/cache-invalidation";
+import { revalidatePath } from "next/cache";
+
+export async function deleteSubmission(/* ... */) {
+  // ... 刪除 submission 邏輯
+
+  // ========== 快取失效 ==========
+  await invalidateDraftCache(userId, artistId);
+  revalidatePath("/sorter");
+
+  console.log(`[CACHE] Deleted submission for user=${userId}, artist=${artistId}`);
+  // ========== 快取失效結束 ==========
+
+  return { success: true };
+}
+```
+
+#### 步驟 3.3: 管理端 Actions (7 個)
+
+**套用模式**: 所有管理端 Actions 使用 `invalidateAdminCache()`
+
+##### 範例: `src/features/admin/addContent/actions/addArtist.ts`
+
+```typescript
+import { invalidateAdminCache } from "@/lib/cache-invalidation";
+import { revalidatePath } from "next/cache";
+
+export async function addArtist(/* ... */) {
+  // ... 新增歌手邏輯
+
+  // ========== 快取失效 ==========
+  await invalidateAdminCache('artist', newArtist.id);
+  revalidatePath(`/admin/artist/${newArtist.id}`);
+  revalidatePath("/admin");
+
+  console.log(`[CACHE] Added artist=${newArtist.id}`);
+  // ========== 快取失效結束 ==========
+
+  return { success: true, artistId: newArtist.id };
+}
+```
+
+**其他管理端 Actions 依此模式套用**:
+- `addAlbum` → `invalidateAdminCache('album', albumId)`
+- `addSingle` → `invalidateAdminCache('track', trackId)`
+- `updateArtist` → `invalidateAdminCache('artist', artistId)`
+- `updateAlbum` → `invalidateAdminCache('album', albumId)`
+- `updateInfo` (track) → `invalidateAdminCache('track', trackId)`
+- `deleteItem` → 根據 type 決定
+
+#### 步驟 3.4: 設定相關 Actions (2 個)
+
+##### 檔案 1: `src/features/settings/actions/saveRankingSettings.ts`
+
+```typescript
+import { CACHE_TAGS } from "@/constants/cache-tags";
+import { revalidateTag, revalidatePath } from "next/cache";
+
+export async function saveRankingSettings(/* ... */) {
+  // ... 儲存偏好設定邏輯
+
+  // ========== 快取失效 ==========
+  revalidateTag(CACHE_TAGS.USER_PREFERENCE(userId));
+
+  // ✅ 關鍵: 偏好設定會影響 getTracksHistory 的結果
+  // 解法: getTracksHistory 掛了兩個 tags:
+  //   1. TRACK_HISTORY(userId, submissionId)
+  //   2. USER_PREFERENCE(userId)
+  // 所以只要失效 USER_PREFERENCE,所有依賴它的查詢都會自動失效 ✅
+
+  revalidatePath("/settings/ranking");
+
+  console.log(`[CACHE] Saved ranking settings for user=${userId}`);
+  // ========== 快取失效結束 ==========
+
+  return { success: true };
+}
+```
+
+**檢查點 3**:
+```bash
+npx tsc --noEmit
+pnpm lint
+```
+
+---
+
+### 階段 4: Layout 重構 (1 小時)
+
+**目標**: 解決 "Uncached data outside Suspense" 錯誤
+
+#### 步驟 4.1: 建立 SidebarSkeleton 元件
+
+**檔案**: `src/components/layout/SidebarSkeleton.tsx` (新建)
+
 ```tsx
-import { getUserSession } from "@/../auth";
-import { getUserDashboardStats } from "@/services/home/getUserDashboardStats";
-import { getUserDrafts } from "@/services/home/getUserDrafts";
-import { getUserHistory } from "@/services/home/getUserHistory";
-import { getHeroItem } from "@/services/home/getHeroItem"; // 🆕 新增
-import { getDiscoveryArtists } from "@/services/home/getDiscoveryArtists"; // 🆕 新增
-import DashboardSection from "@/features/home/components/DashboardSection";
-import GlobalSearch from "@/features/home/components/GlobalSearch";
-import HeroSection from "@/features/home/components/HeroSection"; // 🆕 新增
-import DraftsSection from "@/features/home/components/DraftsSection";
-import HistorySection from "@/features/home/components/HistorySection";
-import DiscoverySection from "@/features/home/components/DiscoverySection"; // 🆕 新增
+import { Skeleton } from "@/components/ui/skeleton";
+import { SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
 
-export default async function HomePage() {
-  const user = await getUserSession();
-  const userId = user.id;
-
-  // 並行查詢所有資料
-  const [stats, drafts, history, hero, discovery] = await Promise.all([
-    getUserDashboardStats({ userId }),
-    getUserDrafts({ userId }),
-    getUserHistory({ userId, limit: 15 }), // 🔧 改為 15
-    getHeroItem({ userId }), // 🆕 新增
-    getDiscoveryArtists({ userId }), // 🆕 新增
-  ]);
-
-  // 🆕 Hero 過濾邏輯 (v3.1 優化版)
-  let filteredDrafts = drafts;
-  let filteredHistory = history;
-
-  if (hero) {
-    const { type, data } = hero;
-    const submissionId = data.submissionId;
-
-    if (type === "resume" && submissionId) {
-      filteredDrafts = drafts.filter(d => d.id !== submissionId);
-    } else if (type === "achievement" && submissionId) {
-      filteredHistory = history.filter(h => h.id !== submissionId);
-    }
-  }
-
+/**
+ * Sidebar Loading 狀態
+ *
+ * 當 getUserSession 和 getRecentLoggedArtists 正在載入時顯示
+ */
+export default function SidebarSkeleton() {
   return (
-    <div className="space-y-12 p-content">
-      {/* Dashboard */}
-      <DashboardSection stats={stats} />
-
-      {/* Global Search */}
-      <div className="mx-auto max-w-2xl">
-        <GlobalSearch />
+    <div className="flex h-screen w-64 flex-col border-r bg-background p-4">
+      {/* 使用者資訊 Skeleton */}
+      <div className="mb-6 flex items-center gap-3">
+        <Skeleton className="h-10 w-10 rounded-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-3 w-16" />
+        </div>
       </div>
 
-      {/* 🆕 Dynamic Hero Section */}
-      <HeroSection hero={hero} />
+      {/* 選單項目 Skeleton */}
+      <SidebarMenu>
+        {[...Array(5)].map((_, i) => (
+          <SidebarMenuItem key={i}>
+            <Skeleton className="h-10 w-full" />
+          </SidebarMenuItem>
+        ))}
+      </SidebarMenu>
 
-      {/* Drafts (Filtered) */}
-      {filteredDrafts.length > 0 && <DraftsSection drafts={filteredDrafts} />}
-
-      {/* History (Filtered) */}
-      {filteredHistory.length > 0 && <HistorySection history={filteredHistory} />}
-
-      {/* 🆕 Discovery Section (Replaces Trending) */}
-      <DiscoverySection artists={discovery} />
+      {/* 歌手清單 Skeleton */}
+      <div className="mt-6 space-y-2">
+        <Skeleton className="h-4 w-32" />
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 ```
 
-**檔案位置**: `src/app/(main)/page.tsx`
+#### 步驟 4.2: 修改 Layout 加上 Suspense
 
-#### 4.3.2 清理舊檔案
+**檔案**: `src/app/(main)/layout.tsx`
 
-- [ ] **3.2** 刪除 `src/services/home/getTrendingArtists.ts` (已被 Discovery 替代)
-- [ ] **3.3** 刪除 `src/features/home/components/TrendingSection.tsx` (已被 Discovery 替代)
-- [ ] **3.4** 刪除 `src/constants/featured.ts` (已不需要)
+**修改前**:
+```tsx
+import { getUserSession } from "../../../auth";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { SimpleSidebar } from "@/components/sidebar/SimpleSidebar";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { getRecentLoggedArtists } from "@/db/artist";
+import ScrollIsolationWrapper from "@/components/layout/ScrollIsolationWrapper";
 
-**檢查點 3**:
-```bash
-pnpm lint         # 確認無 linting 錯誤
-npx tsc --noEmit  # 確認無型別錯誤
-```
+type AdminLayoutProps = {
+  children: React.ReactNode;
+};
 
----
+export default async function MainLayout({ children }: AdminLayoutProps) {
+  const user = await getUserSession();  // ← 這裡會報錯
+  const loggedArtists = await getRecentLoggedArtists({ userId: user.id });
 
-### 階段 4: 功能測試 (1.5 小時)
-
-#### 4.4.1 Hero Section 測試
-
-- [ ] **4.1** 測試 P1 (Achievement): 完成一個排名後,24h 內應顯示 Achievement
-- [ ] **4.2** 測試 P2 (Resume): 建立一個草稿後,應顯示 Resume
-- [ ] **4.3** 測試 P3 (Top Artist): 無 24h 戰績和草稿時,應顯示本命歌手
-- [ ] **4.4** 測試 P3 (Discovery): 全新使用者應顯示隨機歌手
-- [ ] **4.5** 🔧 v3.1 新增: 測試 ARTIST/ALBUM 路由判斷邏輯
-
-#### 4.4.2 Discovery Section 測試
-
-- [ ] **4.6** 測試資料邏輯: 已排名的歌手不應出現在 Discovery
-- [ ] **4.7** 測試草稿過濾: 有草稿但未完成的歌手不應出現在 Discovery
-- [ ] **4.8** 測試冷啟動: 全新使用者應看到所有歌手
-
-#### 4.4.3 Carousel 測試
-
-- [ ] **4.9** 測試 RWD: 手機版 (2 items)、平板版 (3 items)、桌面版 (5 items)
-- [ ] **4.10** 測試左右箭頭: 桌面版應顯示箭頭,手機版隱藏
-- [ ] **4.11** 測試數量限制: Drafts 和 History 不應超過 15 筆
-
-#### 4.4.4 過濾邏輯測試
-
-- [ ] **4.12** 測試 Hero 顯示草稿時,Drafts Section 應少一筆
-- [ ] **4.13** 測試 Hero 顯示戰績時,History Section 應少一筆
-
----
-
-### 階段 5: 品質保證 (1 小時)
-
-- [ ] **5.1** 執行完整檢查
-  ```bash
-  pnpm lint
-  npx tsc --noEmit
-  pnpm prettier
-  ```
-
-- [ ] **5.2** 效能檢查
-  - 確認 `React.cache()` 正確使用
-  - 確認並行查詢（`Promise.all`）正確使用
-  - 確認無 N+1 查詢問題
-
-- [ ] **5.3** 響應式測試
-  - 測試手機版佈局
-  - 測試平板版佈局
-  - 測試桌面版佈局
-  - 測試 Carousel 的觸控操作
-
-- [ ] **5.4** 🔧 v3.1 新增: 英文文字檢查
-  - 確認所有 UI 文字已改為英文
-  - 確認文字語意正確
-
----
-
-### 階段 6: Git Commit (30 分鐘)
-
-- [ ] **6.1** 建立 `docs/COMMIT.md`（按照 CLAUDE.md 規範）
-- [ ] **6.2** 通知使用者 commit
-- [ ] **6.3** 由使用者手動執行 `git commit`
-
-**Commit Message 建議**:
-```
-feat(homepage): 實作 PRD-001c v1.4 完整需求 (v3.1)
-
-核心變更:
-- 新增 Dynamic Hero Section (24h Rule)
-- 新增 Discovery Section (未排名歌手)
-- 重構 Drafts/History 為 Shadcn UI Carousel
-- 實作 Hero 過濾邏輯
-- 統一 Carousel 數量為 15 筆
-
-v3.1 修正:
-- 修正 Hero Resume/Achievement 路由邏輯 (動態判斷 ARTIST/ALBUM)
-- 修正 HeroItemType 型別定義 (新增 type 欄位)
-- 優化 getHeroItem.ts (復用 getDiscoveryArtists)
-- 優化 page.tsx 過濾邏輯 (提取變數)
-- 所有 UI 文字改為英文
-
-TODO:
-- ALBUM 結果頁面路由待專輯頁面完成後更新
-
-🤖 Generated with Claude Code
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
-
----
-
-## 5. 測試計劃
-
-### 5.1 功能測試矩陣
-
-| 測試項目 | 輸入條件 | 預期結果 | 優先級 |
-|---------|---------|---------|--------|
-| **Hero P1** | 24h 內完成排名 | 顯示 Achievement | P0 |
-| **Hero P2** | 有未完成草稿 | 顯示 Resume | P0 |
-| **Hero P3** | 無 24h 戰績和草稿 | 顯示 Top Artist | P1 |
-| **Hero P3 備用** | 全新使用者 | 顯示 Discovery | P1 |
-| **Hero 路由 (ARTIST)** | Resume/Achievement 是 ARTIST | 路由正確 | P0 |
-| **Hero 路由 (ALBUM)** | Resume/Achievement 是 ALBUM | 路由正確 | P0 |
-| **Hero 過濾 (Draft)** | Hero 顯示草稿 | Drafts Section 少一筆 | P0 |
-| **Hero 過濾 (History)** | Hero 顯示戰績 | History Section 少一筆 | P0 |
-| **Discovery 邏輯** | 已排名 Artist A | Discovery 不含 A | P0 |
-| **Discovery 草稿** | 有 Artist B 的草稿 | Discovery 不含 B | P0 |
-| **Discovery 冷啟動** | 全新使用者 | 顯示所有歌手 | P1 |
-| **Carousel RWD** | 手機 / 平板 / 桌面 | 2 / 3 / 5 items | P0 |
-| **Carousel 箭頭** | 桌面版 | 顯示左右箭頭 | P1 |
-| **Carousel 箭頭** | 手機版 | 隱藏左右箭頭 | P1 |
-| **數量限制 (Drafts)** | 超過 15 筆草稿 | 只顯示 15 筆 | P0 |
-| **數量限制 (History)** | 超過 15 筆記錄 | 只顯示 15 筆 | P0 |
-
-### 5.2 效能測試
-
-**關鍵指標**:
-- **首頁載入時間**: < 2 秒（含資料庫查詢）
-- **Hero 判斷邏輯**: < 100ms
-- **Discovery 查詢**: < 500ms
-
-**資料庫查詢次數**:
-```
-Promise.all([
-  getUserDashboardStats,  // 3 次查詢（並行）
-  getUserDrafts,          // 1 次查詢
-  getUserHistory,         // 1 次查詢
-  getHeroItem,            // 1-3 次查詢（依優先級）
-  getDiscoveryArtists,    // 2 次查詢
-])
-```
-
-**總計**: 最多 10 次查詢,但透過 `Promise.all` **完全並行**,實際為 **1 個 round-trip**。
-
-### 5.3 邊界條件測試
-
-| 情境 | 測試重點 |
-|------|---------|
-| **無任何資料** | Dashboard 顯示 0,Discovery 顯示所有歌手 |
-| **只有草稿** | Hero 顯示 Resume,History 不顯示 |
-| **只有完成記錄** | Hero 顯示 Achievement 或 Top Artist |
-| **24h 邊界** | completedAt 剛好 24h 前,應不顯示 Achievement |
-| **圖片缺失** | 所有卡片應顯示 PLACEHOLDER_PIC |
-| **Discovery 為空** | 所有歌手都排名完,Discovery Section 不顯示 |
-
----
-
-## 6. 風險與注意事項
-
-### 6.1 ✅ Carousel 相容性 (已處理)
-
-**風險**: Shadcn UI Carousel 依賴 Embla Carousel,可能有版本相容性問題。
-
-**解決方案**:
-```bash
-# 使用官方安裝指令確保相容性
-npx shadcn@latest add carousel
-```
-
-### 6.2 ✅ Hero 判斷邏輯 (已處理)
-
-**風險**: 24h 判斷可能因時區問題導致誤判。
-
-**解決方案**:
-```typescript
-// 使用 Date.now() - 24 * 60 * 60 * 1000 確保正確
-completedAt: {
-  gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
-  not: null,
+  return (
+    <SidebarProvider defaultOpen={true}>
+      <ScrollIsolationWrapper>
+        <SimpleSidebar user={user} artists={loggedArtists} />
+      </ScrollIsolationWrapper>
+      <SidebarInset className="h-full overflow-hidden">
+        <AppHeader />
+        {children}
+      </SidebarInset>
+    </SidebarProvider>
+  );
 }
 ```
 
-### 6.3 ✅ Discovery 效能 (已處理)
+**修改後**:
+```tsx
+import { Suspense } from "react";  // ← 加這行
+import { getUserSession } from "../../../auth";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { SimpleSidebar } from "@/components/sidebar/SimpleSidebar";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { getRecentLoggedArtists } from "@/db/artist";
+import ScrollIsolationWrapper from "@/components/layout/ScrollIsolationWrapper";
+import SidebarSkeleton from "@/components/layout/SidebarSkeleton";  // ← 加這行
 
-**風險**: `notIn` 查詢在大資料量時可能變慢。
+type AdminLayoutProps = {
+  children: React.ReactNode;
+};
 
-**解決方案**:
-- 目前歌手數量少,無需優化
-- 未來可改用 `LEFT JOIN ... WHERE NULL` (需原生 SQL)
+export default async function MainLayout({ children }: AdminLayoutProps) {
+  return (
+    <SidebarProvider defaultOpen={true}>
+      {/* ========== 用 Suspense 包裹 Sidebar ========== */}
+      <Suspense fallback={<SidebarSkeleton />}>
+        <SidebarWithData />
+      </Suspense>
+      {/* ========== Suspense 結束 ========== */}
 
-### 6.4 ⚠️ Hero 過濾邏輯的邊界情況 (已確認無需處理)
+      <SidebarInset className="h-full overflow-hidden">
+        <AppHeader />
+        {children}
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
 
-**風險**: 若 Hero 顯示的是 Top Artist 或 Discovery,過濾邏輯不會執行,可能導致資料重複。
+/**
+ * Sidebar 資料獲取邏輯
+ *
+ * 拆分原因:
+ * - getUserSession() 不能加 use cache (依賴 headers())
+ * - 必須包在 Suspense 裡才能符合 Next.js 15 的要求
+ * - getRecentLoggedArtists() 可以快取，已加上 use cache
+ */
+async function SidebarWithData() {
+  const user = await getUserSession();  // 動態資料，不快取
+  const loggedArtists = await getRecentLoggedArtists({ userId: user.id });  // 可快取
 
-**分析**: 這是**設計預期**,因為:
-- Top Artist: 來自統計資料,不在 Drafts/History 中
-- Discovery: 來自未排名歌手,不在 Drafts/History 中
-
-**結論**: 無需處理。
-
-### 6.5 🔴 Carousel 的觸控體驗 (待測試)
-
-**風險**: 手機版 Carousel 可能與頁面捲動衝突。
-
-**解決方案**:
-- Shadcn UI Carousel 內建觸控支援
-- 若有問題,可調整 `opts={{ dragFree: true }}`
-
-### 6.6 ✅ 圓形頭像的相容性 (已確認)
-
-**風險**: `GalleryItem` 的圓形顯示邏輯可能不符合 Discovery 需求。
-
-**檢查**:
-```typescript
-// 確認 GalleryItem 的邏輯
-subTitle === "Artist" → 圓形頭像
-subTitle !== "Artist" → 方形封面
+  return (
+    <ScrollIsolationWrapper>
+      <SimpleSidebar user={user} artists={loggedArtists} />
+    </ScrollIsolationWrapper>
+  );
+}
 ```
 
-**結論**: 符合需求,無需修改。
+**關鍵變更說明**:
+1. ✅ 用 `<Suspense>` 包裹 `SidebarWithData`
+2. ✅ 提供 `<SidebarSkeleton />` 作為 fallback
+3. ✅ 把資料獲取邏輯拆到 `SidebarWithData` 函式
+4. ✅ `getUserSession()` 不快取（動態）
+5. ✅ `getRecentLoggedArtists()` 已快取（階段 2 完成）
 
-### 6.7 📝 v3.1 新增: ALBUM 結果頁面路由 (待專輯頁面完成)
-
-**狀況**: ALBUM 完成後的「查看結果」路由尚未確定。
-
-**目前方案**: 暫時導向 `/artist/${artistId}/album/${albumId}` (專輯詳情頁)
-
-**TODO**: 待專輯結果頁面完成後,更新 `HeroSection.tsx` 的 Achievement 路由邏輯。
+**檢查點 4**:
+```bash
+npm run dev  # 啟動開發伺服器
+# 檢查是否還有 "Uncached data outside Suspense" 錯誤
+```
 
 ---
 
-## 7. 檔案清單總覽
+### 階段 5: 測試驗證 (1.5 小時)
 
-### 7.1 新增檔案（共 4 個）
+**目標**: 驗證快取功能正常運作
 
-#### 資料層（2 個）
-1. `src/services/home/getHeroItem.ts` 🆕 (v3.1 修正版)
-2. `src/services/home/getDiscoveryArtists.ts` 🆕
+#### 步驟 5.1: 快取生效測試
 
-#### UI 元件（2 個）
-3. `src/features/home/components/HeroSection.tsx` 🆕 (v3.1 修正版 + 英文化)
-4. `src/features/home/components/DiscoverySection.tsx` 🆕 (英文化)
+**測試 1: 首頁統計有快取**
 
-### 7.2 修改檔案（6 個）
+1. 開啟瀏覽器，進入首頁
+2. 開啟 DevTools Console
+3. 重新整理頁面
+4. **預期結果**:
+   - 第一次載入: 看到 `[CACHE] getUserDashboardStats called for user-xxx`
+   - 第二次載入（1 小時內）: 不應看到此 log（快取命中）
 
-1. `src/types/home.ts` 🔧 (新增 `HeroItemType` 和 `DiscoveryArtistType`,修正 `type` 欄位)
-2. `src/services/home/getUserDrafts.ts` 🔧 (加入 `take: 15`)
-3. `src/services/home/getUserHistory.ts` 🔧 (改預設 `limit = 15`)
-4. `src/features/home/components/DraftsSection.tsx` 🔧 (改為 Carousel + 英文化)
-5. `src/features/home/components/HistorySection.tsx` 🔧 (改為 Carousel + 英文化)
-6. `src/app/(main)/page.tsx` 🔧 (整合 Hero 和 Discovery,實作過濾邏輯 v3.1 優化版)
+**測試 2: 歌手清單有快取**
 
-### 7.3 刪除檔案（3 個）
+1. 進入首頁
+2. 檢查 Console
+3. **預期結果**:
+   - 看到 `[CACHE] getRecentLoggedArtists called for user-xxx`
+   - 重新整理後不再看到（快取命中）
 
-1. `src/services/home/getTrendingArtists.ts` ❌ (已被 Discovery 替代)
-2. `src/features/home/components/TrendingSection.tsx` ❌ (已被 Discovery 替代)
-3. `src/constants/featured.ts` ❌ (已不需要)
+**測試 3: 草稿清單快取較短**
 
-### 7.4 安裝套件
+1. 進入首頁，檢查 Drafts Section
+2. 等待 5-10 分鐘
+3. 重新整理
+4. **預期結果**:
+   - 5-10 分鐘後重新整理，應再次看到 `[CACHE] getUserDrafts called`
+   - 說明 SHORT cache 正常運作
+
+#### 步驟 5.2: 快取失效測試
+
+**測試 4: 完成排名後統計立即更新**
+
+1. 記下當前的統計數字（已完成排名次數）
+2. 開始一個新的排名並完成
+3. 回到首頁
+4. **預期結果**:
+   - 統計數字立即更新（+1）
+   - Console 看到 `[CACHE] Invalidated ranking cache for user=xxx, artist=xxx`
+   - Console 看到 `[CACHE] getUserDashboardStats called`（快取被失效，重新查詢）
+
+**測試 5: 儲存草稿後清單立即更新**
+
+1. 建立一個新的排名草稿
+2. 進行到 50% 後儲存草稿
+3. 回到首頁 Drafts Section
+4. **預期結果**:
+   - 草稿立即出現在清單中
+   - 進度條顯示 50%
+   - Console 看到 `[CACHE] Invalidated draft cache`
+
+**測試 6: 刪除草稿後清單立即更新**
+
+1. 刪除一個草稿
+2. 回到首頁
+3. **預期結果**:
+   - 草稿立即從清單中消失
+   - Console 看到 `[CACHE] Deleted submission`
+
+**測試 7: 管理端編輯後內容立即更新**
+
+1. 進入管理端，編輯一個歌手的名稱
+2. 回到首頁或歌手頁面
+3. **預期結果**:
+   - 歌手名稱立即更新
+   - Console 看到 `[CACHE] Invalidated admin cache for artist=xxx`
+
+#### 步驟 5.3: Layout 測試
+
+**測試 8: Layout 正常渲染**
+
+1. 重新整理首頁
+2. **預期結果**:
+   - 不應看到任何 "Uncached data outside Suspense" 錯誤
+   - Sidebar 短暫顯示 Loading 狀態（SidebarSkeleton）
+   - 然後正常顯示使用者資料和歌手清單
+
+**測試 9: Sidebar Loading 狀態**
+
+1. 清除快取（DevTools > Application > Clear site data）
+2. 重新載入首頁
+3. **預期結果**:
+   - 短暫看到 SidebarSkeleton（灰色 Skeleton）
+   - 然後正常顯示 Sidebar 內容
+
+#### 步驟 5.4: 效能測試
+
+**測試 10: 首頁載入速度**
+
+1. 使用 Chrome DevTools Performance 面板
+2. 記錄首頁載入時間（第一次，無快取）
+3. 記錄首頁載入時間（第二次，有快取）
+4. **預期結果**: 第二次應該更快（提升 20%+）
+
+**檢查點 5**:
+```bash
+# 確認所有測試通過
+# 記錄測試結果
+```
+
+---
+
+### 階段 6: UI 更新（次要，1 小時）
+
+**目標**: 統一使用 shadcn 新元件
+
+#### 步驟 6.1: 安裝 shadcn 新元件
 
 ```bash
-npx shadcn@latest add carousel
+npx shadcn@latest add spinner
+npx shadcn@latest add empty
+npx shadcn@latest add field
+npx shadcn@latest add button-group
 ```
 
----
+#### 步驟 6.2: 替換現有實作
 
-## 8. 依賴關係圖
+**範例: 使用 Spinner 取代自訂 Loading**
 
-```
-src/app/(main)/page.tsx
-├── getUserSession() ← auth.ts
-├── getUserDashboardStats() ← src/services/home/
-├── getUserDrafts() ← src/services/home/ (🔧 加入 take: 15)
-├── getUserHistory() ← src/services/home/ (🔧 改預設 limit = 15)
-├── getHeroItem() ← src/services/home/ (🆕 新增 v3.1 修正版)
-│   └── getDiscoveryArtists() ← src/services/home/ (🔧 v3.1 復用)
-├── getDiscoveryArtists() ← src/services/home/ (🆕 新增)
-├── DashboardSection ← src/features/home/components/
-├── GlobalSearch ← src/features/home/components/
-├── HeroSection ← src/features/home/components/ (🆕 新增 v3.1 修正版)
-├── DraftsSection ← src/features/home/components/ (🔧 改為 Carousel)
-├── HistorySection ← src/features/home/components/ (🔧 改為 Carousel)
-└── DiscoverySection ← src/features/home/components/ (🆕 新增)
-    └── GalleryItem ← src/components/presentation/
-```
-
----
-
-## 9. PRD-001c v1.4 需求對照表
-
-| PRD 需求 | 實作狀態 | 對應檔案 | 備註 |
-|---------|---------|---------|------|
-| **Dynamic Hero Section** | ✅ 完成 (v3.1) | `HeroSection.tsx` + `getHeroItem.ts` | 24h Rule 完整實作 + 路由修正 |
-| **24h Rule (P1-P3)** | ✅ 完成 | `getHeroItem.ts` | 優先級邏輯正確 |
-| **Hero 過濾規則** | ✅ 完成 (v3.1) | `page.tsx` | 從 Carousel 剔除重複項 + 優化 |
-| **Drafts Carousel** | ✅ 完成 | `DraftsSection.tsx` | 方形封面 + 進度條 + 英文化 |
-| **History Carousel** | ✅ 完成 | `HistorySection.tsx` | 方形封面 + 完成時間 + 英文化 |
-| **Discovery Carousel** | ✅ 完成 | `DiscoverySection.tsx` | 圓形頭像 + 未排名歌手 + 英文化 |
-| **Carousel RWD 設定** | ✅ 完成 | 所有 Carousel Section | basis-1/2 md:basis-1/3 lg:basis-1/5 |
-| **資料量 10-15 筆** | ✅ 完成 | 所有查詢函式 | 統一 15 筆上限 |
-| **移除 Top Song** | ✅ 完成 | `HistorySection.tsx` | 已不顯示 Top Song |
-| **Discovery 邏輯** | ✅ 完成 | `getDiscoveryArtists.ts` | NOT IN 排除已互動歌手 |
-| **UI 文字英文化** | ✅ 完成 (v3.1) | 所有 UI 元件 | 統一使用英文 |
-| **Show More (階段二)** | ⏸️ 延後 | - | PRD 明確指定延後 |
-
----
-
-## 10. Linus 式總結
-
-### 【品味評分】🟢 好品味 (9.5/10)
-
-**v3.1 版本提升** (+0.5):
-- ✅ 修正路由邏輯,確保型別安全
-- ✅ 優化程式碼重複,復用 `getDiscoveryArtists`
-- ✅ 提升可讀性,過濾邏輯提取變數
-- ✅ 國際化,所有 UI 文字英文化
-
-**核心原則達成**:
-- ✅ **簡潔的資料結構**: Hero 的優先級邏輯用順序取代 if/else
-- ✅ **消除特殊情況**: Discovery 邏輯簡單清晰,無需複雜判斷
-- ✅ **實用主義**: 解決真實問題（Hero 引導、Discovery 收集心理、Carousel UX）
-- ✅ **零破壞性**: 不影響現有功能,向後相容
-- ✅ **DRY 原則**: 復用程式碼,減少重複
-
-**亮點**:
-1. **Hero 的設計**: 用 config 物件消除重複程式碼,可讀性極高
-2. **過濾邏輯**: 在頁面層處理,不污染資料層
-3. **Discovery 查詢**: 兩次查詢,簡單高效
-4. **程式碼復用**: P3 備用邏輯復用 `getDiscoveryArtists`
-
-**扣分點** (-0.5):
-- ALBUM 結果頁面路由待確定 (已標註 TODO)
-
-### 【關鍵洞察】
-
-1. **資料結構**: Hero 的優先級是「線性判斷」,不是「樹狀分支」,這是好品味的體現
-2. **複雜度審查**: Discovery 的邏輯本質是「集合差集」,用 SQL 的 `NOT IN` 完美解決
-3. **破壞性分析**: 所有修改都是「加法」,沒有「減法」,確保零破壞
-4. **實用性驗證**: PRD 的每一項需求都對應真實的 UX 問題,不是過度設計
-5. **型別安全**: v3.1 修正確保路由邏輯根據資料動態判斷,避免錯誤
-
----
-
-## 11. 未來優化方向
-
-### 11.1 Hero Section 視覺增強
-
-**建議**: 加入動畫效果（淡入、滑動）。
-
+**修改前**:
 ```tsx
-import { motion } from "framer-motion";
-
-<motion.div
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.5 }}
->
-  <HeroSection hero={hero} />
-</motion.div>
+// 自訂 Loading
+<div className="flex items-center justify-center">
+  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+</div>
 ```
 
-### 11.2 Discovery 隨機排序
+**修改後**:
+```tsx
+import { Spinner } from "@/components/ui/spinner";
 
-**當前**: 按資料庫預設順序。
-**建議**: 每次訪問顯示不同的歌手。
+<Spinner />
+```
 
+**範例: 使用 Empty 取代自訂空狀態**
+
+**修改前**:
+```tsx
+{items.length === 0 && (
+  <div className="text-center text-muted-foreground">
+    <p>No items found</p>
+  </div>
+)}
+```
+
+**修改後**:
+```tsx
+import { Empty } from "@/components/ui/empty";
+
+{items.length === 0 && (
+  <Empty
+    title="No items found"
+    description="Start by creating your first item"
+  />
+)}
+```
+
+**注意**: 這個階段是次要的，可以在主要功能穩定後再進行。
+
+---
+
+## 六、Server Actions 快取失效策略
+
+### 6.1 completeSubmission 詳細流程
+
+**最複雜的快取失效操作**
+
+```
+completeSubmission 執行流程:
+├─ 1. 更新 RankingSubmission (status → COMPLETED)
+├─ 2. 建立 TrackRanking / AlbumRanking 記錄
+├─ 3. 更新 TrackStat / AlbumStat 統計
+├─ 4. ⚠️ 快取失效 (8+ tags)
+│    ├─ dashboard-stats-{userId}      ← getUserDashboardStats
+│    ├─ history-{userId}              ← getUserHistory
+│    ├─ hero-{userId}                 ← getHeroItem
+│    ├─ track-stats-{userId}-{artistId}  ← getTracksStats
+│    ├─ album-stats-{userId}-{artistId}  ← getAlbumsStats
+│    ├─ ranking-submissions-{userId}-{artistId}
+│    ├─ logged-artists-{userId}       ← getLoggedArtists
+│    └─ recent-artists-{userId}       ← getRecentLoggedArtists
+└─ 5. Revalidate Path: /artist/{artistId}
+```
+
+**使用集中函式**:
 ```typescript
-// 在 getHeroItem.ts 的 P3 備用邏輯中
-if (discoveryArtists.length > 0) {
-  // 真正的隨機選擇
-  const randomIndex = Math.floor(Math.random() * discoveryArtists.length);
-  const discoveryArtist = discoveryArtists[randomIndex];
+await invalidateRankingCache(userId, artistId);
+```
+
+### 6.2 草稿操作快取失效
+
+```
+createSubmission / saveDraft / finalizeDraft / deleteSubmission:
+├─ drafts-{userId}                    ← getUserDrafts
+├─ hero-{userId}                      ← getHeroItem
+├─ incomplete-submission-{userId}-{artistId}
+└─ discovery-{userId} (僅 createSubmission)
+```
+
+**使用集中函式**:
+```typescript
+await invalidateDraftCache(userId, artistId);
+```
+
+### 6.3 管理端操作快取失效
+
+```
+addArtist / updateArtist / deleteArtist:
+├─ admin-data (全域)
+├─ artist-{artistId}
+├─ albums-{artistId}
+└─ tracks-{artistId}
+
+addAlbum / updateAlbum / deleteAlbum:
+├─ admin-data (全域)
+├─ album-{albumId}
+└─ tracks-album-{albumId}
+
+addSingle / updateTrack / deleteTrack:
+├─ admin-data (全域)
+└─ track-{trackId}
+```
+
+**使用集中函式**:
+```typescript
+await invalidateAdminCache('artist', artistId);
+await invalidateAdminCache('album', albumId);
+await invalidateAdminCache('track', trackId);
+```
+
+### 6.4 設定操作快取失效
+
+```
+saveRankingSettings:
+├─ user-preference-{userId}
+└─ ✅ getTracksHistory 會自動失效 (因為它掛了 USER_PREFERENCE tag)
+
+saveProfileSettings:
+├─ user-{userId}
+└─ Revalidate Path: /settings/profile
+```
+
+---
+
+## 七、Layout 重構方案
+
+### 7.1 問題分析
+
+**原本的 Layout**:
+```tsx
+export default async function MainLayout({ children }) {
+  const user = await getUserSession();  // ← 問題：呼叫 headers()
+  const loggedArtists = await getRecentLoggedArtists({ userId: user.id });
   // ...
 }
 ```
 
-### 11.3 Carousel 的無限捲動
+**為什麼會報錯？**
 
-**當前**: `loop: false`（不循環）。
-**建議**: 資料量少時啟用循環。
+1. Next.js 15 要求所有動態資料操作必須：
+   - 加上 `use cache` OR
+   - 包在 `<Suspense>` 裡
 
-```tsx
-<Carousel opts={{
-  align: "start",
-  loop: items.length > 5  // 超過 5 筆才循環
-}}>
+2. `getUserSession()` 不能加 `use cache`：
+   - 內部呼叫 `auth()`
+   - `auth()` 讀取 `headers()`
+   - `headers()` 是動態資料來源
+
+3. 因此必須用 `<Suspense>` 包裹
+
+### 7.2 解決方案
+
+**架構調整**:
+
+```
+MainLayout
+├─ SidebarProvider
+│  ├─ <Suspense fallback={<SidebarSkeleton />}>
+│  │  └─ SidebarWithData (async)
+│  │     ├─ getUserSession() ← 動態，不快取
+│  │     └─ getRecentLoggedArtists() ← 可快取
+│  └─ SidebarInset
+│     ├─ AppHeader
+│     └─ {children}
 ```
 
-### 11.4 ALBUM 結果頁面路由
+**關鍵點**:
+1. ✅ 把資料獲取邏輯拆到 `SidebarWithData`
+2. ✅ 用 `<Suspense>` 包裹 `SidebarWithData`
+3. ✅ 提供 `<SidebarSkeleton />` 作為 Loading 狀態
+4. ✅ `getRecentLoggedArtists()` 已加 `use cache`（階段 2）
 
-**當前**: TODO 待專輯頁面完成。
-**建議**: 完成後更新 `HeroSection.tsx` 的 Achievement 路由邏輯。
+### 7.3 Suspense 的好處
 
----
+**使用者體驗提升**:
+- 首頁主要內容立即渲染
+- Sidebar 串流渲染（顯示 Loading）
+- 整體載入時間感覺更快
 
-## 12. 檢查清單總覽
-
-### 開發前
-
-- [x] 安裝 Carousel 元件 (`npx shadcn@latest add carousel`)
-- [x] 確認目錄結構存在
-- [ ] 閱讀完整計劃 (v3.1)
-
-### 開發中
-
-- [ ] 實作 2 個新資料查詢（Hero、Discovery）v3.1 修正版
-- [ ] 實作 2 個新 UI 元件（HeroSection v3.1、DiscoverySection）
-- [ ] 重構 2 個現有 UI 元件（DraftsSection、HistorySection）英文化
-- [ ] 修改 3 個資料查詢（getUserDrafts、getUserHistory、型別定義）
-- [ ] 整合頁面（page.tsx）v3.1 優化版
-- [ ] 每階段執行 `npx tsc --noEmit` 和 `pnpm lint`
-
-### 開發後
-
-- [ ] 手動測試所有功能（參考測試矩陣 + v3.1 新增項目）
-- [ ] 測試響應式佈局（手機/平板/桌面）
-- [ ] 執行 `pnpm prettier`
-- [ ] 建立 `docs/COMMIT.md`
-- [ ] 通知使用者 commit
+**技術優勢**:
+- 符合 Next.js 15 的 PPR 要求
+- 允許部分快取、部分動態
+- 避免整個頁面阻塞
 
 ---
 
-## 結語
+## 八、測試計劃
 
-本計劃遵循 **Linus Torvalds 的「好品味」原則**:
+### 8.1 功能測試矩陣
 
-✅ **簡潔的資料結構** - Hero 優先級用順序判斷,Discovery 用集合差集
-✅ **消除特殊情況** - 用 config 物件取代重複的 if/else
-✅ **實用主義** - 解決 PRD 定義的真實 UX 問題
-✅ **零破壞性** - 所有修改都是「加法」,不影響現有功能
-✅ **DRY 原則** - 復用程式碼,減少重複
+| 測試項目 | 測試步驟 | 預期結果 | 優先級 |
+|---------|---------|---------|--------|
+| **快取生效** | 重新整理首頁 2 次 | 第 2 次不應再次查詢 DB | P0 |
+| **統計更新** | 完成排名後回首頁 | 統計數字立即 +1 | P0 |
+| **草稿更新** | 儲存草稿後回首頁 | 草稿立即出現在清單 | P0 |
+| **草稿刪除** | 刪除草稿後回首頁 | 草稿立即消失 | P0 |
+| **管理端編輯** | 編輯歌手名稱後檢查 | 名稱立即更新 | P1 |
+| **Layout 渲染** | 重新整理首頁 | 無 Suspense 錯誤 | P0 |
+| **Loading 狀態** | 清除快取後載入 | 短暫顯示 Skeleton | P1 |
+| **快取時間** | LONG cache 測試 | 1 小時內不重複查詢 | P1 |
+| **快取時間** | SHORT cache 測試 | 5-10 分鐘後重新查詢 | P1 |
+| **效能提升** | Performance 測試 | 載入速度提升 20%+ | P2 |
 
-**核心理念**: 用最少的程式碼,解決真實的問題。
+### 8.2 測試工具
+
+**Console Log 監控**:
+```typescript
+// 在每個 use cache 函式加上
+console.log('[CACHE] functionName called for', params);
+```
+
+**Chrome DevTools**:
+- Network 面板 - 監控請求數量
+- Performance 面板 - 測量載入時間
+- Console 面板 - 查看快取 log
+
+### 8.3 測試腳本
+
+```bash
+# 測試流程腳本
+npm run dev
+
+# 1. 開啟瀏覽器 http://localhost:3000
+# 2. 開啟 DevTools Console
+# 3. 執行測試矩陣中的每個測試
+# 4. 記錄結果
+```
 
 ---
 
-**文件版本**: 3.1 (PRD-001c v1.4 完整實作版 - Code Review 修正版)
-**最後更新**: 2024-12-02
+## 九、風險與對策
+
+### 9.1 關鍵風險清單
+
+#### 風險 1: completeSubmission 的級聯影響 ⚠️ 最高風險
+
+**風險描述**:
+- 完成排名會觸發 8+ 個 cache tags 失效
+- 如果漏掉任何一個，使用者會看到舊資料
+- 測試成本高（需要完整走完排名流程）
+
+**影響範圍**:
+- 首頁統計數字
+- 歷史記錄
+- Hero 顯示
+- 曲目/專輯統計
+- 歌手清單
+
+**對策**:
+1. ✅ 建立 `invalidateRankingCache()` 集中管理
+2. ✅ 詳細的測試清單（見測試計劃）
+3. ✅ Console log 監控所有失效操作
+4. ⚠️ 考慮建立 E2E 測試（未來）
+
+#### 風險 2: Race Condition (草稿衝突) ⚠️ 中風險
+
+**風險描述**:
+- 使用者在儲存草稿時，可能同時收到快取的舊資料
+- 例如：saveDraft 完成，但 getUserDrafts 還在回傳舊快取
+
+**影響範圍**:
+- 草稿清單
+- 未完成提交
+- Hero 顯示
+
+**對策**:
+1. ✅ 使用 SHORT cache（幾分鐘）
+2. ✅ 在 saveDraft 時立即 revalidate
+3. ⚠️ 如果還有問題，考慮用 optimistic update（未來）
+
+#### 風險 3: UserPreference 隱蔽影響 ⚠️ 已解決 ✅
+
+**風險描述**:
+- `saveRankingSettings` 只更新 UserPreference
+- 但會影響 `getTracksHistory` 的過濾邏輯
+- 可能導致使用者改設定後看到不一致的結果
+
+**影響範圍**:
+- 曲目歷史記錄
+- 排名結果顯示
+
+**對策** (已實作):
+1. ✅ 在 `getTracksHistory` 掛兩個 tags:
+   - `TRACK_HISTORY(userId, submissionId)` (細粒度)
+   - `USER_PREFERENCE(userId)` (依賴)
+2. ✅ 當 `saveRankingSettings` 失效 `USER_PREFERENCE(userId)` 時
+3. ✅ 所有掛了這個 tag 的查詢會自動失效
+4. ✅ 使用者立即看到新的顯示方式
+
+**無需 wildcard 支援**,用多 tag 解決。
+
+#### 風險 4: 開發環境快取干擾 ⚠️ 低風險
+
+**風險描述**:
+- 開發時快取可能導致改 code 後看不到效果
+- 需要不斷手動清除快取
+
+**影響範圍**:
+- 開發體驗
+
+**對策**:
+1. ✅ 在 `next.config.ts` 設定開發環境快取時間
+2. ✅ 提供清除快取的指令
+3. ✅ 在 README 加上說明
+
+```typescript
+// next.config.ts
+const nextConfig = {
+  experimental: {
+    staleTimes: {
+      dynamic: 0,  // 開發時關閉快取
+      static: 180,
+    },
+  },
+};
+```
+
+#### 風險 5: Cache Tag 命名衝突 ⚠️ 低風險
+
+**風險描述**:
+- 如果 tag 命名不一致，可能導致失效失敗
+- 例如：`artist-123` vs `artist_123`
+
+**影響範圍**:
+- 所有快取失效操作
+
+**對策**:
+1. ✅ 使用 `CACHE_TAGS` 函式統一命名
+2. ✅ TypeScript 型別檢查
+3. ✅ 避免手寫 tag 字串
+
+### 9.2 降級方案
+
+**如果快取出現重大問題，降級方案**:
+
+1. **緊急關閉快取**:
+```typescript
+// 在 next.config.ts 暫時關閉
+experimental: {
+  staleTimes: {
+    dynamic: 0,
+    static: 0,
+  },
+}
+```
+
+2. **回滾到 React cache()**:
+```typescript
+// 暫時移除 'use cache'，用回 React cache()
+import { cache } from "react";
+export const getUserDashboardStats = cache(async ({ userId }) => {
+  // ...
+});
+```
+
+3. **手動失效所有快取**:
+```typescript
+// 在 Server Action 加上
+revalidatePath('/', 'layout');  // 失效整個 layout
+```
+
+---
+
+## 十、檔案清單
+
+### 10.1 新建檔案 (4 個)
+
+```
+src/
+├── constants/
+│   ├── cache.ts                           # 快取時間常數
+│   └── cache-tags.ts                      # Cache Tag 命名函式
+├── lib/
+│   └── cache-invalidation.ts              # 集中的快取失效邏輯
+└── components/
+    └── layout/
+        └── SidebarSkeleton.tsx            # Sidebar Loading 狀態
+```
+
+### 10.2 修改檔案 (30+ 個)
+
+#### A. 首頁服務層 (5 個)
+```
+src/services/home/
+├── getUserDashboardStats.ts  # ✅ 已完成
+├── getUserHistory.ts          # 加 use cache (LONG)
+├── getUserDrafts.ts           # 加 use cache (SHORT)
+├── getHeroItem.ts             # 加 use cache (SHORT)
+└── getDiscoveryArtists.ts     # 加 use cache (LONG)
+```
+
+#### B. 資料庫查詢層 (15 個)
+```
+src/db/
+├── artist.ts                  # 3 個函式 (LONG)
+├── album.ts                   # 2 個函式 (LONG)
+├── track.ts                   # 5 個函式 (LONG)
+├── ranking.ts                 # 3 個函式 (SHORT/LONG)
+└── user.ts                    # 1 個函式 (LONG)
+```
+
+#### C. 統計服務層 (4 個)
+```
+src/services/
+├── track/
+│   ├── getTracksStats.ts      # 加 use cache (LONG)
+│   └── getTracksHistory.ts    # 加 use cache (LONG)
+└── album/
+    ├── getAlbumsStats.ts      # 加 use cache (LONG)
+    └── getAlbumsHistory.ts    # 加 use cache (LONG)
+```
+
+#### D. Server Actions (15 個)
+```
+src/features/
+├── sorter/actions/
+│   ├── completeSubmission.ts  # 加 invalidateRankingCache
+│   ├── createSubmission.ts    # 加 invalidateDraftCache
+│   ├── saveDraft.ts           # 加 revalidateTag
+│   ├── finalizeDraft.ts       # 加 invalidateDraftCache
+│   └── deleteSubmission.ts    # 加 invalidateDraftCache
+├── admin/
+│   ├── addContent/actions/
+│   │   ├── addArtist.ts       # 加 invalidateAdminCache
+│   │   ├── addAlbum.ts        # 加 invalidateAdminCache
+│   │   └── addSingle.ts       # 加 invalidateAdminCache
+│   ├── editContent/actions/
+│   │   ├── updateArtist.ts    # 加 invalidateAdminCache
+│   │   ├── updateAlbum.ts     # 加 invalidateAdminCache
+│   │   ├── updateInfo.ts      # 加 invalidateAdminCache
+│   │   └── deleteItem.ts      # 加 invalidateAdminCache
+│   └── user/actions/
+│       └── updateUser.ts      # 加 revalidatePath
+└── settings/actions/
+    ├── saveProfileSettings.ts # 加 revalidatePath
+    └── saveRankingSettings.ts # 加 revalidateTag
+```
+
+#### E. Layout (1 個)
+```
+src/app/(main)/
+└── layout.tsx                 # 加 Suspense + SidebarWithData
+```
+
+### 10.3 檔案修改統計
+
+```
+總計:
+- 新建: 4 個檔案
+- 修改: 30+ 個檔案
+- 預估工作量: 7 小時
+
+分階段:
+- 階段 1 (基礎): 3 個新檔案
+- 階段 2 (資料層): 24 個檔案
+- 階段 3 (Actions): 15 個檔案
+- 階段 4 (Layout): 2 個檔案
+```
+
+---
+
+## 十一、Linus 式總結
+
+### 【品味評分】🟢 好品味 (9/10)
+
+**核心原則達成**:
+
+1. ✅ **簡潔的資料結構**
+   - LONG/SHORT 兩層，不過度設計
+   - CACHE_TAGS 函式化，避免 magic string
+
+2. ✅ **消除特殊情況**
+   - 用 `invalidateRankingCache()` 封裝複雜邏輯
+   - 所有查詢函式統一模式
+
+3. ✅ **實用主義**
+   - 解決真實問題（Suspense 錯誤 + 效能）
+   - 不追求完美，先求可用
+
+4. ✅ **零破壞性**
+   - 只加快取，不改現有邏輯
+   - 降級方案清楚
+
+5. ✅ **集中管理**
+   - cache.ts, cache-tags.ts, cache-invalidation.ts
+   - 易於維護和調整
+
+**扣分點** (-1):
+- 需要在多個函式手動掛兩個 tags (但這是可接受的 trade-off)
+
+### 【關鍵洞察】
+
+1. **資料結構**:
+   - Session 是動態的，不能快取 → 必須用 Suspense
+   - 其他資料是半靜態的，可以快取 → 用 LONG/SHORT
+
+2. **複雜度審查**:
+   - `completeSubmission` 是最複雜的，影響 8+ 個查詢
+   - 解法：封裝成 `invalidateRankingCache()`，一次呼叫全失效
+
+3. **破壞性分析**:
+   - 所有修改都是「加法」（加 use cache, 加 revalidateTag）
+   - 沒有「減法」（不刪現有邏輯）
+   - 確保零破壞
+
+4. **實用性驗證**:
+   - 解決 Next.js 15 強制要求的 Suspense 問題（真實痛點）
+   - 提升效能（真實需求）
+   - 降級方案清楚（風險可控）
+
+### 【最大挑戰】
+
+**`completeSubmission` 的級聯影響**
+
+這是整個計畫最複雜的部分：
+- 一次操作影響 8+ 個查詢函式
+- 如果漏掉任何一個，使用者會看到舊資料
+- 測試成本高
+
+**Linus 的解法**:
+- 把複雜度「封裝」起來
+- 用 `invalidateRankingCache()` 集中管理
+- 一次呼叫，全部失效
+- 簡單、清晰、不會出錯
+
+### 【成功標準】
+
+**必須達成** (否則計畫失敗):
+- ✅ "Uncached data outside Suspense" 錯誤消失
+- ✅ 完成排名後統計立即更新
+- ✅ Layout 正常渲染
+
+**期望達成** (計畫成功):
+- 🎯 首頁載入速度提升 20%+
+- 🎯 資料庫查詢次數減少 50%+
+
+**加分項** (錦上添花):
+- 🌟 UI 元件統一使用 shadcn 新版
+- 🌟 建立快取監控儀表板
+
+---
+
+## 附錄 A: 快速參考
+
+### A.1 常用指令
+
+```bash
+# 開發
+npm run dev
+
+# 檢查
+npx tsc --noEmit
+pnpm lint
+
+# 清除快取（開發時）
+rm -rf .next
+
+# Prisma 相關
+npx prisma generate
+npx prisma migrate dev
+```
+
+### A.2 快取除錯技巧
+
+**檢查快取是否生效**:
+```typescript
+console.log('[CACHE] functionName called for', params);
+```
+
+**手動失效快取**:
+```typescript
+import { revalidateTag } from 'next/cache';
+revalidateTag('tag-name');
+```
+
+**關閉快取（開發時）**:
+```typescript
+// next.config.ts
+staleTimes: { dynamic: 0, static: 0 }
+```
+
+### A.3 關鍵檔案路徑
+
+```
+快取相關:
+- src/constants/cache.ts
+- src/constants/cache-tags.ts
+- src/lib/cache-invalidation.ts
+
+Layout:
+- src/app/(main)/layout.tsx
+- src/components/layout/SidebarSkeleton.tsx
+
+首頁服務:
+- src/services/home/getUserDashboardStats.ts (✅ 已完成)
+- src/services/home/getUserHistory.ts
+- src/services/home/getUserDrafts.ts
+- src/services/home/getHeroItem.ts
+- src/services/home/getDiscoveryArtists.ts
+
+關鍵 Action:
+- src/features/sorter/actions/completeSubmission.ts
+```
+
+---
+
+**計畫版本**: 1.1
+**最後更新**: 2025-12-10
 **作者**: Claude (Linus Mode)
-**基於**: PRD-001c v1.4 + 使用者決策確認 + Code Review 修正
-**變更記錄**:
-- v3.0: 初始完整計劃
-- v3.1: Code Review 修正 + 英文化 + 優化程式碼
+**狀態**: 已更新 (根據討論優化)
+
+**更新內容 (v1.1)**:
+1. ✅ 澄清快取是全域的,必須在 tag 裡包含 userId
+2. ✅ 確認只用細粒度 tag,不混合粗細粒度
+3. ✅ 解決 UserPreference 隱蔽影響問題 (用多 tag 方案)
+4. ✅ 補充 `src/db/ranking.ts` 完整範例 (SHORT/LONG 混用)
+5. ✅ 補充 `getTracksHistory` 需掛兩個 tags 的說明
+6. ✅ 刪除 Prisma Log 測試 (改用 console.log 即可)
+7. ✅ 確認使用 `revalidateTag` 而非 `unstable_updateTag`
+
+**下一步**: 退出 Plan Mode,開始執行階段 1
