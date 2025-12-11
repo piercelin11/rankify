@@ -8,9 +8,9 @@ import { redirect } from "next/navigation";
 import { AppResponseType } from "@/types/response";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import getTracksByArtist from "@/lib/database/data/getTracksByArtist";
-import { revalidateTag } from "next/cache";
 import { ADMIN_MESSAGES } from "@/constants/messages";
 import { requireAdmin } from "@/../auth";
+import { invalidateAdminCache } from "@/lib/cacheInvalidation";
 
 type AddArtistProps = {
 	artistId: string;
@@ -127,7 +127,7 @@ export default async function addArtist({
 			}
 		});
 
-		revalidateTag("admin-data");
+		await invalidateAdminCache('artist', artistId);
 		redirect(`/admin/artist/${artistId}`);
 	} catch (error) {
 		console.error("addArtist error:", error);

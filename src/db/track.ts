@@ -1,7 +1,16 @@
+"use cache";
+
+import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db/client";
 import { $Enums } from "@prisma/client";
+import { CACHE_TIMES } from "@/constants/cache";
+import { CACHE_TAGS } from "@/constants/cacheTags";
 
 export async function getTrackForTrackPage({ trackId }: { trackId: string }) {
+	cacheLife(CACHE_TIMES.LONG);
+	cacheTag(CACHE_TAGS.TRACK(trackId));
+
+
 	const track = await db.track.findFirst({
 		where: {
 			id: trackId,
@@ -24,6 +33,11 @@ export async function getTracksRankings({
 	trackIds: string[];
 	type?: $Enums.SubmissionType;
 }) {
+	cacheLife(CACHE_TIMES.LONG);
+	// 這個函式查詢多個 tracks，但主要依賴 userId，所以用 RANKING_SUBMISSIONS
+	trackIds.forEach(trackId => cacheTag(CACHE_TAGS.TRACK(trackId)));
+
+
 	const tracks = await db.track.findMany({
 		where: {
 			id: {
@@ -77,6 +91,10 @@ export async function getTrackRanking({
 	trackId: string;
 	type?: $Enums.SubmissionType;
 }) {
+	cacheLife(CACHE_TIMES.LONG);
+	cacheTag(CACHE_TAGS.TRACK(trackId));
+
+
 	const track = await db.track.findUnique({
 		where: {
 			id: trackId,
@@ -123,6 +141,9 @@ export async function getTrackComparisonOptions({
 	userId: string;
 	artistId: string;
 }) {
+	cacheLife(CACHE_TIMES.LONG);
+	cacheTag(CACHE_TAGS.ARTIST(artistId));
+
 	// 獲取該藝人的所有專輯（有排名資料的）
 	const albums = await db.album.findMany({
 		where: {
@@ -176,6 +197,10 @@ export async function getTrackComparisonOptions({
 }
 
 export async function getSinglesByArtistId({ artistId }: { artistId: string }) {
+	cacheLife(CACHE_TIMES.LONG);
+	cacheTag(CACHE_TAGS.ARTIST(artistId));
+
+
 	const tracks = await db.track.findMany({
 		where: {
 			artistId,
@@ -195,6 +220,10 @@ export default async function getTracksByArtistId({
 }: {
 	artistId: string;
 }) {
+	cacheLife(CACHE_TIMES.LONG);
+	cacheTag(CACHE_TAGS.ARTIST(artistId));
+
+
 	const tracks = await db.track.findMany({
 		where: {
 			artistId,
@@ -209,6 +238,10 @@ export default async function getTracksByArtistId({
 }
 
 export async function getTracksByAlbumId({ albumId }: { albumId: string }) {
+	cacheLife(CACHE_TIMES.LONG);
+	cacheTag(CACHE_TAGS.ALBUM(albumId));
+
+
 	const tracks = await db.track.findMany({
 		where: { albumId },
 		include: {
@@ -228,6 +261,11 @@ export async function getTracksByAlbumAndTrackIds({
 	selectedAlbumIds: string[];
 	selectedTrackIds: string[];
 }) {
+	cacheLife(CACHE_TIMES.LONG);
+	// 這個函式被 sorter 使用，但查詢的是靜態的 track 資料，所以用 LONG
+	selectedAlbumIds.forEach(albumId => cacheTag(CACHE_TAGS.ALBUM(albumId)));
+	selectedTrackIds.forEach(trackId => cacheTag(CACHE_TAGS.TRACK(trackId)));
+
 	const tracks = await db.track.findMany({
 		where: {
 			OR: [

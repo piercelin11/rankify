@@ -4,7 +4,8 @@ import { ADMIN_MESSAGES } from "@/constants/messages";
 import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
 import { updateAlbumSchema, UpdateAlbumType } from "@/lib/schemas/admin";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { invalidateAdminCache } from "@/lib/cacheInvalidation";
 import { requireAdmin } from "@/../auth";
 
 type UpdateAlbumProps = {
@@ -73,7 +74,7 @@ export default async function updateAlbum({
 		}
 
 		revalidatePath(`/admin/album/${albumId}`);
-		revalidateTag("admin-data");
+		await invalidateAdminCache('album', albumId);
 		return { type: "success", message: ADMIN_MESSAGES.ALBUM.UPDATE.SUCCESS };
 	} catch (error) {
 		console.error("updateAlbum error:", error);

@@ -7,7 +7,8 @@ import { db } from "@/db/client";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
 import { AppResponseType } from "@/types/response";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { invalidateAdminCache } from "@/lib/cacheInvalidation";
 import { requireAdmin } from "@/../auth";
 
 type AddAlbumProps = {
@@ -105,7 +106,7 @@ export default async function addAlbum({
 			}
 		});
 
-		revalidateTag("admin-data");
+		await invalidateAdminCache('album', artistId);
 		revalidatePath(`/admin/artist/${artistId}`);
 		return { type: "success", message: ADMIN_MESSAGES.ALBUM.ADD.SUCCESS };
 	} catch (error) {

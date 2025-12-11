@@ -1,6 +1,10 @@
-import { cache } from "react";
+"use cache";
+
+import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db/client";
 import { TrackStatsType } from "@/types/track";
+import { CACHE_TIMES } from "@/constants/cache";
+import { CACHE_TAGS } from "@/constants/cacheTags";
 
 type getTracksStatsProps = {
 	artistId: string;
@@ -34,12 +38,16 @@ async function getPercentileCounts(trackIds: string[]) {
 	);
 }
 
-const getTracksStats = cache(
-	async ({
-		artistId,
-		userId,
-	}: getTracksStatsProps): Promise<TrackStatsType[]> => {
-		const trackStats = await db.trackStat.findMany({
+export default async function getTracksStats({
+	artistId,
+	userId,
+}: getTracksStatsProps): Promise<TrackStatsType[]> {
+
+	cacheLife(CACHE_TIMES.LONG);
+	cacheTag(CACHE_TAGS.RANKING(userId, artistId));
+
+
+	const trackStats = await db.trackStat.findMany({
 			where: {
 				artistId,
 				userId,
@@ -130,8 +138,5 @@ const getTracksStats = cache(
 			};
 		});
 
-		return result;
-	}
-);
-
-export default getTracksStats;
+	return result;
+}

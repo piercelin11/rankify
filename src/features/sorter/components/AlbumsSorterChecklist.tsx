@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Plus, PlusIcon } from "lucide-react";
 import type { Album } from "@prisma/client";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/useMobile";
 import { PLACEHOLDER_PIC } from "@/constants";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";

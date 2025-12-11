@@ -4,7 +4,8 @@ import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
 import { AlbumData, TrackData } from "@/types/data";
 import { updateTrackSchema, UpdateTrackType } from "@/lib/schemas/admin";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { invalidateAdminCache } from "@/lib/cacheInvalidation";
 import { ADMIN_MESSAGES } from "@/constants/messages";
 import { requireAdmin } from "@/../auth";
 
@@ -96,7 +97,7 @@ export default async function updateTrack({
 
 		if (isSuccess) {
 			revalidatePath("/admin");
-			revalidateTag("admin-data");
+			await invalidateAdminCache('track', originalData.id);
 			// 重新驗證藝術家頁面，以確保單曲列表更新
 			revalidatePath(`/admin/artist/${originalData.artistId}`);
 			// 如果原本有專輯，也要重新驗證專輯頁面

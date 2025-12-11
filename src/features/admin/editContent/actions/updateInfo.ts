@@ -5,7 +5,8 @@ import { db } from "@/db/client";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchArtist from "@/lib/spotify/fetchArtist";
 import { AppResponseType } from "@/types/response";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { invalidateAdminCache } from "@/lib/cacheInvalidation";
 import { requireAdmin } from "@/../auth";
 
 type UpdateInfoProps = {
@@ -83,7 +84,7 @@ export default async function updateInfo({
 
 		if (success) {
 			revalidatePath(`/admin/${type}/${id}`);
-			revalidateTag("admin-data");
+			await invalidateAdminCache(type, id);
 		}
 		return {
 			type: "success",

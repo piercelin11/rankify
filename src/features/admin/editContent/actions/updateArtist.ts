@@ -4,7 +4,8 @@ import { ADMIN_MESSAGES } from "@/constants/messages";
 import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
 import { updateArtistSchema, UpdateArtistType } from "@/lib/schemas/admin";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { invalidateAdminCache } from "@/lib/cacheInvalidation";
 import { requireAdmin } from "@/../auth";
 
 type UpdateArtistProps = {
@@ -61,7 +62,7 @@ export default async function updateArtist({
 		}
 
 		if (isSuccess) {
-			revalidateTag("admin-data");
+			await invalidateAdminCache('artist', artistId);
 			revalidatePath(`/admin/artist/${artistId}`);
 		}
 		return { type: "success", message: ADMIN_MESSAGES.ARTIST.UPDATE.SUCCESS };
