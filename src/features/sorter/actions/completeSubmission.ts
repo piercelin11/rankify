@@ -1,13 +1,14 @@
-"use server";
+'use server';
 
-import { db } from "@/db/client";
-import { Prisma } from "@prisma/client";
-import { RankingResultData } from "../types";
-import { getUserSession } from "@/../auth";
-import { revalidatePath } from "next/cache";
-import { calculateAlbumPoints } from "@/features/ranking/utils/calculateAlbumPoints";
-import { updateAlbumStats } from "@/services/album/updateAlbumStats";
-import { updateTrackStats } from "@/services/track/updateTrackStats";
+import { db } from '@/db/client';
+import { Prisma } from '@prisma/client';
+import { RankingResultData } from '../types';
+import { getUserSession } from '@/../auth';
+import { revalidatePath } from 'next/cache';
+import { calculateAlbumPoints } from '@/features/ranking/utils/calculateAlbumPoints';
+import { updateAlbumStats } from '@/services/album/updateAlbumStats';
+import { updateTrackStats } from '@/services/track/updateTrackStats';
+import { invalidateRankingCache } from '@/lib/cacheInvalidation';
 
 type CompleteSubmissionProps = {
 	trackRankings: RankingResultData[];
@@ -127,13 +128,32 @@ export default async function completeSubmission({
 
 				// 更新 AlbumStats（基於 TrackStats）
 				await updateAlbumStats(tx, userId, existingSubmission.artistId);
-			}
-		});
+      }
+    });
 
-		revalidatePath(`/artist/${trackRankings[0].artistId}`);
-		return { type: "success", message: "Submission completed" };
-	} catch (error) {
-		console.error("completeSubmission error:", error);
-		return { type: "error", message: "Failed to complete submission" };
-	}
+    // ========== 快取失效 ==========
+    // 取得 submission 的 artistId
+    const submission = await db.rankingSubmission.findUnique({
+      where: { id: submissionId },
+      select: { artistId: true },
+    });
+
+    if (submission) {
+      // 失效所有相關的快取
+      await invalidateRankingCache(userId, submission.artistId);
+
+      // 重新驗證歌手頁面
+      revalidatePath(`/artist/${submission.artistId}`);
+
+      console.log(
+        `[CACHE] Completed submission for user=${userId}, artist=${submission.artistId}`
+      );
+    }
+    // ========== 快取失效結束 ==========
+
+    return { type: 'success', message: 'Submission completed' };
+  } catch (error) {
+    console.error('completeSubmission error:', error);
+    return { type: 'error', message: 'Failed to complete submission' };
+  }
 }

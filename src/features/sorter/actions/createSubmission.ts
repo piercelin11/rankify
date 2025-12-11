@@ -1,13 +1,14 @@
-"use server";
+'use server';
 
-import { db } from "@/db/client";
-import { $Enums, SubmissionStatus, SubmissionType } from "@prisma/client";
-import { getUserSession } from "@/../auth";
-import { getTracksByAlbumAndTrackIds } from "@/db/track";
-import { sorterFilterSchema, sorterStateSchema } from "@/lib/schemas/sorter";
-import initializeSorterState from "../utils/initializeSorterState";
-import { AppResponseType } from "@/types/response";
-import { RankingSubmissionData } from "@/types/data";
+import { db } from '@/db/client';
+import { $Enums, SubmissionStatus, SubmissionType } from '@prisma/client';
+import { getUserSession } from '@/../auth';
+import { getTracksByAlbumAndTrackIds } from '@/db/track';
+import { sorterFilterSchema, sorterStateSchema } from '@/lib/schemas/sorter';
+import initializeSorterState from '../utils/initializeSorterState';
+import { AppResponseType } from '@/types/response';
+import { RankingSubmissionData } from '@/types/data';
+import { invalidateDraftCache } from '@/lib/cacheInvalidation';
 
 type CreateSubmissionProps = {
 	selectedAlbumIds: string[];
@@ -93,27 +94,33 @@ export async function createSubmission({
 			};
 		}
 
-		// 創建新的 submission
-		const newSubmission = await db.rankingSubmission.create({
-			data: {
-				userId,
-				artistId,
-				albumId: albumId || null,
-				type: type as SubmissionType,
-				status: SubmissionStatus.IN_PROGRESS,
-				draftState: validatedDraftState,
-			},
-		});
-		return {
-			data: newSubmission,
-			type: "success",
-			message: "Submission updated",
-		};
-	} catch (error) {
-		console.error("createSubmission error:", error);
-		return {
-			type: "error",
-			message: "Failed to create submission",
-		};
-	}
+    // 創建新的 submission
+    const newSubmission = await db.rankingSubmission.create({
+      data: {
+        userId,
+        artistId,
+        albumId: albumId || null,
+        type: type as SubmissionType,
+        status: SubmissionStatus.IN_PROGRESS,
+        draftState: validatedDraftState,
+      },
+    });
+
+    // ========== 快取失效 ==========
+    await invalidateDraftCache(userId, artistId);
+    // invalidateDraftCache 已包含 USER_DYNAMIC (含 Discovery)
+    // ========== 快取失效結束 ==========
+
+    return {
+      data: newSubmission,
+      type: 'success',
+      message: 'Submission updated',
+    };
+  } catch (error) {
+    console.error('createSubmission error:', error);
+    return {
+      type: 'error',
+      message: 'Failed to create submission',
+    };
+  }
 }

@@ -4,7 +4,8 @@ import { ADMIN_MESSAGES } from "@/constants/messages";
 import { db } from "@/db/client";
 import fetchTracks from "@/lib/spotify/fetchTracks";
 import { AppResponseType } from "@/types/response";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { invalidateAdminCache } from "@/lib/cacheInvalidation";
 import { requireAdmin } from "@/../auth";
 
 type AddSingleProps = {
@@ -44,7 +45,7 @@ export default async function addSingle({
 		}
 
 		revalidatePath(`/admin/artist/${artistId}`);
-		revalidateTag("admin-data");
+		await invalidateAdminCache('track', artistId);
 		return { type: "success", message: ADMIN_MESSAGES.SINGLE.ADD.SUCCESS };
 	} catch (error) {
 		console.error("addSingle error:", error);

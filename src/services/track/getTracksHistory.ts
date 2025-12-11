@@ -1,4 +1,6 @@
-import { cache } from "react";
+"use cache";
+
+import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db/client";
 import getUserPreference from "@/db/user";
 import { notFound } from "next/navigation";
@@ -7,6 +9,8 @@ import { defaultRankingSettings } from "@/features/settings/components/RankingSe
 import { AchievementType } from "@/features/ranking/stats/components/AchievementDisplay";
 import { TrackHistoryType } from "@/types/track";
 import { $Enums } from "@prisma/client";
+import { CACHE_TIMES } from "@/constants/cache";
+import { CACHE_TAGS } from "@/constants/cacheTags";
 
 type getTracksRankingHistoryOptions = {
 	includeAchievement?: boolean;
@@ -21,18 +25,22 @@ type getTracksHistoryProps = {
 	type?: $Enums.SubmissionType;
 };
 
-export const getTracksHistory = cache(
-	async ({
-		artistId,
-		userId,
-		submissionId,
-		take,
-		type = "ARTIST",
-	}: getTracksHistoryProps): Promise<TrackHistoryType[]> => {
-		const userPreference = await getUserPreference({ userId });
-		const trackQueryConditions = buildTrackQueryCondition(
-			userPreference?.rankingSettings || defaultRankingSettings
-		);
+export async function getTracksHistory({
+	artistId,
+	userId,
+	submissionId,
+	take,
+	type = "ARTIST",
+}: getTracksHistoryProps): Promise<TrackHistoryType[]> {
+	cacheLife(CACHE_TIMES.LONG);
+	cacheTag(CACHE_TAGS.RANKING(userId, artistId));
+	cacheTag(CACHE_TAGS.USER_DYNAMIC(userId)); // 雙 tag！依賴 UserPreference
+
+
+	const userPreference = await getUserPreference({ userId });
+	const trackQueryConditions = buildTrackQueryCondition(
+		userPreference?.rankingSettings || defaultRankingSettings
+	);
 
 		const rankings = await db.trackRanking.findMany({
 			where: {
@@ -145,6 +153,5 @@ export const getTracksHistory = cache(
 			};
 		});
 
-		return result;
-	}
-);
+	return result;
+}

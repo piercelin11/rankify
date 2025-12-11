@@ -1,7 +1,11 @@
-import { cache } from "react";
+"use cache";
+
+import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db/client";
 import { DateRange } from "@/types/general";
 import { AlbumStatsType } from "@/types/album";
+import { CACHE_TIMES } from "@/constants/cache";
+import { CACHE_TAGS } from "@/constants/cacheTags";
 
 type getAlbumsStatsProps = {
     artistId: string;
@@ -9,13 +13,18 @@ type getAlbumsStatsProps = {
     dateRange?: DateRange;
 };
 
-const getAlbumsStats = cache(
-    async ({
-        artistId,
-        userId,
-    }: getAlbumsStatsProps): Promise<AlbumStatsType[]> => {
-        // 直接查詢 AlbumStats（已預先計算好所有資料）
-        const albumStats = await db.albumStat.findMany({
+export default async function getAlbumsStats({
+    artistId,
+    userId,
+}: getAlbumsStatsProps): Promise<AlbumStatsType[]> {
+
+
+    cacheLife(CACHE_TIMES.LONG);
+    cacheTag(CACHE_TAGS.RANKING(userId, artistId));
+
+
+    // 直接查詢 AlbumStats（已預先計算好所有資料）
+    const albumStats = await db.albumStat.findMany({
             where: { artistId, userId },
             include: {
                 album: {
@@ -58,7 +67,4 @@ const getAlbumsStats = cache(
             top25PercentCount: stat.top25PercentCount,
             top50PercentCount: stat.top50PercentCount,
         }));
-    }
-);
-
-export default getAlbumsStats;
+}

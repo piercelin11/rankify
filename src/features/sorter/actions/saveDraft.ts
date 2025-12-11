@@ -1,8 +1,9 @@
-"use server";
+'use server';
 
-import { getUserSession } from "@/../auth";
-import { db } from "@/db/client";
-import { sorterStateSchema, SorterStateType } from "@/lib/schemas/sorter";
+import { getUserSession } from '@/../auth';
+import { db } from '@/db/client';
+import { sorterStateSchema, SorterStateType } from '@/lib/schemas/sorter';
+import { invalidateDraftCache } from '@/lib/cacheInvalidation';
 
 export default async function saveDraft(
 	draftState: SorterStateType,
@@ -21,20 +22,24 @@ export default async function saveDraft(
 		if (!existingSubmission)
 			return { type: "error", message: "Draft not found" };
 
-		const validatedDraftState = sorterStateSchema.parse(draftState);
-		await db.rankingSubmission.update({
-			where: {
-				id: existingSubmission.id,
-			},
-			data: {
-				draftState: validatedDraftState,
-				status: "IN_PROGRESS",
-			},
-		});
+    const validatedDraftState = sorterStateSchema.parse(draftState);
+    await db.rankingSubmission.update({
+      where: {
+        id: existingSubmission.id,
+      },
+      data: {
+        draftState: validatedDraftState,
+        status: 'IN_PROGRESS',
+      },
+    });
 
-		return { type: "success", message: "Draft is successfully saved." };
-	} catch (error) {
-		console.error("saveDraft error:", error);
-		return { type: "error", message: "Failed to save draft" };
-	}
+    // ========== 快取失效 ==========
+    await invalidateDraftCache(userId, existingSubmission.artistId);
+    // ========== 快取失效結束 ==========
+
+    return { type: 'success', message: 'Draft is successfully saved.' };
+  } catch (error) {
+    console.error('saveDraft error:', error);
+    return { type: 'error', message: 'Failed to save draft' };
+  }
 }

@@ -1,7 +1,11 @@
-import { cache } from "react";
+"use cache";
+
+import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db/client";
 import { notFound } from "next/navigation";
 import { AlbumHistoryType } from "@/types/album";
+import { CACHE_TIMES } from "@/constants/cache";
+import { CACHE_TAGS } from "@/constants/cacheTags";
 
 type getAlbumsRankingHistoryProps = {
 	artistId: string;
@@ -16,11 +20,14 @@ function calculatePointsChange(
 	return previous != null ? current - previous : null;
 }
 
-export const getAlbumsHistory = cache(async ({
+export async function getAlbumsHistory({
 	artistId,
 	submissionId,
 	userId,
-}: getAlbumsRankingHistoryProps): Promise<AlbumHistoryType[]> => {
+}: getAlbumsRankingHistoryProps): Promise<AlbumHistoryType[]> {
+	cacheLife(CACHE_TIMES.LONG);
+	cacheTag(CACHE_TAGS.RANKING(userId, artistId));
+
 	const albumRanking = await db.albumRanking.findMany({
 		where: {
 			artistId,
@@ -156,4 +163,4 @@ export const getAlbumsHistory = cache(async ({
 	});
 
 	return result;
-});
+}

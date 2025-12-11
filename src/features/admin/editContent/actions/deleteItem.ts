@@ -3,7 +3,8 @@
 import { ADMIN_MESSAGES } from "@/constants/messages";
 import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { invalidateAdminCache } from "@/lib/cacheInvalidation";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/../auth";
 
@@ -55,10 +56,10 @@ export default async function deleteItem({
 		}
 
 		if (isSuccess) {
+			await invalidateAdminCache(type, id);
 			if (type === "track") revalidatePath("/admin");
 			if (type === "album") redirect(`/admin/artist/${artistId}`);
 			if (type === "artist") redirect("/admin/artist");
-			revalidateTag("admin-data");
 		}
 		return { type: "success", message: ADMIN_MESSAGES.OPERATION_MESSAGES.DELETE.SUCCESS(type) };
 	} catch (error) {

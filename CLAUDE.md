@@ -9,15 +9,15 @@
 ### 1.1. 專案指令 (Project Commands)
 
 - **開發 (Development):**
-    - `npm run dev`: 啟動開發伺服器 (Turbopack)。
-    - `npm run build`: 建置應用程式。
-    - `npm start`: 啟動生產伺服器。
-    - `npm run lint`: 執行 Next.js Linting。
+    - `pnpm dev`: 啟動開發伺服器 (Turbopack)。
+    - `pnpm build`: 建置應用程式。
+    - `pnpm start`: 啟動生產伺服器。
+    - `pnpm lint`: 執行 Next.js Linting。
 - **測試 (Testing):**
-    - `npm run test`: 執行 Jest 測試。
-    - `npm run test:watch`: 以 watch 模式執行 Jest。
+    - `pnpm test`: 執行 Jest 測試。
+    - `pnpm test:watch`: 以 watch 模式執行 Jest。
 - **程式碼品質 (Code Quality):**
-    - `npm run prettier`: 使用 Prettier 格式化程式碼。
+    - `pnpm prettier`: 使用 Prettier 格式化程式碼。
 
 ### 1.2. 專案架構 (Architecture)
 
@@ -115,9 +115,9 @@
 ### 3.3. 品質保證流程 (Quality Assurance Workflow)
 
 - **每次程式碼變後，必須自動執行以下兩項指令進行檢查：**
-    - `npm run lint`
+    - `pnpm lint`
     - `npx tsc --noEmit`
-- **除非使用者明確指示，否則不要執行 `npm run dev` 或 `npm run build`**。
+- **除非使用者明確指示，否則不要執行 `pnpm dev` 或 `pnpm build`**。
 
 ### 3.4. 自動批准的 Bash 指令 (Auto-Approved Commands)
 
