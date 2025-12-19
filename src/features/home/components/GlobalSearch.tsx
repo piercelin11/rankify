@@ -69,7 +69,7 @@ export default function GlobalSearch() {
 		setInputValue("");
 
 		if (type === "artist") {
-			router.push(`/artist/${id}/my-stats`);
+			router.push(`/artist/${id}`);
 		} else if (artistId) {
 			router.push(`/artist/${artistId}/album/${id}`);
 		}

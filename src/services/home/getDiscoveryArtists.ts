@@ -2,7 +2,7 @@
 
 import { cacheLife, cacheTag } from 'next/cache';
 import { db } from '@/db/client';
-import type { DiscoveryArtistType } from '@/types/home';
+import type { DiscoveryType } from '@/types/home';
 import { CACHE_TIMES } from '@/constants/cache';
 import { CACHE_TAGS } from '@/constants/cacheTags';
 
@@ -10,7 +10,7 @@ export async function getDiscoveryArtists({
   userId,
 }: {
   userId: string;
-}): Promise<DiscoveryArtistType[]> {
+}): Promise<DiscoveryType[]> {
   cacheLife(CACHE_TIMES.LONG);
   cacheTag(CACHE_TAGS.USER_DYNAMIC(userId));
 

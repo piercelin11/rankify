@@ -3,7 +3,24 @@
  * These routes do not require authentication
  * @type {string[]}
  */
-export const publicRoutes: string[] = [];
+export const publicRoutes: string[] = ["/"];
+
+/**
+ * An array of routes that require authentication
+ * These routes will redirect unauthenticated users to /auth/signin
+ * Supports dynamic path patterns (e.g., /artist/:artistId)
+ * @type {string[]}
+ */
+export const privateRoutes: string[] = [
+	"/settings",
+	"/settings/ranking",
+	"/sorter/album/:albumId",
+	"/sorter/artist/:artistId",
+	"/artist/:artistId/album/:albumId",
+	"/artist/:artistId/track/:trackId",
+	"/artist/:artistId/community",
+	"/artist/:artistId/:submissionId",
+];
 
 /**
  * An array of routes that are used for authentication

@@ -18,17 +18,17 @@ export default async function MyStatsToolbar({
 				{
 					label: "Overview",
 					value: "overview",
-					href: `/artist/${artistId}/my-stats?view=overview`,
+					href: `/artist/${artistId}?view=overview`,
 				},
 				{
 					label: "History",
 					value: "history",
-					href: `/artist/${artistId}/my-stats/${latestSubmissionId}`,
+					href: `/artist/${artistId}/${latestSubmissionId}`,
 				},
 				{
 					label: "All Rankings",
 					value: "all-rankings",
-					href: `/artist/${artistId}/my-stats?view=all-rankings`,
+					href: `/artist/${artistId}?view=all-rankings`,
 				},
 			]}
 		/>

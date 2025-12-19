@@ -1,11 +1,11 @@
 import ProfileSettingsForm from "@/features/settings/components/ProfileSettingsForm";
 
-import { getUserSession } from "../../../../auth";
+import { requireSession } from "../../../../auth";
 import getUserById from "@/lib/database/user/getUserById";
 import { notFound } from "next/navigation";
 
 export default async function SettingsPage() {
-	const { id: userId } = await getUserSession();
+	const { id: userId } = await requireSession();
 	const user = await getUserById({ userId });
 
 	if (!user) notFound();

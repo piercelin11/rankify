@@ -1,193 +1,506 @@
-# Next.js 15 use cache 實驗 - 快取架構優化完成報告
+# Rankify Auth Refactoring Plan - Linus Review 修正版
 
-**日期**: 2025-12-11
-**狀態**: ✅ 已完成
-**評分**: 🟢 9/10 - 好品味
+> **目標**: 修正 TypeScript 型別錯誤、重構驗證架構、啟用 Middleware 驗證
 
----
-
-## 執行摘要
-
-本次優化針對 Next.js 15 `use cache` 實驗性功能的快取架構進行了全面審查與修正，共修復 5 個明確的設計缺陷（1 個已提前修復），將快取架構從「湊合」提升至「好品味」等級。
+**建立日期**: 2025-12-19
+**修正日期**: 2025-12-19
+**預計執行時間**: 2 小時
+**影響範圍**: 24 個檔案
 
 ---
 
-## 快取架構設計
+## 【Linus Review 核心判斷】
 
-### 三層粗粒度標籤策略
+### ✅ 值得做,採用黑名單策略
 
+**原計劃評估結果**:
+1. ✅ 使用黑名單策略(privateRoutes)符合專案特性
+2. ✅ Phase 4 元件拆分可延後(當前 160 行,未超過 200 行門檻)
+3. ❌ 未優先修復 [proxy.ts:32](../src/proxy.ts#L32) 的 Syntax Error
+
+**路由分布分析**:
+- 公開路由: 2 個 (當前) - `/`, `/artist/:id`
+- 私密路由: 8 個 - `/settings`, `/sorter/*`, `/artist/:id/album/:id`, `/artist/:id/track/:id`, `/artist/:id/community`, `/artist/:id/:submissionId`
+- Admin 路由: 4 個 - `/admin/*`
+
+**使用黑名單的理由**:
+1. Rankify 本質是「音樂瀏覽平台」,公開內容是主體
+2. 未來新增公開頁面(如 `/artist/:id/biography`)時無需維護路由配置
+3. 私密路由清單明確(Settings, Sorter, Community, Album, Track, 快照頁面)
+
+**修正後的優先級**:
+- 🔴 **P0+**: 修復 proxy.ts:32 的 Syntax Error(阻塞編譯)
+- 🔴 **P0**: 使用黑名單策略(privateRoutes)重構 Middleware
+- 🔴 **P0**: 修正 TypeScript 型別錯誤
+- 🟢 **P1**: Admin Layout 保護
+- ⚪ **P2**: Guest/User 拆分(延後執行,當前不需要)
+
+---
+
+## 一、執行計劃
+
+### Phase 1: 緊急修復 Syntax Error (🔴 P0+ - 5 分鐘)
+
+**檔案**: [src/proxy.ts:32](../src/proxy.ts#L32)
+
+**問題**: 孤立的 `return` 導致編譯失敗
+
+**修改**:
+```typescript
+// ❌ Before (line 30-35)
+    return;
+}
+return  // ← 移除這行
+if (!isLoggedIn && !isPublicRoute) {
+    return Response.redirect(new URL("/auth/signin", nextUrl.origin));
+}
+
+// ✅ After
+    return;
+}
+
+if (!isLoggedIn && !isPublicRoute) {
+    return Response.redirect(new URL("/auth/signin", nextUrl.origin));
+}
 ```
-第一層：USER_DYNAMIC(userId)
-├── 首頁統計、歷史、Hero、Discovery
-├── 已登記歌手清單
-└── 使用者偏好設定
 
-第二層：RANKING(userId, artistId)
-├── 排名統計 (tracks/albums stats)
-├── 提交記錄 (submissions)
-└── 排名歷史 (ranking history)
+**驗證**: `npx tsc --noEmit` 應該能編譯成功
 
-第三層：ARTIST/ALBUM/TRACK(id)
-└── 靜態內容資料（跨使用者共享）
+---
+
+### Phase 2: Auth 函式重構 (🔴 P0 - 15 分鐘)
+
+**檔案**: [auth.ts](../auth.ts)
+
+**目標**: 建立型別安全且語意清晰的驗證函式
+
+**修改內容**:
+
+```typescript
+// 1. 重新命名: getCurrentSession() → getSession()
+export async function getSession() {
+    const session = await auth();
+    if (!session?.user?.id || !session.user.role || !session.user.name) {
+        return null;
+    }
+    return session.user;
+}
+
+// 2. 新增 requireSession() - 型別安全 + Fail-safe
+export async function requireSession() {
+    const user = await getSession();
+    if (!user) {
+        // 理論上不會發生(Middleware 已保護)
+        // 如果發生,代表 Middleware 配置錯誤,直接重導而非拋錯
+        redirect("/auth/signin");
+    }
+    return user;
+}
+
+// 3. requireAdmin() 維持不變(已經正確)
+export async function requireAdmin() {
+    const session = await auth();
+    if (session?.user.role !== "ADMIN") {
+        throw new Error("Forbidden: Admin access required");
+    }
+    return session;
+}
 ```
 
-**設計原則**:
-- USER_DYNAMIC: 用戶的所有動態資料
-- RANKING: 用戶+歌手的排名相關資料
-- ARTIST/ALBUM/TRACK: 靜態內容資料（只在 admin 編輯時變動）
+**關鍵設計決策**:
+- `requireSession()` 使用 `redirect()` 而非 `throw Error`,避免觸發 Error Boundary
+- 提供雙層防護: Middleware 負責主要驗證,`requireSession()` 作為 Fail-safe
+- 型別安全: 回傳保證是 `User`,無需在 Page 中寫 Type Guard
+
+**影響範圍**: 23 個檔案需要更新 import
 
 ---
 
-## 已修復問題清單
+### Phase 3: Middleware 黑名單重構 (🔴 P0 - 30 分鐘)
 
-### P0 優先級（影響使用者體驗）
+#### 3.1 定義私密路由黑名單
 
-#### ✅ P0-1: createSubmission 快取失效
-- **狀態**: 已提前修復
-- **檔案**: `src/features/sorter/actions/createSubmission.ts:110`
-- **修復內容**: 確認已有 `await invalidateDraftCache(userId, artistId);`
+**檔案**: [src/config/route.ts](../src/config/route.ts)
 
-#### ✅ P0-2: getPeakRankings 缺少快取配置
-- **檔案**: `src/db/ranking.ts:18`
-- **問題**: 函式完全沒有 `cacheLife` 和 `cacheTag`
-- **修復**: 加上快取配置
-  ```typescript
-  cacheLife(CACHE_TIMES.LONG);
-  cacheTag(CACHE_TAGS.TRACK(trackId));
-  ```
+**策略**: 使用**黑名單**(privateRoutes),預設所有路由公開
 
-#### ✅ P0-3: getAlbumComparisonOptions 標籤配置不完整
-- **檔案**: `src/db/album.ts:175`
-- **問題**: 只標記 `ARTIST`，但這是使用者+專輯的排名資料
-- **影響**: 當使用者完成新排名時，快取不會被清除，導致顯示舊資料
-- **修復**: 加上 `RANKING` 標籤
-  ```typescript
-  cacheTag(CACHE_TAGS.RANKING(userId, artistId));
-  ```
+**修改內容**:
 
----
+```typescript
+/**
+ * 私密路由黑名單(需要驗證)
+ * 預設策略: 所有路由公開,除非明確列在此清單
+ * @type {string[]}
+ */
+export const privateRoutes: string[] = [
+    "/settings",                            // 個人設定
+    "/settings/ranking",                    // 排名設定
+    "/sorter/album/:albumId",               // Album Sorter (未來會公開)
+    "/sorter/artist/:artistId",             // Artist Sorter (未來會公開)
+    "/artist/:artistId/album/:albumId",     // Album 詳情 (未來會公開)
+    "/artist/:artistId/track/:trackId",     // Track 詳情 (未來會公開)
+    "/artist/:artistId/community",          // 社群頁面
+    "/artist/:artistId/:submissionId",      // 快照頁面
+];
 
-### P1 優先級（程式碼品質）
+/**
+ * Admin 路由(需要 ADMIN 角色)
+ * @type {string[]}
+ */
+export const adminRoutes: string[] = [
+    "/admin",
+];
 
-#### ✅ P1-4: 移除 ADMIN_DATA 死代碼
-- **檔案**:
-  - `src/constants/cacheTags.ts:23`
-  - `src/lib/cacheInvalidation.ts:41`
-- **問題**: 定義了 `ADMIN_DATA` 標籤，但沒有任何資料庫函式使用它
-- **修復**:
-  1. 從 `cacheTags.ts` 刪除 `ADMIN_DATA: 'admin-data'`
-  2. 從 `cacheInvalidation.ts` 刪除 `revalidateTag(CACHE_TAGS.ADMIN_DATA, 'max');`
+// authRoutes, apiAuthPrefix, DEFAULT_LOGIN_REDIRECT 保持不變
+```
 
-#### ✅ P1-5: getAlbumsHistory 移除重複標籤
-- **檔案**: `src/services/album/getAlbumsHistory.ts:30`
-- **問題**: 同時使用 `RANKING` 和 `USER_DYNAMIC` 標籤
-- **為什麼錯誤**:
-  - 這是特定 submission 的歷史資料，不是「動態資料」
-  - `invalidateRankingCache` 已經會失效 `RANKING` 標籤
-  - 雙重標籤會造成邏輯不一致
-- **修復**: 移除 `USER_DYNAMIC` 標籤，只保留 `RANKING`
-
-#### ✅ P1-6: getTrackComparisonOptions 移除重複標籤
-- **檔案**: `src/db/track.ts:146`
-- **問題**: 同一個 `ARTIST` 標籤被設定兩次
-- **修復**: 刪除重複的 `cacheTag(CACHE_TAGS.ARTIST(artistId));`
+**設計理由**:
+1. **符合專案定位**: Rankify 是音樂瀏覽平台,公開內容是主體
+2. **未來擴展性**: 新增公開頁面(如 `/artist/:id/biography`)時無需維護路由配置
+3. **私密路由明確**: Settings, Sorter, Album, Track, Community, 快照頁面清單清晰
 
 ---
 
-## 修改檔案清單
+#### 3.2 簡化 Middleware 邏輯
 
-1. ✅ `src/db/ranking.ts` - 加快取配置
-2. ✅ `src/db/album.ts` - 加 RANKING 標籤
-3. ✅ `src/constants/cacheTags.ts` - 移除 ADMIN_DATA
-4. ✅ `src/lib/cacheInvalidation.ts` - 移除 ADMIN_DATA 引用
-5. ✅ `src/services/album/getAlbumsHistory.ts` - 移除 USER_DYNAMIC 標籤
-6. ✅ `src/db/track.ts` - 移除重複標籤
+**檔案**: [src/proxy.ts](../src/proxy.ts)
+
+**依賴**: 安裝 `path-to-regexp`
+```bash
+pnpm add path-to-regexp
+```
+
+**修改內容**:
+
+```typescript
+import authConfig from "../auth.config";
+import NextAuth from "next-auth";
+import { privateRoutes, adminRoutes, authRoutes, apiAuthPrefix, DEFAULT_LOGIN_REDIRECT } from "./config/route";
+import { NextResponse } from "next/server";
+import { match } from "path-to-regexp";
+
+const { auth } = NextAuth(authConfig);
+
+export default auth(async function proxy(req) {
+    const { nextUrl } = req;
+    const isLoggedIn = !!req.auth;
+
+    // 1. API Auth 路由直接放行
+    const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+    if (isApiAuthRoute) return;
+
+    // 2. Auth 路由: 已登入者重導到首頁
+    const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+    if (isAuthRoute) {
+        if (isLoggedIn) {
+            return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin));
+        }
+        return;
+    }
+
+    // 3. 檢查是否為私密路由(黑名單)
+    const isPrivateRoute = privateRoutes.some((route) => {
+        const matcher = match(route, { decode: decodeURIComponent });
+        return matcher(nextUrl.pathname);
+    });
+
+    // 4. 未登入且訪問私密路由 → 重導到登入頁
+    if (!isLoggedIn && isPrivateRoute) {
+        return Response.redirect(new URL("/auth/signin", nextUrl.origin));
+    }
+
+    // 5. Admin 路由保護
+    const isAdminRoute = adminRoutes.some(route => nextUrl.pathname.startsWith(route));
+    if (isAdminRoute && isLoggedIn && req.auth?.user?.role !== "ADMIN") {
+        return Response.redirect(new URL("/", nextUrl.origin));
+    }
+
+    // 6. Server Action 請求直接放行
+    const isServerAction = req.headers.get("Next-Action") !== null;
+    if (isServerAction) {
+        return NextResponse.next();
+    }
+
+    // 7. 正常請求: 加入自訂 header
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set("x-current-path", nextUrl.pathname);
+    return NextResponse.next({
+        request: { headers: requestHeaders },
+    });
+});
+
+export const config = {
+    matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+};
+```
+
+**移除內容**:
+- ❌ 刪除 `isPublicRoute = true` 註解(line 20)
+- ❌ 刪除孤立的 `return`(line 32)
+- ❌ 刪除整個 TODO 註解(line 19)
+
+**關鍵修改**:
+- 將 `publicRoutes` 改為 `privateRoutes` import
+- 將 `isPublicRoute` 檢查改為 `isPrivateRoute` 檢查
+- 邏輯反轉: `!isLoggedIn && !isPublicRoute` → `!isLoggedIn && isPrivateRoute`
 
 ---
 
-## 快取失效邏輯
+### Phase 4: 更新所有 getCurrentSession() 呼叫 (🔴 P0 - 45 分鐘)
 
-| 操作 | 失效函式 | 失效標籤 | 狀態 |
-|-----|---------|---------|------|
-| 完成排名 | `invalidateRankingCache` | `USER_DYNAMIC` + `RANKING` | ✅ 正確 |
-| 保存草稿 | `invalidateDraftCache` | `USER_DYNAMIC` + `RANKING` | ✅ 正確 |
-| 刪除草稿 | `invalidateDraftCache` | `USER_DYNAMIC` + `RANKING` | ✅ 正確 |
-| 建立排名 | `invalidateDraftCache` | `USER_DYNAMIC` + `RANKING` | ✅ 正確 |
-| 編輯歌手 | `invalidateAdminCache` | `ARTIST` | ✅ 正確 |
-| 編輯專輯 | `invalidateAdminCache` | `ALBUM` | ✅ 正確 |
-| 編輯歌曲 | `invalidateAdminCache` | `TRACK` | ✅ 正確 |
+#### 策略分類
 
----
+| 檔案類型 | 使用函式 | 範例 |
+|---------|---------|------|
+| **需要驗證的 Pages** | `requireSession()` | Settings, Sorter, Album, Track |
+| **條件渲染的 Pages** | `getSession()` | 首頁, Artist 頁面 |
+| **Server Actions** | `requireSession()` | 所有 actions/* |
 
-## 資料庫函式配置統計
+#### 4.1 需要驗證的 Pages (9 個檔案)
 
-檢查了 22 個函式，結果：
+**清單**:
+1. `src/app/(main)/settings/page.tsx`
+2. `src/app/(main)/settings/ranking/page.tsx`
+3. `src/app/(main)/artist/[artistId]/(artist)/[submissionId]/page.tsx`
+4. `src/app/(main)/artist/[artistId]/album/[albumId]/page.tsx`
+5. `src/app/(main)/artist/[artistId]/track/[trackId]/page.tsx`
+6. `src/app/sorter/album/[albumId]/page.tsx`
+7. `src/app/sorter/artist/[artistId]/page.tsx`
+8. `src/app/(main)/artist/[artistId]/album/[albumId]/actions.ts`
+9. `src/app/(main)/artist/[artistId]/track/[trackId]/actions.ts`
 
-| 配置項 | 狀態 |
-|--------|------|
-| `'use cache'` 宣告 | ✅ 5/5 檔案正確 |
-| 舊 `cache()` 移除 | ✅ 已完全清除 |
-| `cacheLife` 配置 | ✅ 22/22 正確 |
-| `cacheTag` 配置 | ✅ 22/22 正確 |
+**修改範例**:
+```typescript
+// ❌ Before (型別錯誤)
+import { getCurrentSession } from "@/../auth";
+const { id: userId } = await getCurrentSession();
 
----
-
-## 品質檢查結果
-
-- ✅ `npm run lint` - 通過
-- ✅ `npx tsc --noEmit` - 通過
-
----
-
-## Linus 式設計原則評估
-
-### 好品味的標準
-
-**好的程式碼沒有特殊情況。**
-
-修復前的問題：
-- ❌ `getAlbumsHistory` 是唯一一個用雙標籤的查詢 → 特殊情況
-- ❌ `ADMIN_DATA` 是唯一一個沒人用的標籤 → 死代碼
-- ❌ `getPeakRankings` 是唯一一個沒快取的查詢 → 不一致
-
-修復後的狀態：
-- ✅ 所有查詢函式都有一致的快取配置
-- ✅ 所有寫操作都有對應的快取失效
-- ✅ 沒有死代碼，每個標籤都有實際用途
-- ✅ 邏輯清晰，沒有特殊情況
+// ✅ After (型別安全)
+import { requireSession } from "@/../auth";
+const { id: userId } = await requireSession();
+```
 
 ---
 
-## 架構優勢
+#### 4.2 條件渲染的 Pages (3 個檔案)
 
-1. **簡潔性** - 3 個失效函式，3 個標籤類型
-2. **一致性** - 所有寫操作都有失效，所有查詢都有快取
-3. **可維護性** - 沒有死代碼，每個標籤都有明確用途
-4. **實用主義** - 粗粒度設計適合目前的應用規模
-5. **可擴展性** - 如果未來需要更精細的控制，可以輕鬆擴展
+**清單**:
+1. `src/app/(main)/layout.tsx`
+2. `src/app/(main)/page.tsx`
+3. `src/app/(main)/artist/[artistId]/(artist)/page.tsx`
+
+**修改範例**:
+```typescript
+// ❌ Before
+import { getCurrentSession } from "@/../auth";
+const user = await getCurrentSession();
+
+// ✅ After
+import { getSession } from "@/../auth";
+const user = await getSession();
+
+if (!user) {
+    return <GuestView />;
+}
+return <UserView userId={user.id} />;
+```
 
 ---
 
-## 未來優化建議
+#### 4.3 Server Actions (10 個檔案)
 
-### 短期（可選）
-- 考慮在 `settings` 頁面加入「專輯計分方式偏好」設定
-- 如果實作此功能，需要為 `getAlbumsHistory` 加回 `USER_DYNAMIC` 標籤
+**清單**:
+1. `src/features/settings/actions/saveProfileSettings.ts`
+2. `src/features/settings/actions/saveRankingSettings.ts`
+3. `src/features/settings/actions/generatePresignedUploadUrl.ts`
+4. `src/features/settings/actions/updateUserProfileImage.ts`
+5. `src/features/settings/actions/deleteUserImageOnS3.ts`
+6. `src/features/sorter/actions/createSubmission.ts`
+7. `src/features/sorter/actions/saveDraft.ts`
+8. `src/features/sorter/actions/completeSubmission.ts`
+9. `src/features/sorter/actions/finalizeDraft.ts`
+10. `src/features/sorter/actions/deleteSubmission.ts`
 
-### 長期（視規模而定）
-- 如果使用者數量大幅增長，考慮將 `USER_DYNAMIC` 拆分為更細粒度的標籤
-- 如果快取失效過於頻繁，可以引入更精細的時間控制策略
+**修改範例**:
+```typescript
+// ❌ Before
+import { getCurrentSession } from "@/../auth";
+try {
+    const { id: userId } = await getCurrentSession();
+    // ...
+} catch (error) {
+    return { type: "error", message: "Failed" };
+}
+
+// ✅ After
+import { requireSession } from "@/../auth";
+try {
+    const { id: userId } = await requireSession();
+    // ...
+} catch (error) {
+    return { type: "error", message: "Failed" };
+}
+```
 
 ---
 
-## 結論
+### Phase 5: Admin Layout 保護 (🟢 P1 - 10 分鐘)
 
-**最終評分: 🟢 9/10 - 好品味**
+**檔案**: `src/app/(main)/admin/layout.tsx` (需新建或修改)
 
-修復後的快取系統符合 Linus Torvalds 的三個核心原則：
+**目標**: 在 Layout 層級加入 `requireAdmin()` 驗證
 
-1. ✅ **簡潔執念 (Simplicity)** - 每個函式 5-10 行，邏輯清晰
-2. ✅ **實用主義 (Pragmatism)** - 接受合理的權衡，不過度優化
-3. ✅ **好品味 (Good Taste)** - 沒有特殊情況，沒有死代碼
+**內容**:
 
-**這就是 Linus 所說的「好品味」—— 簡單、清晰、沒有特殊情況。** 🎉
+```typescript
+import { requireAdmin } from "@/../auth";
+
+type AdminLayoutProps = {
+    children: React.ReactNode;
+};
+
+export default async function AdminLayout({ children }: AdminLayoutProps) {
+    await requireAdmin();
+    return <>{children}</>;
+}
+```
+
+**影響**: 所有 `/admin/*` 路由自動受保護(雙層防護: Middleware + Layout)
+
+---
+
+### Phase 6: Guest/User 元件拆分 (⚪ P2 - 延後執行)
+
+**執行條件**: 只有在以下情況才執行
+1. 單一 Page 檔案超過 200 行
+2. Guest/User 邏輯各自有 3+ 層巢狀
+3. 需要在多個地方重用元件
+
+**當前狀況**: `artist/[artistId]/page.tsx` 約 160 行,**不需要拆分**
+
+**理由**:
+- Guest 邏輯: 44 行(單純的相冊網格)
+- User 邏輯: 70 行(統計功能)
+- `if (!user)` early return 已經很清晰
+- 拆分後會增加心智負擔(需要在 3 個檔案間跳轉)
+
+---
+
+### Phase 7: 驗證與測試 (🟢 P2 - 20 分鐘)
+
+#### 7.1 TypeScript 編譯檢查
+```bash
+npx tsc --noEmit
+```
+**預期**: 0 errors
+
+#### 7.2 Linting 檢查
+```bash
+pnpm lint
+```
+**預期**: 0 warnings
+
+#### 7.3 手動測試清單
+
+| 測試項目 | 路由 | 預期行為 |
+|---------|------|----------|
+| Guest 訪問首頁 | `/` | 顯示 Guest 首頁 |
+| Guest 訪問 Artist | `/artist/[id]` | 顯示相冊網格 |
+| Guest 訪問 Album | `/artist/[id]/album/[id]` | 重導到 `/auth/signin` |
+| Guest 訪問 Track | `/artist/[id]/track/[id]` | 重導到 `/auth/signin` |
+| Guest 訪問 Settings | `/settings` | 重導到 `/auth/signin` |
+| Guest 訪問 Sorter | `/sorter/artist/[id]` | 重導到 `/auth/signin` |
+| Guest 訪問 Community | `/artist/[id]/community` | 重導到 `/auth/signin` |
+| User 訪問 Artist | `/artist/[id]` | 顯示統計資料 |
+| User 訪問 Settings | `/settings` | 正常顯示 |
+| User 訪問 Admin | `/admin` | 重導到 `/` |
+| Admin 訪問 Admin | `/admin` | 正常顯示 |
+
+---
+
+## 二、未來規劃與當前範圍
+
+### 使用者確認的未來規劃:
+- ✅ Album/Track 詳情頁未來會改成**公開**
+- ✅ Sorter 頁面未來也會改成**公開**
+
+### 當前執行範圍(此次重構):
+**只處理當前的型別錯誤和 Middleware 問題,不改變現有的頁面存取權限**
+
+**具體做法**:
+1. Album/Track 詳情頁**保持需登入**(因為當前沒有 Guest 邏輯)
+2. Sorter 頁面**保持需登入**(未來才會開放)
+3. `privateRoutes` 包含所有當前需要登入的路由
+
+**理由**:
+- 此次重構專注於「修復型別錯誤」和「啟用 Middleware 驗證」
+- Guest 邏輯的實作是另一個獨立任務,不應混在一起
+- 未來開放 Album/Track/Sorter 時,只需:
+  1. 從 `privateRoutes` 移除對應路由
+  2. 為這些頁面加入 Guest 顯示邏輯
+
+---
+
+## 三、檔案修改清單總覽
+
+### 🔴 P0+ (緊急修復 - 5 分鐘)
+- `src/proxy.ts` - 修復 Syntax Error
+
+### 🔴 P0 (核心重構 - 90 分鐘)
+1. `auth.ts` - 重新命名 + 新增 `requireSession()`
+2. `src/config/route.ts` - 新增 `privateRoutes`
+3. `src/proxy.ts` - 重構 Middleware 邏輯
+4. 23 個檔案 - 更新 `getCurrentSession()` → `getSession()` / `requireSession()`
+
+### 🟢 P1 (安全加固 - 10 分鐘)
+- `src/app/(main)/admin/layout.tsx` - 新增 Admin Layout 保護
+
+### ⚪ P2 (可選優化 - 延後)
+- Phase 6: Guest/User 元件拆分(目前不需要)
+
+---
+
+## 四、關鍵設計決策總結
+
+### 1. 路由策略: 黑名單(privateRoutes) ✅
+**理由**:
+- Rankify 是音樂瀏覽平台,公開內容是主體
+- 私密路由清單清晰且數量有限
+- 未來新增公開頁面時無需維護路由配置
+
+### 2. requireSession() 使用 redirect() 而非 throw Error ✅
+**理由**:
+- 避免觸發 Error Boundary(使用者體驗差)
+- Middleware 已保護私密路由,`requireSession()` 只是 Fail-safe
+- 型別安全: 回傳保證是 `User`,無需 Type Guard
+
+### 3. 元件拆分延後執行 ✅
+**理由**:
+- 當前檔案 160 行,未超過 200 行門檻
+- `if (!user)` early return 已經很清晰
+- 拆分後會增加維護成本
+
+### 4. Syntax Error 優先修復 ✅
+**理由**:
+- [proxy.ts:32](../src/proxy.ts#L32) 阻塞編譯,必須立即修復
+- 不應該讓編譯失敗的程式碼留在 codebase
+
+---
+
+## 五、成功指標
+
+- [ ] proxy.ts:32 的 Syntax Error 已修復
+- [ ] TypeScript 編譯 0 errors
+- [ ] ESLint 0 warnings
+- [ ] Guest 可以瀏覽 `/`, `/artist/[id]`
+- [ ] Guest 訪問私密路由會重導到登入頁
+- [ ] User 可以訪問所有功能
+- [ ] Admin 可以訪問後台
+
+---
+
+**總時間**: 2 小時
+**程式碼變化**: 淨減少 50 行
+**新增檔案數**: 1 個(admin layout)
+
+**計劃完成** ✅

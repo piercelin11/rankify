@@ -2,7 +2,7 @@
 
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { getUserSession } from "../../../../auth";
+import { requireSession } from "../../../../auth";
 import { nanoid } from "nanoid";
 import { AppResponseType } from "@/types/response";
 import { SETTINGS_MESSAGES } from "@/constants/messages";
@@ -70,7 +70,7 @@ export async function generatePresignedUploadUrl({
 	fileSize,
 }: GenerateUrlParams): Promise<GenerateUrlResponse> {
 	try {
-		const { id: userId } = await getUserSession();
+		const { id: userId } = await requireSession();
 
 		// 1. 基本欄位檢查
 		if (!fileName || !fileType || !fileSize) {

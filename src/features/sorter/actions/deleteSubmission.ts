@@ -1,6 +1,6 @@
 'use server';
 
-import { getUserSession } from '@/../auth';
+import { requireSession } from '@/../auth';
 import { db } from '@/db/client';
 import { revalidatePath } from 'next/cache';
 import { invalidateDraftCache } from '@/lib/cacheInvalidation';
@@ -11,7 +11,7 @@ export default async function deleteSubmission({
 	submissionId: string;
 }) {
   try {
-    const { id: userId } = await getUserSession();
+    const { id: userId } = await requireSession();
 
     // 先取得 artistId (刪除前)
     const submission = await db.rankingSubmission.findUnique({

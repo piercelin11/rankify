@@ -31,7 +31,7 @@ export default function HeroSection({ hero }: HeroSectionProps) {
 					ctaText: "View Results",
 					ctaHref:
 						data.type === "ARTIST"
-							? `/artist/${data.artistId}/my-stats?submissionId=${data.submissionId}`
+							? `/artist/${data.artistId}?submissionId=${data.submissionId}`
 							: `/artist/${data.artistId}/album/${data.id}`, // TODO: 待專輯頁面完成後更新為正確的結果頁面路由
 				};
 

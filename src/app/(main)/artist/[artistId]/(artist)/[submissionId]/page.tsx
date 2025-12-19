@@ -1,4 +1,4 @@
-import { getUserSession } from "@/../auth";
+import { requireSession } from "@/../auth";
 import { getTracksHistory } from "@/services/track/getTracksHistory";
 //import { getLoggedAlbumNames } from "@/db/album";
 import { artistViewParamsSchema } from "@/lib/schemas/artist";
@@ -27,7 +27,7 @@ export default async function SnapshotPage({
 }: PageProps) {
 	const { artistId, submissionId } = await params;
 	const { view: rawView } = await searchParams;
-	const { id: userId } = await getUserSession();
+	const { id: userId } = await requireSession();
 
 	const submissions = await getArtistRankingSubmissions({ artistId, userId });
 	const currentSubmission = submissions.find((s) => s.id === submissionId);
@@ -73,7 +73,7 @@ export default async function SnapshotPage({
 							options={submissions.map((s) => ({
 								value: s.id,
 								label: dateToDashFormat(s.date),
-								href: `/artist/${artistId}/my-stats/${s.id}?view=${view}`,
+								href: `/artist/${artistId}/${s.id}?view=${view}`,
 							}))}
 						/>
 					</div>
@@ -100,7 +100,7 @@ export default async function SnapshotPage({
 								</div>
 							))}
 							<Link
-								href={`/artist/${trackHistory[0].artistId}/my-stats?view=all-rankings&submissionId=${submissionId}`}
+								href={`/artist/${trackHistory[0].artistId}?view=all-rankings&submissionId=${submissionId}`}
 								className="ml-auto flex items-center gap-1 text-sm text-foreground hover:text-primary"
 							>
 								Full rankings

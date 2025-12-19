@@ -35,9 +35,9 @@
 		scrollbar-color: hsl(var(--muted)) transparent;
 	}
 
-	.p-content {
+	/* .p-content {
 		@apply p-4 md:p-[3rem]
-	}
+	} */
 }
 
 @layer base {

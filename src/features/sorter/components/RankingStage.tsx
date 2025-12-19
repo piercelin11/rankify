@@ -70,7 +70,7 @@ export default function RankingStage({
 	//離開排名介面
 	function handleQuit() {
 		setSaveStatus("idle");
-		router.replace(`/artist/${artistId}/my-stats`);
+		router.replace(`/artist/${artistId}`);
 	}
 
 	// 處理選擇反饋效果

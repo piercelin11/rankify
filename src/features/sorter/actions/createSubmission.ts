@@ -2,7 +2,7 @@
 
 import { db } from '@/db/client';
 import { $Enums, SubmissionStatus, SubmissionType } from '@prisma/client';
-import { getUserSession } from '@/../auth';
+import { requireSession } from '@/../auth';
 import { getTracksByAlbumAndTrackIds } from '@/db/track';
 import { sorterFilterSchema, sorterStateSchema } from '@/lib/schemas/sorter';
 import initializeSorterState from '../utils/initializeSorterState';
@@ -26,7 +26,7 @@ export async function createSubmission({
 	albumId,
 }: CreateSubmissionProps): Promise<AppResponseType<RankingSubmissionData>> {
 	try {
-		const { id: userId } = await getUserSession();
+		const { id: userId } = await requireSession();
 
 		// 🔧 防禦性驗證: 確保 ALBUM 類型必須有 albumId
 		if (type === "ALBUM" && !albumId) {

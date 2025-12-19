@@ -1,7 +1,7 @@
 "use server";
 
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { getUserSession } from "@/../auth";
+import { requireSession } from "@/../auth";
 import { AppResponseType } from "@/types/response";
 import { SETTINGS_MESSAGES } from "@/constants/messages";
 
@@ -31,7 +31,7 @@ export default async function deleteUserImageOnS3({
 	imageUrlToDelete,
 }: DeleteUserImageOnS3): Promise<AppResponseType> {
 	try {
-		await getUserSession();
+		await requireSession();
 
 		if (!imageUrlToDelete || typeof imageUrlToDelete !== "string") {
 			return { type: "success", message: "No image to delete" };

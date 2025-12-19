@@ -1,4 +1,4 @@
-import { getUserSession } from "@/../auth";
+import { requireSession } from "@/../auth";
 import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
 import { Card } from "@/components/ui/card";
 import { ALBUM_SEGMENT_OPTIONS } from "@/config/segmentOptions";
@@ -26,7 +26,7 @@ export default async function page({
 	const albumId = (await params).albumId;
 	const artistId = (await params).artistId;
 	const { type = "artist" } = await searchParams;
-	const { id: userId } = await getUserSession();
+	const { id: userId } = await requireSession();
 
 	const defaultAlbum = await getAlbumRanking({ userId, albumId });
 	const { menuOptions } = await getAlbumComparisonOptions({ userId, artistId });

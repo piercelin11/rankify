@@ -136,7 +136,7 @@ export default function ResultStage({
 
 	const handleSubmit = async () => {
 		await completeSubmission({ trackRankings: result, submissionId });
-		router.push(`/artist/${artistId}/my-stats/${submissionId}`)
+		router.push(`/artist/${artistId}/${submissionId}`)
 	};
 
 	const handleDelete = () => {
@@ -146,7 +146,7 @@ export default function ResultStage({
 			confirmText: "Delete Record",
 			onConfirm: () => {
 				deleteSubmission({ submissionId });
-				router.push(`/artist/${artistId}/my-stats`)
+				router.push(`/artist/${artistId}`)
 			}
 		});
 	};

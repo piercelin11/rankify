@@ -1,10 +1,10 @@
 
-import { getUserSession } from "../../../../../auth";
+import { requireSession } from "../../../../../auth";
 import getUserPreference from "@/lib/database/user/getUserPreference";
 import RankingSettings from "@/features/settings/components/RankingSettingsForm";
 
 export default async function RankingSettingsPage() {
-	const {id: userId} = await getUserSession();
+	const {id: userId} = await requireSession();
 	const userPreference = await getUserPreference({userId});
 	
 	return (

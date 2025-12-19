@@ -79,7 +79,7 @@ export default function FilterStage({ albums, singles }: FilterStageProps) {
 						{isSubmitting ? "Creating..." : "Start Sorter"}
 					</Button>
 					{albums.length > 0 && (
-						<Link href={`/artist/${albums[0].artistId}/my-stats`}>
+						<Link href={`/artist/${albums[0].artistId}`}>
 							<Button variant="secondary">Quit Sorter</Button>
 						</Link>
 					)}

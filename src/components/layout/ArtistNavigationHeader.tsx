@@ -2,12 +2,9 @@
 
 import { usePathname } from "next/navigation";
 import AnimatedSegmentControl from "@/components/navigation/AnimatedSegmentControl";
-import SimpleBreadcrumb, {
-	createBreadcrumbItems,
-} from "@/components/navigation/SimpleBreadcrumb";
 import { ArtistData } from "@/types/data";
-import { getArtistTabOptions } from "@/config/artistTabs";
 import { CreateRankingButton } from "@/features/sorter/components/CreateRankingButton";
+import { useSession } from "next-auth/react";
 
 type ArtistNavigationHeaderProps = {
 	artist: ArtistData;
@@ -17,23 +14,29 @@ export default function ArtistNavigationHeader({
 	artist,
 }: ArtistNavigationHeaderProps) {
 	const pathname = usePathname();
-	const tabOptions = getArtistTabOptions(artist.id);
-	const breadCrumbItems = createBreadcrumbItems([
+	const session = useSession();
+	const mainTab =
+		session.status === "authenticated" ? "My Stats" : "Discogrphy";
+	const tabOptions = [
 		{
-			label: "Home",
-			href: "/",
+			id: mainTab.toLowerCase().replace(" ", "-"),
+			label: mainTab,
+			href: `/artist/${artist.id}`,
 		},
 		{
-			label: artist.name,
+			id: "community",
+			label: "Community",
+
+			href: `/artist/${artist.id}/community`,
 		},
-	]);
+	];
 
 	const isRankingPage = pathname.includes("/ranking");
-	const currentTab = pathname.split("/")[3];
+	const currentTab =
+		pathname.split("/")[3] ?? mainTab.toLowerCase().replace(" ", "-");
 
 	return (
-		<div className="px-content pt-content md:flex md:justify-between">
-			<SimpleBreadcrumb items={breadCrumbItems} />
+		<div className="px-content pt-content md:flex md:justify-end">
 			<div className="flex gap-4">
 				<AnimatedSegmentControl
 					size="md"

@@ -393,7 +393,7 @@ export default function ProfileForm() {
 ```tsx
 // app/(main)/page.tsx
 export default async function HomePage() {
-  const user = await getUserSession();
+  const user = await getCurrentSession();
   const stats = await getUserDashboardStats({ userId: user.id });
 
   return <DashboardSection stats={stats} />;

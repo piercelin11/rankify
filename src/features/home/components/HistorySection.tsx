@@ -43,7 +43,7 @@ export default function HistorySection({ history }: HistorySectionProps) {
 								className="basis-1/2 md:basis-1/3 xl:basis-1/6 2xl:basis-1/8"
 							>
 								<GalleryItem
-									href={`/artist/${item.artistId}/my-stats?submissionId=${item.id}`}
+									href={`/artist/${item.artistId}?submissionId=${item.id}`}
 									img={displayImg}
 									title={displayName}
 									subTitle={relativeTime}

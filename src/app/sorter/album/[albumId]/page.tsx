@@ -1,4 +1,4 @@
-import { getUserSession } from "@/../auth";
+import { requireSession } from "@/../auth";
 import { getAlbumById } from "@/db/album";
 import { getIncompleteRankingSubmission } from "@/db/ranking";
 import { getTracksByAlbumId } from "@/db/track";
@@ -19,7 +19,7 @@ export default async function page({ params, searchParams }: pageProps) {
 	const { albumId } = await params;
 	const search = await searchParams;
 	const fromHome = search?.resume === "true";
-	const { id: userId } = await getUserSession();
+	const { id: userId } = await requireSession();
 
 	const album = await getAlbumById({ albumId });
 	if (!album) notFound();

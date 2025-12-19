@@ -4,7 +4,7 @@ import {
 	profileSettingsSchema,
 	ProfileSettingsType,
 } from "@/lib/schemas/settings";
-import { getUserSession } from "@/../auth";
+import { requireSession } from "@/../auth";
 import { AppResponseType } from "@/types/response";
 import { db } from "@/db/client";
 import { revalidatePath } from "next/cache";
@@ -15,7 +15,7 @@ export default async function saveProfileSettings(
 	formData: ProfileSettingsType
 ): Promise<AppResponseType> {
 	try {
-		const { id: userId } = await getUserSession();
+		const { id: userId } = await requireSession();
 
 		const validatedField = profileSettingsSchema.safeParse(formData);
 		if (!validatedField.success) {

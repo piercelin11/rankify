@@ -1,4 +1,4 @@
-import { getUserSession } from "@/../auth";
+import { requireSession } from "@/../auth";
 import { getAlbumsByArtistId } from "@/db/album";
 import { getIncompleteRankingSubmission } from "@/db/ranking";
 import getTracksByArtistId, { getSinglesByArtistId } from "@/db/track";
@@ -16,7 +16,7 @@ export default async function page({ params, searchParams }: pageProps) {
 	const { artistId } = await params;
 	const search = await searchParams;
 	const fromHome = search?.resume === "true";
-	const { id: userId } = await getUserSession();
+	const { id: userId } = await requireSession();
 	const submission = await getIncompleteRankingSubmission({ artistId, userId });
 
 	const singles = await getSinglesByArtistId({ artistId });

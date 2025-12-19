@@ -1,10 +1,10 @@
 "use server";
 
 import { db } from "@/db/client";
-import { getUserSession } from "@/../auth";
+import { requireSession } from "@/../auth";
 
 export async function getComparisonAlbumsData(albumIds: string[]) {
-	const { id: userId } = await getUserSession();
+	const { id: userId } = await requireSession();
 
 	if (!userId || albumIds.length === 0) {
 		return [];

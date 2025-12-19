@@ -51,12 +51,12 @@ export default function RankingTable<T extends RankingListDataTypeExtend>({
 							{
 								value: "average",
 								label: "Average",
-								href: `/artist/${data[0].artistId}/my-stats?view=all-rankings`,
+								href: `/artist/${data[0].artistId}?view=all-rankings`,
 							},
 							{
 								value: "snapshot",
 								label: "Snapshot",
-								href: `/artist/${data[0].artistId}/my-stats?submissionId=${latestSubmissionId}&view=all-rankings`,
+								href: `/artist/${data[0].artistId}?submissionId=${latestSubmissionId}&view=all-rankings`,
 							},
 						]}
 						value={view}
@@ -72,7 +72,7 @@ export default function RankingTable<T extends RankingListDataTypeExtend>({
 								options={submissions.map((s) => ({
 									value: s.id,
 									label: dateToDashFormat(s.date),
-									href: `/artist/${data[0].artistId}/my-stats?submissionId=${s.id}&view=all-rankings`,
+									href: `/artist/${data[0].artistId}?submissionId=${s.id}&view=all-rankings`,
 								}))}
 							/>
 						</div>
