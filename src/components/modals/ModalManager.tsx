@@ -4,6 +4,7 @@ import { useModal } from "@/contexts";
 import { AlertModal } from "./AlertModal";
 import { Modal } from "./Modal";
 import { ConfirmModal } from "./ConfirmModal";
+import { AuthGuardModal } from "./AuthGuardModal";
 
 export function ModalManager() {
 	const { modal, close } = useModal();
@@ -73,6 +74,18 @@ export function ModalManager() {
 					modal.onCancel?.();
 					close();
 				}}
+			/>
+		);
+	}
+
+	if (config.type === "authGuard") {
+		return (
+			<AuthGuardModal
+				isOpen={true}
+				onOpenChange={(open) => {
+					if (!open) close();
+				}}
+				callbackUrl={config.callbackUrl}
 			/>
 		);
 	}
