@@ -85,6 +85,7 @@ export default {
 			spacing: {
 				"18": "4.5rem",
 				"22": "5.5rem",
+				"header": "4rem",
 			},
 			backgroundImage: {
 				glow: "`radial-gradient(ellipse farthest-side at top, ${colors.neutral[800]}40, ${colors.neutral[950]}CC)`",

@@ -5,8 +5,6 @@ import {
 	Sidebar,
 	SidebarContent,
 	SidebarGroup,
-	SidebarHeader,
-	SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { SidebarProps } from "./types";
 import {
@@ -30,12 +28,6 @@ export function SimpleSidebar({ user, artists }: SidebarProps) {
 			variant="sidebar"
 			className="overflow-y-auto overscroll-y-contain"
 		>
-			<SidebarHeader className="border-b border-sidebar-border">
-				<div className="flex items-center justify-start p-3">
-					<SidebarTrigger className="h-8 w-8" />
-				</div>
-			</SidebarHeader>
-
 			<SidebarContent>
 				<SidebarGroup>
 					<MenuSection items={mainItems} />

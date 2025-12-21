@@ -28,8 +28,8 @@ export default async function MainLayout({ children }: AdminLayoutProps) {
 			</Suspense>
 
 			{/* Main Content */}
-			<SidebarInset className="h-full overflow-hidden pt-16 pb-16 md:pb-0">
-				{/* pt-16: Header 高度, pb-16: Mobile 底部導航高度 (僅 Mobile) */}
+			<SidebarInset className="h-full overflow-hidden pt-header pb-header md:pb-0">
+				{/* pt-header: Header 高度, pb-header: Mobile 底部導航高度 (僅 Mobile) */}
 				{children}
 			</SidebarInset>
 

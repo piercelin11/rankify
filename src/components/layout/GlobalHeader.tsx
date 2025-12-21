@@ -13,7 +13,7 @@ export function GlobalHeader({ user }: { user: ExtendedUser | null }) {
 
 	return (
 		<header className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-			<div className="flex h-16 items-center gap-4 px-4">
+			<div className="flex h-header items-center justify-between px-4">
 				{/* 左側: 漢堡按鈕 (Desktop only) + Logo */}
 				<div className="flex items-center gap-3">
 					{!isMobile && (
@@ -31,13 +31,15 @@ export function GlobalHeader({ user }: { user: ExtendedUser | null }) {
 					</Link>
 				</div>
 
-				{/* 中間: 搜尋 (Desktop only) */}
-				<div className="hidden flex-1 md:flex md:max-w-md lg:max-w-lg">
+				{/* 中間: 搜尋 (Desktop only, 置中) */}
+				<div className="absolute left-1/2 -translate-x-1/2 hidden md:flex w-full max-w-md lg:max-w-lg px-4">
 					<GlobalSearch />
 				</div>
 
 				{/* 右側: 認證區 */}
-				<AuthSection user={user} />
+				<div className="flex items-center">
+					<AuthSection user={user} />
+				</div>
 			</div>
 		</header>
 	);

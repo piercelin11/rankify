@@ -114,7 +114,7 @@ export default function GlobalSearch() {
 						{results.artists.map((artist) => (
 							<CommandItem
 								key={artist.id}
-								value={artist.name}
+								value={`artist-${artist.id}`}
 								onSelect={() => handleNavigate("artist", artist.id)}
 								className="flex cursor-pointer items-center gap-3"
 							>
@@ -146,7 +146,7 @@ export default function GlobalSearch() {
 						{results.albums.map((album) => (
 							<CommandItem
 								key={album.id}
-								value={album.name}
+								value={`album-${album.id}`}
 								onSelect={() =>
 									handleNavigate("album", album.id, album.artistId)
 								}

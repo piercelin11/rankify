@@ -44,7 +44,7 @@ export default function CollapsibleArtistHeader({
 			{/* 收合版本的 Header - 固定在頂部 */}
 			<div
 				className={cn(
-					"fixed right-0 top-0 z-50 flex items-center justify-between gap-2 border-b bg-accent/90 px-content py-4 backdrop-blur transition-all duration-200 ease-linear supports-[backdrop-filter]:bg-accent/90",
+					"fixed right-0 top-header z-40 flex h-header items-center justify-between gap-2 border-b bg-accent/90 px-content backdrop-blur transition-all duration-200 ease-linear supports-[backdrop-filter]:bg-accent/90",
 					getLeftPosition(),
 					headerState === "collapsed"
 						? "opacity-100"
