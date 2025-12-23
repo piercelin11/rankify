@@ -12,7 +12,7 @@ export function GlobalHeader({ user }: { user: ExtendedUser | null }) {
 	const { toggleSidebar, isMobile } = useSidebar();
 
 	return (
-		<header className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+		<header className="fixed top-0 z-50 w-full bg-background shadow-sm">
 			<div className="flex h-header items-center justify-between px-4">
 				{/* 左側: 漢堡按鈕 (Desktop only) + Logo */}
 				<div className="flex items-center gap-3">

@@ -42,7 +42,7 @@ export function MobileBottomNav({ user }: { user: ExtendedUser | null }) {
 	};
 
 	return (
-		<nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background md:hidden">
+		<nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background shadow-[0_-1px_3px_0_rgb(0_0_0_/_0.1)] md:hidden">
 			<div className="flex h-header items-center justify-around">
 				{navItems.map((item) => {
 					const isActive = item.isActive(pathname);
