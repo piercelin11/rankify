@@ -29,9 +29,10 @@ export default async function MainLayout({ children }: AdminLayoutProps) {
 			</Suspense>
 
 			{/* Main Content */}
-			<SidebarInset className="pt-header pb-header h-full overflow-hidden md:pb-0">
-				{/* pt-header: Header 高度, pb-header: Mobile 底部導航高度 (僅 Mobile) */}
-				{children}
+			<SidebarInset>
+				<div data-scroll-container className="h-full overflow-y-auto overflow-x-hidden">
+					{children}
+				</div>
 			</SidebarInset>
 
 			{/* Mobile 底部導航 */}

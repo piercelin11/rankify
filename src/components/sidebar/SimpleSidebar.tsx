@@ -26,7 +26,7 @@ export function SimpleSidebar({ user, artists }: SidebarProps) {
 			ref={sidebarRef}
 			collapsible="icon"
 			variant="inset"
-			className="overflow-y-auto overscroll-y-contain"
+			className="overflow-y-auto overscroll-y-contain bg-background"
 		>
 			<SidebarContent>
 				<SidebarGroup>

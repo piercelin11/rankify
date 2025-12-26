@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { useWindowVirtualizer } from "@tanstack/react-virtual";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { flexRender } from "@tanstack/react-table";
 import { ArrowUpDown, ArrowUp, ArrowDown, Loader2 } from "lucide-react";
 import {
@@ -21,7 +21,7 @@ import { RankingListDataTypeExtend } from "../types";
 import { useRouter } from "next/navigation";
 
 const ROW_HEIGHT = 70;
-const OVERSCAN = 5;
+const OVERSCAN = 8;
 
 type WindowVirtualizedTableProps<T extends RankingListDataTypeExtend> = {
 	data: T[];
@@ -50,7 +50,7 @@ export default function WindowVirtualizedTable<
 		router.push(`/artist/${item.artistId}/track/${item.id}`);
 	}
 	const { isStuck, sentinelRef } = useStickyState({
-		rootMargin: "-100px",
+		rootMargin: "50px",
 		threshold: 0,
 	});
 
@@ -68,34 +68,11 @@ export default function WindowVirtualizedTable<
 
 	const { rows } = table.getRowModel();
 
-	const [scrollMargin, setScrollMargin] = useState(0);
-
-	useEffect(() => {
-		if (!isClient) return;
-
-		const updateScrollMargin = () => {
-			if (listRef.current) {
-				const rect = listRef.current.getBoundingClientRect();
-				const margin = window.pageYOffset + rect.top;
-				setScrollMargin(margin);
-			}
-		};
-
-		updateScrollMargin();
-		const timer = setTimeout(updateScrollMargin, 100);
-		window.addEventListener("resize", updateScrollMargin);
-
-		return () => {
-			clearTimeout(timer);
-			window.removeEventListener("resize", updateScrollMargin);
-		};
-	}, [isClient]);
-
-	const virtualizer = useWindowVirtualizer({
+	const virtualizer = useVirtualizer({
 		count: rows.length,
+		getScrollElement: () => listRef.current?.closest('[data-scroll-container]') as HTMLElement | null,
 		estimateSize: () => ROW_HEIGHT,
 		overscan: OVERSCAN,
-		scrollMargin: scrollMargin,
 	});
 
 	const items = virtualizer.getVirtualItems();
@@ -132,8 +109,8 @@ export default function WindowVirtualizedTable<
 			<div ref={sentinelRef} className="h-0" />
 			<div
 				className={cn(
-					"sticky top-[72px] z-10",
-					isStuck ? "border-b backdrop-blur" : ""
+					"sticky top-header z-10 border-b",
+					isStuck ? "backdrop-blur bg-black" : ""
 				)}
 			>
 				<Table>
@@ -233,7 +210,7 @@ export default function WindowVirtualizedTable<
 									left: 0,
 									width: "100%",
 									height: `${virtualItem.size}px`,
-									transform: `translateY(${virtualItem.start - (scrollMargin || 0)}px)`,
+									transform: `translateY(${virtualItem.start}px)`,
 								}}
 							>
 								<Table>
