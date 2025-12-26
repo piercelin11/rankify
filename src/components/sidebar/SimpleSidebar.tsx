@@ -5,8 +5,6 @@ import {
 	Sidebar,
 	SidebarContent,
 	SidebarGroup,
-	SidebarHeader,
-	SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { SidebarProps } from "./types";
 import {
@@ -27,15 +25,9 @@ export function SimpleSidebar({ user, artists }: SidebarProps) {
 		<Sidebar
 			ref={sidebarRef}
 			collapsible="icon"
-			variant="sidebar"
-			className="overflow-y-auto overscroll-y-contain"
+			variant="inset"
+			className="overflow-y-auto overscroll-y-contain bg-background"
 		>
-			<SidebarHeader className="border-b border-sidebar-border">
-				<div className="flex items-center justify-start p-3">
-					<SidebarTrigger className="h-8 w-8" />
-				</div>
-			</SidebarHeader>
-
 			<SidebarContent>
 				<SidebarGroup>
 					<MenuSection items={mainItems} />

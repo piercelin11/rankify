@@ -85,6 +85,8 @@ export default {
 			spacing: {
 				"18": "4.5rem",
 				"22": "5.5rem",
+				"header": "4rem",
+				"header-inset": "calc(4rem - 0.5rem)"
 				"content": "3rem"
 			},
 			backgroundImage: {
