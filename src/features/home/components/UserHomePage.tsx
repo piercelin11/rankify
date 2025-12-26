@@ -4,7 +4,6 @@ import { getUserHistory } from "@/services/home/getUserHistory";
 import { getHeroItem } from "@/services/home/getHeroItem";
 import { getDiscoveryArtists } from "@/services/home/getDiscoveryArtists";
 import DashboardSection from "@/features/home/components/DashboardSection";
-import GlobalSearch from "@/features/home/components/GlobalSearch";
 import HeroSection from "@/features/home/components/HeroSection";
 import DraftsSection from "@/features/home/components/DraftsSection";
 import HistorySection from "@/features/home/components/HistorySection";
@@ -40,9 +39,6 @@ export default async function UserHomePage({ userId }: UserHomePageProps) {
 
 	return (
 		<div className="p-content space-y-14">
-			<div className="mx-auto max-w-2xl">
-				<GlobalSearch />
-			</div>
 			<div className="space-y-4">
 				<HeroSection hero={hero} />
 				<DashboardSection stats={stats} />
