@@ -17,8 +17,8 @@ export function GuestSidebar() {
 		<Sidebar
 			ref={sidebarRef}
 			collapsible="icon"
-			variant="sidebar"
-			className="overflow-y-auto overscroll-y-contain"
+			variant="inset"
+			className="overflow-y-auto overscroll-y-contain bg-background"
 		>
 			<SidebarContent>
 				<SidebarGroup>

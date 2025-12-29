@@ -249,7 +249,7 @@ const Sidebar = React.forwardRef<
               : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
             // Adjust the padding for floating and inset variants.
             variant === "floating" || variant === "inset"
-              ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
+              ? "px-2 pb-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
               : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r border-sidebar-border group-data-[side=right]:border-l",
             className
           )}
@@ -335,7 +335,7 @@ const SidebarInset = React.forwardRef<
         // inset variant: 固定定位 + 固定高度 + 間距
         "md:peer-data-[variant=inset]:fixed",
         "md:peer-data-[variant=inset]:w-auto",
-        "md:peer-data-[variant=inset]:top-18",
+        "md:peer-data-[variant=inset]:top-header",
         "md:peer-data-[variant=inset]:bottom-4",
         "md:peer-data-[variant=inset]:left-[calc(var(--sidebar-width))]",
         "md:peer-data-[variant=inset]:right-4",
