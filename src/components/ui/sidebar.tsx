@@ -340,7 +340,7 @@ const SidebarInset = React.forwardRef<
         "md:peer-data-[variant=inset]:left-[calc(var(--sidebar-width))]",
         "md:peer-data-[variant=inset]:right-4",
         "md:peer-data-[state=collapsed]:peer-data-[variant=inset]:left-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]",
-        "md:peer-data-[variant=inset]:rounded-xl",
+        "md:peer-data-[variant=inset]:rounded-lg",
         "md:peer-data-[variant=inset]:shadow",
         "md:peer-data-[variant=inset]:overflow-hidden",
         className
