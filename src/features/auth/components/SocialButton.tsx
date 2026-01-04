@@ -4,13 +4,17 @@ import { Button } from "@/components/ui/button";
 import { GoogleIcon, SpotifyIcon } from "@/components/icons/LogoIcons";
 import handleOath from "@/features/auth/actions/handleOath";
 
-export default function SocialButton() {
+type SocialButtonProps = {
+	callbackUrl?: string;
+};
+
+export default function SocialButton({ callbackUrl = '/' }: SocialButtonProps) {
 	return (
 		<div className="flex gap-4">
 			<Button
 				className="w-full justify-center"
 				variant="outline"
-				onClick={() => handleOath("google")}
+				onClick={() => handleOath("google", callbackUrl)}
 			>
 				<GoogleIcon size={27} />
 			</Button>

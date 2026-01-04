@@ -5,8 +5,9 @@ import { DEFAULT_LOGIN_REDIRECT } from "@/config/route";
 import { AppResponseType } from "@/types/response";
 
 export default async function handleOath(
-	provider: "google"
+	provider: "google",
+	callbackUrl?: string
 ): Promise<AppResponseType> {
-	await signIn(provider, { redirectTo: DEFAULT_LOGIN_REDIRECT });
+	await signIn(provider, { redirectTo: callbackUrl || DEFAULT_LOGIN_REDIRECT });
 	return { type: "success", message: "successfully sign in." };
 }

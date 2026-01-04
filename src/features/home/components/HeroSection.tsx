@@ -51,8 +51,8 @@ export default function HeroSection({ hero }: HeroSectionProps) {
 					ctaText: "Continue Ranking",
 					ctaHref:
 						data.type === "ARTIST"
-							? `/sorter/artist/${data.id}?resume=true`
-							: `/sorter/album/${data.id}?resume=true`,
+							? `/sorter/artist/${data.id}?skipPrompt=true`
+							: `/sorter/album/${data.id}?skipPrompt=true`,
 				};
 
 			case "top_artist":

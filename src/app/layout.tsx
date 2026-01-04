@@ -5,6 +5,7 @@ import { ModalManager } from "@/components/modals/ModalManager";
 import { ModalProvider } from "@/contexts";
 import { Suspense } from "react";
 import { SessionProvider } from "next-auth/react";
+import { Toaster } from "@/components/ui/toaster";
 
 const serif = Geist_Mono({
 	variable: "--font-serif",
@@ -44,6 +45,7 @@ export default function RootLayout({
 						>
 							{children}
 							<ModalManager />
+							<Toaster />
 						</body>
 					</ModalProvider>
 				</SessionProvider>

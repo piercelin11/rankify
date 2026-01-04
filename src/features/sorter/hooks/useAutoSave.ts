@@ -1,10 +1,10 @@
 import { useRef, useCallback, useEffect } from 'react';
 import type { SorterStateType } from '@/lib/schemas/sorter';
-import saveDraft from '../actions/saveDraft';
 import type { SaveStatusType } from '@/contexts/SorterContext';
 
 type UseAutoSaveParams = {
-	submissionId: string;
+	enabled: boolean;
+	onSave: (state: SorterStateType) => Promise<void>;
 	setSaveStatus: (status: SaveStatusType) => void;
 	debounceDelay?: number;  // 預設 10 秒
 	maxInterval?: number;    // 預設 2 分鐘
@@ -16,9 +16,11 @@ type UseAutoSaveParams = {
  * 行為:
  * - 使用者停止點擊 10 秒後 → 自動儲存
  * - 連續點擊超過 2 分鐘 → 強制儲存
+ * - Guest 模式下不啟用 (enabled=false)
  */
 export function useAutoSave({
-	submissionId,
+	enabled,
+	onSave,
 	setSaveStatus,
 	debounceDelay = 10 * 1000,
 	maxInterval = 2 * 60 * 1000,
@@ -40,22 +42,19 @@ export function useAutoSave({
 		setSaveStatus('pending');
 
 		try {
-			const result = await saveDraft(state, submissionId);
-
-			if (result.type === 'error') {
-				console.error('Auto-save failed:', result.message);
-				setSaveStatus('failed');
-			} else {
-				setSaveStatus('saved');
-			}
+			await onSave(state);
+			setSaveStatus('saved');
 		} catch (error) {
 			console.error('Auto-save error:', error);
 			setSaveStatus('failed');
 		}
-	}, [submissionId, setSaveStatus]);
+	}, [onSave, setSaveStatus]);
 
 	// 觸發自動儲存（由 sortList 呼叫）
 	const triggerAutoSave = useCallback((state: SorterStateType) => {
+		// 若不啟用自動儲存，直接返回
+		if (!enabled) return;
+
 		// 保存最新狀態
 		latestStateRef.current = state;
 
@@ -92,7 +91,7 @@ export function useAutoSave({
 				maxIntervalTimerRef.current = null;
 			}
 		}, debounceDelay);
-	}, [executeSave, debounceDelay, maxInterval]);
+	}, [enabled, executeSave, debounceDelay, maxInterval]);
 
 	return triggerAutoSave;
 }

@@ -14,7 +14,6 @@ export const publicRoutes: string[] = ["/"];
 export const privateRoutes: string[] = [
 	"/settings",
 	"/settings/ranking",
-	"/sorter/album/:albumId",
 	"/sorter/artist/:artistId",
 	"/artist/:artistId/album/:albumId",
 	"/artist/:artistId/track/:trackId",

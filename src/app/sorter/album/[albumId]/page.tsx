@@ -1,4 +1,4 @@
-import { requireSession } from "@/../auth";
+import { getSession } from "@/../auth";
 import { getAlbumById } from "@/db/album";
 import { getIncompleteRankingSubmission } from "@/db/ranking";
 import { getTracksByAlbumId } from "@/db/track";
@@ -9,6 +9,9 @@ import { createSubmission } from "@/features/sorter/actions/createSubmission";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import GuestSorterEntry from "@/features/sorter/components/GuestSorterEntry";
+import MigrationHandler from "@/features/sorter/components/MigrationHandler";
+import initializeSorterState from "@/features/sorter/utils/initializeSorterState";
 
 type pageProps = {
 	params: Promise<{ albumId: string }>;
@@ -18,11 +21,50 @@ type pageProps = {
 export default async function page({ params, searchParams }: pageProps) {
 	const { albumId } = await params;
 	const search = await searchParams;
-	const fromHome = search?.resume === "true";
-	const { id: userId } = await requireSession();
+	const shouldSkipPrompt = search?.skipPrompt === "true";
+	const shouldMigrate = search?.migrate === "true";
+
+	const user = await getSession();
+	const isGuest = !user;
 
 	const album = await getAlbumById({ albumId });
 	if (!album) notFound();
+
+	const tracks = await getTracksByAlbumId({ albumId });
+
+	// 處理 Guest 資料遷移 (登入後自動匯入 LocalStorage 資料)
+	if (shouldMigrate && !isGuest) {
+		return <MigrationHandler albumId={albumId} artistId={album.artistId} />;
+	}
+
+	// Guest 模式 → 渲染 GuestSorterEntry
+	if (isGuest) {
+		if (tracks.length === 0) {
+			return (
+				<div className="flex flex-col items-center justify-center py-20">
+					<p className="text-lg">此專輯無歌曲資料</p>
+					<Link href={`/album/${albumId}`}>
+						<Button className="mt-4">返回專輯頁面</Button>
+					</Link>
+				</div>
+			);
+		}
+
+		// 直接使用 initializeSorterState 建立初始狀態
+		const initialState = initializeSorterState(tracks);
+
+		return (
+			<GuestSorterEntry
+				albumId={albumId}
+				artistId={album.artistId}
+				tracks={tracks}
+				initialState={initialState}
+			/>
+		);
+	}
+
+	// User 模式
+	const userId = user.id;
 
 	const submission = await getIncompleteRankingSubmission({
 		artistId: album.artistId,
@@ -30,8 +72,6 @@ export default async function page({ params, searchParams }: pageProps) {
 		type: "ALBUM",
 		albumId,
 	});
-
-	const tracks = await getTracksByAlbumId({ albumId });
 
 	// 沒有草稿 → 自動建立（不 redirect）
 	if (!submission) {
@@ -67,7 +107,9 @@ export default async function page({ params, searchParams }: pageProps) {
 		}
 
 		// 建立成功 → 驗證並渲染 DraftPrompt
-		const validation = sorterStateSchema.safeParse(submissionResult.data.draftState);
+		const validation = sorterStateSchema.safeParse(
+			submissionResult.data.draftState
+		);
 		if (!validation.success) {
 			return (
 				<CorruptedDraftFallback
@@ -81,10 +123,12 @@ export default async function page({ params, searchParams }: pageProps) {
 			<DraftPrompt
 				submissionId={submissionResult.data.id}
 				draftState={validation.data}
-				draftDate={submissionResult.data.updatedAt || submissionResult.data.createdAt}
+				draftDate={
+					submissionResult.data.updatedAt || submissionResult.data.createdAt
+				}
 				tracks={tracks}
-				userId={userId}
-				fromHome={fromHome}
+				artistId={album.artistId}
+				shouldSkipPrompt={shouldSkipPrompt}
 			/>
 		);
 	}
@@ -108,8 +152,8 @@ export default async function page({ params, searchParams }: pageProps) {
 			draftState={validation.data}
 			draftDate={submission.updatedAt || submission.createdAt}
 			tracks={tracks}
-			userId={userId}
-			fromHome={fromHome}
+			artistId={album.artistId}
+			shouldSkipPrompt={shouldSkipPrompt}
 		/>
 	);
 }

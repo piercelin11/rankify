@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { ChevronLeftIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import useSorter from "@/features/sorter/hooks/useSorter";
@@ -8,15 +7,14 @@ import TrackBtn from "./TrackBtn";
 import EqualBtn from "./EqualBtn";
 import { useModal } from "@/contexts";
 import { TrackData } from "@/types/data";
-import deleteSubmission from "../actions/deleteSubmission";
 import { useSorterContext } from "@/contexts/SorterContext";
 import { SorterStateType } from "@/lib/schemas/sorter";
+import { StorageStrategy } from "../storage/StorageStrategy";
 
 type RankingStageProps = {
 	initialState: SorterStateType;
-	submissionId: string;
 	tracks: TrackData[];
-	userId: string;
+	storage: StorageStrategy;
 };
 
 type PressedKeyType = "ArrowLeft" | "ArrowRight" | "ArrowDown" | "ArrowUp";
@@ -31,20 +29,15 @@ const keyMap = {
 
 export default function RankingStage({
 	initialState,
-	submissionId,
 	tracks,
-	userId,
+	storage,
 }: RankingStageProps) {
-	const router = useRouter();
 	const { showAlert, showConfirm } = useModal();
 	const { setSaveStatus, setPercentage, saveStatus } =
 		useSorterContext();
 
 	const [selectedButton, setSelectedButton] = useState<string | null>(null);
 	const [pressedKey, setPressedKey] = useState<PressedKeyType | null>(null);
-
-	// 從 initialState 獲取必要資訊
-	const artistId = tracks[0]?.artistId;
 
 	const {
 		leftField,
@@ -55,22 +48,23 @@ export default function RankingStage({
 		restorePreviousState,
 	} = useSorter({
 		initialState,
-		submissionId,
 		tracks,
-		userId,
+		storage,
 	});
 
 	//清除排名紀錄並重新開始
 	function handleClear() {
+		if (!storage.capabilities.canRestart) return;
+
 		setSaveStatus("idle");
 		setPercentage(0);
-		deleteSubmission({ submissionId });
+		storage.delete();
 	}
 
 	//離開排名介面
 	function handleQuit() {
 		setSaveStatus("idle");
-		router.replace(`/artist/${artistId}`);
+		storage.quit();
 	}
 
 	// 處理選擇反饋效果
@@ -114,8 +108,7 @@ export default function RankingStage({
 	// beforeunload 警告：防止意外關閉導致資料遺失
 	useEffect(() => {
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-			// 如果有未儲存的變更，顯示警告
-			if (saveStatus !== "saved") {
+			if (storage.capabilities.needsBeforeUnload && saveStatus !== "saved") {
 				e.preventDefault();
 				e.returnValue = ''; // Chrome 需要設定 returnValue
 			}
@@ -123,7 +116,7 @@ export default function RankingStage({
 
 		window.addEventListener('beforeunload', handleBeforeUnload);
 		return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-	}, [saveStatus]);
+	}, [storage.capabilities.needsBeforeUnload, saveStatus]);
 
 	return (
 		<section className="flex h-[calc(100vh-80px)] select-none">
@@ -164,23 +157,25 @@ export default function RankingStage({
 					</Button>
 
 					<div className="flex gap-3 xl:gap-6">
-						<Button
-							variant="outline"
-							onClick={() =>
-								showAlert({
-									title: "Are You Sure?",
-									description: "You will clear your sorting record.",
-									confirmText: "Clear and Restart",
-									onConfirm: () => handleClear(),
-								})
-							}
-						>
-							Restart
-						</Button>
+						{storage.capabilities.canRestart && (
+							<Button
+								variant="outline"
+								onClick={() =>
+									showAlert({
+										title: "Are You Sure?",
+										description: "You will clear your sorting record.",
+										confirmText: "Clear and Restart",
+										onConfirm: () => handleClear(),
+									})
+								}
+							>
+								Restart
+							</Button>
+						)}
 						<Button
 							variant="outline"
 							onClick={() => {
-								if (saveStatus === "idle")
+								if (saveStatus === "idle") {
 									showConfirm({
 										title: "Are You Sure?",
 										description: "Your sorting record has not been saved.",
@@ -192,7 +187,9 @@ export default function RankingStage({
 											handleQuit();
 										},
 									});
-								else handleQuit();
+								} else {
+									handleQuit();
+								}
 							}}
 						>
 							Quit

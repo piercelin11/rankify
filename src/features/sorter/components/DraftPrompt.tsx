@@ -9,14 +9,16 @@ import RankingStage from "./RankingStage";
 import ResultStage from "./ResultStage";
 import type { SorterStateType } from "@/lib/schemas/sorter";
 import type { TrackData } from "@/types/data";
+import { DatabaseStorage } from "../storage/DatabaseStorage";
+import { useSorterContext } from "@/contexts/SorterContext";
 
 type DraftPromptProps = {
 	submissionId: string;
 	draftState: SorterStateType;
 	draftDate: Date;
 	tracks: TrackData[];
-	userId: string;
-	fromHome?: boolean;
+	artistId: string;
+	shouldSkipPrompt?: boolean;
 };
 
 export function DraftPrompt({
@@ -24,12 +26,16 @@ export function DraftPrompt({
 	draftState,
 	draftDate,
 	tracks,
-	userId,
-	fromHome = false,
+	artistId,
+	shouldSkipPrompt = false,
 }: DraftPromptProps) {
 	const [choice, setChoice] = useState<"continue" | "restart" | null>(null);
 	const [isPending, startTransition] = useTransition();
 	const router = useRouter();
+	const { setSaveStatus } = useSorterContext();
+
+	// 建立 DatabaseStorage 實例
+	const storage = new DatabaseStorage(submissionId, artistId, router, setSaveStatus);
 
 	const handleRestart = () => {
 		setChoice("restart");
@@ -45,19 +51,18 @@ export function DraftPrompt({
 			<ResultStage
 				draftState={draftState}
 				tracks={tracks}
-				submissionId={submissionId}
+				storage={storage}
 			/>
 		);
 	}
 
-	// 從首頁點擊進來 → 直接繼續
-	if (fromHome) {
+	// 使用者明確表達繼續意圖 (從首頁點擊 Continue) → 直接繼續,跳過確認 Modal
+	if (shouldSkipPrompt) {
 		return (
 			<RankingStage
 				initialState={draftState}
 				tracks={tracks}
-				submissionId={submissionId}
-				userId={userId}
+				storage={storage}
 			/>
 		);
 	}
@@ -68,8 +73,7 @@ export function DraftPrompt({
 			<RankingStage
 				initialState={draftState}
 				tracks={tracks}
-				submissionId={submissionId}
-				userId={userId}
+				storage={storage}
 			/>
 		);
 	}
@@ -117,8 +121,7 @@ export function DraftPrompt({
 		<RankingStage
 			initialState={draftState}
 			tracks={tracks}
-			submissionId={submissionId}
-			userId={userId}
+			storage={storage}
 		/>
 	);
 }
