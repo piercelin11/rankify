@@ -33,6 +33,7 @@ type ResultStageProps = {
 	tracks: TrackData[];
 	storage: StorageStrategy;
 	initialRankedList?: string[];
+	albumId?: string; // Guest 模式需要 albumId 來清除 LocalStorage
 };
 
 export default function ResultStage({
@@ -40,6 +41,7 @@ export default function ResultStage({
 	tracks,
 	storage,
 	initialRankedList,
+	albumId,
 }: ResultStageProps) {
 	const { showAlert } = useModal();
 	const { setPercentage } = useSorterContext();
@@ -180,12 +182,58 @@ export default function ResultStage({
 			<div className="sticky top-0 flex items-center justify-between py-10">
 				<h3>Your ranking result</h3>
 				<div className="flex gap-5">
+					{/* Guest 模式: 重新排名按鈕 */}
+					{!storage.capabilities.canAutoSave && albumId && (
+						<Button
+							variant="outline"
+							onClick={() => {
+								showAlert({
+									title: "Restart Ranking?",
+									description: "Your current ranking will be cleared and cannot be recovered",
+									confirmText: "Restart",
+									onConfirm: () => {
+										localStorage.removeItem(`rankify_guest_result_${albumId}`);
+										window.location.reload();
+									},
+								});
+							}}
+						>
+							Restart Ranking
+						</Button>
+					)}
+
+					{/* 儲存排名/登入按鈕 */}
 					<Button onClick={handleSubmit}>
 						{storage.capabilities.canAutoSave ? "Submit" : "Login to Save"}
 					</Button>
+
+					{/* User 模式: Delete 按鈕 */}
 					{storage.capabilities.canDelete && (
 						<Button variant="secondary" onClick={handleDelete}>
 							<p className="w-full">Delete</p>
+						</Button>
+					)}
+
+					{/* Guest 模式: Quit 按鈕 */}
+					{!storage.capabilities.canAutoSave ? (
+						<Button
+							variant="outline"
+							onClick={() => {
+								showAlert({
+									title: "Leave Without Saving?",
+									description: "Your ranking has not been saved yet",
+									confirmText: "Leave",
+									onConfirm: () => {
+										window.location.href = "/";
+									},
+								});
+							}}
+						>
+							Quit
+						</Button>
+					) : (
+						<Button variant="outline" onClick={() => storage.quit()}>
+							Quit
 						</Button>
 					)}
 				</div>

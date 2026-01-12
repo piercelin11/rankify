@@ -108,7 +108,15 @@ export default function RankingStage({
 	// beforeunload 警告：防止意外關閉導致資料遺失
 	useEffect(() => {
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-			if (storage.capabilities.needsBeforeUnload && saveStatus !== "saved") {
+			// 只有 User 模式才需要 beforeunload 警告
+			if (!storage.capabilities.needsBeforeUnload) {
+				return; // Guest 模式直接返回，不警告
+			}
+
+			// User 模式: 只在未儲存時警告
+			const shouldWarn = saveStatus !== "saved";
+
+			if (shouldWarn) {
 				e.preventDefault();
 				e.returnValue = ''; // Chrome 需要設定 returnValue
 			}
@@ -175,20 +183,31 @@ export default function RankingStage({
 						<Button
 							variant="outline"
 							onClick={() => {
-								if (saveStatus === "idle") {
-									showConfirm({
-										title: "Are You Sure?",
-										description: "Your sorting record has not been saved.",
-										confirmText: "Quit",
-										cancelText: "Save",
-										onConfirm: () => handleQuit(),
-										onCancel: async () => {
-											await handleSave();
-											handleQuit();
-										},
-									});
+								if (storage.capabilities.canAutoSave) {
+									// User 模式: 有草稿功能,可以 Save
+									if (saveStatus === "idle") {
+										showConfirm({
+											title: "Are You Sure?",
+											description: "Your sorting record has not been saved.",
+											confirmText: "Quit",
+											cancelText: "Save",
+											onConfirm: () => handleQuit(),
+											onCancel: async () => {
+												await handleSave();
+												handleQuit();
+											},
+										});
+									} else {
+										handleQuit();
+									}
 								} else {
-									handleQuit();
+									// Guest 模式: 沒有草稿功能,只有確認退出
+									showAlert({
+										title: "Are You Sure?",
+										description: "Your ranking progress will be lost",
+										confirmText: "Quit",
+										onConfirm: () => handleQuit(),
+									});
 								}
 							}}
 						>

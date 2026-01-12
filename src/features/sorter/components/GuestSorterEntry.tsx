@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { GuestResultData } from "@/types/guest";
 import ResultStage from "./ResultStage";
 import RankingStage from "./RankingStage";
@@ -34,8 +34,17 @@ export default function GuestSorterEntry({
 	const [isLoading, setIsLoading] = useState(true);
 	const { showAuthGuard } = useModal();
 
-	// 建立 GuestStorage 實例
-	const storage = new GuestStorage(albumId, artistId, showAuthGuard);
+	// 使用 useRef 穩定 callback 引用 (避免 storage 實例重建)
+	const handleFinalizeRef = useRef<(data: GuestResultData) => void>(() => {});
+	handleFinalizeRef.current = (data: GuestResultData) => {
+		setGuestData(data);
+	};
+
+	// 建立 GuestStorage 實例 (傳入 callback)
+	const storage = useMemo(
+		() => new GuestStorage(albumId, artistId, showAuthGuard, (data) => handleFinalizeRef.current?.(data)),
+		[albumId, artistId, showAuthGuard]
+	);
 
 	useEffect(() => {
 		const key = `rankify_guest_result_${albumId}`;
@@ -63,7 +72,7 @@ export default function GuestSorterEntry({
 	if (isLoading) {
 		return (
 			<div className="flex items-center justify-center min-h-screen">
-				<p>載入中...</p>
+				<p>Loading...</p>
 			</div>
 		);
 	}
@@ -75,6 +84,7 @@ export default function GuestSorterEntry({
 				tracks={tracks}
 				storage={storage}
 				initialRankedList={guestData.resultState.rankedList}
+				albumId={albumId}
 			/>
 		);
 	}

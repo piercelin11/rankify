@@ -10,7 +10,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import GuestSorterEntry from "@/features/sorter/components/GuestSorterEntry";
-import MigrationHandler from "@/features/sorter/components/MigrationHandler";
 import initializeSorterState from "@/features/sorter/utils/initializeSorterState";
 
 type pageProps = {
@@ -22,7 +21,6 @@ export default async function page({ params, searchParams }: pageProps) {
 	const { albumId } = await params;
 	const search = await searchParams;
 	const shouldSkipPrompt = search?.skipPrompt === "true";
-	const shouldMigrate = search?.migrate === "true";
 
 	const user = await getSession();
 	const isGuest = !user;
@@ -32,19 +30,14 @@ export default async function page({ params, searchParams }: pageProps) {
 
 	const tracks = await getTracksByAlbumId({ albumId });
 
-	// 處理 Guest 資料遷移 (登入後自動匯入 LocalStorage 資料)
-	if (shouldMigrate && !isGuest) {
-		return <MigrationHandler albumId={albumId} artistId={album.artistId} />;
-	}
-
 	// Guest 模式 → 渲染 GuestSorterEntry
 	if (isGuest) {
 		if (tracks.length === 0) {
 			return (
 				<div className="flex flex-col items-center justify-center py-20">
-					<p className="text-lg">此專輯無歌曲資料</p>
+					<p className="text-lg">No tracks available for this album</p>
 					<Link href={`/album/${albumId}`}>
-						<Button className="mt-4">返回專輯頁面</Button>
+						<Button className="mt-4">Back to Album</Button>
 					</Link>
 				</div>
 			);
@@ -78,9 +71,9 @@ export default async function page({ params, searchParams }: pageProps) {
 		if (tracks.length === 0) {
 			return (
 				<div className="flex flex-col items-center justify-center py-20">
-					<p className="text-lg">此專輯無歌曲資料</p>
+					<p className="text-lg">No tracks available for this album</p>
 					<Link href={`/album/${albumId}`}>
-						<Button className="mt-4">返回專輯頁面</Button>
+						<Button className="mt-4">Back to Album</Button>
 					</Link>
 				</div>
 			);
@@ -98,9 +91,9 @@ export default async function page({ params, searchParams }: pageProps) {
 		if (!submissionResult.data) {
 			return (
 				<div className="flex flex-col items-center gap-4 py-20">
-					<p className="text-destructive">無法建立排名</p>
+					<p className="text-destructive">Failed to create ranking</p>
 					<p className="text-sm text-muted-foreground">
-						{submissionResult.message || "未知錯誤"}
+						{submissionResult.message || "Unknown error"}
 					</p>
 				</div>
 			);

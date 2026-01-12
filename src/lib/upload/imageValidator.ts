@@ -54,7 +54,7 @@ export async function validateImageFile(file: File): Promise<{
 	if (!isAllowedMimeType(file.type)) {
 		return {
 			valid: false,
-			error: `只允許上傳 ${ALLOWED_IMAGE_MIME_TYPES.join(", ")} 格式的圖片`,
+			error: `Only ${ALLOWED_IMAGE_MIME_TYPES.join(", ")} image formats are allowed`,
 		};
 	}
 
@@ -62,7 +62,7 @@ export async function validateImageFile(file: File): Promise<{
 	if (file.size > MAX_IMAGE_FILE_SIZE) {
 		return {
 			valid: false,
-			error: `檔案大小不得超過 ${MAX_IMAGE_FILE_SIZE / 1024 / 1024}MB`,
+			error: `File size must not exceed ${MAX_IMAGE_FILE_SIZE / 1024 / 1024}MB`,
 		};
 	}
 
@@ -71,7 +71,7 @@ export async function validateImageFile(file: File): Promise<{
 	if (!isMagicNumberValid) {
 		return {
 			valid: false,
-			error: "檔案格式驗證失敗,可能是偽裝的檔案",
+			error: "File format validation failed, possible file type mismatch",
 		};
 	}
 

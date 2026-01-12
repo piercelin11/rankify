@@ -9,7 +9,7 @@ import RankingStage from "./RankingStage";
 import ResultStage from "./ResultStage";
 import type { SorterStateType } from "@/lib/schemas/sorter";
 import type { TrackData } from "@/types/data";
-import { DatabaseStorage } from "../storage/DatabaseStorage";
+import { UserStorage } from "../storage/UserStorage";
 import { useSorterContext } from "@/contexts/SorterContext";
 
 type DraftPromptProps = {
@@ -34,8 +34,8 @@ export function DraftPrompt({
 	const router = useRouter();
 	const { setSaveStatus } = useSorterContext();
 
-	// 建立 DatabaseStorage 實例
-	const storage = new DatabaseStorage(submissionId, artistId, router, setSaveStatus);
+	// 建立 UserStorage 實例
+	const storage = new UserStorage(submissionId, artistId, router, setSaveStatus);
 
 	const handleRestart = () => {
 		setChoice("restart");
@@ -112,7 +112,7 @@ export function DraftPrompt({
 	if (choice === "restart") {
 		return (
 			<div className="flex items-center justify-center py-20">
-				<p className="text-muted-foreground">正在刪除草稿...</p>
+				<p className="text-muted-foreground">Deleting draft...</p>
 			</div>
 		);
 	}

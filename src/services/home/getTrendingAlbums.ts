@@ -14,7 +14,7 @@ export async function getTrendingAlbums(): Promise<DiscoveryType[]> {
 				some: {
 					status: "COMPLETED",
 					completedAt: {
-						gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+						gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
 						not: null,
 					},
 				},

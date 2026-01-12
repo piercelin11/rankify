@@ -27,6 +27,7 @@ type UseSorterStateReturn = {
 	leftField: TrackData | undefined;
 	rightField: TrackData | undefined;
 	finishFlag: { current: number };
+	isRankingComplete: boolean;
 	handleSave: () => Promise<{ type: string; message: string }>;
 	restorePreviousState: () => void;
 	sortList: (flag: number) => void;
@@ -190,7 +191,8 @@ export default function useSorter({
 	return {
 		leftField,
 		rightField,
-		finishFlag: { current: state?.finishFlag || 0 }, // 保持原本的 ref 介面
+		finishFlag: { current: state?.finishFlag || 0 }, // 保持原本的 ref 介面 (後向相容)
+		isRankingComplete: state?.finishFlag === 1, // 新增語義化的 boolean 值
 		handleSave,
 		restorePreviousState,
 		sortList,

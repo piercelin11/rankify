@@ -2,6 +2,7 @@ import { StorageStrategy, Capabilities } from "./StorageStrategy";
 import { SorterStateType } from "@/lib/schemas/sorter";
 import { TrackData } from "@/types/data";
 import { RankingResultData } from "../types";
+import { GuestResultData } from "@/types/guest";
 
 /**
  * Guest 儲存策略
@@ -13,15 +14,18 @@ export class GuestStorage implements StorageStrategy {
 	private albumId: string;
 	private artistId: string;
 	private showAuthGuard: (params: { callbackUrl: string }) => void;
+	private onFinalize?: (data: GuestResultData) => void;
 
 	constructor(
 		albumId: string,
 		artistId: string,
-		showAuthGuard: (params: { callbackUrl: string }) => void
+		showAuthGuard: (params: { callbackUrl: string }) => void,
+		onFinalize?: (data: GuestResultData) => void
 	) {
 		this.albumId = albumId;
 		this.artistId = artistId;
 		this.showAuthGuard = showAuthGuard;
+		this.onFinalize = onFinalize;
 	}
 
 	async save(_state: SorterStateType): Promise<void> {
@@ -36,7 +40,7 @@ export class GuestStorage implements StorageStrategy {
 			.filter(Boolean);
 
 		// 建立 Guest 結果資料
-		const guestData = {
+		const guestData: GuestResultData = {
 			albumId: this.albumId,
 			artistId: this.artistId,
 			resultState: {
@@ -53,8 +57,8 @@ export class GuestStorage implements StorageStrategy {
 			JSON.stringify(guestData)
 		);
 
-		// 重新載入頁面以顯示結果
-		window.location.reload();
+		// 觸發狀態更新 (不需要 reload!)
+		this.onFinalize?.(guestData);
 	}
 
 	async delete(): Promise<void> {
@@ -63,9 +67,9 @@ export class GuestStorage implements StorageStrategy {
 	}
 
 	async submitResult(_result: RankingResultData[]): Promise<void> {
-		// 觸發登入引導,帶上 migrate=true 參數
+		// 觸發登入引導,導向 /migration 頁面
 		this.showAuthGuard({
-			callbackUrl: `/sorter/album/${this.albumId}?migrate=true`,
+			callbackUrl: `/migration`,
 		});
 	}
 
@@ -81,9 +85,7 @@ export class GuestStorage implements StorageStrategy {
 	};
 
 	quit(): void {
-		// 觸發登入引導
-		this.showAuthGuard({
-			callbackUrl: `/sorter/album/${this.albumId}`,
-		});
+		// Guest 退出回首頁 (保持 SPA 體驗)
+		window.location.assign('/');
 	}
 }

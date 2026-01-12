@@ -1,7 +1,7 @@
 import z from "zod/v4";
 
 export const sorterFilterSchema = z.object({
-	selectedAlbumIds: z.array(z.string()).min(2, "至少選擇2個專輯"),
+	selectedAlbumIds: z.array(z.string()).min(2, "Select at least 2 albums"),
 	selectedTrackIds: z.array(z.string()),
 });
 

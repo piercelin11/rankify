@@ -37,16 +37,16 @@ export function AuthGuardModal({
 				<AlertDialogHeader>
 					<div className="flex items-center gap-2">
 						<Lock className="h-5 w-5 text-muted-foreground" />
-						<AlertDialogTitle>解鎖完整功能</AlertDialogTitle>
+						<AlertDialogTitle>Unlock Full Features</AlertDialogTitle>
 					</div>
 					<AlertDialogDescription>
-						登入後即可建立、儲存並分享你的專屬排名。
+						Sign in to create, save, and share your personalized rankings.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel>取消</AlertDialogCancel>
+					<AlertDialogCancel>Cancel</AlertDialogCancel>
 					<AlertDialogAction onClick={handleSignIn}>
-						前往登入/註冊
+						Sign In / Sign Up
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

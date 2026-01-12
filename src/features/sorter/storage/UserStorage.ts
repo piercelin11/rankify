@@ -11,12 +11,12 @@ type Router = { replace: (url: string) => void; push: (url: string) => void };
 type SetSaveStatus = (status: "saved" | "pending" | "failed" | "idle") => void;
 
 /**
- * Database 儲存策略
+ * User 儲存策略
  *
  * 使用 Server Actions 將資料儲存到資料庫
  * 支援自動儲存、重新開始、刪除等完整功能
  */
-export class DatabaseStorage implements StorageStrategy {
+export class UserStorage implements StorageStrategy {
 	private submissionId: string;
 	private artistId: string;
 	private router: Router;

@@ -16,14 +16,14 @@ export type HeroSpotlightType = {
 export async function getHeroSpotlight(): Promise<HeroSpotlightType | null> {
 	cacheLife(CACHE_TIMES.LONG);
 
-	// 選擇最近 30 天內最熱門的專輯
+	// 選擇最近 90 天內最熱門的專輯
 	const popularAlbum = await db.album.findFirst({
 		where: {
 			submissions: {
 				some: {
 					status: "COMPLETED",
 					completedAt: {
-						gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+						gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
 						not: null,
 					},
 				},

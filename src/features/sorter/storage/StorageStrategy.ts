@@ -28,7 +28,7 @@ export interface Capabilities {
  * const storage = new GuestStorage(albumId, artistId, showAuthGuard);
  *
  * // User 模式
- * const storage = new DatabaseStorage(submissionId, artistId, router, setSaveStatus);
+ * const storage = new UserStorage(submissionId, artistId, router, setSaveStatus);
  *
  * // 統一使用
  * await storage.save(state);
