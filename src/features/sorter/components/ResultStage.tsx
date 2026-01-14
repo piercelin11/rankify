@@ -25,7 +25,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 import Image from "next/image";
 import { PLACEHOLDER_PIC } from "@/constants";
-import { useSorterContext } from "@/contexts/SorterContext";
+import { useSorterActions } from "@/contexts/SorterContext";
 import { StorageStrategy } from "../storage/StorageStrategy";
 
 type ResultStageProps = {
@@ -44,7 +44,7 @@ export default function ResultStage({
 	albumId,
 }: ResultStageProps) {
 	const { showAlert } = useModal();
-	const { setPercentage } = useSorterContext();
+	const { setPercentage } = useSorterActions();
 
 	// 配置拖曳感測器
 	const sensors = useSensors(

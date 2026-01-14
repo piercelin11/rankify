@@ -3,14 +3,14 @@
 import { CheckIcon } from "@radix-ui/react-icons";
 import LoadingAnimation from "@/components/feedback/LoadingAnimation";
 import { Progress } from "@/components/ui/progress";
-import { useSorterContext } from "@/contexts/SorterContext";
+import { useSorterState } from "@/contexts/SorterContext";
 
 type SorterHeaderProps = {
 	title: string;
 };
 
 export default function SorterHeader({ title }: SorterHeaderProps) {
-	const { saveStatus, percentage } = useSorterContext();
+	const { saveStatus, percentage } = useSorterState();
 
 	return (
 		<div className="grid h-20 items-center border-b px-4 sm:grid-cols-3">

@@ -3,7 +3,7 @@
 import { requireSession } from '@/../auth';
 import { db } from '@/db/client';
 import { revalidatePath } from 'next/cache';
-import { invalidateDraftCache } from '@/lib/cacheInvalidation';
+import { invalidateDraftCacheImmediate } from '@/lib/cacheInvalidation';
 
 export default async function deleteSubmission({
 	submissionId,
@@ -26,11 +26,11 @@ export default async function deleteSubmission({
       },
     });
 
-    // ========== 快取失效 ==========
+    // ========== 快取失效（硬失效） ==========
+    // 使用 invalidateDraftCacheImmediate 確保刪除後立即更新列表
     if (submission) {
-      await invalidateDraftCache(userId, submission.artistId);
+      await invalidateDraftCacheImmediate(userId, submission.artistId);
       revalidatePath('/sorter');
-
     }
     // ========== 快取失效結束 ==========
 

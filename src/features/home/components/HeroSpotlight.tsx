@@ -53,7 +53,7 @@ export default function HeroSpotlight({ data }: HeroSpotlightProps) {
 						onClick={handleStartRanking}
 						className="bg-primary hover:bg-primary/90"
 					>
-						⚡ Start Ranking
+						Start Ranking
 					</Button>
 					<Link href={`/artist/${data.artistId}`}>
 						<Button size="lg" variant="outline" className="w-full sm:w-auto">

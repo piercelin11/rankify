@@ -31,13 +31,13 @@ export default function GlobalSearch() {
 		}
 
 		setIsSearching(true);
-		const abortController = new AbortController(); // 🟢 用於取消過時的請求
+		const abortController = new AbortController(); // 用於取消過時的請求
 
 		const timer = setTimeout(async () => {
 			try {
 				const data = await searchArtistsAndAlbums({ query: inputValue });
 
-				// 🟢 只在請求未被取消時更新狀態
+				// 只在請求未被取消時更新狀態
 				if (!abortController.signal.aborted) {
 					setResults(data);
 					setIsOpen(true);

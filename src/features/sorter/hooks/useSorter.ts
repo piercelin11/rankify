@@ -1,4 +1,4 @@
-import { useSorterContext } from "@/contexts/SorterContext";
+import { useSorterActions } from "@/contexts/SorterContext";
 import { TrackData } from "@/types/data";
 import {
 	useEffect,
@@ -38,7 +38,7 @@ export default function useSorter({
 	tracks,
 	storage,
 }: UseSorterStateProps): UseSorterStateReturn {
-	const { setSaveStatus, setPercentage } = useSorterContext();
+	const { setSaveStatus, setPercentage } = useSorterActions();
 
 	// 初始化 saveStatus
 	useEffect(() => {

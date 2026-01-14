@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import deleteSubmission from "../actions/deleteSubmission";
@@ -10,7 +10,7 @@ import ResultStage from "./ResultStage";
 import type { SorterStateType } from "@/lib/schemas/sorter";
 import type { TrackData } from "@/types/data";
 import { UserStorage } from "../storage/UserStorage";
-import { useSorterContext } from "@/contexts/SorterContext";
+import { useSorterActions } from "@/contexts/SorterContext";
 
 type DraftPromptProps = {
 	submissionId: string;
@@ -32,10 +32,13 @@ export function DraftPrompt({
 	const [choice, setChoice] = useState<"continue" | "restart" | null>(null);
 	const [isPending, startTransition] = useTransition();
 	const router = useRouter();
-	const { setSaveStatus } = useSorterContext();
+	const { setSaveStatus } = useSorterActions();
 
-	// 建立 UserStorage 實例
-	const storage = new UserStorage(submissionId, artistId, router, setSaveStatus);
+	// 使用 useMemo 穩定 reference
+	const storage = useMemo(
+		() => new UserStorage(submissionId, artistId, router, setSaveStatus),
+		[submissionId, artistId, router, setSaveStatus]
+	);
 
 	const handleRestart = () => {
 		setChoice("restart");

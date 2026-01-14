@@ -96,7 +96,7 @@ export default async function PublicRankingPage({ params }: PageProps) {
 			<div className="sticky bottom-0 p-4 bg-background/80 backdrop-blur-sm border-t">
 				<Link href={`/sorter/album/${submission.albumId}`} className="block">
 					<Button size="lg" className="w-full">
-						⚡ 我也要排這張專輯
+						我也要排這張專輯
 					</Button>
 				</Link>
 			</div>

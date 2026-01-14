@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronLeftIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import useSorter from "@/features/sorter/hooks/useSorter";
@@ -7,7 +7,7 @@ import TrackBtn from "./TrackBtn";
 import EqualBtn from "./EqualBtn";
 import { useModal } from "@/contexts";
 import { TrackData } from "@/types/data";
-import { useSorterContext } from "@/contexts/SorterContext";
+import { useSorterState, useSorterActions } from "@/contexts/SorterContext";
 import { SorterStateType } from "@/lib/schemas/sorter";
 import { StorageStrategy } from "../storage/StorageStrategy";
 
@@ -33,11 +33,14 @@ export default function RankingStage({
 	storage,
 }: RankingStageProps) {
 	const { showAlert, showConfirm } = useModal();
-	const { setSaveStatus, setPercentage, saveStatus } =
-		useSorterContext();
+	const { setSaveStatus, setPercentage } = useSorterActions();
+	const { saveStatus } = useSorterState();
 
 	const [selectedButton, setSelectedButton] = useState<string | null>(null);
 	const [pressedKey, setPressedKey] = useState<PressedKeyType | null>(null);
+
+	// 追蹤是否為有意導航 (Quit/Restart 按鈕)
+	const isIntentionalNavigation = useRef(false);
 
 	const {
 		leftField,
@@ -56,15 +59,19 @@ export default function RankingStage({
 	function handleClear() {
 		if (!storage.capabilities.canRestart) return;
 
+		// 使用者已確認要重新開始，設定 flag 跳過 beforeunload
+		isIntentionalNavigation.current = true;
 		setSaveStatus("idle");
 		setPercentage(0);
-		storage.delete();
+		storage.delete(); // 同步操作，會立即完成並導航
 	}
 
 	//離開排名介面
 	function handleQuit() {
+		// 使用者已確認要離開，設定 flag 跳過 beforeunload
+		isIntentionalNavigation.current = true;
 		setSaveStatus("idle");
-		storage.quit();
+		storage.quit(); // 會立即導航
 	}
 
 	// 處理選擇反饋效果
@@ -113,7 +120,12 @@ export default function RankingStage({
 				return; // Guest 模式直接返回，不警告
 			}
 
-			// User 模式: 只在未儲存時警告
+			// 如果是有意導航 (Quit/Restart)，不攔截
+			if (isIntentionalNavigation.current) {
+				return;
+			}
+
+			// 只在意外關閉時警告
 			const shouldWarn = saveStatus !== "saved";
 
 			if (shouldWarn) {

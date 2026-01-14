@@ -132,7 +132,7 @@ export default function MigrationPage() {
 								.filter((r) => r.status === "success")
 								.map((r) => (
 									<li key={r.albumId} className="text-sm">
-										✅ {r.albumName}
+										{r.albumName}
 									</li>
 								))}
 						</ul>
@@ -150,7 +150,7 @@ export default function MigrationPage() {
 								.filter((r) => r.status === "failed")
 								.map((r) => (
 									<li key={r.albumId} className="text-sm">
-										❌ {r.albumName} - {r.error || "Unknown error"}
+										{r.albumName} - {r.error || "Unknown error"}
 									</li>
 								))}
 						</ul>

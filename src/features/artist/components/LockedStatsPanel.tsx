@@ -81,7 +81,7 @@ export default function LockedStatsPanel({ artistName }: LockedStatsPanelProps) 
 					journey.
 				</p>
 				<Button onClick={handleUnlock} size="lg">
-					⚡ Login to Analyze
+					Login to Analyze
 				</Button>
 			</div>
 		</div>
