@@ -75,7 +75,7 @@ async function SubHeader({ track }: { track: Track & { artist: ArtistData } }) {
 		},
 		{
 			label: track.artist.name,
-			href: `/artist/${track.artist.id}/my-stats`,
+			href: `/artist/${track.artist.id}`,
 		},
 		{
 			label: track.name,

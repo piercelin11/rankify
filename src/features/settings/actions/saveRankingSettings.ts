@@ -4,7 +4,7 @@ import {
 	rankingSettingsSchema,
 	RankingSettingsType,
 } from "@/lib/schemas/settings";
-import { getUserSession } from "../../../../auth";
+import { requireSession } from "../../../../auth";
 import { AppResponseType } from "@/types/response";
 import { db } from "@/db/client";
 import { revalidatePath } from "next/cache";
@@ -14,7 +14,7 @@ export default async function saveRankingSettings(
 	formData: RankingSettingsType
 ): Promise<AppResponseType> {
 	try {
-		const { id: userId } = await getUserSession();
+		const { id: userId } = await requireSession();
 
 		const validatedField = rankingSettingsSchema.safeParse(formData);
 		if (!validatedField.success) {

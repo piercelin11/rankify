@@ -1,5 +1,9 @@
-import { getUserSession } from "@/../auth";
-import { getAlbumRankingSessions, getLoggedAlbumNames } from "@/db/album";
+import { getSession } from "@/../auth";
+import {
+	getAlbumRankingSessions,
+	getAlbumsByArtistId,
+	getLoggedAlbumNames,
+} from "@/db/album";
 import MyStatsToolbar from "@/components/artist/MyStatsToolbar";
 import OverviewView from "@/features/ranking/views/OverviewView";
 import { cuidSchema } from "@/lib/schemas/general";
@@ -7,12 +11,20 @@ import {
 	artistRangeParamsSchema,
 	artistViewParamsSchema,
 } from "@/lib/schemas/artist";
-import { calculateDateRangeFromSlug } from "@/lib/utils";
+import { calculateDateRangeFromSlug, cn } from "@/lib/utils";
 import getAlbumsStats from "@/services/album/getAlbumsStats";
 import { getTracksHistory } from "@/services/track/getTracksHistory";
 import getTracksStats from "@/services/track/getTracksStats";
 import { getArtistRankingSubmissions } from "@/db/ranking";
 import RankingTable from "@/features/ranking/table/RankingTable";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import Image from "next/image";
+import { PLACEHOLDER_PIC } from "@/constants";
+import { getArtistById } from "@/db/artist";
+import LockedStatsPanel from "@/features/artist/components/LockedStatsPanel";
+import SurpriseMeButton from "@/features/artist/components/SurpriseMeButton";
 
 type PageProps = {
 	params: Promise<{ artistId: string }>;
@@ -31,7 +43,75 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 	const range = artistRangeParamsSchema.parse(query.range);
 	const submissionId = cuidSchema.optional().parse(query.submissionId);
 
-	const { id: userId } = await getUserSession();
+	const user = await getSession();
+
+	if (!user) {
+		const [albums, artist] = await Promise.all([
+			getAlbumsByArtistId({ artistId }),
+			getArtistById({ artistId }),
+		]);
+
+		if (!artist) {
+			return null;
+		}
+
+		return (
+			<div className="p-content space-y-14">
+				{/* Header with Surprise Me Button */}
+				<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+					<h2 className="text-3xl font-bold">{artist.name}</h2>
+					<SurpriseMeButton albums={albums} artistId={artistId} />
+				</div>
+
+				{/* Albums Grid */}
+				<div className="space-y-3">
+					<h3 className="text-2xl font-semibold">Albums</h3>
+					<div className="grid grid-cols-2 gap-4 md:grid-cols-6 xl:grid-cols-8">
+						{albums.map((album) => (
+							<div key={album.id}>
+								<div className="group relative aspect-square w-full overflow-hidden rounded-lg">
+									<Link href={`/artist/${artistId}/album/${album.id}`}>
+										<Image
+											src={album.img || PLACEHOLDER_PIC}
+											alt={album.name}
+											fill
+											sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 17vw"
+											className={cn(
+												`object-cover transition-all duration-300 group-hover:scale-105`
+											)}
+										/>
+									</Link>
+									<div className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
+										<Link href={`/sorter/album/${album.id}`}>
+											<Button
+												variant="primary"
+												size="icon"
+												className="h-10 w-10 rounded-full shadow-lg"
+											>
+												<Plus className="h-4 w-4" />
+											</Button>
+										</Link>
+									</div>
+								</div>
+								<div className="mt-2">
+									<Link href={`/artist/${artistId}/album/${album.id}`}>
+										<h3 className="cursor-pointer truncate text-base font-semibold hover:underline">
+											{album.name}
+										</h3>
+									</Link>
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+
+				{/* Locked Stats Panel */}
+				<LockedStatsPanel artistName={artist.name} />
+			</div>
+		);
+	}
+
+	const userId = user.id;
 	const dateRange = calculateDateRangeFromSlug(range);
 
 	const submissions = await getArtistRankingSubmissions({ artistId, userId });
@@ -90,7 +170,7 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 	}
 
 	return (
-		<div className="space-y-10 p-content">
+		<div className="p-content space-y-10">
 			<MyStatsToolbar
 				artistId={artistId}
 				activeTab={view}

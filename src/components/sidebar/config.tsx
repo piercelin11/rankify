@@ -1,9 +1,18 @@
 import { signOut } from "next-auth/react";
 import { $Enums } from "@prisma/client";
 import { MenuItem } from "./types";
-import { Home, Lock, LogOut, Mic, Settings, Star, User } from "lucide-react";
+import {
+	Home,
+	Lock,
+	LockIcon,
+	LogOut,
+	Mic,
+	Settings,
+	Star,
+	User,
+} from "lucide-react";
 
-export function getMainMenuItems(role: $Enums.Role): MenuItem[] {
+export function getMainMenuItems(role?: $Enums.Role): MenuItem[] {
 	const items: MenuItem[] = [
 		{
 			id: "home",
@@ -11,13 +20,22 @@ export function getMainMenuItems(role: $Enums.Role): MenuItem[] {
 			icon: Home,
 			href: "/",
 		},
-		{
+	];
+
+	if (role) {
+		items.push({
 			id: "library",
 			label: "My Library",
 			icon: Star,
 			href: "/library",
-		},
-	];
+		});
+	} else {
+		items.push({
+			id: "library",
+			label: "My Library",
+			icon: LockIcon,
+		});
+	}
 
 	if (role === "ADMIN") {
 		items.push({

@@ -2,7 +2,7 @@ export const getArtistTabOptions = (artistId: string) => [
 	{
 		id: "my-stats",
 		label: "My Stats",
-		href: `/artist/${artistId}/my-stats`,
+		href: `/artist/${artistId}`,
 	},
 	{
 		id: "community",

@@ -31,13 +31,13 @@ export default function GlobalSearch() {
 		}
 
 		setIsSearching(true);
-		const abortController = new AbortController(); // 🟢 用於取消過時的請求
+		const abortController = new AbortController(); // 用於取消過時的請求
 
 		const timer = setTimeout(async () => {
 			try {
 				const data = await searchArtistsAndAlbums({ query: inputValue });
 
-				// 🟢 只在請求未被取消時更新狀態
+				// 只在請求未被取消時更新狀態
 				if (!abortController.signal.aborted) {
 					setResults(data);
 					setIsOpen(true);
@@ -69,7 +69,7 @@ export default function GlobalSearch() {
 		setInputValue("");
 
 		if (type === "artist") {
-			router.push(`/artist/${id}/my-stats`);
+			router.push(`/artist/${id}`);
 		} else if (artistId) {
 			router.push(`/artist/${artistId}/album/${id}`);
 		}
@@ -114,7 +114,7 @@ export default function GlobalSearch() {
 						{results.artists.map((artist) => (
 							<CommandItem
 								key={artist.id}
-								value={artist.name}
+								value={`artist-${artist.id}`}
 								onSelect={() => handleNavigate("artist", artist.id)}
 								className="flex cursor-pointer items-center gap-3"
 							>
@@ -146,7 +146,7 @@ export default function GlobalSearch() {
 						{results.albums.map((album) => (
 							<CommandItem
 								key={album.id}
-								value={album.name}
+								value={`album-${album.id}`}
 								onSelect={() =>
 									handleNavigate("album", album.id, album.artistId)
 								}

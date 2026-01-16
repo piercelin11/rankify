@@ -84,7 +84,7 @@ export default function AlbumsSorterChecklist({ albums, artistId }: Props) {
 									<Button
 										variant="primary"
 										size="icon"
-										className="h-8 w-8 rounded-full shadow-lg"
+										className="h-10 w-10 rounded-full shadow-lg"
 									>
 										<Plus className="h-4 w-4" />
 									</Button>

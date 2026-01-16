@@ -72,7 +72,7 @@ export default function OverviewView({
 						</Link>
 					))}
 					<Link
-						href={`/artist/${trackStats[0].artistId}/my-stats?view=all-rankings`}
+						href={`/artist/${trackStats[0].artistId}?view=all-rankings`}
 						className="ml-auto flex items-center gap-1 text-sm text-secondary-foreground hover:text-foreground"
 					>
 						Full rankings

@@ -1,10 +1,10 @@
 "use server";
 
 import { getTracksRankings } from "@/db/track";
-import { getUserSession } from "@/../auth";
+import { requireSession } from "@/../auth";
 
 export async function getComparisonTracksData(trackIds: string[]) {
-	const { id: userId } = await getUserSession();
+	const { id: userId } = await requireSession();
 
 	if (!userId || trackIds.length === 0) {
 		return [];

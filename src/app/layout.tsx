@@ -4,6 +4,8 @@ import "./globals.css";
 import { ModalManager } from "@/components/modals/ModalManager";
 import { ModalProvider } from "@/contexts";
 import { Suspense } from "react";
+import { SessionProvider } from "next-auth/react";
+import { Toaster } from "@/components/ui/toaster";
 
 const serif = Geist_Mono({
 	variable: "--font-serif",
@@ -36,14 +38,17 @@ export default function RootLayout({
 	return (
 		<html lang="en" className="dark">
 			<Suspense>
-				<ModalProvider>
-					<body
-						className={`${serif.variable} ${sans.variable} ${numeric.variable} font-poppins antialiased`}
-					>
-						{children}
-						<ModalManager />
-					</body>
-				</ModalProvider>
+				<SessionProvider>
+					<ModalProvider>
+						<body
+							className={`${serif.variable} ${sans.variable} ${numeric.variable} font-poppins antialiased`}
+						>
+							{children}
+							<ModalManager />
+							<Toaster />
+						</body>
+					</ModalProvider>
+				</SessionProvider>
 			</Suspense>
 		</html>
 	);

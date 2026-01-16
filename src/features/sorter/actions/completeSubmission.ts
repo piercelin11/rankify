@@ -3,7 +3,7 @@
 import { db } from '@/db/client';
 import { Prisma } from '@prisma/client';
 import { RankingResultData } from '../types';
-import { getUserSession } from '@/../auth';
+import { requireSession } from '@/../auth';
 import { revalidatePath } from 'next/cache';
 import { calculateAlbumPoints } from '@/features/ranking/utils/calculateAlbumPoints';
 import { updateAlbumStats } from '@/services/album/updateAlbumStats';
@@ -20,7 +20,7 @@ export default async function completeSubmission({
 	submissionId,
 }: CompleteSubmissionProps) {
 	try {
-		const { id: userId } = await getUserSession();
+		const { id: userId } = await requireSession();
 		const countTrack = trackRankings.length;
 		const trackIds = trackRankings.map((track) => track.id);
 

@@ -25,25 +25,26 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 import Image from "next/image";
 import { PLACEHOLDER_PIC } from "@/constants";
-import { useSorterContext } from "@/contexts/SorterContext";
-import completeSubmission from "../actions/completeSubmission";
-import deleteSubmission from "../actions/deleteSubmission";
-import { useRouter } from "next/navigation";
+import { useSorterActions } from "@/contexts/SorterContext";
+import { StorageStrategy } from "../storage/StorageStrategy";
 
 type ResultStageProps = {
-	draftState: SorterStateType;
+	draftState?: SorterStateType;
 	tracks: TrackData[];
-	submissionId: string;
+	storage: StorageStrategy;
+	initialRankedList?: string[];
+	albumId?: string; // Guest 模式需要 albumId 來清除 LocalStorage
 };
 
 export default function ResultStage({
 	draftState,
 	tracks,
-	submissionId,
+	storage,
+	initialRankedList,
+	albumId,
 }: ResultStageProps) {
 	const { showAlert } = useModal();
-	const { setPercentage } = useSorterContext();
-	const router = useRouter();
+	const { setPercentage } = useSorterActions();
 
 	// 配置拖曳感測器
 	const sensors = useSensors(
@@ -62,6 +63,24 @@ export default function ResultStage({
 	useEffect(() => {
 		const initializeResult = async () => {
 			try {
+				// 使用 initialRankedList 重建結果 (Guest 模式)
+				if (initialRankedList) {
+					const guestResult: RankingResultData[] = initialRankedList.map((trackId, index) => {
+						const track = tracks.find((t) => t.id === trackId);
+						if (!track) {
+							throw new Error(`Track ${trackId} not found`);
+						}
+						return {
+							...track,
+							ranking: index + 1,
+						};
+					});
+					setResult(guestResult);
+					setIsLoading(false);
+					return;
+				}
+
+				// 使用 draftState 生成結果 (User 模式)
 				if (!draftState) {
 					setIsLoading(false);
 					return;
@@ -76,7 +95,7 @@ export default function ResultStage({
 		};
 
 		initializeResult();
-	}, [draftState, tracks]);
+	}, [draftState, tracks, initialRankedList]);
 
 
 	// 設定進度為 100%
@@ -84,25 +103,24 @@ export default function ResultStage({
 		setPercentage(100);
 	}, [setPercentage]);
 
-	// beforeunload 警告：ResultStage 永遠顯示警告（因為結果尚未送出）
+	// beforeunload 警告
 	useEffect(() => {
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-			e.preventDefault();
-			e.returnValue = '';
+			if (storage.capabilities.needsBeforeUnload) {
+				e.preventDefault();
+				e.returnValue = '';
+			}
 		};
 
 		window.addEventListener('beforeunload', handleBeforeUnload);
 		return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-	}, []);
+	}, [storage.capabilities.needsBeforeUnload]);
 
 	// Fail-fast 檢查: tracks 不應為空
 	if (tracks.length === 0) {
 		console.error('ResultStage: tracks array is empty - this should not happen');
-		router.push('/');
 		return null;
 	}
-
-	const artistId = tracks[0].artistId;
 
 	// 拖曳結束處理
 	const handleDragEnd = (event: DragEndEvent) => {
@@ -135,19 +153,19 @@ export default function ResultStage({
 	};
 
 	const handleSubmit = async () => {
-		await completeSubmission({ trackRankings: result, submissionId });
-		router.push(`/artist/${artistId}/my-stats/${submissionId}`)
+		await storage.submitResult(result);
 	};
 
 	const handleDelete = () => {
+		if (!storage.capabilities.canDelete) return;
+
 		showAlert({
 			title: "Are You Sure?",
 			description: "This action cannot be undone.",
 			confirmText: "Delete Record",
-			onConfirm: () => {
-				deleteSubmission({ submissionId });
-				router.push(`/artist/${artistId}/my-stats`)
-			}
+			onConfirm: async () => {
+				await storage.delete();
+			},
 		});
 	};
 
@@ -164,10 +182,60 @@ export default function ResultStage({
 			<div className="sticky top-0 flex items-center justify-between py-10">
 				<h3>Your ranking result</h3>
 				<div className="flex gap-5">
-					<Button onClick={handleSubmit}>Submit</Button>
-					<Button variant="secondary" onClick={handleDelete}>
-						<p className="w-full">Delete</p>
+					{/* Guest 模式: 重新排名按鈕 */}
+					{!storage.capabilities.canAutoSave && albumId && (
+						<Button
+							variant="outline"
+							onClick={() => {
+								showAlert({
+									title: "Restart Ranking?",
+									description: "Your current ranking will be cleared and cannot be recovered",
+									confirmText: "Restart",
+									onConfirm: () => {
+										localStorage.removeItem(`rankify_guest_result_${albumId}`);
+										window.location.reload();
+									},
+								});
+							}}
+						>
+							Restart Ranking
+						</Button>
+					)}
+
+					{/* 儲存排名/登入按鈕 */}
+					<Button onClick={handleSubmit}>
+						{storage.capabilities.canAutoSave ? "Submit" : "Login to Save"}
 					</Button>
+
+					{/* User 模式: Delete 按鈕 */}
+					{storage.capabilities.canDelete && (
+						<Button variant="secondary" onClick={handleDelete}>
+							<p className="w-full">Delete</p>
+						</Button>
+					)}
+
+					{/* Guest 模式: Quit 按鈕 */}
+					{!storage.capabilities.canAutoSave ? (
+						<Button
+							variant="outline"
+							onClick={() => {
+								showAlert({
+									title: "Leave Without Saving?",
+									description: "Your ranking has not been saved yet",
+									confirmText: "Leave",
+									onConfirm: () => {
+										window.location.href = "/";
+									},
+								});
+							}}
+						>
+							Quit
+						</Button>
+					) : (
+						<Button variant="outline" onClick={() => storage.quit()}>
+							Quit
+						</Button>
+					)}
 				</div>
 			</div>
 			<div className="overflow-y-auto scrollbar-hidden">

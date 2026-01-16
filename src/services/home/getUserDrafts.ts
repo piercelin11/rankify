@@ -31,7 +31,7 @@ export async function getUserDrafts({
     take: 15, // 限制 15 筆
   });
 
-  // 🔧 防禦性過濾: 移除無效資料
+  // 防禦性過濾: 移除無效資料
   return drafts.filter((draft) => {
     // 驗證 1: ALBUM 類型必須有 albumId
     if (draft.type === 'ALBUM' && !draft.albumId) {

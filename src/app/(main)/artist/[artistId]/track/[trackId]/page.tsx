@@ -1,4 +1,4 @@
-import { getUserSession } from "@/../auth";
+import { requireSession } from "@/../auth";
 import SimpleSegmentControl from "@/components/navigation/SimpleSegmentControl";
 import { Card } from "@/components/ui/card";
 import { TRACK_SEGMENT_OPTIONS } from "@/config/segmentOptions";
@@ -26,7 +26,7 @@ export default async function page({
 	const trackId = (await params).trackId;
 	const artistId = (await params).artistId;
 	const { type = "artist" } = await searchParams;
-	const { id: userId } = await getUserSession();
+	const { id: userId } = await requireSession();
 
 	const defaultTrack = await getTrackRanking({ userId, trackId });
 	const { menuOptions, parentOptions } = await getTrackComparisonOptions({

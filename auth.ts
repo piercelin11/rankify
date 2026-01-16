@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import authConfig from "./auth.config";
 import { db } from "@/db/client";
 import { $Enums } from "@prisma/client";
+import { redirect } from "next/navigation";
 
 export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
 	adapter: PrismaAdapter(db),
@@ -50,21 +51,44 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
 	},
 });
 
-export async function getUserSession() {
-	const session = await auth();
-	if (!session || !session.user) {
-		throw new Error(
-			"User session is not available. Please ensure the user is authenticated."
-		);
-	}
+/**
+ * 取得當前使用者 Session
+ * @returns User | null (若使用者未登入或 Session 不完整則返回 null)
+ */
+export async function getSession() {
+    const session = await auth();
 
-	const { id, role, name } = session.user;
+    if (!session?.user) return null;
 
-	if (!id || !role || !name) {
-		throw new Error("User session is missing required attributes.");
-	}
+    const { id, role, name } = session.user;
+    if (!id || !role || !name) {
+        console.warn("User session exists but is incomplete");
+        return null;
+    }
 
-	return session.user;
+    return session.user;
+}
+
+// Keep getCurrentSession as alias for backward compatibility during migration
+export const getCurrentSession = getSession;
+
+/**
+ * 要求使用者必須登入,否則重導向至登入頁面
+ * @returns User (型別安全,保證不為 null)
+ * @example
+ * export default async function ProtectedPage() {
+ *   const user = await requireSession(); // 保證 user 不為 null
+ *   return <div>Welcome {user.name}</div>;
+ * }
+ */
+export async function requireSession() {
+    const user = await getSession();
+
+    if (!user) {
+        redirect("/auth/signin");
+    }
+
+    return user;
 }
 
 /**
@@ -78,9 +102,9 @@ export async function getUserSession() {
  * }
  */
 export async function requireAdmin() {
-	const session = await getUserSession();
+	const session = await  auth();
 
-	if (session.role !== "ADMIN") {
+	if (session?.user.role !== "ADMIN") {
 		throw new Error("Forbidden: Admin access required");
 	}
 

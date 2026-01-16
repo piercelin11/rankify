@@ -2,13 +2,13 @@
 
 import { db } from '@/db/client';
 import { $Enums, SubmissionStatus, SubmissionType } from '@prisma/client';
-import { getUserSession } from '@/../auth';
+import { requireSession } from '@/../auth';
 import { getTracksByAlbumAndTrackIds } from '@/db/track';
 import { sorterFilterSchema, sorterStateSchema } from '@/lib/schemas/sorter';
 import initializeSorterState from '../utils/initializeSorterState';
 import { AppResponseType } from '@/types/response';
 import { RankingSubmissionData } from '@/types/data';
-import { invalidateDraftCache } from '@/lib/cacheInvalidation';
+import { invalidateDraftCacheImmediate } from '@/lib/cacheInvalidation';
 
 type CreateSubmissionProps = {
 	selectedAlbumIds: string[];
@@ -26,9 +26,9 @@ export async function createSubmission({
 	albumId,
 }: CreateSubmissionProps): Promise<AppResponseType<RankingSubmissionData>> {
 	try {
-		const { id: userId } = await getUserSession();
+		const { id: userId } = await requireSession();
 
-		// 🔧 防禦性驗證: 確保 ALBUM 類型必須有 albumId
+		// 防禦性驗證: 確保 ALBUM 類型必須有 albumId
 		if (type === "ALBUM" && !albumId) {
 			return {
 				type: "error",
@@ -106,9 +106,9 @@ export async function createSubmission({
       },
     });
 
-    // ========== 快取失效 ==========
-    await invalidateDraftCache(userId, artistId);
-    // invalidateDraftCache 已包含 USER_DYNAMIC (含 Discovery)
+    // ========== 快取失效（硬失效） ==========
+    // 使用 invalidateDraftCacheImmediate 確保創建後立即看到新 submission
+    await invalidateDraftCacheImmediate(userId, artistId);
     // ========== 快取失效結束 ==========
 
     return {

@@ -1,6 +1,6 @@
 'use server';
 
-import { getUserSession } from '@/../auth';
+import { requireSession } from '@/../auth';
 import { db } from '@/db/client';
 import { sorterStateSchema, SorterStateType } from '@/lib/schemas/sorter';
 import { invalidateDraftCache } from '@/lib/cacheInvalidation';
@@ -10,7 +10,7 @@ export default async function saveDraft(
 	submissionId: string
 ) {
 	try {
-		const { id: userId } = await getUserSession();
+		const { id: userId } = await requireSession();
 
 		const existingSubmission = await db.rankingSubmission.findUnique({
 			where: {

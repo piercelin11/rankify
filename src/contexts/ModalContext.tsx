@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useCallback, useState, ReactNode } from "react";
 
 // === 類型定義 ===
-export type ModalType = "alert" | "custom" | "confirm";
+export type ModalType = "alert" | "custom" | "confirm" | "authGuard";
 
 export type AlertModalConfig = {
 	type: "alert";
@@ -30,7 +30,12 @@ export type ConfirmModalConfig = {
 	variant?: "default" | "destructive";
 };
 
-export type ModalConfig = AlertModalConfig | CustomModalConfig | ConfirmModalConfig;
+export type AuthGuardModalConfig = {
+	type: "authGuard";
+	callbackUrl: string;
+};
+
+export type ModalConfig = AlertModalConfig | CustomModalConfig | ConfirmModalConfig | AuthGuardModalConfig;
 
 export type Modal = {
 	id: string;
@@ -57,12 +62,17 @@ type ShowConfirmOptions = Omit<ConfirmModalConfig, "type"> & {
 	onCancel?: () => void;
 };
 
+type ShowAuthGuardOptions = {
+	callbackUrl: string;
+};
+
 // === Context 類型 ===
 type ModalContextType = {
 	modal: Modal | null;
 	showAlert: (options: ShowAlertOptions) => void;
 	showCustom: (options: ShowCustomOptions) => void;
 	showConfirm: (options: ShowConfirmOptions) => void;
+	showAuthGuard: (options: ShowAuthGuardOptions) => void;
 	close: () => void;
 };
 
@@ -102,6 +112,13 @@ export function ModalProvider({ children }: { children: ReactNode }) {
 		});
 	}, []);
 
+	const showAuthGuard = useCallback((options: ShowAuthGuardOptions) => {
+		setModal({
+			id: `modal-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+			config: { type: "authGuard", callbackUrl: options.callbackUrl },
+		});
+	}, []);
+
 	const close = useCallback(() => {
 		setModal(null);
 	}, []);
@@ -111,6 +128,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
 		showAlert,
 		showCustom,
 		showConfirm,
+		showAuthGuard,
 		close,
 	};
 

@@ -44,14 +44,14 @@ export type HeroItemType = {
 };
 
 // ========== Discovery ==========
-export type DiscoveryArtistType = {
+export type DiscoveryType = {
 	id: string;
 	name: string;
 	img: string | null;
 };
 
 // ========== Trending (保留向後相容) ==========
-export type TrendingArtistType = DiscoveryArtistType;
+export type TrendingArtistType = DiscoveryType;
 
 // ========== Search ==========
 export type SearchResultType = {

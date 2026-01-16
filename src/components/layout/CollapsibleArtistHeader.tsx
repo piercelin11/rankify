@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useStickyState } from "@/lib/hooks/useStickyState";
-import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { ArtistData } from "@/types/data";
 import BlurredImageBackground from "@/components/backgrounds/BlurredImageBackground";
@@ -22,7 +21,6 @@ export default function CollapsibleArtistHeader({
 	const [headerState, setHeaderState] = useState<"expanded" | "collapsed">(
 		"expanded"
 	);
-	const { state: sidebarState, isMobile } = useSidebar();
 
 	const { isStuck, sentinelRef } = useStickyState({
 		rootMargin: "-150px",
@@ -34,18 +32,12 @@ export default function CollapsibleArtistHeader({
 		setHeaderState(newState);
 	}, [isStuck]);
 
-	const getLeftPosition = () => {
-		if (isMobile) return "left-0";
-		return sidebarState === "expanded" ? "left-[16rem]" : "left-[4.5rem]";
-	};
-
 	return (
 		<>
 			{/* 收合版本的 Header - 固定在頂部 */}
 			<div
 				className={cn(
-					"fixed right-0 top-0 z-50 flex items-center justify-between gap-2 border-b bg-accent/90 px-content py-4 backdrop-blur transition-all duration-200 ease-linear supports-[backdrop-filter]:bg-accent/90",
-					getLeftPosition(),
+					"absolute left-0 top-0 w-full z-40 flex h-header items-center justify-between gap-2 bg-accent/80 px-content backdrop-blur transition-all duration-200 ease-linear supports-[backdrop-filter]:bg-accent/80",
 					headerState === "collapsed"
 						? "opacity-100"
 						: "pointer-events-none opacity-0"

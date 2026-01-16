@@ -4,7 +4,7 @@ import { SidebarMenu, SidebarMenuItem } from '@/components/ui/sidebar';
 /**
  * Sidebar Loading 狀態
  *
- * 當 getUserSession 和 getRecentLoggedArtists 正在載入時顯示
+ * 當 getCurrentSession 和 getRecentLoggedArtists 正在載入時顯示
  */
 export default function SidebarSkeleton() {
   return (

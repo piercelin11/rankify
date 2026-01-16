@@ -1,9 +1,9 @@
 'use server';
 
-import { getUserSession } from '@/../auth';
+import { requireSession } from '@/../auth';
 import { db } from '@/db/client';
 import { revalidatePath } from 'next/cache';
-import { invalidateDraftCache } from '@/lib/cacheInvalidation';
+import { invalidateDraftCacheImmediate } from '@/lib/cacheInvalidation';
 
 export default async function deleteSubmission({
 	submissionId,
@@ -11,7 +11,7 @@ export default async function deleteSubmission({
 	submissionId: string;
 }) {
   try {
-    const { id: userId } = await getUserSession();
+    const { id: userId } = await requireSession();
 
     // 先取得 artistId (刪除前)
     const submission = await db.rankingSubmission.findUnique({
@@ -26,11 +26,11 @@ export default async function deleteSubmission({
       },
     });
 
-    // ========== 快取失效 ==========
+    // ========== 快取失效（硬失效） ==========
+    // 使用 invalidateDraftCacheImmediate 確保刪除後立即更新列表
     if (submission) {
-      await invalidateDraftCache(userId, submission.artistId);
+      await invalidateDraftCacheImmediate(userId, submission.artistId);
       revalidatePath('/sorter');
-
     }
     // ========== 快取失效結束 ==========
 

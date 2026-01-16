@@ -1,34 +1,51 @@
 import authConfig from "../auth.config";
 import NextAuth from "next-auth";
 import {
-	publicRoutes,
+	privateRoutes,
 	authRoutes,
 	apiAuthPrefix,
 	DEFAULT_LOGIN_REDIRECT,
 } from "./config/route";
 import { NextResponse } from "next/server";
+import { match } from "path-to-regexp";
 
 const { auth } = NextAuth(authConfig);
+
+/**
+ * 檢查路徑是否匹配私密路由
+ * @param pathname - 要檢查的路徑
+ * @returns 是否為私密路由
+ */
+function isPrivateRoute(pathname: string): boolean {
+	return privateRoutes.some((route) => {
+		const matcher = match(route, { decode: decodeURIComponent });
+		return matcher(pathname) !== false;
+	});
+}
 
 export default auth(async function proxy(req) {
 	const { nextUrl } = req;
 	const isLoggedIn = !!req.auth;
 
 	const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-	const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
 	const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+	const isPrivate = isPrivateRoute(nextUrl.pathname);
 
+	// 1. API Auth 路由:直接放行
 	if (isApiAuthRoute) {
 		return;
 	}
 
+	// 2. 驗證路由:已登入則重導向至首頁
 	if (isAuthRoute) {
-		if (isLoggedIn)
+		if (isLoggedIn) {
 			return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin));
+		}
 		return;
 	}
 
-	if (!isLoggedIn && !isPublicRoute) {
+	// 3. 私密路由:未登入則重導向至登入頁
+	if (isPrivate && !isLoggedIn) {
 		return Response.redirect(new URL("/auth/signin", nextUrl.origin));
 	}
 

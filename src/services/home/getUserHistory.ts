@@ -20,7 +20,7 @@ export async function getUserHistory({
     where: {
       userId,
       status: 'COMPLETED',
-      completedAt: { not: null }, // 🟢 防禦性過濾
+      completedAt: { not: null }, // 防禦性過濾
     },
     select: {
       id: true,

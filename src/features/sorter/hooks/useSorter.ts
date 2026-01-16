@@ -1,4 +1,4 @@
-import { useSorterContext } from "@/contexts/SorterContext";
+import { useSorterActions } from "@/contexts/SorterContext";
 import { TrackData } from "@/types/data";
 import {
 	useEffect,
@@ -11,193 +11,40 @@ import {
 	SorterStateSnapshotType,
 	SorterStateType,
 } from "@/lib/schemas/sorter";
-import finalizeDraft from "../actions/finalizeDraft";
-import saveDraft from "../actions/saveDraft";
 import { useAutoSave } from "./useAutoSave";
+import { processSortChoice } from "../utils/sorterAlgorithm";
+import { StorageStrategy } from "../storage/StorageStrategy";
 
 type SortChoice = -1 | 0 | 1;
 
 type UseSorterStateProps = {
 	initialState: SorterStateType;
 	tracks: TrackData[];
-	submissionId: string;
-	userId: string;
+	storage: StorageStrategy;
 };
 
 type UseSorterStateReturn = {
 	leftField: TrackData | undefined;
 	rightField: TrackData | undefined;
 	finishFlag: { current: number };
+	isRankingComplete: boolean;
 	handleSave: () => Promise<{ type: string; message: string }>;
 	restorePreviousState: () => void;
 	sortList: (flag: number) => void;
 };
 
-// 核心排序邏輯 (對應原本的 sortList)
-function processSortChoice(
-	state: SorterStateType,
-	flag: SortChoice
-): SorterStateType {
-	// 深拷貝需要修改的部分
-	const newState: SorterStateType = {
-		...state,
-		lstMember: state.lstMember.map((arr) => [...arr]),
-		parent: [...state.parent],
-		equal: [...state.equal],
-		rec: [...state.rec],
-		namMember: [...state.namMember],
-		history: [...state.history], 
-	};
-
-	// 原本 sortList 的邏輯，完全相同
-	if (flag === -1) {
-		newState.rec[newState.nrec] =
-			newState.lstMember[newState.cmp1][newState.head1];
-		newState.head1++;
-		newState.nrec++;
-		newState.finishSize++;
-		while (newState.equal[newState.rec[newState.nrec - 1]] !== -1) {
-			newState.rec[newState.nrec] =
-				newState.lstMember[newState.cmp1][newState.head1];
-			newState.head1++;
-			newState.nrec++;
-			newState.finishSize++;
-		}
-	} else if (flag === 1) {
-		newState.rec[newState.nrec] =
-			newState.lstMember[newState.cmp2][newState.head2];
-		newState.head2++;
-		newState.nrec++;
-		newState.finishSize++;
-		while (newState.equal[newState.rec[newState.nrec - 1]] !== -1) {
-			newState.rec[newState.nrec] =
-				newState.lstMember[newState.cmp2][newState.head2];
-			newState.head2++;
-			newState.nrec++;
-			newState.finishSize++;
-		}
-	} else {
-		// flag === 0 (平手)
-		newState.rec[newState.nrec] =
-			newState.lstMember[newState.cmp1][newState.head1];
-		newState.head1++;
-		newState.nrec++;
-		newState.finishSize++;
-		while (newState.equal[newState.rec[newState.nrec - 1]] !== -1) {
-			newState.rec[newState.nrec] =
-				newState.lstMember[newState.cmp1][newState.head1];
-			newState.head1++;
-			newState.nrec++;
-			newState.finishSize++;
-		}
-		newState.equal[newState.rec[newState.nrec - 1]] =
-			newState.lstMember[newState.cmp2][newState.head2];
-		newState.rec[newState.nrec] =
-			newState.lstMember[newState.cmp2][newState.head2];
-		newState.head2++;
-		newState.nrec++;
-		newState.finishSize++;
-		while (newState.equal[newState.rec[newState.nrec - 1]] !== -1) {
-			newState.rec[newState.nrec] =
-				newState.lstMember[newState.cmp2][newState.head2];
-			newState.head2++;
-			newState.nrec++;
-			newState.finishSize++;
-		}
-	}
-
-	// 處理組別結束的情況
-	if (
-		newState.head1 < newState.lstMember[newState.cmp1].length &&
-		newState.head2 === newState.lstMember[newState.cmp2].length
-	) {
-		while (newState.head1 < newState.lstMember[newState.cmp1].length) {
-			newState.rec[newState.nrec] =
-				newState.lstMember[newState.cmp1][newState.head1];
-			newState.head1++;
-			newState.nrec++;
-			newState.finishSize++;
-		}
-	} else if (
-		newState.head1 === newState.lstMember[newState.cmp1].length &&
-		newState.head2 < newState.lstMember[newState.cmp2].length
-	) {
-		while (newState.head2 < newState.lstMember[newState.cmp2].length) {
-			newState.rec[newState.nrec] =
-				newState.lstMember[newState.cmp2][newState.head2];
-			newState.head2++;
-			newState.nrec++;
-			newState.finishSize++;
-		}
-	}
-
-	// 合併完成的組別
-	if (
-		newState.head1 === newState.lstMember[newState.cmp1].length &&
-		newState.head2 === newState.lstMember[newState.cmp2].length
-	) {
-		const totalLength =
-			newState.lstMember[newState.cmp1].length +
-			newState.lstMember[newState.cmp2].length;
-		for (let i = 0; i < totalLength; i++) {
-			newState.lstMember[newState.parent[newState.cmp1]][i] = newState.rec[i];
-		}
-		newState.lstMember.pop();
-		newState.lstMember.pop();
-		newState.cmp1 = newState.cmp1 - 2;
-		newState.cmp2 = newState.cmp2 - 2;
-		newState.head1 = 0;
-		newState.head2 = 0;
-
-		if (newState.head1 === 0 && newState.head2 === 0) {
-			for (let i = 0; i < newState.namMember.length; i++) {
-				newState.rec[i] = 0;
-			}
-			newState.nrec = 0;
-		}
-	}
-
-	// 檢查是否完成或更新當前比較對
-	if (newState.cmp1 < 0) {
-		newState.percent = 100;
-		newState.finishFlag = 1;
-	} else {
-		newState.percent = Math.floor(
-			(newState.finishSize * 100) / newState.totalSize
-		);
-
-		// 更安全的索引取得方式
-		const leftGroup = newState.lstMember[newState.cmp1];
-		const rightGroup = newState.lstMember[newState.cmp2];
-
-		newState.currentLeftIndex =
-			leftGroup && newState.head1 < leftGroup.length
-				? leftGroup[newState.head1]
-				: null;
-
-		newState.currentRightIndex =
-			rightGroup && newState.head2 < rightGroup.length
-				? rightGroup[newState.head2]
-				: null;
-	}
-
-	return newState;
-}
-
-// 主要的 hook
 export default function useSorter({
 	initialState,
 	tracks,
-	submissionId,
-	userId: _userId
+	storage,
 }: UseSorterStateProps): UseSorterStateReturn {
-	const { setSaveStatus, setPercentage } = useSorterContext();
+	const { setSaveStatus, setPercentage } = useSorterActions();
 
-	// 初始化 saveStatus: 頁面載入時永遠是已儲存狀態（草稿來自資料庫）
+	// 初始化 saveStatus
 	useEffect(() => {
 		setPercentage(initialState.percent);
-		setSaveStatus("saved");
-	}, [initialState.percent, setPercentage, setSaveStatus]);
+		setSaveStatus(storage.getInitialSaveStatus());
+	}, [initialState.percent, setPercentage, setSaveStatus, storage]);
 
 	// 用 useState 管理狀態
 	const [state, setState] = useState<SorterStateType>(initialState);
@@ -243,7 +90,8 @@ export default function useSorter({
 
 	// 使用新的 useAutoSave Hook
 	const triggerAutoSave = useAutoSave({
-		submissionId,
+		enabled: storage.capabilities.canAutoSave,
+		onSave: (state) => storage.save(state),
 		setSaveStatus,
 		// debounceDelay 和 maxInterval 使用預設值 (10s, 2min)
 	});
@@ -253,20 +101,17 @@ export default function useSorter({
 		if (!state) {
 			return { type: "error", message: "No state to save" };
 		}
+
 		setSaveStatus("pending");
 		try {
-			const result = await saveDraft(state, submissionId);
-			if (result.type === "error") {
-				setSaveStatus("failed");
-				return { type: "error", message: result.message };
-			}
+			await storage.save(state);
 			setSaveStatus("saved");
 			return { type: "success", message: "Draft saved successfully" };
 		} catch {
 			setSaveStatus("failed");
 			return { type: "error", message: "Failed to save draft" };
 		}
-	}, [state, submissionId, setSaveStatus]);
+	}, [state, storage, setSaveStatus]);
 
 	// 核心排序函數
 	const sortList = useCallback(
@@ -310,18 +155,19 @@ export default function useSorter({
 				// 更新進度
 				setPercentage(newState.percent);
 
-				// 如果完成，跳到結果頁面
+				// 如果完成，處理完成邏輯
 				if (newState.finishFlag === 1) {
-					finalizeDraft(newState, submissionId)
+					// 統一呼叫 storage.finalize
+					storage.finalize(newState, tracks);
 				} else {
-					// 觸發自動儲存 (debounce + max interval)
+					// 未完成：觸發自動儲存 (內部已判斷 enabled)
 					triggerAutoSave(newState);
 				}
 			} catch (err) {
 				console.error(err);
 			}
 		},
-		[triggerAutoSave, setSaveStatus, setPercentage, submissionId]
+		[triggerAutoSave, setSaveStatus, setPercentage, storage, tracks]
 	);
 
 	// 復原上一步
@@ -345,7 +191,8 @@ export default function useSorter({
 	return {
 		leftField,
 		rightField,
-		finishFlag: { current: state?.finishFlag || 0 }, // 保持原本的 ref 介面
+		finishFlag: { current: state?.finishFlag || 0 }, // 保持原本的 ref 介面 (後向相容)
+		isRankingComplete: state?.finishFlag === 1, // 新增語義化的 boolean 值
 		handleSave,
 		restorePreviousState,
 		sortList,

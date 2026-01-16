@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useTransition } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlbumData, TrackData } from "@/types/data";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { useForm, Controller, Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sorterFilterSchema, SorterFilterType } from "@/lib/schemas/sorter";
 import { createSubmission } from "../actions/createSubmission";
-import { useSorterContext } from "@/contexts/SorterContext";
+import { useSorterActions } from "@/contexts/SorterContext";
 import { useRouter } from "next/navigation";
 
 type FilterStageProps = {
@@ -20,13 +20,14 @@ type FilterStageProps = {
 };
 
 export default function FilterStage({ albums, singles }: FilterStageProps) {
-	const { setPercentage } = useSorterContext();
+	const { setPercentage } = useSorterActions();
 	const router = useRouter();
+	const [isPending, startTransition] = useTransition();
 
 	const {
 		control,
 		handleSubmit,
-		formState: { errors, isSubmitting },
+		formState: { errors },
 	} = useForm<SorterFilterType>({
 		resolver: zodResolver(sorterFilterSchema),
 		defaultValues: {
@@ -42,19 +43,21 @@ export default function FilterStage({ albums, singles }: FilterStageProps) {
 				alert("找不到藝人 ID");
 				return;
 			}
+			startTransition(async () => {
+				const result = await createSubmission({
+					selectedAlbumIds: data.selectedAlbumIds,
+					selectedTrackIds: data.selectedTrackIds,
+					type: "ARTIST",
+					artistId,
+				});
 
-			const result = await createSubmission({
-				selectedAlbumIds: data.selectedAlbumIds,
-				selectedTrackIds: data.selectedTrackIds,
-				type: "ARTIST",
-				artistId,
+				// 成功後直接導航到新創建的 submission
+				if (result.data && "id" in result.data) {
+					// 使用 updateTag 硬失效,下次請求會強制取得新資料
+					router.push(`/sorter/artist/${artistId}?skipPrompt=true`);
+					router.refresh();
+				}
 			});
-
-			// 成功後設置 flag 並 refresh 以獲取最新資料
-			if (result.data && "id" in result.data) {
-				sessionStorage.setItem('justFiltered', 'true');
-				router.refresh();
-			}
 		} catch (error) {
 			console.error("創建排序失敗:", error);
 			alert("創建排序失敗，請重試");
@@ -75,11 +78,11 @@ export default function FilterStage({ albums, singles }: FilterStageProps) {
 					</p>
 				</div>
 				<div className="flex justify-center gap-4">
-					<Button type="submit" form="filter-form" disabled={isSubmitting}>
-						{isSubmitting ? "Creating..." : "Start Sorter"}
+					<Button type="submit" form="filter-form" disabled={isPending}>
+						{isPending ? "Creating..." : "Start Sorter"}
 					</Button>
 					{albums.length > 0 && (
-						<Link href={`/artist/${albums[0].artistId}/my-stats`}>
+						<Link href={`/artist/${albums[0].artistId}`}>
 							<Button variant="secondary">Quit Sorter</Button>
 						</Link>
 					)}

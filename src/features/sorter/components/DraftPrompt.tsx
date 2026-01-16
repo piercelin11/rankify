@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import deleteSubmission from "../actions/deleteSubmission";
@@ -9,14 +9,16 @@ import RankingStage from "./RankingStage";
 import ResultStage from "./ResultStage";
 import type { SorterStateType } from "@/lib/schemas/sorter";
 import type { TrackData } from "@/types/data";
+import { UserStorage } from "../storage/UserStorage";
+import { useSorterActions } from "@/contexts/SorterContext";
 
 type DraftPromptProps = {
 	submissionId: string;
 	draftState: SorterStateType;
 	draftDate: Date;
 	tracks: TrackData[];
-	userId: string;
-	fromHome?: boolean;
+	artistId: string;
+	shouldSkipPrompt?: boolean;
 };
 
 export function DraftPrompt({
@@ -24,12 +26,19 @@ export function DraftPrompt({
 	draftState,
 	draftDate,
 	tracks,
-	userId,
-	fromHome = false,
+	artistId,
+	shouldSkipPrompt = false,
 }: DraftPromptProps) {
 	const [choice, setChoice] = useState<"continue" | "restart" | null>(null);
 	const [isPending, startTransition] = useTransition();
 	const router = useRouter();
+	const { setSaveStatus } = useSorterActions();
+
+	// 使用 useMemo 穩定 reference
+	const storage = useMemo(
+		() => new UserStorage(submissionId, artistId, router, setSaveStatus),
+		[submissionId, artistId, router, setSaveStatus]
+	);
 
 	const handleRestart = () => {
 		setChoice("restart");
@@ -45,19 +54,18 @@ export function DraftPrompt({
 			<ResultStage
 				draftState={draftState}
 				tracks={tracks}
-				submissionId={submissionId}
+				storage={storage}
 			/>
 		);
 	}
 
-	// 從首頁點擊進來 → 直接繼續
-	if (fromHome) {
+	// 使用者明確表達繼續意圖 (從首頁點擊 Continue) → 直接繼續,跳過確認 Modal
+	if (shouldSkipPrompt) {
 		return (
 			<RankingStage
 				initialState={draftState}
 				tracks={tracks}
-				submissionId={submissionId}
-				userId={userId}
+				storage={storage}
 			/>
 		);
 	}
@@ -68,8 +76,7 @@ export function DraftPrompt({
 			<RankingStage
 				initialState={draftState}
 				tracks={tracks}
-				submissionId={submissionId}
-				userId={userId}
+				storage={storage}
 			/>
 		);
 	}
@@ -108,7 +115,7 @@ export function DraftPrompt({
 	if (choice === "restart") {
 		return (
 			<div className="flex items-center justify-center py-20">
-				<p className="text-muted-foreground">正在刪除草稿...</p>
+				<p className="text-muted-foreground">Deleting draft...</p>
 			</div>
 		);
 	}
@@ -117,8 +124,7 @@ export function DraftPrompt({
 		<RankingStage
 			initialState={draftState}
 			tracks={tracks}
-			submissionId={submissionId}
-			userId={userId}
+			storage={storage}
 		/>
 	);
 }

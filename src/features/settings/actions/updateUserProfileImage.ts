@@ -1,6 +1,6 @@
 "use server";
 
-import { getUserSession } from "@/../auth";
+import { requireSession } from "@/../auth";
 import { SETTINGS_MESSAGES } from "@/constants/messages";
 import { db } from "@/db/client";
 import { AppResponseType } from "@/types/response";
@@ -14,7 +14,7 @@ export default async function updateUserProfileImage({
 	imageUrl,
 }: UpdateUserProfileImageProps): Promise<AppResponseType> {
 	try {
-		const { id: userId } = await getUserSession();
+		const { id: userId } = await requireSession();
 
 		try {
 			await db.user.update({

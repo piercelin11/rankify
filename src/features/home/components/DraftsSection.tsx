@@ -43,7 +43,7 @@ export default function DraftsSection({ drafts }: DraftsSectionProps) {
 								className="pl-4 basis-1/2 md:basis-1/2 lg:basis-1/3 2xl:basis-1/4"
 							>
 								<Link
-									href={`/sorter/${targetType}/${targetId}?resume=true`}
+									href={`/sorter/${targetType}/${targetId}?skipPrompt=true`}
 									className="group"
 								>
 									<Card className="border-0 bg-transparent transition-transform">

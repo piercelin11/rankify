@@ -41,7 +41,7 @@ export default async function searchArtistsAndAlbums({
 				id: true,
 				name: true,
 				img: true,
-				artistId: true, // ✅ 新增: 用於跳轉
+				artistId: true, // 新增: 用於跳轉
 				artist: {
 					select: { name: true },
 				},
@@ -59,7 +59,7 @@ export default async function searchArtistsAndAlbums({
 			id: album.id,
 			name: album.name,
 			img: album.img,
-			artistId: album.artistId, // ✅ 新增
+			artistId: album.artistId, // 新增
 			artistName: album.artist.name,
 			type: "album" as const,
 		})),

@@ -1,6 +1,6 @@
 "use server";
 
-import { getUserSession } from "@/../auth";
+import { requireSession } from "@/../auth";
 import { db } from "@/db/client";
 import { sorterStateSchema, SorterStateType } from "@/lib/schemas/sorter";
 import { revalidatePath } from "next/cache";
@@ -10,7 +10,7 @@ export default async function finalizeDraft(
 	submissionId: string
 ) {
 	try {
-		const { id: userId } = await getUserSession();
+		const { id: userId } = await requireSession();
 
 		const existingSubmission = await db.rankingSubmission.findUnique({
 			where: {

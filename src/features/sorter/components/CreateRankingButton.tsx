@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 
-// ✅ Discriminated Union: 編譯時期保證型別安全
+// Discriminated Union: 編譯時期保證型別安全
 type CreateRankingButtonProps =
 	| {
 			type?: "ARTIST";
