@@ -84,7 +84,6 @@ export default function GuestSorterEntry({
 				tracks={tracks}
 				storage={storage}
 				initialRankedList={guestData.resultState.rankedList}
-				albumId={albumId}
 			/>
 		);
 	}

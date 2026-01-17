@@ -1,4 +1,4 @@
-import { StorageStrategy, Capabilities } from "./StorageStrategy";
+import { StorageStrategy, Capabilities, WarningContext } from "./StorageStrategy";
 import { SorterStateType } from "@/lib/schemas/sorter";
 import { TrackData } from "@/types/data";
 import { RankingResultData } from "../types";
@@ -62,8 +62,8 @@ export class GuestStorage implements StorageStrategy {
 	}
 
 	async delete(): Promise<void> {
-		// Guest 不支援刪除
-		throw new Error("Guest mode does not support delete");
+		// Guest 重新載入頁面以重置排序狀態
+		window.location.reload();
 	}
 
 	async submitResult(_result: RankingResultData[]): Promise<void> {
@@ -78,14 +78,25 @@ export class GuestStorage implements StorageStrategy {
 	}
 
 	readonly capabilities: Capabilities = {
-		canRestart: false,
 		canDelete: false,
 		canAutoSave: false,
-		needsBeforeUnload: false, // Guest 離開不會遺失資料 (已存 LocalStorage)
 	};
 
 	quit(): void {
 		// Guest 退出回首頁 (保持 SPA 體驗)
 		window.location.assign('/');
+	}
+
+	shouldWarnBeforeLeaving(state: WarningContext): boolean {
+		// Guest 只看 finishFlag（排名是否完成）
+		return state.finishFlag !== 1;
+	}
+
+	getLeaveWarning() {
+		return {
+			title: "Are You Sure?",
+			description: "Your ranking progress will be lost",
+			confirmText: "Quit",
+		};
 	}
 }

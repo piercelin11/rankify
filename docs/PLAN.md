@@ -1,451 +1,345 @@
-# Sorter 狀態管理修復計劃
+# Sorter UX 優化實作計劃（終稿）
 
-> **Linus Torvalds 式的「好品味」重構**
->
-> 目標：消除 reference 污染、修復 race condition、優化 beforeunload 體驗
+## 目標
 
----
-
-## 【核心判斷】✅ 值得做，精準打擊
-
-**原因**：這三個問題都是「資料結構設計不當」導致的次生問題。
-- **P0/P1**：Reference 污染 → 不必要的重渲染與狀態重置
-- **P2**：狀態機時序衝突 → autoSave 覆蓋使用者操作
-- **P3**：條件邏輯缺失 → 雙重確認影響 UX
+統一 Album Sorter 和 Artist Sorter 的導航體驗，**完善 Storage Strategy 封裝**，徹底消除 UI 層的 `if (isGuest)` 或 `if (canAutoSave)` 判斷，提升 Mobile UX。
 
 ---
 
-## 【關鍵洞察】
+## 核心設計原則
 
-### P0：UserStorage 每次 render 都重建
-- **位置**：`DraftPrompt.tsx:37-38`
-- **問題**：`new UserStorage(...)` 沒有 useMemo 保護 → reference 改變 → useSorter 重新初始化
-- **Linus 會說**：「storage 應該是穩定的基礎設施，不該依賴 render cycle」
+### 1. 完善策略模式封裝
+- 將「警告邏輯」封裝進 Storage Strategy，UI 不需要知道 Guest/User 的差異
+- 新增 `shouldWarnBeforeLeaving()` 和 `getLeaveWarning()` 方法
+- **消除** UI 層的 `if (storage.capabilities.canAutoSave)` 判斷警告條件
 
-### P1：SorterContext value object 重建
-- **位置**：`SorterContext.tsx:25-30`
-- **問題**：value object 每次都重建 → 所有 consumer 重渲染
-- **Linus 會說**：「這是 React Context 的『渲染放大器』bug」
+### 2. 向後相容
+- 保持現有 Storage 方法（save, finalize, quit 等）不變
+- 只新增方法，不破壞現有邏輯
 
-### P2：autoSave race condition
-- **問題**：
-  ```
-  T=11s   autoSave 開始
-  T=11.5s 使用者點擊 → setSaveStatus("idle")
-  T=12s   autoSave 完成 → setSaveStatus("saved") ← 覆蓋了 idle！
-  ```
-- **Linus 會說**：「經典的 check-then-act 問題，需要 compare-and-set」
-
-### P3：beforeunload 雙重確認
-- **問題**：Quit/Restart 已有 Modal，beforeunload 導致雙重確認
-- **解決**：加入 `isIntentionalNavigation` flag 區分「意圖導航」與「意外關閉」
+### 3. Mobile First
+- 所有按鈕 Touch Target ≥ 44x44px（WCAG 標準）
+- Previous 按鈕在 Mobile 為全寬
 
 ---
 
-## Phase 1：穩定 Reference（P0 + P1）
+## 核心問題診斷
 
-### 目標
-消除不必要的 reference 變化，建立清晰的資料流。
+### 問題 1：Capabilities 失去區分能力
 
----
+**當前狀態**：
+- Guest: `canRestart=false`, `needsBeforeUnload=false`
+- User: `canRestart=true`, `needsBeforeUnload=true`
 
-### Step 1.1：拆分 SorterContext
+**需求變更後**：
+- Guest: `canRestart=true` ← 訪客也要能 Restart
+- Guest: `needsBeforeUnload=true` ← 訪客也要 beforeunload 警告
 
-**檔案**：`src/contexts/SorterContext.tsx`
+**結果**：兩邊都是 `true`，capabilities 無法區分模式 → UI 還是要用 `if (canAutoSave)` 判斷 → **回到 `if (isGuest)` 的老路**
 
-**策略**：按「變動頻率」拆分
-- `SorterStateContext` - 經常變動的 state
-- `SorterActionsContext` - 永遠不變的 setters
+### 問題 2：警告邏輯散落在 UI 層
 
-**修改內容**：
-
+**當前寫法**（如果按原計劃）：
 ```typescript
-// 拆分成兩個 Context
-const SorterStateContext = createContext<{
-  saveStatus: SaveStatusType;
-  percentage: number;
-} | undefined>(undefined);
+// RankingStage.tsx - beforeunload
+const shouldWarn = storage.capabilities.canAutoSave
+  ? saveStatus !== "saved"      // User 邏輯
+  : finishFlag.current !== 1;   // Guest 邏輯
 
-const SorterActionsContext = createContext<{
-  setSaveStatus: (status: SaveStatusType) => void;
-  setPercentage: (percentage: number) => void;
-} | undefined>(undefined);
-
-export function SorterProvider({ children }: { children: ReactNode }) {
-  const [saveStatus, setSaveStatus] = useState<SaveStatusType>("idle");
-  const [percentage, setPercentage] = useState<number>(0);
-
-  // Actions 永不改變（React 保證 useState 的 setter 穩定）
-  // 不需要 useMemo，直接賦值即可
-  const actions = { setSaveStatus, setPercentage };
-
-  // State 只在值變化時才改變
-  const state = useMemo(
-    () => ({
-      saveStatus,
-      percentage,
-    }),
-    [saveStatus, percentage]
-  );
-
-  return (
-    <SorterActionsContext.Provider value={actions}>
-      <SorterStateContext.Provider value={state}>
-        {children}
-      </SorterStateContext.Provider>
-    </SorterActionsContext.Provider>
-  );
-}
-
-// 提供兩個獨立的 Hook
-export function useSorterState() {
-  const context = useContext(SorterStateContext);
-  if (context === undefined) {
-    throw new Error("useSorterState must be used within a SorterProvider");
-  }
-  return context;
-}
-
-export function useSorterActions() {
-  const context = useContext(SorterActionsContext);
-  if (context === undefined) {
-    throw new Error("useSorterActions must be used within a SorterProvider");
-  }
-  return context;
-}
-
-// 保留舊 Hook 作為向後相容
-export function useSorterContext() {
-  return { ...useSorterState(), ...useSorterActions() };
+// QuitButton.tsx - Quit 警告
+if (storage.capabilities.canAutoSave) {
+  // User 邏輯
+} else {
+  // Guest 邏輯
 }
 ```
 
-**需要新增 import**：
-```typescript
-import { useMemo } from "react";
-```
-
-**預期效果**：
-- ✅ Actions 消費者不會因為 percentage 變化而重渲染
-- ✅ State 消費者不會因為 actions reference 變化而重渲染
-- ✅ 保留 `useSorterContext()` 向後相容
+**違背策略模式**：UI 需要知道 Guest/User 的實作細節
 
 ---
 
-### Step 1.2：穩定 DraftPrompt 的 UserStorage
+## Linus 式解決方案
 
-> ⚠️ **重要**：必須在 Step 1.1 完成後再執行此步驟，因為需要先確保 `setSaveStatus` 的 reference 穩定。
-
-**檔案**：`src/features/sorter/components/DraftPrompt.tsx`
-
-**修改位置**：第 13, 35-38 行
-
-**修改內容**：
+### 核心思想：讓 Storage 自己決定要不要警告
 
 ```typescript
-// 修改 import
-import { useSorterActions } from "@/contexts/SorterContext";
-import { useMemo } from "react";
+// UI 只需要呼叫，不需要判斷
+if (storage.shouldWarnBeforeLeaving(state)) {
+  e.preventDefault();
+}
 
-// 修改 storage 建立邏輯
-const { setSaveStatus } = useSorterActions(); // 改用新 Hook
-
-// 使用 useMemo 穩定 reference
-const storage = useMemo(
-  () => new UserStorage(submissionId, artistId, router, setSaveStatus),
-  [submissionId, artistId, router, setSaveStatus]
-);
+if (storage.shouldWarnBeforeLeaving(state)) {
+  const warning = storage.getLeaveWarning();
+  showAlert(warning);
+}
 ```
 
-**預期效果**：
-- ✅ `storage` reference 在整個生命週期內穩定
-- ✅ `useSorter` 不會因為 parent render 而重新初始化
+**優點**：
+- ✅ 完全消除 `if (isGuest)` 或 `if (canAutoSave)` 的警告條件判斷
+- ✅ UI 不需要知道 Guest 看 finishFlag、User 看 saveStatus
+- ✅ 未來加新模式（例如 Premium User）只需新增 Strategy class
 
 ---
 
-### Step 1.3：更新所有 Context 消費者
+## 實作步驟
 
-根據使用情況選擇正確的 Hook：
+### 第一階段：完善 StorageStrategy 介面
 
-#### 1.3.1 useSorter.ts（Actions only）
-**檔案**：`src/features/sorter/hooks/useSorter.ts`
-**修改行**：第 1, 41 行
+#### 檔案：`src/features/sorter/storage/StorageStrategy.ts`
 
+**修改 1：新增狀態型別**
+
+在檔案開頭新增：
 ```typescript
-import { useSorterActions } from "@/contexts/SorterContext";
-
-const { setSaveStatus, setPercentage } = useSorterActions();
+/**
+ * 用於警告判斷的狀態
+ */
+export interface WarningContext {
+  finishFlag: number;
+  saveStatus: "saved" | "pending" | "idle" | "failed";
+}
 ```
 
----
+**修改 2：在 StorageStrategy 介面新增方法**
 
-#### 1.3.2 ResultStage.tsx（Actions only）
-**檔案**：`src/features/sorter/components/ResultStage.tsx`
-**修改行**：第 28, 47 行
-
+在 `quit(): void;` 之後新增：
 ```typescript
-import { useSorterActions } from "@/contexts/SorterContext";
+/**
+ * 檢查是否需要在離開時警告（beforeunload 和 Quit 按鈕共用）
+ *
+ * Guest: 檢查 finishFlag !== 1（排名未完成）
+ * User: 檢查 saveStatus !== "saved"（有未儲存變更）
+ *
+ * @param state - 當前狀態（包含 finishFlag 和 saveStatus）
+ * @returns true 表示需要警告
+ */
+shouldWarnBeforeLeaving(state: WarningContext): boolean;
 
-const { setPercentage } = useSorterActions();
-```
-
----
-
-#### 1.3.3 FilterStage.tsx（Actions only）
-**檔案**：`src/features/sorter/components/FilterStage.tsx`
-**修改行**：第 14, 23 行
-
-```typescript
-import { useSorterActions } from "@/contexts/SorterContext";
-
-const { setPercentage } = useSorterActions();
+/**
+ * 取得離開警告的文字內容
+ *
+ * Guest: "Your ranking progress will be lost"
+ * User: "Your sorting record has not been saved."
+ *
+ * @returns 警告訊息物件
+ */
+getLeaveWarning(): {
+  title: string;
+  description: string;
+  confirmText: string;
+};
 ```
 
 ---
 
-#### 1.3.4 SorterHeader.tsx（State only）
-**檔案**：`src/features/sorter/components/SorterHeader.tsx`
-**修改行**：第 6, 13 行
+### 第二階段：實作 GuestStorage 方法
+
+#### 檔案：`src/features/sorter/storage/GuestStorage.ts`
+
+**修改 1：修改 capabilities（第 80-85 行）**
 
 ```typescript
+readonly capabilities: Capabilities = {
+  canRestart: true,              // ← 改為 true（訪客也能 Restart）
+  canDelete: false,
+  canAutoSave: false,
+  needsBeforeUnload: true,       // ← 改為 true（訪客也要警告）
+};
+```
+
+**修改 2：在 `quit()` 方法之後新增兩個方法**
+
+```typescript
+shouldWarnBeforeLeaving(state: WarningContext): boolean {
+  // Guest 只看 finishFlag（排名是否完成）
+  return state.finishFlag !== 1;
+}
+
+getLeaveWarning() {
+  return {
+    title: "Are You Sure?",
+    description: "Your ranking progress will be lost",
+    confirmText: "Quit",
+  };
+}
+```
+
+**修改 3：新增 import**
+
+在檔案頂部的 import 區塊加入：
+```typescript
+import { StorageStrategy, Capabilities, WarningContext } from "./StorageStrategy";
+```
+
+---
+
+### 第三階段：實作 UserStorage 方法
+
+#### 檔案：`src/features/sorter/storage/UserStorage.ts`
+
+**修改 1：在 `quit()` 方法之後新增兩個方法**
+
+```typescript
+shouldWarnBeforeLeaving(state: WarningContext): boolean {
+  // User 只看 saveStatus（是否有未儲存變更）
+  return state.saveStatus !== "saved";
+}
+
+getLeaveWarning() {
+  return {
+    title: "Are You Sure?",
+    description: "Your sorting record has not been saved.",
+    confirmText: "Quit",
+  };
+}
+```
+
+**修改 2：新增 import**
+
+在檔案頂部的 import 區塊加入：
+```typescript
+import { StorageStrategy, Capabilities, WarningContext } from "./StorageStrategy";
+```
+
+---
+
+### 第四階段：建立統一的 QuitButton 組件
+
+#### 檔案：`src/features/sorter/components/QuitButton.tsx`（新檔案）
+
+**完整內容**：
+
+```typescript
+"use client";
+
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useModal } from "@/contexts";
 import { useSorterState } from "@/contexts/SorterContext";
+import { StorageStrategy } from "../storage/StorageStrategy";
+import { useRef } from "react";
 
-const { saveStatus, percentage } = useSorterState();
-```
+type QuitButtonProps = {
+  storage: StorageStrategy;
+  finishFlag: React.MutableRefObject<number>;
+  onSave?: () => Promise<void>; // RankingStage 提供的 handleSave
+};
 
----
+/**
+ * 統一的 Quit 按鈕（浮在左上角）
+ *
+ * 職責：
+ * - 統一 Guest/User 的離開邏輯
+ * - 依賴 Storage Strategy 決定警告行為
+ * - 用 canAutoSave 判斷是否提供 Save 選項（YAGNI 原則）
+ */
+export function QuitButton({ storage, finishFlag, onSave }: QuitButtonProps) {
+  const { showAlert, showConfirm } = useModal();
+  const { saveStatus } = useSorterState();
+  const isIntentionalNavigation = useRef(false);
 
-#### 1.3.5 RankingStage.tsx（Mixed）
-**檔案**：`src/features/sorter/components/RankingStage.tsx`
-**修改行**：第 10, 36-37 行
+  const handleQuit = () => {
+    isIntentionalNavigation.current = true;
+    storage.quit();
+  };
 
-```typescript
-import { useSorterState, useSorterActions } from "@/contexts/SorterContext";
+  const handleClick = async () => {
+    const state = {
+      finishFlag: finishFlag.current,
+      saveStatus,
+    };
 
-const { setSaveStatus, setPercentage } = useSorterActions();
-const { saveStatus } = useSorterState();
-```
-
----
-
-## Phase 2：修復 autoSave race condition（P2）
-
-### 目標
-在 `setSaveStatus("saved")` 前檢查是否有新變更，避免覆蓋使用者的 "idle" 狀態。
-
----
-
-### Step 2.1：修改 useAutoSave 的 executeSave
-
-**檔案**：`src/features/sorter/hooks/useAutoSave.ts`
-**修改位置**：第 1, 40-51 行
-
-**需要新增 import（頂部）**：
-```typescript
-// 在檔案最上方加入
-// 只在開發環境啟用 Debug Log
-const DEBUG_AUTOSAVE = process.env.NEXT_PUBLIC_DEBUG_AUTOSAVE === 'true';
-```
-
-**修改前**：
-```typescript
-const executeSave = useCallback(async (state: SorterStateType) => {
-  setSaveStatus('pending');
-
-  try {
-    await onSave(state);
-    setSaveStatus('saved');
-  } catch (error) {
-    console.error('Auto-save error:', error);
-    setSaveStatus('failed');
-  }
-}, [onSave, setSaveStatus]);
-```
-
-**修改後**：
-```typescript
-const executeSave = useCallback(async (stateToSave: SorterStateType) => {
-  // ============================================================
-  // 開發者模式：追蹤 autoSave 的時序
-  // ============================================================
-  // 用途：驗證 race condition 修復是否有效
-  //
-  // 啟用方式：
-  //   在 .env.local 加入：
-  //   NEXT_PUBLIC_DEBUG_AUTOSAVE=true
-  //
-  // 輸出範例：
-  //   [AutoSave 1736812345678] 🚀 Started with 42 items
-  //   [AutoSave 1736812345678] ⏭️ Skipped (new changes detected)
-  //
-  // 說明：
-  //   - "⏭️ Skipped" 表示儲存完成時，使用者又操作了
-  //   - "✅ Saved" 表示成功儲存且無新變更
-  // ============================================================
-  const saveId = DEBUG_AUTOSAVE ? Date.now() : null;
-
-  if (saveId) {
-    console.log(
-      `[AutoSave ${saveId}] 🚀 Started with ${stateToSave.sortList.length} items`
-    );
-  }
-
-  setSaveStatus('pending');
-
-  try {
-    await onSave(stateToSave);
-
-    // ✅ 儲存完成前檢查：是否有新的變更？
-    // 如果 latestStateRef 已經不等於 stateToSave，代表使用者又點擊了
-    const hasNewChanges = latestStateRef.current !== stateToSave;
-
-    if (saveId) {
-      console.log(
-        `[AutoSave ${saveId}] ${
-          hasNewChanges
-            ? '⏭️ Skipped (new changes detected)'
-            : '✅ Saved successfully'
-        }`
-      );
-    }
-
-    if (!hasNewChanges) {
-      setSaveStatus('saved');
-    }
-    // 否則保持當前狀態（由下一次 sortList 設定）
-  } catch (error) {
-    if (saveId) {
-      console.error(`[AutoSave ${saveId}] ❌ Failed:`, error);
-    } else {
-      console.error('Auto-save error:', error);
-    }
-    setSaveStatus('failed');
-  }
-}, [onSave, setSaveStatus]);
-```
-
-**預期效果**：
-```
-T=11s   autoSave 開始 (stateToSave = stateA)
-T=11.5s 使用者點擊 → setSaveStatus("idle"), latestStateRef = stateB
-T=12s   saveDraft 完成
-        → 檢查: latestStateRef !== stateToSave
-        → 不設定 "saved"，保持 "idle"
-        → 下次 debounce 會正確儲存 stateB
-```
-
-**風險**：極低。worst case 是 UI 顯示 "idle" 而非 "saved"（但資料確實未完全儲存，所以正確）
-
----
-
-## Phase 3：條件式 beforeunload（P3）
-
-### 目標
-只在「意外關閉」時觸發 beforeunload，Quit/Restart 按鈕已有 Modal，不應重複確認。
-
----
-
-### Step 3.1：加入 isIntentionalNavigation ref
-
-**檔案**：`src/features/sorter/components/RankingStage.tsx`
-
-**修改點 1**：新增 import（第 1 行）
-```typescript
-import React, { useState, useEffect, useCallback, useRef } from "react";
-```
-
-**修改點 2**：新增 ref（第 40 行後）
-```typescript
-const [selectedButton, setSelectedButton] = useState<string | null>(null);
-const [pressedKey, setPressedKey] = useState<PressedKeyType | null>(null);
-
-// 追蹤是否為有意導航 (Quit/Restart 按鈕)
-const isIntentionalNavigation = useRef(false);
-```
-
----
-
-### Step 3.2：在 Quit/Restart 按鈕設定 flag ~~+ 冷卻期~~
-
-> ⚠️ **2026-01-14 修正：移除冷卻期機制**
->
-> **原因：**
-> - 原 PLAN 假設「按鈕點擊時立即設定 flag → 彈出 Modal → 使用者取消 → flag 沒重置」
-> - 但實際程式碼是：`onClick={() => showAlert({ onConfirm: () => handleClear() })}`
-> - **handleClear() 只在使用者 confirm 後才執行**
-> - 如果使用者點「取消」，handleClear() 根本不會跑，冷卻期邏輯也不會觸發
-> - 所以「Modal 取消後的誤判」問題根本不存在
->
-> **Linus 會說：** 「這是想像出來的問題。`handleClear()` 只在使用者確認後執行，這時候設定 flag 就是正確的，不需要任何冷卻期。」
-
-**修改位置 1**：handleClear（第 59-66 行）
-```typescript
-function handleClear() {
-  if (!storage.capabilities.canRestart) return;
-
-  // 使用者已確認要重新開始，設定 flag 跳過 beforeunload
-  isIntentionalNavigation.current = true;
-  setSaveStatus("idle");
-  setPercentage(0);
-  storage.delete(); // 同步操作，會立即完成並導航
-}
-```
-
-**修改位置 2**：handleQuit（第 92-96 行）
-```typescript
-function handleQuit() {
-  // 使用者已確認要離開，設定 flag 跳過 beforeunload
-  isIntentionalNavigation.current = true;
-  setSaveStatus("idle");
-  storage.quit(); // 會立即導航
-}
-```
-
----
-
-### Step 3.3：更新 beforeunload 邏輯
-
-**檔案**：`src/features/sorter/components/RankingStage.tsx`
-**修改位置**：第 108-127 行
-
-**修改前**：
-```typescript
-useEffect(() => {
-  const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-    if (!storage.capabilities.needsBeforeUnload) {
+    // 檢查是否需要警告
+    if (!storage.shouldWarnBeforeLeaving(state)) {
+      handleQuit();
       return;
     }
 
-    const shouldWarn = saveStatus !== "saved";
+    const warning = storage.getLeaveWarning();
 
-    if (shouldWarn) {
-      e.preventDefault();
-      e.returnValue = '';
+    // 檢查是否有儲存能力（用 canAutoSave 判斷 - YAGNI 原則）
+    // 有自動儲存功能 = 有儲存功能 → 提供 Save 選項
+    if (storage.capabilities.canAutoSave) {
+      // 有儲存功能 → showConfirm（提供 Save 選項）
+      showConfirm({
+        title: warning.title,
+        description: warning.description,
+        confirmText: warning.confirmText,
+        cancelText: "Save",
+        onConfirm: handleQuit,
+        onCancel: async () => {
+          await onSave?.(); // 呼叫 RankingStage 提供的 handleSave
+          handleQuit();
+        },
+      });
+    } else {
+      // 沒有儲存功能 → showAlert（只有 Quit）
+      showAlert({
+        title: warning.title,
+        description: warning.description,
+        confirmText: warning.confirmText,
+        onConfirm: handleQuit,
+      });
     }
   };
 
-  window.addEventListener('beforeunload', handleBeforeUnload);
-  return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-}, [storage.capabilities.needsBeforeUnload, saveStatus]);
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={handleClick}
+      className="fixed left-4 top-24 z-40 h-11 w-11 rounded-full bg-background/80 backdrop-blur-sm hover:bg-accent border shadow-lg transition-all hover:scale-105 active:scale-95"
+      aria-label="Quit sorter"
+    >
+      <X className="h-5 w-5" />
+    </Button>
+  );
+}
 ```
 
-**修改後**：
+**設計要點**：
+- `fixed left-4 top-24`：浮在 Header 下方左上角
+- `z-40`：低於 Modal（z-50），確保 Modal 可以覆蓋
+- `h-11 w-11`：Touch Target 44x44px（符合 WCAG）
+- **完全沒有 `if (isGuest)` 判斷**
+- 使用 `canAutoSave` 判斷是否提供 Save 選項（YAGNI 原則）
+- 接受 `onSave` callback，避免型別錯誤
+
+---
+
+### 第五階段：修改 RankingStage
+
+#### 檔案：`src/features/sorter/components/RankingStage.tsx`
+
+**修改 1：引入 QuitButton 和新的型別**
+
+在 import 區塊新增：
+```typescript
+import { QuitButton } from "./QuitButton";
+import { WarningContext } from "../storage/StorageStrategy";
+```
+
+**修改 2：移除舊的 handleQuit 函數**
+
+刪除第 69-75 行（`handleQuit` 函數）。
+
+**修改 3：修改 beforeunload 邏輯（第 116-139 行）**
+
 ```typescript
 useEffect(() => {
   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-    if (!storage.capabilities.needsBeforeUnload) {
-      return;
-    }
-
-    // ✅ 如果是有意導航 (Quit/Restart)，不攔截
+    // 如果是有意導航 (Quit/Restart)，不攔截
     if (isIntentionalNavigation.current) {
       return;
     }
 
-    // 只在意外關閉時警告
-    const shouldWarn = saveStatus !== "saved";
+    // 完全依賴 Storage 決定
+    const state: WarningContext = {
+      finishFlag: finishFlag.current,
+      saveStatus,
+    };
 
-    if (shouldWarn) {
+    if (storage.shouldWarnBeforeLeaving(state)) {
       e.preventDefault();
       e.returnValue = '';
     }
@@ -453,282 +347,276 @@ useEffect(() => {
 
   window.addEventListener('beforeunload', handleBeforeUnload);
   return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-}, [storage.capabilities.needsBeforeUnload, saveStatus]);
+}, [storage, finishFlag, saveStatus]);
 ```
 
-**預期效果**：
-- ✅ 點擊 Quit/Restart → 只有自訂 Modal，無雙重確認
-- ✅ 點擊 Quit/Restart 後「取消」→ 3 秒後恢復 beforeunload 保護
-- ✅ 直接關閉瀏覽器 → 瀏覽器原生 Modal 警告（如果有未儲存資料）
+**修改 4：Previous 按鈕 Responsive（第 173-177 行）**
 
----
-
-## 驗證方法
-
-### Phase 1 驗證
-
-**DevTools React Profiler**：
-```
-1. 開啟 React DevTools Profiler
-2. 點擊 Left/Right 按鈕
-3. 檢查 SorterHeader 是否只在 percentage 變化時重渲染
-4. 檢查 useSorter 是否穩定（不重新初始化）
-```
-
-**Console.log 追蹤**：
 ```typescript
-// 在 DraftPrompt.tsx 加入
+<Button
+  variant="outline"
+  onClick={restorePreviousState}
+  className="w-full sm:w-auto min-h-[44px]" // ← 新增 Responsive 樣式
+>
+  <ChevronLeftIcon />
+  <p>Previous</p>
+</Button>
+```
+
+**修改 5：移除舊的 Quit 按鈕區塊（第 195-227 行）**
+
+刪除整個 Quit 按鈕，保留 Restart 按鈕：
+```typescript
+<div className="flex justify-between gap-3">
+  <Button
+    variant="outline"
+    onClick={restorePreviousState}
+    className="w-full sm:w-auto min-h-[44px]"
+  >
+    <ChevronLeftIcon />
+    <p>Previous</p>
+  </Button>
+
+  {/* 只保留 Restart */}
+  {storage.capabilities.canRestart && (
+    <Button
+      variant="outline"
+      onClick={() =>
+        showAlert({
+          title: "Are You Sure?",
+          description: "You will clear your sorting record.",
+          confirmText: "Clear and Restart",
+          onConfirm: () => handleClear(),
+        })
+      }
+    >
+      Restart
+    </Button>
+  )}
+</div>
+```
+
+**修改 6：渲染新的 QuitButton（第 142 行）**
+
+在 `return` 的最外層 `<section>` 內加入：
+```typescript
+return (
+  <section className="flex h-[calc(100vh-80px)] select-none">
+    <QuitButton
+      storage={storage}
+      finishFlag={finishFlag}
+      onSave={handleSave} // ← 傳入 useSorter 提供的 handleSave
+    />
+    {/* 原有內容 */}
+  </section>
+);
+```
+
+---
+
+### 第六階段：修改 SorterHeader（加入 Logo）
+
+#### 檔案：`src/features/sorter/components/SorterHeader.tsx`
+
+**修改 1：引入 Link**
+
+```typescript
+import Link from "next/link";
+```
+
+**修改 2：調整 JSX 結構（第 16-34 行）**
+
+```typescript
+return (
+  <div className="grid h-20 items-center border-b px-4 sm:grid-cols-3">
+    {/* 左側: Logo + Save Status */}
+    <div className="flex items-center gap-4">
+      {/* Logo */}
+      <Link
+        href="/"
+        className="flex items-center gap-2 text-lg font-bold hover:opacity-70 transition-opacity active:opacity-50"
+      >
+        Rankify
+      </Link>
+
+      {/* Save Status */}
+      <div className="hidden h-5 justify-end text-muted-foreground lg:flex">
+        {saveStatus === "saved" ? (
+          <div className="flex items-center gap-1">
+            <CheckIcon />
+            <p className="text-sm">Saved</p>
+          </div>
+        ) : saveStatus === "pending" ? (
+          <div className="flex items-center gap-2">
+            <LoadingAnimation size="small" isFull={false} />
+            <p className="text-sm">Saving...</p>
+          </div>
+        ) : ""}
+      </div>
+    </div>
+
+    {/* 中間: Title */}
+    <div className="hidden justify-self-center sm:block">
+      <p className="text-secondary-foreground">{title}&apos;s Sorter</p>
+    </div>
+
+    {/* 右側: Progress */}
+    <div className="mt-2 w-full justify-self-end sm:w-fit">
+      <div className="relative w-full sm:w-[150px] xl:w-[300px]">
+        <p
+          className="absolute -top-5 -translate-x-full text-right text-sm text-muted-foreground"
+          style={{ left: `${percentage}%` }}
+        >
+          {percentage}%
+        </p>
+        <Progress value={percentage} className="h-2" />
+      </div>
+    </div>
+  </div>
+);
+```
+
+**設計要點**：
+- Logo 使用 `<Link href="/">`，依賴 beforeunload 自動攔截
+- 不需要額外的警告邏輯（RankingStage 的 beforeunload 已處理）
+
+---
+
+### 第七階段：修改 ResultStage（移除 Quit 按鈕）
+
+#### 檔案：`src/features/sorter/components/ResultStage.tsx`
+
+**修改 1：簡化 beforeunload 邏輯（第 107-117 行）**
+
+```typescript
 useEffect(() => {
-  console.log('storage reference changed', storage);
+  const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    // ResultStage: finishFlag 已是 1，Guest 不會警告
+    // User 模式如果還沒 submit，saveStatus 可能不是 "saved"
+    const state = {
+      finishFlag: 1,
+      saveStatus: "idle", // 假設還沒儲存
+    };
+
+    if (storage.shouldWarnBeforeLeaving(state)) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  };
+
+  window.addEventListener('beforeunload', handleBeforeUnload);
+  return () => window.removeEventListener('beforeunload', handleBeforeUnload);
 }, [storage]);
-
-// 預期：只輸出一次
 ```
+
+**修改 2：移除舊的 Quit 按鈕（第 217-238 行）**
+
+第 184-239 行改為：
+```typescript
+<div className="sticky top-0 flex items-center justify-between py-10">
+  <h3>Your ranking result</h3>
+  <div className="flex gap-5">
+    {/* Submit/Login 按鈕 */}
+    <Button onClick={handleSubmit}>
+      {storage.capabilities.canAutoSave ? "Submit" : "Login to Save"}
+    </Button>
+
+    {/* User 模式: Delete */}
+    {storage.capabilities.canDelete && (
+      <Button variant="secondary" onClick={handleDelete}>
+        <p className="w-full">Delete</p>
+      </Button>
+    )}
+  </div>
+</div>
+```
+
+**設計理由**：
+- ResultStage 是完成狀態，finishFlag=1，不需要警告
+- 依賴 Header 的 Logo 返回首頁（減少視覺雜訊）
+- 符合 Linus 的簡潔原則
 
 ---
 
-### Phase 2 驗證
+## 關鍵改進總結
 
-**時序測試**：
-```
-1. 快速連續點擊 10 次
-2. 等待 10 秒後再點擊一次
-3. 檢查 SorterHeader 顯示的 saveStatus
-4. 預期：
-   - "Saving..." → "Saved"
-   - 點擊後 → 空白
-   - 10 秒後 → "Saving..." → "Saved"
-```
-
-**極端情況**：
-```
-T=0s:    快速點擊 5 次
-T=9.5s:  再點擊 1 次（重置 debounce）
-T=19.5s: 再點擊 1 次
-
-預期：只執行兩次 saveDraft
+### Before（原計劃 - 違背策略模式）
+```typescript
+// UI 層需要判斷
+if (storage.capabilities.canAutoSave) {
+  // User 邏輯
+} else {
+  // Guest 邏輯
+}
 ```
 
----
+### After（重構版 - 完美封裝）
+```typescript
+// UI 層完全不需要判斷警告條件
+if (storage.shouldWarnBeforeLeaving(state)) {
+  const warning = storage.getLeaveWarning();
+  showAlert(warning);
+}
 
-### Phase 3 驗證
-
-**Quit 按鈕測試（正常流程）**：
+// 只在決定 UI 選項時使用 canAutoSave（YAGNI 原則）
+if (storage.capabilities.canAutoSave) {
+  showConfirm({ cancelText: "Save", ... });
+} else {
+  showAlert({ ... });
+}
 ```
-1. 點擊 Quit
-2. 應該只彈出自訂 Modal
-3. 點擊「確定」後直接導航
-4. 不應該看到瀏覽器的「確定要離開嗎？」
-```
-
-**Quit 按鈕測試（取消後關閉）**：
-```
-1. 點擊 Quit
-2. 彈出自訂 Modal
-3. 點擊「取消」
-4. 關閉瀏覽器 tab
-   → 應該彈出瀏覽器警告（因為 handleQuit() 沒執行，flag 保持 false）
-```
-
-> ⚠️ **2026-01-14 修正：** 移除冷卻期後，此測試場景更簡單：
-> - 使用者取消 Modal → `handleQuit()` 不執行 → `isIntentionalNavigation.current` 保持 `false`
-> - 關閉瀏覽器 → beforeunload 正常警告
-
-**關閉瀏覽器測試**：
-```
-1. 點擊幾次後直接關閉 tab
-2. 應該彈出瀏覽器原生確認對話框（如果 saveStatus !== "saved"）
-```
-
----
-
-## 風險評估
-
-### 整體風險：極低
-
-| Phase | 風險等級 | 回滾方案 |
-|-------|---------|---------|
-| Phase 1 | 幾乎為零 | 將所有 `useSorterActions` 改回 `useSorterContext` |
-| Phase 2 | 極低 | 移除 `if (!hasNewChanges)` 檢查與 Debug Log |
-| Phase 3 | 極低 | 移除 `isIntentionalNavigation` 檢查 ~~與 setTimeout~~（已移除冷卻期） |
 
 ---
 
 ## 關鍵檔案清單
 
-1. **`src/contexts/SorterContext.tsx`**
-   - Context 拆分的核心
-   - 建立穩定的資料流
-
-2. **`src/features/sorter/components/DraftPrompt.tsx`**
-   - 修復 P0 的關鍵
-   - 穩定 storage reference
-
-3. **`src/features/sorter/hooks/useAutoSave.ts`**
-   - 修復 P2 的關鍵
-   - 解決 race condition
-
-4. **`src/features/sorter/components/RankingStage.tsx`**
-   - 修復 P3 的關鍵
-   - 條件式 beforeunload
-
-5. **其他 Context 消費者**：
-   - `src/features/sorter/hooks/useSorter.ts`
-   - `src/features/sorter/components/ResultStage.tsx`
-   - `src/features/sorter/components/FilterStage.tsx`
-   - `src/features/sorter/components/SorterHeader.tsx`
+1. `src/features/sorter/storage/StorageStrategy.ts` - 新增介面方法
+2. `src/features/sorter/storage/GuestStorage.ts` - 實作 2 個方法 + 修改 capabilities
+3. `src/features/sorter/storage/UserStorage.ts` - 實作 2 個方法
+4. `src/features/sorter/components/QuitButton.tsx` - 新建統一的 Quit 按鈕
+5. `src/features/sorter/components/RankingStage.tsx` - 整合 QuitButton + 修改 beforeunload
+6. `src/features/sorter/components/ResultStage.tsx` - 移除 Quit 按鈕（依賴 Header Logo）
+7. `src/features/sorter/components/SorterHeader.tsx` - 加入 Logo
 
 ---
 
-## Linus 式總結
+## 測試計劃
 
-### 好品味原則
-1. ✅ **消除特例**：Context 拆分後，不需要手動選擇訂閱範圍
-2. ✅ **穩定 Reference**：useMemo 讓 storage 像檔案描述符一樣穩定
-3. ✅ **狀態機清晰**：race condition 用 compare-and-set 解決
-4. ✅ **條件邏輯簡化**：beforeunload 加個 flag，不需要重構導航系統
+### 測試矩陣
 
-### 破壞性分析
-- ✅ **零破壞**：所有修改都是「加強約束」，不改變現有行為
-- ✅ **向後相容**：保留 `useSorterContext()` 讓舊代碼可以繼續工作
-
-### 實用性驗證
-- ✅ **真實問題**：P0 和 P2 會導致實際 bug，P1 和 P3 影響使用者體驗
-- ✅ **複雜度匹配**：修改範圍小（~30 行），與問題嚴重性匹配
+| 模式 | Stage | 測試點 |
+|------|-------|--------|
+| **Guest** | RankingStage | 1. Quit 按鈕（未完成）→ 警告 "進度會遺失"<br>2. Logo 點擊 → beforeunload 攔截<br>3. Restart 按鈕 → 清除 localStorage → reload<br>4. Previous 按鈕（Mobile）→ 全寬 + 最小高度 44px |
+| **Guest** | ResultStage | 5. Logo 點擊 → 直接離開，不警告 |
+| **User** | RankingStage | 6. Quit 按鈕（未儲存）→ 雙按鈕 Modal（Quit/Save）<br>7. Quit 按鈕（已儲存）→ 直接離開<br>8. Logo 點擊（未儲存）→ beforeunload 攔截 |
+| **User** | ResultStage | 9. Logo 點擊 → 直接離開<br>10. Delete 按鈕 → 警告 → 刪除草稿 |
 
 ---
 
-## 執行順序
+## 完成標準
 
-**建議按順序執行，每個 Phase 完成後驗證再進行下一個**：
-
-1. Phase 1 → 驗證 → Commit
-2. Phase 2 → 驗證 → Commit
-3. Phase 3 → 驗證 → Commit
-
-**總預估時間**：1-2 小時
-
----
-
-## 附錄：技術決策討論記錄
-
-### 決策 1：Phase 1 的 `actions` 是否需要 useMemo？
-
-**原始方案**：
-```typescript
-const actions = useMemo(
-  () => ({ setSaveStatus, setPercentage }),
-  []
-);
-```
-
-**最終決策**：❌ 不使用 useMemo
-```typescript
-const actions = { setSaveStatus, setPercentage };
-```
-
-**理由**：
-- React 保證 `useState` 的 setter 函式在整個生命週期都穩定
-- 使用 useMemo 會觸發 ESLint `exhaustive-deps` 警告
-- 直接賦值更簡潔，不會有 reference 變化問題
+- [ ] StorageStrategy 新增 2 個方法定義
+- [ ] GuestStorage 實作 2 個方法 + capabilities 改為 `true`
+- [ ] UserStorage 實作 2 個方法
+- [ ] QuitButton 在 RankingStage 統一顯示（左上角）
+- [ ] RankingStage 的 beforeunload 使用 `storage.shouldWarnBeforeLeaving()`
+- [ ] Logo 在 Header 左側，點擊可回首頁
+- [ ] Previous 按鈕在 Mobile 為全寬
+- [ ] ResultStage 不渲染 QuitButton（依賴 Header Logo）
+- [ ] **UI 層完全沒有 `if (isGuest)` 判斷**
+- [ ] **警告條件判斷完全封裝在 Storage Strategy**
+- [ ] 通過測試矩陣的所有測試點
 
 ---
 
-### 決策 2：Phase 2 是否需要防禦性檢查？
+## 實作順序建議
 
-**考慮方案**：
-```typescript
-// 選項 A：加防禦性檢查
-if (latestStateRef.current && latestStateRef.current === stateToSave) {
-  setSaveStatus('saved');
-}
+1. **StorageStrategy.ts** - 新增介面定義（最簡單）
+2. **GuestStorage.ts** - 實作方法 + 修改 capabilities
+3. **UserStorage.ts** - 實作方法
+4. **QuitButton.tsx** - 建立新組件（依賴上述完成）
+5. **SorterHeader.tsx** - 加入 Logo（獨立修改）
+6. **RankingStage.tsx** - 整合 QuitButton + 修改 beforeunload
+7. **ResultStage.tsx** - 移除 Quit 按鈕 + 簡化 beforeunload
 
-// 選項 B：直接比較（最終採用）
-if (latestStateRef.current === stateToSave) {
-  setSaveStatus('saved');
-}
-```
-
-**最終決策**：✅ 選項 B（不加防禦性檢查）
-
-**理由**：
-- `latestStateRef` 由 `useRef(sortList)` 初始化，永遠不會是 `undefined`
-- TypeScript 已經保證類型正確
-- 加 `if (latestStateRef.current)` 是「不信任類型系統」的表現
-- Linus 原則：不要為不會發生的情況加檢查
-
----
-
-### 決策 3：Phase 3 的 cleanup 機制
-
-**考慮方案**：
-
-**選項 A**：改造 `storage.quit()` 返回 Promise
-```typescript
-storage.quit().finally(() => {
-  isIntentionalNavigation.current = false;
-});
-```
-
-**選項 B**：監聽路由事件
-```typescript
-router.events.on('routeChangeStart', () => {
-  isIntentionalNavigation.current = true;
-});
-```
-
-**選項 C**：使用狀態管理
-```typescript
-const [isNavigating, setIsNavigating] = useState(false);
-```
-
-~~**選項 D**：setTimeout 冷卻期（原採用，已廢棄）~~
-```typescript
-isIntentionalNavigation.current = true;
-storage.quit();
-setTimeout(() => {
-  isIntentionalNavigation.current = false;
-}, 3000);
-```
-
-**~~最終決策~~**：~~✅ 選項 D（setTimeout 冷卻期）~~ → ❌ **2026-01-14 修正：不需要任何 cleanup 機制**
-
-**原理由（已失效）**：
-- ~~選項 A：需要改 `storage.quit()` 的實作，可能影響其他地方~~
-- ~~選項 B：Next.js 15 App Router 沒有 `router.events`~~
-- ~~選項 C：過度複雜，需要確保 Promise 正確返回~~
-- ~~選項 D：簡單，只需 2 行代碼，用時間窗口解決「反悔」問題~~
-
-**廢棄原因**：
-- **前提錯誤**：原 PLAN 假設「按鈕點擊時立即設定 flag」
-- **實際情況**：`handleClear()` 和 `handleQuit()` 只在 Modal `onConfirm` 時執行
-- **結論**：不存在「使用者取消後 flag 沒重置」的問題，所以不需要任何 cleanup 機制
-
-**修正後的決策**：✅ **不需要 cleanup**
-- `handleClear()` 只在使用者確認後執行
-- `storage.delete()` 會立即完成並導航
-- 使用者取消 Modal → `handleClear()` 不執行 → flag 保持 `false` → beforeunload 正常運作
-
----
-
-### 決策 4：Phase 2 的 Debug Log
-
-**考慮方案**：
-
-**選項 1**：純測試用（用完就刪）
-**選項 2**：永久的開發者模式（最終採用）✅
-**選項 3**：手動測試時才加
-
-**最終決策**：✅ 選項 2（開發者模式）
-
-**理由**：
-- 長期保留 Debug 能力，方便未來追蹤問題
-- 用 `NEXT_PUBLIC_DEBUG_AUTOSAVE` 環境變數控制
-- Production 預設關閉，無效能影響
-- 加入詳細註解說明用途與啟用方式
-
----
-
-**計劃完成** ✅
-
-**準備開始執行**
+**原因**：由底層到上層，逐步驗證邏輯正確性。

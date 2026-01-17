@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { ChevronLeftIcon } from "@radix-ui/react-icons";
-import { Button } from "@/components/ui/button";
+import { ChevronLeftIcon, ReloadIcon } from "@radix-ui/react-icons";
 import useSorter from "@/features/sorter/hooks/useSorter";
 import TrackBtn from "./TrackBtn";
 import EqualBtn from "./EqualBtn";
@@ -9,7 +8,8 @@ import { useModal } from "@/contexts";
 import { TrackData } from "@/types/data";
 import { useSorterState, useSorterActions } from "@/contexts/SorterContext";
 import { SorterStateType } from "@/lib/schemas/sorter";
-import { StorageStrategy } from "../storage/StorageStrategy";
+import { StorageStrategy, WarningContext } from "../storage/StorageStrategy";
+import { QuitButton } from "./QuitButton";
 
 type RankingStageProps = {
 	initialState: SorterStateType;
@@ -32,7 +32,7 @@ export default function RankingStage({
 	tracks,
 	storage,
 }: RankingStageProps) {
-	const { showAlert, showConfirm } = useModal();
+	const { showAlert } = useModal();
 	const { setSaveStatus, setPercentage } = useSorterActions();
 	const { saveStatus } = useSorterState();
 
@@ -57,21 +57,11 @@ export default function RankingStage({
 
 	//清除排名紀錄並重新開始
 	function handleClear() {
-		if (!storage.capabilities.canRestart) return;
-
 		// 使用者已確認要重新開始，設定 flag 跳過 beforeunload
 		isIntentionalNavigation.current = true;
 		setSaveStatus("idle");
 		setPercentage(0);
-		storage.delete(); // 同步操作，會立即完成並導航
-	}
-
-	//離開排名介面
-	function handleQuit() {
-		// 使用者已確認要離開，設定 flag 跳過 beforeunload
-		isIntentionalNavigation.current = true;
-		setSaveStatus("idle");
-		storage.quit(); // 會立即導航
+		storage.delete();
 	}
 
 	// 處理選擇反饋效果
@@ -115,32 +105,38 @@ export default function RankingStage({
 	// beforeunload 警告：防止意外關閉導致資料遺失
 	useEffect(() => {
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-			// 只有 User 模式才需要 beforeunload 警告
-			if (!storage.capabilities.needsBeforeUnload) {
-				return; // Guest 模式直接返回，不警告
-			}
-
 			// 如果是有意導航 (Quit/Restart)，不攔截
 			if (isIntentionalNavigation.current) {
 				return;
 			}
 
-			// 只在意外關閉時警告
-			const shouldWarn = saveStatus !== "saved";
+			// 完全依賴 Storage 決定
+			const state: WarningContext = {
+				finishFlag: finishFlag.current,
+				saveStatus,
+			};
 
-			if (shouldWarn) {
+			if (storage.shouldWarnBeforeLeaving(state)) {
 				e.preventDefault();
-				e.returnValue = ''; // Chrome 需要設定 returnValue
+				e.returnValue = '';
 			}
 		};
 
 		window.addEventListener('beforeunload', handleBeforeUnload);
 		return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-	}, [storage.capabilities.needsBeforeUnload, saveStatus]);
+	}, [storage, finishFlag, saveStatus]);
 
 	return (
 		<section className="flex h-[calc(100vh-80px)] select-none">
-			<div className="m-auto flex-1 space-y-6">
+			<QuitButton
+				storage={storage}
+				finishFlag={finishFlag}
+				isIntentionalNavigation={isIntentionalNavigation}
+				onSave={async () => {
+					await handleSave();
+				}}
+			/>
+			<div className="m-auto flex-1 space-y-3 xl:space-y-6">
 				<div className="grid grid-cols-2 grid-rows-[150px_75px_150px] gap-3 sm:grid-flow-col sm:grid-cols-3 sm:grid-rows-2 xl:gap-6">
 					<TrackBtn
 						isPressed={pressedKey === "ArrowLeft"}
@@ -171,61 +167,28 @@ export default function RankingStage({
 				</div>
 
 				<div className="flex justify-between gap-3">
-					<Button variant="outline" onClick={restorePreviousState}>
+					<button
+						onClick={restorePreviousState}
+						className="flex w-full cursor-pointer select-none items-center justify-center gap-2 rounded-xl border bg-secondary p-2 transition-all duration-150 ease-out hover:bg-accent hover:shadow-lg sm:w-auto lg:p-5"
+					>
 						<ChevronLeftIcon />
 						<p>Previous</p>
-					</Button>
+					</button>
 
-					<div className="flex gap-3 xl:gap-6">
-						{storage.capabilities.canRestart && (
-							<Button
-								variant="outline"
-								onClick={() =>
-									showAlert({
-										title: "Are You Sure?",
-										description: "You will clear your sorting record.",
-										confirmText: "Clear and Restart",
-										onConfirm: () => handleClear(),
-									})
-								}
-							>
-								Restart
-							</Button>
-						)}
-						<Button
-							variant="outline"
-							onClick={() => {
-								if (storage.capabilities.canAutoSave) {
-									// User 模式: 有草稿功能,可以 Save
-									if (saveStatus === "idle") {
-										showConfirm({
-											title: "Are You Sure?",
-											description: "Your sorting record has not been saved.",
-											confirmText: "Quit",
-											cancelText: "Save",
-											onConfirm: () => handleQuit(),
-											onCancel: async () => {
-												await handleSave();
-												handleQuit();
-											},
-										});
-									} else {
-										handleQuit();
-									}
-								} else {
-									// Guest 模式: 沒有草稿功能,只有確認退出
-									showAlert({
-										title: "Are You Sure?",
-										description: "Your ranking progress will be lost",
-										confirmText: "Quit",
-										onConfirm: () => handleQuit(),
-									});
-								}
-							}}
-						>
-							Quit
-						</Button>
-					</div>
+					<button
+						className="flex min-h-[44px] cursor-pointer select-none items-center justify-center gap-2 rounded-xl border bg-secondary p-2 transition-all duration-150 ease-out hover:bg-accent hover:shadow-lg lg:p-5"
+						onClick={() =>
+							showAlert({
+								title: "Are You Sure?",
+								description: "You will clear your sorting record.",
+								confirmText: "Clear and Restart",
+								onConfirm: () => handleClear(),
+							})
+						}
+					>
+						<ReloadIcon />
+						<p>Restart</p>
+					</button>
 				</div>
 			</div>
 		</section>

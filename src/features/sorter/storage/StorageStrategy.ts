@@ -3,18 +3,22 @@ import { TrackData } from "@/types/data";
 import { RankingResultData } from "../types";
 
 /**
+ * 用於警告判斷的狀態
+ */
+export interface WarningContext {
+	finishFlag: number;
+	saveStatus: "saved" | "pending" | "idle" | "failed";
+}
+
+/**
  * UI 能力標記
  * 用於控制元件的行為和可見性
  */
 export interface Capabilities {
-	/** 是否顯示 Restart 按鈕 */
-	canRestart: boolean;
 	/** 是否顯示 Delete 按鈕 */
 	canDelete: boolean;
 	/** 是否啟用自動儲存 */
 	canAutoSave: boolean;
-	/** 是否需要 beforeunload 警告 */
-	needsBeforeUnload: boolean;
 }
 
 /**
@@ -83,4 +87,25 @@ export interface StorageStrategy {
 	 * User: 正常導航到 artist 頁面
 	 */
 	quit(): void;
+
+	/**
+	 * 檢查是否需要在離開時警告（beforeunload 和 Quit 按鈕共用）
+	 * Guest: 檢查 finishFlag !== 1（排名未完成）
+	 * User: 檢查 saveStatus !== "saved"（有未儲存變更）
+	 * @param state - 當前狀態（包含 finishFlag 和 saveStatus）
+	 * @returns true 表示需要警告
+	 */
+	shouldWarnBeforeLeaving(state: WarningContext): boolean;
+
+	/**
+	 * 取得離開警告的文字內容
+	 * Guest: "Your ranking progress will be lost"
+	 * User: "Your sorting record has not been saved."
+	 * @returns 警告訊息物件
+	 */
+	getLeaveWarning(): {
+		title: string;
+		description: string;
+		confirmText: string;
+	};
 }

@@ -14,9 +14,8 @@ export default function SorterHeader({ title }: SorterHeaderProps) {
 
 	return (
 		<div className="grid h-20 items-center border-b px-4 sm:grid-cols-3">
-			<div className="flex items-center gap-2 justify-self-center sm:justify-self-auto">
-				{/* <LogoDisplay /> */}
-				<div className="hidden h-5 justify-end text-muted-foreground lg:flex">
+			{/* 左側: Save Status */}
+			<div className="hidden h-5 text-muted-foreground lg:flex">
 					{saveStatus === "saved" ? (
 						<div className="flex items-center gap-1">
 							<CheckIcon />
@@ -30,12 +29,14 @@ export default function SorterHeader({ title }: SorterHeaderProps) {
 					) : (
 						""
 					)}
-				</div>
 			</div>
 
+			{/* 中間: Title */}
 			<div className="hidden justify-self-center sm:block">
 				<p className="text-secondary-foreground">{title}&apos;s Sorter</p>
 			</div>
+
+			{/* 右側: Progress */}
 			<div className="mt-2 w-full justify-self-end sm:w-fit">
 				<div className="relative w-full sm:w-[150px] xl:w-[300px]">
 					<p

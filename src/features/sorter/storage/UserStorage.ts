@@ -1,4 +1,4 @@
-import { StorageStrategy, Capabilities } from "./StorageStrategy";
+import { StorageStrategy, Capabilities, WarningContext } from "./StorageStrategy";
 import { SorterStateType } from "@/lib/schemas/sorter";
 import { TrackData } from "@/types/data";
 import { RankingResultData } from "../types";
@@ -61,14 +61,25 @@ export class UserStorage implements StorageStrategy {
 	}
 
 	readonly capabilities: Capabilities = {
-		canRestart: true,
 		canDelete: true,
 		canAutoSave: true,
-		needsBeforeUnload: true, // User 離開時需警告 (資料可能未儲存)
 	};
 
 	quit(): void {
 		// 正常導航到 artist 頁面
 		this.router.replace(`/artist/${this.artistId}`);
+	}
+
+	shouldWarnBeforeLeaving(state: WarningContext): boolean {
+		// User 只看 saveStatus（是否有未儲存變更）
+		return state.saveStatus !== "saved";
+	}
+
+	getLeaveWarning() {
+		return {
+			title: "Are You Sure?",
+			description: "Your sorting record has not been saved.",
+			confirmText: "Quit",
+		};
 	}
 }
