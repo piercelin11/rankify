@@ -7,7 +7,7 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { useState, useEffect, useTransition, useRef } from "react";
+import { useState, useEffect, useTransition } from "react";
 
 import {
 	Table,
@@ -21,52 +21,11 @@ import {
 import { AlbumData, TrackData } from "@/types/data";
 import { cn } from "@/lib/utils";
 import { $Enums } from "@prisma/client";
-import { Play, Pause } from "lucide-react";
 import updateTrack from "../actions/updateTrack";
 import { InlineEditCell, InlineSelectCell } from "./InlineEditor";
 import TrackActionDropdown from "./TrackActionDropdown";
 import Image from "next/image";
-
-function PreviewPlayButton({ previewUrl }: { previewUrl: string }) {
-	const audioRef = useRef<HTMLAudioElement | null>(null);
-	const [isPlaying, setIsPlaying] = useState(false);
-
-	function toggle() {
-		const audio = audioRef.current;
-		if (!audio) return;
-		if (isPlaying) {
-			audio.pause();
-		} else {
-			document.querySelectorAll("audio").forEach((a) => {
-				if (a !== audio) a.pause();
-			});
-			audio.play();
-		}
-		setIsPlaying(!isPlaying);
-	}
-
-	return (
-		<div className="flex items-center">
-			<audio
-				ref={audioRef}
-				src={previewUrl}
-				onEnded={() => setIsPlaying(false)}
-				preload="none"
-			/>
-			<button
-				onClick={toggle}
-				className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary transition-colors hover:bg-accent"
-				aria-label={isPlaying ? "Pause" : "Play"}
-			>
-				{isPlaying ? (
-					<Pause size={13} fill="currentColor" />
-				) : (
-					<Play size={13} fill="currentColor" className="ml-0.5" />
-				)}
-			</button>
-		</div>
-	);
-}
+import PreviewPlayButton from "@/components/audio/PreviewPlayButton";
 
 type TracksTableProps = {
 	tracks: TrackData[];
@@ -212,7 +171,7 @@ export default function TracksTable({
 			header: "Preview",
 			cell: ({ row }) =>
 				row.original.previewUrl ? (
-					<PreviewPlayButton previewUrl={row.original.previewUrl} />
+					<PreviewPlayButton id={row.original.id} previewUrl={row.original.previewUrl} />
 				) : (
 					<span className="text-xs text-muted-foreground">—</span>
 				),
