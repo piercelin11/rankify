@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import AlbumEditingForm from "./AlbumEditingForm";
 import { AlbumData } from "@/types/data";
-import deleteItem from "../actions/deleteItem";
+import deleteAlbum from "../actions/deleteAlbum";
 import { fetchAlbumPreviewUrls } from "../actions/fetchAlbumPreviewUrls";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +16,7 @@ import {
 import { MoreHorizontal, Edit, RefreshCw, Trash2 } from "lucide-react";
 import { useModal } from "@/contexts";
 import { useToast } from "@/hooks/use-toast";
+import { useServerAction } from "@/lib/hooks/useServerAction";
 import { cn } from "@/lib/utils";
 
 type AlbumActionDropdownProps = { data: AlbumData };
@@ -24,6 +25,7 @@ export default function AlbumActionDropdown({ data }: AlbumActionDropdownProps) 
 	const {showAlert, showCustom, close} = useModal();
 	const { toast } = useToast();
 	const [isFetchingPreviews, startFetchPreviews] = useTransition();
+	const { execute: executeDeleteAlbum } = useServerAction(deleteAlbum);
 
 	const { id } = data;
 
@@ -37,6 +39,23 @@ export default function AlbumActionDropdown({ data }: AlbumActionDropdownProps) 
 		});
 	}
 
+	async function handleDelete() {
+		try {
+			const result = await executeDeleteAlbum(id);
+			toast({
+				title: result.message,
+				variant: result.type === "error" ? "destructive" : "default",
+			});
+		} catch (error) {
+			if (error instanceof Error && error.message !== "NEXT_REDIRECT") {
+				toast({
+					title: "Failed to delete album.",
+					variant: "destructive",
+				});
+			}
+		}
+	}
+
 	return (
 		<>
 			<DropdownMenu>
@@ -46,7 +65,7 @@ export default function AlbumActionDropdown({ data }: AlbumActionDropdownProps) 
 						<span className="sr-only">Open menu</span>
 					</Button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end">
+				<DropdownMenuContent align="end" className="w-52">
 					<DropdownMenuItem onClick={() => showCustom({
 						content: <AlbumEditingForm data={data} onClose={close} />,
 						title: "Edit Album",
@@ -60,7 +79,7 @@ export default function AlbumActionDropdown({ data }: AlbumActionDropdownProps) 
 						onClick={handleFetchPreviewUrls}
 					>
 						<RefreshCw className={cn("mr-2 h-4 w-4", isFetchingPreviews && "animate-spin")} />
-						{isFetchingPreviews ? "Fetching..." : "Refresh Preview URLs"}
+						{isFetchingPreviews ? "Fetching..." : "Get Preview URLs"}
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem
@@ -70,7 +89,7 @@ export default function AlbumActionDropdown({ data }: AlbumActionDropdownProps) 
 							description: "This action cannot be undone.",
 							confirmText: "Delete",
 							variant: "destructive",
-							onConfirm: () => deleteItem({ type: "album", id }),
+							onConfirm: handleDelete,
 						})}
 					>
 						<Trash2 className="mr-2 h-4 w-4" />
