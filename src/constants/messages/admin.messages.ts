@@ -43,6 +43,7 @@ export const ADMIN_MESSAGES = {
 		UPDATE: {
 			SUCCESS: "Track information has been updated successfully.",
 			FAILURE: "Failed to update track information.",
+			ERROR_NOT_FOUND: "Track not found. Update failed.",
 			ERROR_INVALID_FIELDS:
 				"Invalid data provided for track update. Please check your input.",
 		},
