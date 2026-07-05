@@ -1,7 +1,7 @@
 "use client";
 
 import { ArtistData } from "@/types/data";
-import deleteItem from "../actions/deleteItem";
+import deleteArtist from "../actions/deleteArtist";
 import fetchSpotifyToken from "@/lib/spotify/fetchSpotifyToken";
 import updateInfo from "../actions/updateInfo";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import ArtistEditingForm from "./ArtistEditingForm";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { useModal } from "@/contexts";
+import { useToast } from "@/hooks/use-toast";
+import { useServerAction } from "@/lib/hooks/useServerAction";
 
 type ArtistActionDropdownProps = { data: ArtistData };
 
@@ -23,12 +25,31 @@ export default function ArtistActionDropdown({
 	data,
 }: ArtistActionDropdownProps) {
 	const { showCustom, showAlert, close } = useModal();
+	const { toast } = useToast();
+	const { execute: executeDeleteArtist } = useServerAction(deleteArtist);
 
 	const { id } = data;
 
 	async function handleUpdate() {
 		const accessToken = await fetchSpotifyToken();
 		updateInfo({ type: "artist", id, token: accessToken });
+	}
+
+	async function handleDelete() {
+		try {
+			const result = await executeDeleteArtist(id);
+			toast({
+				title: result.message,
+				variant: result.type === "error" ? "destructive" : "default",
+			});
+		} catch (error) {
+			if (error instanceof Error && error.message !== "NEXT_REDIRECT") {
+				toast({
+					title: "Failed to delete artist.",
+					variant: "destructive",
+				});
+			}
+		}
 	}
 
 	return (
@@ -65,7 +86,7 @@ export default function ArtistActionDropdown({
 								title: "Are You Sure?",
 								description: "This action cannot be undone.",
 								confirmText: "Delete",
-								onConfirm: () => deleteItem({ type: "artist", id }),
+								onConfirm: handleDelete,
 							})
 						}
 					>

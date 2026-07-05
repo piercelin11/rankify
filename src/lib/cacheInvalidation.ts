@@ -2,6 +2,7 @@
 
 import { revalidateTag, updateTag } from 'next/cache';
 import { CACHE_TAGS } from '@/constants/cacheTags';
+import { AdminItemType } from '@/types/admin';
 
 /**
  * 完成排名後的快取失效
@@ -52,7 +53,7 @@ export async function invalidateDraftCacheImmediate(userId: string, artistId: st
  * - ARTIST/ALBUM/TRACK: 特定內容項目
  */
 export async function invalidateAdminCache(
-  type: 'artist' | 'album' | 'track',
+  type: AdminItemType,
   id: string
 ) {
   switch (type) {
