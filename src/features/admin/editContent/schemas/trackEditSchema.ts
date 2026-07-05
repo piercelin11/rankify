@@ -7,6 +7,7 @@ export const trackEditSchema = z.object({
 	trackNumber: z.number().min(1, "Track number must be at least 1"),
 	discNumber: z.number().min(1, "Disc number must be at least 1"),
 	type: z.nativeEnum($Enums.TrackType),
+	previewUrl: z.string().url("Must be a valid URL").or(z.literal("")).optional(),
 });
 
 export type TrackEditFormData = z.infer<typeof trackEditSchema>;

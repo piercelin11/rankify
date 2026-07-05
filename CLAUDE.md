@@ -25,7 +25,7 @@
     - **框架**: Next.js 15 (App Router)
     - **資料庫**: PostgreSQL with Prisma ORM
     - **驗證**: NextAuth.js (Google Provider)
-    - **狀態管理**: Redux Toolkit
+    - **狀態管理**: React Context
     - **樣式**: Tailwind CSS
     - **UI 元件**: Radix UI
     - **測試**: Jest with React Testing Library
@@ -39,7 +39,7 @@
     - `src/features/`: 功能導向的模組 (排名、驗證、後台等)。
     - `src/lib/`: 共用函式庫 (資料庫查詢、API 串接)。
     - `src/components/`: 可重用的 UI 元件。
-    - `src/store/`: Redux 狀態管理。
+    - `src/contexts/`: React Context（ModalContext、SorterContext）。
     - `src/types/`: TypeScript 型別定義。
 
 ### 1.3. 資料庫 (Database)

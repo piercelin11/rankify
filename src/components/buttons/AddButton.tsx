@@ -14,10 +14,10 @@ export default function AddButton({
 	return (
 		<Button
 			className={cn(
-				"m-3 flex aspect-square w-full h-auto items-center justify-center gap-2 rounded-full bg-neutral-800 hover:bg-accent",
+				"m-3 flex aspect-square w-full h-auto items-center justify-center gap-2 rounded-full bg-muted hover:bg-accent",
 				className,
 				{
-					"bg-neutral-800/80 opacity-70": disabled,
+					"bg-muted opacity-70": disabled,
 				}
 			)}
 			disabled={disabled}

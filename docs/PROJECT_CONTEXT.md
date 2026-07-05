@@ -32,8 +32,8 @@
 
 | 技術 | 版本 | 用途 |
 |------|------|------|
-| Next.js | 15.1.1 | App Router、Server Components、Server Actions |
-| React | 18.2.0 | UI 框架 |
+| Next.js | 16.1.0-canary.16 | App Router、Server Components、Server Actions |
+| React | 19.0.0-rc.1 | UI 框架 |
 | TypeScript | 5.x | 型別安全 |
 
 ### UI & Styling
@@ -112,6 +112,9 @@ src/
 │   ├── sorter/              # 排序介面（獨立 layout）
 │   │   ├── artist/[artistId]/  # 藝人全曲排序
 │   │   └── album/[albumId]/    # 專輯歌曲排序
+│   ├── ranking/             # 公開排名分享
+│   │   └── public/[submissionId]/
+│   ├── migration/           # 訪客排序完成後的登入遷移頁面
 │   ├── auth/                # 驗證相關頁面（登入/註冊）
 │   └── api/                 # API Routes
 │       ├── auth/            # NextAuth.js
@@ -122,9 +125,10 @@ src/
 │   │   ├── components/     # HeroSection, DashboardSection, GlobalSearch
 │   │   └── actions/        # searchArtistsAndAlbums
 │   ├── sorter/             # 排序功能
-│   │   ├── components/     # SorterBattleCard, ProgressBar
+│   │   ├── components/     # RankingStage, ResultStage, QuitButton, SorterHeader
 │   │   ├── hooks/          # useSorter, useAutoSave
-│   │   ├── actions/        # completeSubmission, saveDraft
+│   │   ├── actions/        # completeSubmission, saveDraft, finalizeDraft
+│   │   ├── storage/        # StorageStrategy, GuestStorage, UserStorage（策略模式）
 │   │   └── utils/          # 排序演算法相關
 │   ├── ranking/            # 統計與排名
 │   │   ├── chart/          # 圖表元件
@@ -174,6 +178,7 @@ src/
 │   └── achievement/        # getUserArtistAchievement
 │
 ├── contexts/                # React Context
+│   ├── ModalContext.tsx    # 彈窗狀態管理（open/close/config）
 │   └── SorterContext.tsx   # 排序狀態（saveStatus, percentage）
 │
 ├── types/                   # TypeScript 型別定義

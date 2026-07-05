@@ -38,6 +38,7 @@ export default function TrackEditingForm({
 			trackNumber: track.trackNumber || 1,
 			discNumber: track.discNumber || 1,
 			type: track.type,
+			previewUrl: track.previewUrl || "",
 		},
 	});
 
@@ -49,6 +50,7 @@ export default function TrackEditingForm({
 			trackNumber: track.trackNumber || 1,
 			discNumber: track.discNumber || 1,
 			type: track.type,
+			previewUrl: track.previewUrl || "",
 		});
 	}, [track, form]);
 
@@ -62,6 +64,7 @@ export default function TrackEditingForm({
 				discNumber: data.discNumber,
 				type: data.type,
 				color: track.color || undefined,
+				previewUrl: data.previewUrl || "",
 			},
 		});
 		if (response.type === "success") {
@@ -71,7 +74,6 @@ export default function TrackEditingForm({
 
 	return (
 		<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-			<hr />
 			<div className="space-y-4">
 				<div className="grid grid-cols-2 gap-4">
 					<div>
@@ -104,11 +106,11 @@ export default function TrackEditingForm({
 						>
 							<SelectTrigger
 								id={`album-${track.id}`}
-								className="mt-1 border-muted bg-neutral-900 text-white"
+								className="mt-1 border bg-transparent text-white"
 							>
 								<SelectValue placeholder="Select album" />
 							</SelectTrigger>
-							<SelectContent className="border-muted bg-neutral-900">
+							<SelectContent className="border bg-muted">
 								<SelectItem value="no-album">No album</SelectItem>
 								{albums.map((album) => (
 									<SelectItem key={album.id} value={album.name}>
@@ -118,6 +120,22 @@ export default function TrackEditingForm({
 							</SelectContent>
 						</Select>
 					</div>
+				</div>
+				<div>
+					<Label htmlFor={`previewUrl-${track.id}`} className="text-neutral-200">
+						Preview URL
+					</Label>
+					<Input
+						id={`previewUrl-${track.id}`}
+						{...form.register("previewUrl")}
+						placeholder="https://..."
+						className="mt-1"
+					/>
+					{form.formState.errors.previewUrl && (
+						<p className="mt-1 text-sm text-red-400">
+							{form.formState.errors.previewUrl.message}
+						</p>
+					)}
 				</div>
 				<div className="grid grid-cols-3 gap-4">
 					<div>
@@ -170,11 +188,11 @@ export default function TrackEditingForm({
 						>
 							<SelectTrigger
 								id={`type-${track.id}`}
-								className="mt-1 border-muted bg-neutral-900 text-white"
+								className="mt-1 border bg-transparent text-white"
 							>
 								<SelectValue />
 							</SelectTrigger>
-							<SelectContent className="border-muted bg-neutral-900">
+							<SelectContent className="border bg-muted">
 								{Object.values($Enums.TrackType).map((type) => (
 									<SelectItem key={type} value={type}>
 										{type}
