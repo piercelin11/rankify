@@ -4,7 +4,7 @@ import fetchArtist from "@/lib/spotify/fetchArtist";
 import { db } from "@/db/client";
 import fetchAlbum from "@/lib/spotify/fetchAlbum";
 import fetchAlbumsTrack from "@/lib/spotify/fetchAlbumsTrack";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { AppResponseType } from "@/types/response";
 import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import getTracksByArtist from "@/lib/database/data/getTracksByArtist";
@@ -130,6 +130,7 @@ export default async function addArtist({
 		await invalidateAdminCache('artist', artistId);
 		redirect(`/admin/artist/${artistId}`);
 	} catch (error) {
+		unstable_rethrow(error);
 		console.error("addArtist error:", error);
 		return { type: "error", message: ADMIN_MESSAGES.ARTIST.ADD.FAILURE };
 	}
