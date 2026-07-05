@@ -32,6 +32,18 @@ export const updateAlbumSchema = z.object({
 
 export type UpdateAlbumType = z.infer<typeof updateAlbumSchema>;
 
+export const updateTrackCoverSchema = z.object({
+	img: z.string().min(1, "Track cover is required."),
+	color: z
+		.string()
+		.refine(
+			(value) => /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(value),
+			"Must be a valid HEX color, e.g., #FFF or #FFFFFF"
+		),
+});
+
+export type UpdateTrackCoverType = z.infer<typeof updateTrackCoverSchema>;
+
 export const updateArtistSchema = z.object({
 	name: z.string().min(1, "Artist name is required."),
 });

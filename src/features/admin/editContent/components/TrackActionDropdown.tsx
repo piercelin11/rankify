@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useTransition } from "react";
 import { TrackData, AlbumData } from "@/types/data";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,9 +10,12 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, Edit, RefreshCw, Trash2 } from "lucide-react";
 import TrackEditingForm from "./TrackEditingForm";
 import { useModal } from "@/contexts";
+import { useToast } from "@/hooks/use-toast";
+import { fetchTrackPreviewUrl } from "../actions/fetchTrackPreviewUrl";
+import { cn } from "@/lib/utils";
 
 type TrackActionDropdownProps = {
 	data: TrackData;
@@ -24,6 +27,18 @@ export default function TrackActionDropdown({
 	albums,
 }: TrackActionDropdownProps) {
 	const { showCustom, close } = useModal();
+	const { toast } = useToast();
+	const [isFetchingPreview, startFetchPreview] = useTransition();
+
+	function handleFetchPreviewUrl() {
+		startFetchPreview(async () => {
+			const result = await fetchTrackPreviewUrl(data.id);
+			toast({
+				title: result.message,
+				variant: result.type === "error" ? "destructive" : "default",
+			});
+		});
+	}
 
 	return (
 		<>
@@ -34,7 +49,7 @@ export default function TrackActionDropdown({
 						<span className="sr-only">Open menu</span>
 					</Button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end">
+				<DropdownMenuContent align="end" className="w-52">
 					<DropdownMenuItem
 						onClick={() =>
 							showCustom({
@@ -51,6 +66,15 @@ export default function TrackActionDropdown({
 					>
 						<Edit className="mr-2 h-4 w-4" />
 						Edit
+					</DropdownMenuItem>
+					<DropdownMenuItem
+						disabled={isFetchingPreview}
+						onClick={handleFetchPreviewUrl}
+					>
+						<RefreshCw
+							className={cn("mr-2 h-4 w-4", isFetchingPreview && "animate-spin")}
+						/>
+						{isFetchingPreview ? "Fetching..." : "Get Preview URL"}
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem className="text-destructive">

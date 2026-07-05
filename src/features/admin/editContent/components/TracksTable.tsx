@@ -24,8 +24,11 @@ import { $Enums } from "@prisma/client";
 import updateTrack from "../actions/updateTrack";
 import { InlineEditCell, InlineSelectCell } from "./InlineEditor";
 import TrackActionDropdown from "./TrackActionDropdown";
+import TrackCoverEditingForm from "./TrackCoverEditingForm";
 import Image from "next/image";
 import PreviewPlayButton from "@/components/audio/PreviewPlayButton";
+import { Pencil1Icon } from "@radix-ui/react-icons";
+import { useModal } from "@/contexts";
 
 type TracksTableProps = {
 	tracks: TrackData[];
@@ -40,6 +43,7 @@ export default function TracksTable({
 }: TracksTableProps) {
 	const [data, setData] = useState(tracks);
 	const [, startTransition] = useTransition();
+	const { showCustom, close } = useModal();
 
 	// 當 tracks prop 改變時更新本地狀態
 	useEffect(() => {
@@ -104,15 +108,28 @@ export default function TracksTable({
 			accessorKey: "img",
 			header: "",
 			cell: ({ row }) => (
-				<div className="flex items-center justify-center">
+				<button
+					type="button"
+					className="group relative flex h-10 w-10 items-center justify-center overflow-hidden rounded"
+					onClick={() =>
+						showCustom({
+							title: "Edit Track Cover",
+							description: `Update cover art and color for ${row.original.name}`,
+							content: (
+								<TrackCoverEditingForm data={row.original} onClose={close} />
+							),
+						})
+					}
+				>
 					<Image
 						src={row.original.img || "/pic/placeholder.jpg"}
 						alt={row.original.name}
-						className="rounded"
+						className="rounded object-cover transition-opacity group-hover:opacity-40"
 						width={40}
 						height={40}
 					/>
-				</div>
+					<Pencil1Icon className="absolute h-4 w-4 text-white opacity-0 transition-opacity group-hover:opacity-100" />
+				</button>
 			),
 			size: 60,
 			minSize: 60,
