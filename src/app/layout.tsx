@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist_Mono, Outfit, Inter } from "next/font/google";
 import "./globals.css";
 import { ModalManager } from "@/components/modals/ModalManager";
-import { ModalProvider } from "@/contexts";
+import { ModalProvider, AudioPlayerProvider } from "@/contexts";
 import { Suspense } from "react";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/toaster";
@@ -39,15 +39,17 @@ export default function RootLayout({
 		<html lang="en" className="dark">
 			<Suspense>
 				<SessionProvider>
-					<ModalProvider>
-						<body
-							className={`${serif.variable} ${sans.variable} ${numeric.variable} font-poppins antialiased`}
-						>
-							{children}
-							<ModalManager />
-							<Toaster />
-						</body>
-					</ModalProvider>
+					<AudioPlayerProvider>
+						<ModalProvider>
+							<body
+								className={`${serif.variable} ${sans.variable} ${numeric.variable} font-poppins antialiased`}
+							>
+								{children}
+								<ModalManager />
+								<Toaster />
+							</body>
+						</ModalProvider>
+					</AudioPlayerProvider>
 				</SessionProvider>
 			</Suspense>
 		</html>

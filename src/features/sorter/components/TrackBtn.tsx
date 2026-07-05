@@ -36,11 +36,13 @@ export default function TrackBtn({
 				}
 			}}
 		>
-			{data?.previewUrl && (
-				<CustomAudioPlayer key={data.id} previewUrl={data.previewUrl} />
-			)}
 			<div className="relative aspect-square h-auto w-full rounded-lg">
 				<Image src={data?.img || PLACEHOLDER_PIC} alt="cover" fill sizes="" />
+				{data?.previewUrl && (
+					<div className="absolute bottom-2 right-2">
+						<CustomAudioPlayer key={data.id} id={data.id} previewUrl={data.previewUrl} />
+					</div>
+				)}
 			</div>
 			<div className="m-auto flex-1 space-y-1 sm:pb-6 sm:pt-8">
 				<p className="line-clamp-1 text-lg font-semibold">{data?.name}</p>

@@ -2,14 +2,18 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Play, Pause } from "lucide-react";
+import { useAudioPlayerState, useAudioPlayerActions } from "@/contexts";
 
 type Props = {
+	id: string;
 	previewUrl: string;
 };
 
-export default function CustomAudioPlayer({ previewUrl }: Props) {
+export default function CustomAudioPlayer({ id, previewUrl }: Props) {
 	const audioRef = useRef<HTMLAudioElement | null>(null);
-	const [isPlaying, setIsPlaying] = useState(false);
+	const { playingId } = useAudioPlayerState();
+	const { play, stop } = useAudioPlayerActions();
+	const isPlaying = playingId === id;
 	const [progress, setProgress] = useState(0);
 
 	function togglePlay() {
@@ -17,10 +21,11 @@ export default function CustomAudioPlayer({ previewUrl }: Props) {
 		if (!audio) return;
 		if (isPlaying) {
 			audio.pause();
+			stop(id);
 		} else {
 			audio.play();
+			play(id);
 		}
-		setIsPlaying(!isPlaying);
 	}
 
 	function handleTimeUpdate() {
@@ -30,25 +35,35 @@ export default function CustomAudioPlayer({ previewUrl }: Props) {
 	}
 
 	function handleEnded() {
-		setIsPlaying(false);
+		stop(id);
 		setProgress(0);
 	}
+
+	useEffect(() => {
+		if (playingId !== id) {
+			audioRef.current?.pause();
+		}
+	}, [playingId, id]);
 
 	useEffect(() => {
 		const audio = audioRef.current;
 		return () => {
 			audio?.pause();
+			stop(id);
 		};
-	}, []);
+	}, [id, stop]);
 
-	const size = 44;
+	const size = 72;
 	const center = size / 2;
-	const radius = 20;
+	const strokeWidth = size * (2.5 / 44);
+	const radius = center - strokeWidth;
 	const circumference = 2 * Math.PI * radius;
 	const dashOffset = circumference * (1 - progress / 100);
+	const buttonSize = size * (32 / 44);
+	const iconSize = size * (14 / 44);
 
 	return (
-		<div className="relative h-11 w-11 shrink-0">
+		<div className="relative shrink-0 group" style={{ width: size, height: size }}>
 			<audio
 				ref={audioRef}
 				src={previewUrl}
@@ -67,15 +82,15 @@ export default function CustomAudioPlayer({ previewUrl }: Props) {
 					cy={center}
 					r={radius}
 					fill="none"
-					strokeWidth={2.5}
-					className="stroke-muted"
+					strokeWidth={strokeWidth}
+					className="stroke-transparent"
 				/>
 				<circle
 					cx={center}
 					cy={center}
 					r={radius}
 					fill="none"
-					strokeWidth={2.5}
+					strokeWidth={strokeWidth}
 					strokeLinecap="round"
 					strokeDasharray={circumference}
 					strokeDashoffset={dashOffset}
@@ -87,13 +102,14 @@ export default function CustomAudioPlayer({ previewUrl }: Props) {
 					e.stopPropagation();
 					togglePlay();
 				}}
-				className="absolute inset-0 m-auto flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-background transition-colors hover:opacity-80"
+				style={{ width: buttonSize, height: buttonSize }}
+				className="absolute inset-0 m-auto flex items-center justify-center rounded-full bg-foreground text-background transition-colors group-hover:bg-primary"
 				aria-label={isPlaying ? "Pause" : "Play"}
 			>
 				{isPlaying ? (
-					<Pause size={14} fill="currentColor" />
+					<Pause size={iconSize} fill="currentColor" />
 				) : (
-					<Play size={14} fill="currentColor" className="ml-0.5" />
+					<Play size={iconSize} fill="currentColor" className="ml-0.5" />
 				)}
 			</button>
 		</div>
