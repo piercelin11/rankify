@@ -18,8 +18,8 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { useState, useEffect, useTransition } from "react";
-import { GripVertical } from "lucide-react";
+import { useState, useEffect, useTransition, useRef } from "react";
+import { GripVertical, Play, Pause } from "lucide-react";
 
 import {
 	Table,
@@ -37,6 +37,50 @@ import updateTrack from "../actions/updateTrack";
 import { InlineEditCell, InlineSelectCell } from "./InlineEditor";
 import TrackActionDropdown from "./TrackActionDropdown";
 import { useDragAndDrop } from "../hooks/useDragAndDrop";
+
+function PreviewPlayButton({ previewUrl }: { previewUrl: string }) {
+	const audioRef = useRef<HTMLAudioElement | null>(null);
+	const [isPlaying, setIsPlaying] = useState(false);
+
+	function toggle() {
+		const audio = audioRef.current;
+		if (!audio) return;
+		if (isPlaying) {
+			audio.pause();
+		} else {
+			// 停止頁面上其他正在播放的音訊
+			document
+				.querySelectorAll("audio")
+				.forEach((a) => {
+					if (a !== audio) a.pause();
+				});
+			audio.play();
+		}
+		setIsPlaying(!isPlaying);
+	}
+
+	return (
+		<div className="flex items-center">
+			<audio
+				ref={audioRef}
+				src={previewUrl}
+				onEnded={() => setIsPlaying(false)}
+				preload="none"
+			/>
+			<button
+				onClick={toggle}
+				className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary hover:bg-accent transition-colors"
+				aria-label={isPlaying ? "Pause" : "Play"}
+			>
+				{isPlaying ? (
+					<Pause size={13} fill="currentColor" />
+				) : (
+					<Play size={13} fill="currentColor" className="ml-0.5" />
+				)}
+			</button>
+		</div>
+	);
+}
 
 type TracksTableProps = {
 	tracks: TrackData[];
@@ -292,6 +336,19 @@ function TracksTableContent({
 			maxSize: 150,
 		},
 		{
+			id: "preview",
+			header: "Preview",
+			cell: ({ row }) =>
+				row.original.previewUrl ? (
+					<PreviewPlayButton previewUrl={row.original.previewUrl} />
+				) : (
+					<span className="text-xs text-muted-foreground">—</span>
+				),
+			size: 90,
+			minSize: 90,
+			maxSize: 90,
+		},
+		{
 			id: "actions",
 			cell: ({ row }) => (
 				<TrackActionDropdown
@@ -335,6 +392,7 @@ function TracksTableContent({
 							<col style={{ width: '300px' }} />
 							<col style={{ width: '200px' }} />
 							<col style={{ width: '120px' }} />
+							<col style={{ width: '90px' }} />
 							<col style={{ width: '80px' }} />
 						</colgroup>
 						<TableHeader>

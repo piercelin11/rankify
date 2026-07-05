@@ -102,6 +102,7 @@ model Track {
   discNumber  Int?
   type        TrackType      @default(STANDARD)
   color       String?
+  previewUrl  String?
   album       Album?         @relation(fields: [albumId], references: [id], onDelete: Cascade)
   artist      Artist         @relation(fields: [artistId], references: [id], onDelete: Cascade)
   trackRanks  TrackRanking[]

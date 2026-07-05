@@ -54,6 +54,7 @@ export default async function AdminArtistPage({
 									img={album.img}
 									title={album.name}
 									subTitle="Album"
+									type="ALBUM"
 								/>
 							))}
 							<AddAlbumButton artistId={artistId} />
@@ -69,6 +70,7 @@ export default async function AdminArtistPage({
 									img={ep.img}
 									title={ep.name}
 									subTitle="EP"
+									type="ALBUM"
 								/>
 							))}
 							<AddEPButton artistId={artistId} />
