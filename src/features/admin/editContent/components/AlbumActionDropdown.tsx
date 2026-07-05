@@ -1,8 +1,10 @@
 "use client";
 
+import { useTransition } from "react";
 import AlbumEditingForm from "./AlbumEditingForm";
 import { AlbumData } from "@/types/data";
 import deleteItem from "../actions/deleteItem";
+import { fetchAlbumPreviewUrls } from "../actions/fetchAlbumPreviewUrls";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -11,15 +13,29 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, Edit, RefreshCw, Trash2 } from "lucide-react";
 import { useModal } from "@/contexts";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 type AlbumActionDropdownProps = { data: AlbumData };
 
 export default function AlbumActionDropdown({ data }: AlbumActionDropdownProps) {
 	const {showAlert, showCustom, close} = useModal();
+	const { toast } = useToast();
+	const [isFetchingPreviews, startFetchPreviews] = useTransition();
 
 	const { id } = data;
+
+	function handleFetchPreviewUrls() {
+		startFetchPreviews(async () => {
+			const result = await fetchAlbumPreviewUrls(id);
+			toast({
+				title: result.message,
+				variant: result.type === "error" ? "destructive" : "default",
+			});
+		});
+	}
 
 	return (
 		<>
@@ -38,6 +54,13 @@ export default function AlbumActionDropdown({ data }: AlbumActionDropdownProps) 
 					})}>
 						<Edit className="mr-2 h-4 w-4" />
 						Edit
+					</DropdownMenuItem>
+					<DropdownMenuItem
+						disabled={isFetchingPreviews}
+						onClick={handleFetchPreviewUrls}
+					>
+						<RefreshCw className={cn("mr-2 h-4 w-4", isFetchingPreviews && "animate-spin")} />
+						{isFetchingPreviews ? "Fetching..." : "Refresh Preview URLs"}
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem
