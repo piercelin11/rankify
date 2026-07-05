@@ -9,6 +9,7 @@ import AddAlbumButton from "@/features/admin/addContent/components/AddAlbumButto
 import AddEPButton from "@/features/admin/addContent/components/AddEPButton";
 import AddSingleButton from "@/features/admin/addContent/components/AddSingleButton";
 import ArtistActionDropdown from "@/features/admin/editContent/components/ArtistActionDropdown";
+import AlbumActionDropdown from "@/features/admin/editContent/components/AlbumActionDropdown";
 import GalleryWrapper from "@/components/presentation/GalleryWrapper";
 import GalleryItem from "@/components/presentation/GalleryItem";
 import AdminContentHeader from "@/features/admin/editContent/components/AdminContentHeader";
@@ -55,6 +56,7 @@ export default async function AdminArtistPage({
 									title={album.name}
 									subTitle="Album"
 									type="ALBUM"
+									actions={<AlbumActionDropdown data={album} />}
 								/>
 							))}
 							<AddAlbumButton artistId={artistId} />
@@ -71,6 +73,7 @@ export default async function AdminArtistPage({
 									title={ep.name}
 									subTitle="EP"
 									type="ALBUM"
+									actions={<AlbumActionDropdown data={ep} />}
 								/>
 							))}
 							<AddEPButton artistId={artistId} />

@@ -61,7 +61,7 @@ export default function TracksTable({
 					originalData: track,
 					formData: {
 						name: updates.name || track.name,
-						album: updates.album?.name || track.album?.name || "",
+						album: "album" in updates ? updates.album?.name || "" : track.album?.name || "",
 						trackNumber: updates.trackNumber || track.trackNumber || 1,
 						discNumber: updates.discNumber || track.discNumber || 1,
 						type: updates.type || track.type,
@@ -106,7 +106,7 @@ export default function TracksTable({
 			cell: ({ row }) => (
 				<div className="flex items-center justify-center">
 					<Image
-						src={row.original.img || "/placeholder-album.png"}
+						src={row.original.img || "/pic/placeholder.jpg"}
 						alt={row.original.name}
 						className="rounded"
 						width={40}
@@ -137,9 +137,17 @@ export default function TracksTable({
 			accessorKey: "album",
 			header: "Album",
 			cell: ({ row }) => (
-				<div className="text-muted-foreground">
-					{row.original.album?.name || "No album"}
-				</div>
+				<InlineSelectCell
+					value={row.original.album?.id || "none"}
+					onSave={(value) => {
+						const album = value === "none" ? null : albums.find((a) => a.id === value) ?? null;
+						handleUpdateTrack(row.original.id, { album });
+					}}
+					options={[
+						{ value: "none", label: "No album" },
+						...albums.map((album) => ({ value: album.id, label: album.name })),
+					]}
+				/>
 			),
 			size: 200,
 			minSize: 150,

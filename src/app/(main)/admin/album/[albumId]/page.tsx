@@ -9,7 +9,6 @@ import getAlbumsByArtist from "@/lib/database/data/getAlbumsByArtist";
 import { PageContainer } from "@/components/layout/PageContainer";
 import AlbumActionDropdown from "@/features/admin/editContent/components/AlbumActionDropdown";
 import AdminContentHeader from "@/features/admin/editContent/components/AdminContentHeader";
-import FetchPreviewUrlsButton from "@/features/admin/editContent/components/FetchPreviewUrlsButton";
 
 export default async function AdminAlbumPage({
 	params,
@@ -31,7 +30,6 @@ export default async function AdminAlbumPage({
 				data={album}
 				subTitleContent={<p>{dateToLong(album.releaseDate)}</p>}
 			>
-				<FetchPreviewUrlsButton albumId={albumId} />
 				<AlbumActionDropdown data={album} />
 			</AdminContentHeader>
 			<PageContainer>
