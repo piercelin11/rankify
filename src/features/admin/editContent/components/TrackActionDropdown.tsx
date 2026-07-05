@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useTransition } from "react";
+import React, { useState } from "react";
 import { TrackData, AlbumData } from "@/types/data";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,17 +30,20 @@ export default function TrackActionDropdown({
 }: TrackActionDropdownProps) {
 	const { showAlert, showCustom, close } = useModal();
 	const { toast } = useToast();
-	const [isFetchingPreview, startFetchPreview] = useTransition();
+	const [isFetchingPreview, setIsFetchingPreview] = useState(false);
 	const { execute: executeDeleteTrack } = useServerAction(deleteTrack);
 
-	function handleFetchPreviewUrl() {
-		startFetchPreview(async () => {
+	async function handleFetchPreviewUrl() {
+		setIsFetchingPreview(true);
+		try {
 			const result = await fetchTrackPreviewUrl(data.id);
 			toast({
 				title: result.message,
 				variant: result.type === "error" ? "destructive" : "default",
 			});
-		});
+		} finally {
+			setIsFetchingPreview(false);
+		}
 	}
 
 	async function handleDelete() {
@@ -89,7 +92,14 @@ export default function TrackActionDropdown({
 					</DropdownMenuItem>
 					<DropdownMenuItem
 						disabled={isFetchingPreview}
-						onClick={handleFetchPreviewUrl}
+						onSelect={(event) => {
+							if (isFetchingPreview) {
+								event.preventDefault();
+								return;
+							}
+							event.preventDefault();
+							handleFetchPreviewUrl();
+						}}
 					>
 						<RefreshCw
 							className={cn("mr-2 h-4 w-4", isFetchingPreview && "animate-spin")}

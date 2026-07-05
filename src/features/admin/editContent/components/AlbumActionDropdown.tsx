@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState } from "react";
 import AlbumEditingForm from "./AlbumEditingForm";
 import { AlbumData } from "@/types/data";
 import deleteAlbum from "../actions/deleteAlbum";
@@ -24,19 +24,22 @@ type AlbumActionDropdownProps = { data: AlbumData };
 export default function AlbumActionDropdown({ data }: AlbumActionDropdownProps) {
 	const {showAlert, showCustom, close} = useModal();
 	const { toast } = useToast();
-	const [isFetchingPreviews, startFetchPreviews] = useTransition();
+	const [isFetchingPreviews, setIsFetchingPreviews] = useState(false);
 	const { execute: executeDeleteAlbum } = useServerAction(deleteAlbum);
 
 	const { id } = data;
 
-	function handleFetchPreviewUrls() {
-		startFetchPreviews(async () => {
+	async function handleFetchPreviewUrls() {
+		setIsFetchingPreviews(true);
+		try {
 			const result = await fetchAlbumPreviewUrls(id);
 			toast({
 				title: result.message,
 				variant: result.type === "error" ? "destructive" : "default",
 			});
-		});
+		} finally {
+			setIsFetchingPreviews(false);
+		}
 	}
 
 	async function handleDelete() {
@@ -76,7 +79,14 @@ export default function AlbumActionDropdown({ data }: AlbumActionDropdownProps) 
 					</DropdownMenuItem>
 					<DropdownMenuItem
 						disabled={isFetchingPreviews}
-						onClick={handleFetchPreviewUrls}
+						onSelect={(event) => {
+							if (isFetchingPreviews) {
+								event.preventDefault();
+								return;
+							}
+							event.preventDefault();
+							handleFetchPreviewUrls();
+						}}
 					>
 						<RefreshCw className={cn("mr-2 h-4 w-4", isFetchingPreviews && "animate-spin")} />
 						{isFetchingPreviews ? "Fetching..." : "Get Preview URLs"}
