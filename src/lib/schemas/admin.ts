@@ -14,7 +14,7 @@ export const updateTrackSchema = z.object({
 			"Must be a valid HEX color, e.g., #FFF or #FFFFFF"
 		)
 		.optional(),
-	previewUrl: z.string().optional(),
+	previewUrl: z.string().optional().nullable(),
 });
 
 export type UpdateTrackType = z.infer<typeof updateTrackSchema>;

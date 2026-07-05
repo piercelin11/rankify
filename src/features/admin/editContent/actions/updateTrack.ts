@@ -68,7 +68,9 @@ export default async function updateTrack({
 						color: newAlbum.color,
 						type: validatedData.type,
 						discNumber: validatedData.discNumber ?? originalData.discNumber ?? 1,
-						previewUrl: validatedData.previewUrl || null,
+						...(validatedData.previewUrl !== undefined && {
+							previewUrl: validatedData.previewUrl || null,
+						}),
 					},
 				});
 			} else {
@@ -86,7 +88,9 @@ export default async function updateTrack({
 						trackNumber: validatedData.trackNumber,
 						discNumber: validatedData.discNumber ?? originalData.discNumber ?? 1,
 						img: validatedData.color ? null : originalData.img, // 保留原有圖片，除非有新的顏色
-						previewUrl: validatedData.previewUrl || null,
+						...(validatedData.previewUrl !== undefined && {
+							previewUrl: validatedData.previewUrl || null,
+						}),
 					},
 				});
 			}
