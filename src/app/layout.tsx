@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Outfit, Inter } from "next/font/google";
+import { Geist_Mono, Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ModalManager } from "@/components/modals/ModalManager";
 import { ModalProvider, AudioPlayerProvider } from "@/contexts";
@@ -12,10 +13,20 @@ const serif = Geist_Mono({
 	subsets: ["latin"],
 });
 
-const numeric = Outfit({
+const numeric = localFont({
 	variable: "--font-numeric",
-	weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-	subsets: ["latin"],
+	src: [
+		{
+			path: "../fonts/BoutiqueBitmap9x9-Regular.ttf",
+			weight: "400",
+			style: "normal",
+		},
+		{
+			path: "../fonts/BoutiqueBitmap9x9-Bold.ttf",
+			weight: "700",
+			style: "normal",
+		},
+	],
 });
 
 const sans = Inter({

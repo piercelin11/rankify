@@ -41,6 +41,7 @@ async function getPercentileCounts(trackIds: string[]) {
 export default async function getTracksStats({
 	artistId,
 	userId,
+	take,
 }: getTracksStatsProps): Promise<TrackStatsType[]> {
 
 	cacheLife(CACHE_TIMES.LONG);
@@ -89,6 +90,7 @@ export default async function getTracksStats({
 			orderBy: {
 				overallRank: "asc",
 			},
+			take,
 		});
 
 		const trackIds = trackStats.map((stats) => stats.track.id);
