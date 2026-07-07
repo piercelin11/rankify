@@ -58,6 +58,22 @@ export function adjustColor(
 	return `#${newHexValue}`;
 }
 
+// 只調整飽和度，亮度維持原色不變
+export function adjustSaturation(
+	hexColor: string | null,
+	saturationFactor: number
+): string {
+	if (!hexColor) return DEFAULT_COLOR;
+
+	const hexValue = hexColor.slice(1);
+	const rgb = colorConvert.hex.rgb(hexValue);
+	const lab = colorConvert.rgb.lab(rgb);
+	const lch = colorConvert.lab.lch(lab);
+	const originalLightness = lch[0] / 100;
+
+	return adjustColor(hexColor, originalLightness, saturationFactor);
+}
+
 export function adjustColorOpacity(hexColor: string, opacity: number) {
 	switch (opacity) {
 		case 0.95: {

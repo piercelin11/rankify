@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import DonutChart from "@/components/charts/DonutChart";
+import InfoTooltip from "@/components/overlay/InfoTooltip";
 import type { AlbumStatsType } from "@/types/album";
 import { PERCENTILE_OPTIONS, type PercentileKey } from "./constants";
 import PercentileSelect from "./components/PercentileSelect";
@@ -39,7 +40,10 @@ export default function AlbumPercentileCard({
 	return (
 		<Card className="bg-card/80 p-6">
 			<div className="mb-4 flex items-center justify-between">
-				<h2>{title}</h2>
+				<div className="flex items-center gap-2">
+					<h2>{title}</h2>
+					<InfoTooltip content="Shows how many albums fall within each percentile tier based on your rankings." />
+				</div>
 				<PercentileSelect value={percentile} onChange={setPercentile} />
 			</div>
 

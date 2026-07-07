@@ -25,17 +25,17 @@ export default function Tooltip({
 	return (
 		<TooltipProvider delayDuration={0}>
 			<TooltipRoot>
-				<TooltipTrigger>{children}</TooltipTrigger>
+				<TooltipTrigger asChild>{children}</TooltipTrigger>
 				<TooltipPortal>
 					<TooltipContent
 						className={cn(
-							"z-50 rounded-md bg-neutral-800 px-3 py-2 text-sm text-secondary-foreground",
+							"z-50 rounded-md bg-background/80 px-3 py-2 text-sm text-secondary-foreground",
 							className
 						)}
 						side={position}
 					>
 						{content}
-						<TooltipArrow className="mb-2 fill-neutral-800" />
+						<TooltipArrow className="mb-2 fill-background/80" />
 					</TooltipContent>
 				</TooltipPortal>
 			</TooltipRoot>
