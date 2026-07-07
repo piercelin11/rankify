@@ -1,4 +1,5 @@
 import PointsBarChart from "@/components/charts/PointsBarChart";
+import InfoTooltip from "@/components/overlay/InfoTooltip";
 import type { AlbumStatsType } from "@/types/album";
 
 type Props = {
@@ -14,7 +15,10 @@ export default function AlbumPointsCard({
 
 	return (
 		<div>
-			<h2 className="mb-4">{title}</h2>
+			<div className="mb-20 flex items-center gap-2">
+				<h2>{title}</h2>
+				<InfoTooltip content="Average points earned by each album across your ranking submissions." />
+			</div>
 			<div className="h-[280px] xl:h-[380px] 2xl:h-[420px]">
 				<PointsBarChart
 					items={albumStats.map((album) => ({

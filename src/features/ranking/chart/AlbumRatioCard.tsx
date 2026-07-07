@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import RatioBarChart from "@/components/charts/RatioBarChart";
+import InfoTooltip from "@/components/overlay/InfoTooltip";
 import type { AlbumStatsType } from "@/types/album";
 import { PERCENTILE_OPTIONS, type PercentileKey } from "./constants";
 import PercentileSelect from "./components/PercentileSelect";
@@ -37,7 +38,10 @@ export default function AlbumRatioCard({
 	return (
 		<Card className="bg-card/80 p-6">
 			<div className="mb-4 flex items-center justify-between">
-				<h2>{title}</h2>
+				<div className="flex items-center gap-2">
+					<h2>{title}</h2>
+					<InfoTooltip content="Percentage of each album's tracks that rank within the selected percentile." />
+				</div>
 				<PercentileSelect value={percentile} onChange={setPercentile} />
 			</div>
 
@@ -45,6 +49,7 @@ export default function AlbumRatioCard({
 				<RatioBarChart
 					items={withRatio.map((album) => ({
 						id: album.id,
+						label: album.name,
 						value: album.ratio,
 						color: album.color,
 					}))}
