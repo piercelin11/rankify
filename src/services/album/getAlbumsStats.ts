@@ -60,6 +60,7 @@ export default async function getAlbumsStats({
             averageRank: stat.averageTrackRank.toFixed(1),
             avgPoints: stat.points,
             submissionCount: stat.submissionCount,
+            trackCount: stat.trackCount,
 
             // 百分位統計（已預先計算）
             top5PercentCount: stat.top5PercentCount,

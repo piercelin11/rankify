@@ -1,23 +1,13 @@
 import { getSession } from "@/../auth";
-import {
-	getAlbumRankingSessions,
-	getAlbumsByArtistId,
-	getLoggedAlbumNames,
-} from "@/db/album";
-import MyStatsToolbar from "@/components/artist/MyStatsToolbar";
-import OverviewView from "@/features/ranking/views/OverviewView";
-import { cuidSchema } from "@/lib/schemas/general";
-import {
-	artistRangeParamsSchema,
-	artistViewParamsSchema,
-} from "@/lib/schemas/artist";
-import { calculateDateRangeFromSlug, cn } from "@/lib/utils";
+import { artistRangeParamsSchema } from "@/lib/schemas/artist";
+import { calculateDateRangeFromSlug } from "@/lib/utils";
 import getAlbumsStats from "@/services/album/getAlbumsStats";
-import { getTracksHistory } from "@/services/track/getTracksHistory";
 import getTracksStats from "@/services/track/getTracksStats";
 import { getArtistRankingSubmissions } from "@/db/ranking";
-import RankingTable from "@/features/ranking/table/RankingTable";
 import TopTracksCard from "@/features/ranking/top-tracks/TopTracksCard";
+import AlbumPercentileCard from "@/features/ranking/chart/AlbumPercentileCard";
+import AlbumRatioCard from "@/features/ranking/chart/AlbumRatioCard";
+import AlbumPointsCard from "@/features/ranking/chart/AlbumPointsCard";
 
 type PageProps = {
 	params: Promise<{ artistId: string }>;
@@ -32,9 +22,7 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 	const { artistId } = await params;
 	const query = await searchParams;
 
-	const view = artistViewParamsSchema.parse(query.view);
 	const range = artistRangeParamsSchema.parse(query.range);
-	const submissionId = cuidSchema.optional().parse(query.submissionId);
 
 	const user = await getSession();
 
@@ -48,21 +36,27 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 	//TODO:處理沒有資料的回傳畫面
 	if (!latestSubmissionId) return null;
 
-	const [trackStats, albumStats, albumSubmissions] = await Promise.all([
-			getTracksStats({ artistId, userId }),
-			getAlbumsStats({ artistId, userId, dateRange }),
-			getAlbumRankingSessions({ userId, artistId }),
-		]);
+	const [trackStats, albumStats] = await Promise.all([
+		getTracksStats({ artistId, userId }),
+		getAlbumsStats({ artistId, userId, dateRange }),
+	]);
 
 	const topTracks = trackStats.slice(0, 5);
 
 	return (
-		<div className="p-content space-y-10">
+		<div className="space-y-10 p-content">
 			<TopTracksCard
 				tracks={topTracks}
 				columnKey={["highestRank"]}
 				title="Your Top Tracks"
 			/>
+
+			<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+				<AlbumPercentileCard albumStats={albumStats} />
+				<AlbumRatioCard albumStats={albumStats} />
+			</div>
+
+			<AlbumPointsCard albumStats={albumStats} />
 		</div>
 	);
 }

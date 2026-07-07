@@ -23,6 +23,7 @@ export type AlbumStatsType = {
 	submissionCount: number;
 
 	rank: number;
+	trackCount: number;
 	top5PercentCount: number;
 	top10PercentCount: number;
 	top25PercentCount: number;
