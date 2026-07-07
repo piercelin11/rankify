@@ -41,7 +41,7 @@ export default function TopTracksCard({
 							0{track.overallRank}
 						</div>
 						<div className="flex min-w-0 flex-1 items-center gap-3">
-							<div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg lg:h-18 lg:w-18">
+							<div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg lg:h-16 lg:w-16">
 								<Image
 									src={track.img || PLACEHOLDER_PIC}
 									alt={track.name}
