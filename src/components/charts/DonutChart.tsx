@@ -11,6 +11,7 @@ import {
 import { Doughnut } from "react-chartjs-2";
 import colorConvert from "color-convert";
 import { DEFAULT_COLOR, MUTED_COLOR } from "@/constants";
+import { adjustSaturation } from "@/lib/utils";
 
 ChartJS.register(ArcElement, Tooltip);
 
@@ -28,16 +29,41 @@ type Props = {
 	labels: string[];
 	data: number[];
 	colors: (string | null)[];
+	ids: string[];
+	hoveredId?: string | null;
+	onHoveredIdChange?: (id: string | null) => void;
 };
 
-export default function DonutChart({ labels, data, colors }: Props) {
-	const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+export default function DonutChart({
+	labels,
+	data,
+	colors,
+	ids,
+	hoveredId,
+	onHoveredIdChange,
+}: Props) {
+	const [localHoveredIndex, setLocalHoveredIndex] = useState<number | null>(
+		null
+	);
+
+	let controlledIndex: number | null | undefined;
+	if (hoveredId === undefined) {
+		controlledIndex = undefined;
+	} else if (hoveredId === null) {
+		controlledIndex = null;
+	} else {
+		const index = ids.indexOf(hoveredId);
+		controlledIndex = index === -1 ? null : index;
+	}
+	const hoveredIndex = controlledIndex ?? localHoveredIndex;
 
 	const backgroundColor = colors.map((color, index) =>
 		hoveredIndex === null
 			? getDefaultColorForIndex(index, data.length)
 			: hoveredIndex === index
-				? (color ?? DEFAULT_COLOR)
+				? color
+					? adjustSaturation(color, 2.5)
+					: DEFAULT_COLOR
 				: MUTED_COLOR
 	);
 
@@ -62,7 +88,9 @@ export default function DonutChart({ labels, data, colors }: Props) {
 			duration: 500,
 		},
 		onHover: (_event: ChartEvent, elements: ActiveElement[]) => {
-			setHoveredIndex(elements[0]?.index ?? null);
+			const index = elements[0]?.index ?? null;
+			setLocalHoveredIndex(index);
+			onHoveredIdChange?.(index === null ? null : ids[index]);
 		},
 		plugins: {
 			legend: {
@@ -85,7 +113,10 @@ export default function DonutChart({ labels, data, colors }: Props) {
 	return (
 		<div
 			className="relative h-full w-full"
-			onMouseLeave={() => setHoveredIndex(null)}
+			onMouseLeave={() => {
+				setLocalHoveredIndex(null);
+				onHoveredIdChange?.(null);
+			}}
 		>
 			<Doughnut data={chartData} options={options} />
 		</div>

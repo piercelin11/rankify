@@ -5,8 +5,7 @@ import getAlbumsStats from "@/services/album/getAlbumsStats";
 import getTracksStats from "@/services/track/getTracksStats";
 import { getArtistRankingSubmissions } from "@/db/ranking";
 import TopTracksCard from "@/features/ranking/top-tracks/TopTracksCard";
-import AlbumPercentileCard from "@/features/ranking/chart/AlbumPercentileCard";
-import AlbumRatioCard from "@/features/ranking/chart/AlbumRatioCard";
+import LinkedAlbumCharts from "@/features/ranking/chart/LinkedAlbumCharts";
 import AlbumPointsCard from "@/features/ranking/chart/AlbumPointsCard";
 
 type PageProps = {
@@ -51,10 +50,7 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 				title="Your Top Tracks"
 			/>
 
-			<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-				<AlbumPercentileCard albumStats={albumStats} />
-				<AlbumRatioCard albumStats={albumStats} />
-			</div>
+			<LinkedAlbumCharts albumStats={albumStats} />
 
 			<AlbumPointsCard albumStats={albumStats} />
 		</div>
