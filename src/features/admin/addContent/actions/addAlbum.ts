@@ -10,6 +10,7 @@ import { AppResponseType } from "@/types/response";
 import { revalidatePath } from "next/cache";
 import { invalidateAdminCache } from "@/lib/cacheInvalidation";
 import { requireAdmin } from "@/../auth";
+import getDominantColorFromImage from "@/lib/upload/getDominantColorFromImage";
 
 type AddAlbumProps = {
 	artistId: string;
@@ -65,18 +66,28 @@ export default async function addAlbum({
 			(track) => track.name
 		);
 
-		const newAlbums = albumData
+		const filteredAlbums = albumData
 			.filter((album) => album !== null)
-			.filter((album) => !savedAlbumsName.includes(album.name))
-			.map((album) => ({
-				id: album.id,
-				name: album.name,
-				artistId,
-				spotifyUrl: album.external_urls.spotify,
-				img: album.images?.[0].url,
-				releaseDate: new Date(album.release_date),
-				type,
-			}));
+			.filter((album) => !savedAlbumsName.includes(album.name));
+
+		const albumColors = await Promise.all(
+			filteredAlbums.map((album) =>
+				album.images?.[0]?.url
+					? getDominantColorFromImage(album.images[0].url)
+					: Promise.resolve(null)
+			)
+		);
+
+		const newAlbums = filteredAlbums.map((album, index) => ({
+			id: album.id,
+			name: album.name,
+			artistId,
+			spotifyUrl: album.external_urls.spotify,
+			img: album.images?.[0].url,
+			color: albumColors[index],
+			releaseDate: new Date(album.release_date),
+			type,
+		}));
 
 		const newTracks = trackData
 			.filter((track) => track !== null)

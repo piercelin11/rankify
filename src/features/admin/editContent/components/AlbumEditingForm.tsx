@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import ColorSelector from "./ColorSelector";
+import AlbumDatePicker from "./AlbumDatePicker";
 import { Controller, useForm } from "react-hook-form";
 import { updateAlbumSchema, UpdateAlbumType } from "@/lib/schemas/admin";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,6 +41,7 @@ export default function AlbumEditingForm({
 			img: data.img!,
 			name: data.name,
 			color: data.color || "",
+			releaseDate: data.releaseDate,
 		},
 	});
 
@@ -109,6 +111,19 @@ export default function AlbumEditingForm({
 						<ColorSelector
 							data={data}
 							message={errors.color?.message}
+							onChange={field.onChange}
+							onBlur={field.onBlur}
+							value={field.value}
+							name={field.name}
+						/>
+					)}
+				/>
+				<Controller
+					name="releaseDate"
+					control={control}
+					render={({ field }) => (
+						<AlbumDatePicker
+							message={errors.releaseDate?.message}
 							onChange={field.onChange}
 							onBlur={field.onBlur}
 							value={field.value}

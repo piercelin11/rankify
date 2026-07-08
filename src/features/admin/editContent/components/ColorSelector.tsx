@@ -1,17 +1,26 @@
 import useDominantColor from "@/lib/hooks/useDominantColor";
 import { Button } from "@/components/ui/button";
-import { InputHTMLAttributes, useState } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import FormMessage from "@/components/form/FormMessage";
 import colorConvert from "color-convert";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { HexColorPicker } from "react-colorful";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 
 type ColorSelectorProps = {
 	data: { img: string | null };
 	message?: string;
-} & InputHTMLAttributes<HTMLInputElement>;
+	value?: string;
+	name?: string;
+	onChange: (value: string) => void;
+	onBlur: () => void;
+};
 
 export default function ColorSelector({
 	data,
@@ -53,20 +62,34 @@ export default function ColorSelector({
 									value={colorOption}
 									className="hidden"
 									checked={value === colorOption}
-									onChange={onChange}
+									onChange={(e) => onChange(e.target.value)}
 								/>
 							</label>
 						))}
 					</div>
 				) : (
-					<Input
-						type="text"
-						name={name}
-						value={value || ""}
-						onChange={onChange}
-						onBlur={onBlur}
-						placeholder="Hex color (#rrggbb) or name"
-					/>
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button
+								type="button"
+								variant="outline"
+								className="flex items-center gap-2"
+								onBlur={onBlur}
+							>
+								<span
+									className="h-5 w-5 rounded-full border"
+									style={{ backgroundColor: value || "#000000" }}
+								/>
+								<span>{value || "Pick a color"}</span>
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-auto">
+							<HexColorPicker
+								color={value || "#000000"}
+								onChange={onChange}
+							/>
+						</PopoverContent>
+					</Popover>
 				)}
 				<Button
 					className="h-10 w-10 p-3"

@@ -55,6 +55,7 @@ export default async function updateAlbum({
 						name: validatedData.name,
 						color: validatedData.color,
 						img: validatedData.img,
+						releaseDate: validatedData.releaseDate,
 					},
 				});
 
