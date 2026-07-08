@@ -41,6 +41,7 @@ export default function AlbumRatioCard({
 			id: album.id,
 			name: album.name,
 			color: album.color,
+			releaseDate: album.releaseDate,
 			ratio: album[field] / album.trackCount,
 		}));
 
@@ -49,6 +50,9 @@ export default function AlbumRatioCard({
 	const ranked = [...withRatio].sort((a, b) => b.ratio - a.ratio);
 	const ranks = getCompetitionRanks(ranked, (album) => album.ratio);
 	const visibleAlbums = expanded ? ranked : ranked.slice(0, 3);
+	const sortedByReleaseDate = [...withRatio].sort(
+		(a, b) => a.releaseDate.getTime() - b.releaseDate.getTime()
+	);
 
 	return (
 		<Card className="space-y-3 bg-card/80 p-6">
@@ -62,7 +66,7 @@ export default function AlbumRatioCard({
 
 			<div className="h-[240px] xl:h-[320px] 2xl:h-[380px]">
 				<RatioBarChart
-					items={withRatio.map((album) => ({
+					items={sortedByReleaseDate.map((album) => ({
 						id: album.id,
 						label: album.name,
 						value: album.ratio,
