@@ -28,6 +28,7 @@ export const updateAlbumSchema = z.object({
 			(value) => /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(value),
 			"Must be a valid HEX color, e.g., #FFF or #FFFFFF"
 		),
+	releaseDate: z.date({ message: "A valid release date is required." }),
 });
 
 export type UpdateAlbumType = z.infer<typeof updateAlbumSchema>;
