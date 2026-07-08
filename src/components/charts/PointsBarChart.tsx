@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { toAcronym } from "@/lib/utils";
+import { cn, toAcronym } from "@/lib/utils";
 import { adjustColor, adjustSaturation } from "@/lib/utils/color.utils";
 import { DEFAULT_COLOR, MUTED_COLOR } from "@/constants";
-import Tooltip from "@/components/overlay/Tooltip";
 
 // 非-hover（預設狀態）的漸層設定
 const DEFAULT_GRADIENT = {
@@ -18,7 +17,7 @@ const DEFAULT_GRADIENT = {
 function getHoverGradient(color: string | null) {
 	return {
 		base: adjustSaturation(color, 2.5),
-		tint: adjustColor(color, 0.6, 1),
+		tint: adjustColor(color, 1, 1),
 		start: 0,
 		stop: 150,
 	};
@@ -64,21 +63,34 @@ export default function PointsBarChart({ items }: Props) {
 
 					return (
 						<div key={item.id} className="flex h-full flex-1 items-end">
-							<Tooltip content={`${item.value}`}>
-								<div
-									className="min-h-[4px] w-full rounded-2xl px-2 transition-[height] duration-700 ease-out"
-									style={{
-										height: mounted ? `${Math.max(ratio * 100, 2)}%` : "0%",
-									}}
-									onMouseEnter={() => setHoveredId(item.id)}
-									onMouseLeave={() => setHoveredId(null)}
-								>
+							<div
+								className="relative min-h-[4px] w-full rounded-2xl px-2 transition-[height] duration-700 ease-out"
+								style={{
+									height: mounted ? `${Math.max(ratio * 100, 2)}%` : "0%",
+								}}
+								onMouseEnter={() => setHoveredId(item.id)}
+								onMouseLeave={() => setHoveredId(null)}
+							>
+								{isHovered && (
 									<div
-										className="h-full w-full rounded-2xl"
-										style={{ background }}
-									/>
-								</div>
-							</Tooltip>
+										className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-sm font-semibold"
+										style={{
+											borderColor: item.color
+												? adjustColor(item.color, 0.8, 3)
+												: DEFAULT_COLOR,
+											color: item.color
+												? adjustColor(item.color, 0.8, 3)
+												: DEFAULT_COLOR,
+										}}
+									>
+										{item.value}
+									</div>
+								)}
+								<div
+									className="h-full w-full rounded-2xl"
+									style={{ background }}
+								/>
+							</div>
 						</div>
 					);
 				})}
@@ -88,7 +100,9 @@ export default function PointsBarChart({ items }: Props) {
 				{items.map((item) => (
 					<div
 						key={item.id}
-						className="w-full flex-1 truncate px-1 text-center text-xs text-muted-foreground"
+						className={cn("w-full flex-1 truncate px-1 text-center text-xs text-muted-foreground", {
+							"text-foreground": hoveredId === item.id
+						})}
 					>
 						{toAcronym(item.label)}
 					</div>

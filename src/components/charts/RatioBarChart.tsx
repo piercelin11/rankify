@@ -9,7 +9,7 @@ import Tooltip from "@/components/overlay/Tooltip";
 const DEFAULT_GRADIENT = {
 	base: DEFAULT_COLOR,
 	tint: adjustColor(DEFAULT_COLOR, 1, 1),
-	start: 20,
+	start: 10,
 	stop: 100,
 };
 
@@ -17,9 +17,9 @@ const DEFAULT_GRADIENT = {
 function getHoverGradient(color: string | null) {
 	return {
 		base: adjustSaturation(color, 2.5),
-		tint: adjustColor(color, 0.6, 1),
-		start: 0,
-		stop: 300,
+		tint: adjustColor(color, 1, 1.5),
+		start: 10,
+		stop: 200,
 	};
 }
 
@@ -32,11 +32,19 @@ type BarItem = {
 
 type Props = {
 	items: BarItem[];
+	hoveredId?: string | null;
+	onHoveredIdChange?: (id: string | null) => void;
 };
 
-export default function RatioBarChart({ items }: Props) {
+export default function RatioBarChart({
+	items,
+	hoveredId: controlledHoveredId,
+	onHoveredIdChange,
+}: Props) {
 	const [mounted, setMounted] = useState(false);
-	const [hoveredId, setHoveredId] = useState<string | null>(null);
+	const [localHoveredId, setLocalHoveredId] = useState<string | null>(null);
+	const hoveredId = controlledHoveredId ?? localHoveredId;
+	const setHoveredId = onHoveredIdChange ?? setLocalHoveredId;
 
 	useEffect(() => {
 		const frame = requestAnimationFrame(() => setMounted(true));
@@ -55,7 +63,7 @@ export default function RatioBarChart({ items }: Props) {
 				const background =
 					hasHover && !isHovered
 						? MUTED_COLOR
-						: `linear-gradient(to top, ${gradient.base} 0%, ${gradient.base} ${gradient.start}%, ${gradient.tint} ${gradient.stop}%)`;
+						: `linear-gradient(to top, ${gradient.base} 0%, ${gradient.base} ${gradient.start}%, ${gradient.tint} max(${gradient.stop}%, 150px))`;
 
 				return (
 					<div key={item.id} className="flex h-full flex-1 items-end">
