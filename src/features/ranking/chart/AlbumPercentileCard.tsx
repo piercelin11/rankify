@@ -41,6 +41,7 @@ export default function AlbumPercentileCard({
 			name: album.name,
 			color: album.color,
 			count: album[field],
+			tracks: album.tracks.slice(0, album[field]),
 		}))
 		.sort((a, b) => b.count - a.count);
 
@@ -65,6 +66,7 @@ export default function AlbumPercentileCard({
 					data={ranked.map((album) => album.count)}
 					colors={ranked.map((album) => album.color)}
 					ids={ranked.map((album) => album.id)}
+					trackLists={ranked.map((album) => album.tracks)}
 					hoveredId={hoveredAlbumId}
 					onHoveredIdChange={onHoveredAlbumIdChange}
 				/>
@@ -84,7 +86,7 @@ export default function AlbumPercentileCard({
 					return (
 						<div
 							key={album.id}
-							className={cn("flex items-center gap-3 rounded-lg px-4 pb-3", {
+							className={cn("flex items-center gap-3 rounded-lg px-4 pb-2", {
 								"text-muted-foreground/60": isDimmed,
 								"text-foreground": isActive,
 							})}

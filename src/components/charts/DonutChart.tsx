@@ -12,7 +12,7 @@ import {
 import { Doughnut } from "react-chartjs-2";
 import colorConvert from "color-convert";
 import { DEFAULT_COLOR, MUTED_COLOR } from "@/constants";
-import { adjustSaturation, cn } from "@/lib/utils";
+import { adjustSaturation, cn, toAcronym } from "@/lib/utils";
 
 ChartJS.register(ArcElement, Tooltip);
 
@@ -30,10 +30,13 @@ function getDefaultColorForIndex(index: number, total: number): string {
 	return `rgba(${DEFAULT_R}, ${DEFAULT_G}, ${DEFAULT_B}, ${ratio})`;
 }
 
+type TrackItem = { id: string; name: string; rank: number };
+
 type TooltipData = {
 	label: string;
 	value: string;
 	color: string;
+	tracks: TrackItem[];
 	x: number;
 	y: number;
 };
@@ -43,6 +46,8 @@ type Props = {
 	data: number[];
 	colors: (string | null)[];
 	ids: string[];
+	/** 各扇形對應的歌曲明細，索引與 labels/data/ids 一致，供 tooltip 顯示清單 */
+	trackLists?: TrackItem[][];
 	hoveredId?: string | null;
 	onHoveredIdChange?: (id: string | null) => void;
 	/** 圖表首次渲染（弧形進場）動畫時長，單位 ms */
@@ -58,6 +63,7 @@ export default function DonutChart({
 	data,
 	colors,
 	ids,
+	trackLists,
 	hoveredId,
 	onHoveredIdChange,
 	renderDuration = DEFAULT_RENDER_DURATION,
@@ -156,8 +162,7 @@ export default function DonutChart({
 						}
 
 						const dataPoint = tooltip.dataPoints?.[0];
-						const containerRect =
-							containerRef.current?.getBoundingClientRect();
+						const containerRect = containerRef.current?.getBoundingClientRect();
 						if (!dataPoint || !containerRect) return;
 
 						const canvasRect = chart.canvas.getBoundingClientRect();
@@ -168,6 +173,7 @@ export default function DonutChart({
 							color: (dataPoint.dataset.backgroundColor as string[])[
 								dataPoint.dataIndex
 							],
+							tracks: trackLists?.[dataPoint.dataIndex] ?? [],
 							x: canvasRect.left - containerRect.left + tooltip.caretX,
 							y: canvasRect.top - containerRect.top + tooltip.caretY,
 						});
@@ -176,10 +182,7 @@ export default function DonutChart({
 				},
 			},
 		}),
-		// tooltipData/tooltipVisible 刻意不放進依賴：它們只驅動疊加的 DOM tooltip，
-		// 若讓 options reference 隨 hover 變動,會觸發 react-chartjs-2 的
-		// update effect 與 external callback 互相觸發，造成無限迴圈。
-		[ids, onHoveredIdChange, renderDuration, hoverDuration]
+		[ids, trackLists, onHoveredIdChange, renderDuration, hoverDuration]
 	);
 
 	return (
@@ -197,28 +200,68 @@ export default function DonutChart({
 			{tooltipData && (
 				<div
 					className={cn(
-						"pointer-events-none absolute z-50 rounded-lg bg-background/80 px-3 py-2 shadow-lg backdrop-blur-sm transition-[opacity,transform] ease-out",
+						"pointer-events-none absolute z-50 space-y-2 rounded-lg bg-background/80 py-2 shadow-lg backdrop-blur-sm transition-[opacity,transform] ease-out",
+						tooltipData.tracks.length > 0 &&
+							(tooltipData.tracks.length > 5 ? "w-[424px]" : "w-[200px]"),
 						tooltipVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
 					)}
 					style={{
 						left: tooltipData.x,
 						top: tooltipData.y,
 						transitionDuration: `${tooltipDuration}ms`,
-						transform: "translate(-50%, calc(-100% - 10px))",
+						transform: "translate(calc(-50% + 30px), calc(-100% - 10px))",
 					}}
 				>
-					<div className="flex items-center gap-2">
-						<span
-							className="h-2.5 w-2.5 shrink-0 rounded-full"
-							style={{ backgroundColor: tooltipData.color }}
-						/>
-						<span className="text-sm font-semibold text-secondary-foreground">
-							{tooltipData.label}
-						</span>
+					<div className="flex items-center justify-between px-3">
+						<div className="flex items-center gap-2">
+							<span
+								className="h-3 w-3 shrink-0 rounded-full"
+								style={{ backgroundColor: tooltipData.color }}
+							/>
+							<span className="text-base font-semibold text-foreground">
+								{toAcronym(tooltipData.label)}
+							</span>
+						</div>
+						<div className="font-numeric text-base text-secondary-foreground">
+							{tooltipData.value}
+						</div>
 					</div>
-					<div className="mt-0.5 text-right font-numeric text-base text-foreground">
-						{tooltipData.value}
-					</div>
+					<div className="border-t border-border/50" />
+
+					{tooltipData.tracks.length > 0 && (
+						<div
+							className={cn(
+								"mt-2 grid gap-x-4 px-3",
+								tooltipData.tracks.length > 5
+									? "grid-cols-2"
+									: "grid-cols-1"
+							)}
+						>
+							{(tooltipData.tracks.length > 5
+								? [
+										tooltipData.tracks.slice(0, 5),
+										tooltipData.tracks.slice(5, 10),
+									]
+								: [tooltipData.tracks]
+							).map((column, columnIndex) => (
+								<div key={columnIndex} className="min-w-0 space-y-1">
+									{column.map((track) => (
+										<div
+											key={track.id}
+											className="flex items-center gap-2 text-sm"
+										>
+											<span className="w-8 shrink-0 font-numeric text-foreground">
+												#{track.rank < 10 ? `${track.rank}` : track.rank}
+											</span>
+											<span className="min-w-0 flex-1 truncate text-muted-foreground">
+												{track.name}
+											</span>
+										</div>
+									))}
+								</div>
+							))}
+						</div>
+					)}
 				</div>
 			)}
 		</div>
