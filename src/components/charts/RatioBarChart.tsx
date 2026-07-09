@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { adjustColor, adjustSaturation } from "@/lib/utils/color.utils";
 import { DEFAULT_COLOR, MUTED_COLOR } from "@/constants";
 import Tooltip from "@/components/overlay/Tooltip";
+import { toAcronym } from "@/lib/utils";
 
 // 非-hover（預設狀態）的漸層設定
 const DEFAULT_GRADIENT = {
@@ -67,9 +68,7 @@ export default function RatioBarChart({
 
 				return (
 					<div key={item.id} className="flex h-full flex-1 items-end">
-						<Tooltip
-							content={`${item.label}: ${Math.round(item.value * 100)}%`}
-						>
+						<Tooltip content={<RatioTooltip tooltipData={item} />}>
 							<div
 								className="min-h-[4px] w-full rounded-lg px-1 transition-[height] duration-700 ease-out"
 								style={{
@@ -87,6 +86,25 @@ export default function RatioBarChart({
 					</div>
 				);
 			})}
+		</div>
+	);
+}
+
+function RatioTooltip({ tooltipData }: { tooltipData: BarItem }) {
+	return (
+		<div className="flex items-center gap-4">
+			<div className="flex items-center gap-2">
+				<span
+					className="h-3 w-3 shrink-0 rounded-full"
+					style={{ backgroundColor: tooltipData.color ?? DEFAULT_COLOR }}
+				/>
+				<span className="text-base font-semibold text-foreground">
+					{toAcronym(tooltipData.label)}
+				</span>
+			</div>
+			<div className="font-numeric text-base text-secondary-foreground">
+				{Math.round(tooltipData.value * 100)}%
+			</div>
 		</div>
 	);
 }

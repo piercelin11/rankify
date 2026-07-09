@@ -28,6 +28,9 @@ export type AlbumStatsType = {
 	top10PercentCount: number;
 	top25PercentCount: number;
 	top50PercentCount: number;
+
+	/** 歌曲明細，依 overallRank 升冪排序，用於 tooltip 顯示歌曲清單 */
+	tracks: { id: string; name: string; rank: number }[];
 };
 
 /**

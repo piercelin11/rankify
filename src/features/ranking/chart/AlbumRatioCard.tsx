@@ -91,7 +91,7 @@ export default function AlbumRatioCard({
 					return (
 						<div
 							key={album.id}
-							className={cn("flex items-center gap-3 rounded-lg px-4 pb-3", {
+							className={cn("flex items-center gap-3 rounded-lg px-4 pb-2", {
 								"text-muted-foreground/60": isDimmed,
 								"text-foreground": isActive,
 							})}
