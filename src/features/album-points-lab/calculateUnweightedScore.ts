@@ -2,8 +2,11 @@ import { AlbumScoreResult } from "./types";
 
 type TrackRankingsType = { albumId: string | null; rank: number };
 
-// Baseline score with no percentile tiers, no smoothing, no length penalty —
-// purely "how good is this album's average rank" for comparison against the weighted algorithm.
+// TEMPORARY(sandbox): Baseline score with no percentile tiers, no smoothing,
+// no length penalty — purely "how good is this album's average rank" for
+// comparison against the weighted algorithm. See calculateAlbumPoints.sandbox.ts
+// header for why this is safe to call from production pages while unfinalized,
+// and why it should be removed once a formula is finalized and backfilled.
 export function calculateUnweightedAlbumScore(
 	trackRankings: TrackRankingsType[]
 ): AlbumScoreResult[] {

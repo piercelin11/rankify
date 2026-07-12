@@ -1,8 +1,12 @@
 import { AlbumPointsParams, AlbumScoreResult } from "./types";
 
-// Sandbox copy of src/features/ranking/utils/calculateAlbumPoints.ts
-// Coefficients are parameterized so the lab page can tune them live.
-// DO NOT import this from production code — it exists only for the test page.
+// TEMPORARY(sandbox): Experimental album score formula, parameterized so the
+// lab page can tune coefficients live. Also used by production pages to render
+// an experimental score preview alongside the official AlbumStat-backed card —
+// always called with DEFAULT_PARAMS there (no user-facing controls). Not yet
+// backfilled into AlbumRanking/AlbumStat, so production usage must compute on
+// read, not persist. Once a formula is finalized and backfilled, this whole
+// file (and its production call sites) should be removed.
 
 export const DEFAULT_PARAMS: AlbumPointsParams = {
 	curveExponent: 2,
