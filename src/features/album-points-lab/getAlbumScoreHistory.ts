@@ -5,7 +5,7 @@
 // favor of a MAX()/adjacent-row aggregate query against AlbumRanking.
 import { db } from "@/db/client";
 import {
-	calculateAlbumPointsSandbox,
+	calculateOneDirectionalAlbumPoints,
 	DEFAULT_PARAMS,
 } from "./calculateAlbumPoints.sandbox";
 import { calculateUnweightedAlbumScore } from "./calculateUnweightedScore";
@@ -34,10 +34,19 @@ type SubmissionScorePoint = {
 
 export type AlbumScoreStats = {
 	albumId: string;
-	peak: number;
+	score: number;
+	rank: number;
+	previousRank: number | null;
+	rankChange: number | null;
 	changeFromPrevious: number | null;
+	peak: number;
 	submissionCount: number;
 };
+
+function rankByScore(scores: AlbumScoreResult[]): Map<string, number> {
+	const sorted = [...scores].sort((a, b) => b.score - a.score);
+	return new Map(sorted.map(({ albumId }, index) => [albumId, index + 1]));
+}
 
 async function getRankingsBySubmission({
 	artistId,
@@ -57,6 +66,7 @@ async function getRankingsBySubmission({
 			userId,
 			submission: {
 				type: "ARTIST",
+				status: "COMPLETED",
 				...(cutoff ? { createdAt: { lte: cutoff.createdAt } } : {}),
 			},
 		},
@@ -86,26 +96,48 @@ async function getRankingsBySubmission({
 }
 
 function toStatsPerAlbum(points: SubmissionScorePoint[]): AlbumScoreStats[] {
-	const byAlbum = new Map<string, { submissionId: string; score: number }[]>();
+	const byAlbum = new Map<
+		string,
+		{ submissionId: string; score: number; rank: number }[]
+	>();
 	for (const point of points) {
+		const ranks = rankByScore(point.scores);
 		for (const { albumId, score } of point.scores) {
 			const entry = byAlbum.get(albumId) ?? [];
-			entry.push({ submissionId: point.submissionId, score });
+			entry.push({
+				submissionId: point.submissionId,
+				score,
+				rank: ranks.get(albumId) ?? Number.MAX_SAFE_INTEGER,
+			});
 			byAlbum.set(albumId, entry);
 		}
 	}
 
-	return Array.from(byAlbum.entries()).map(([albumId, scores]) => {
-		const peak = Math.max(...scores.map((s) => s.score));
-		const submissionCount = scores.length;
-		const [previous, latest] = scores.slice(-2);
-		const changeFromPrevious =
-			previous && latest && previous.score !== 0
-				? (latest.score - previous.score) / previous.score
-				: null;
+	return Array.from(byAlbum.entries())
+		.filter(([, scores]) => scores.length > 0)
+		.map(([albumId, scores]) => {
+			const peak = Math.max(...scores.map((s) => s.score));
+			const submissionCount = scores.length;
+			const latest = scores[scores.length - 1];
+			const previous =
+				scores.length > 1 ? scores[scores.length - 2] : undefined;
+			const changeFromPrevious =
+				previous && previous.score !== 0
+					? (latest.score - previous.score) / previous.score
+					: null;
+			const rankChange = previous ? previous.rank - latest.rank : null;
 
-		return { albumId, peak, changeFromPrevious, submissionCount };
-	});
+			return {
+				albumId,
+				score: latest.score,
+				rank: latest.rank,
+				previousRank: previous?.rank ?? null,
+				rankChange,
+				changeFromPrevious,
+				peak,
+				submissionCount,
+			};
+		});
 }
 
 async function getScoreHistory(
@@ -129,7 +161,7 @@ export function getAlbumScoreHistory(
 	props: GetAlbumScoreHistoryProps
 ): Promise<AlbumScoreStats[]> {
 	return getScoreHistory(props, (rankings) =>
-		calculateAlbumPointsSandbox(rankings, DEFAULT_PARAMS)
+		calculateOneDirectionalAlbumPoints(rankings, DEFAULT_PARAMS)
 	);
 }
 

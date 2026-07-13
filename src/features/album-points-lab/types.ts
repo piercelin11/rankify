@@ -17,6 +17,7 @@ export type LabAlbum = {
 	id: string;
 	name: string;
 	color: string | null;
+	img: string | null;
 	releaseDate: Date;
 };
 
