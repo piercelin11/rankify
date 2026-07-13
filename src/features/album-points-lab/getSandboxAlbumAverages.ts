@@ -1,5 +1,5 @@
 import {
-	calculateAlbumPointsSandbox,
+	calculateOneDirectionalAlbumPoints,
 	DEFAULT_PARAMS,
 } from "./calculateAlbumPoints.sandbox";
 import { calculateUnweightedAlbumScore } from "./calculateUnweightedScore";
@@ -19,7 +19,7 @@ export type SandboxAlbumAverage = {
 export function getSandboxWeightedAlbumAverages(
 	data: LabArtistData
 ): SandboxAlbumAverage[] {
-	const results = calculateAlbumPointsSandbox(
+	const results = calculateOneDirectionalAlbumPoints(
 		data.tracks.map((t) => ({ albumId: t.albumId, rank: t.overallRank })),
 		DEFAULT_PARAMS
 	);

@@ -6,17 +6,13 @@ import getTracksStats from "@/services/track/getTracksStats";
 import { getArtistRankingSubmissions } from "@/db/ranking";
 import TopTracksCard from "@/features/ranking/top-tracks/TopTracksCard";
 import LinkedAlbumCharts from "@/features/ranking/chart/LinkedAlbumCharts";
-import AlbumPointsCard from "@/features/ranking/chart/AlbumPointsCard";
 import { getRawTrackStats } from "@/features/album-points-lab/getRawTrackStats";
-import {
-	getSandboxWeightedAlbumAverages,
-	getSandboxUnweightedAlbumAverages,
-} from "@/features/album-points-lab/getSandboxAlbumAverages";
 import {
 	getAlbumScoreHistory,
 	getUnweightedAlbumScoreHistory,
 } from "@/features/album-points-lab/getAlbumScoreHistory";
-import SandboxAlbumPointsCard from "@/features/album-points-lab/components/SandboxAlbumPointsCard";
+import LatestAlbumScoreChartCard from "@/features/ranking/album-ranking/LatestAlbumScoreChartCard";
+import { toLatestRankingItems } from "@/features/ranking/album-ranking/utils/toRankingItems";
 
 type PageProps = {
 	params: Promise<{ artistId: string }>;
@@ -56,12 +52,13 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 
 	const topTracks = trackStats.slice(0, 5);
 
-	const sandboxWeightedAverages = rawTrackStats
-		? getSandboxWeightedAlbumAverages(rawTrackStats)
-		: [];
-	const sandboxUnweightedAverages = rawTrackStats
-		? getSandboxUnweightedAlbumAverages(rawTrackStats)
-		: [];
+	const albums = rawTrackStats?.albums ?? [];
+
+	const latestWeightedItems = toLatestRankingItems(weightedHistory, albums);
+	const latestUnweightedItems = toLatestRankingItems(
+		unweightedHistory,
+		albums
+	);
 
 	return (
 		<div className="space-y-10 p-content">
@@ -70,21 +67,13 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 				columnKey={["highestRank"]}
 				title="Your Top Tracks"
 			/>
+			
 
 			<LinkedAlbumCharts albumStats={albumStats} />
 
-			<AlbumPointsCard albumStats={albumStats} />
-
-			<SandboxAlbumPointsCard
-				averages={sandboxWeightedAverages}
-				history={weightedHistory}
-				title="Album Points — Weighted (Experimental)"
-			/>
-
-			<SandboxAlbumPointsCard
-				averages={sandboxUnweightedAverages}
-				history={unweightedHistory}
-				title="Album Points — Unweighted (Experimental)"
+			<LatestAlbumScoreChartCard
+				weightedItems={latestWeightedItems}
+				unweightedItems={latestUnweightedItems}
 			/>
 		</div>
 	);

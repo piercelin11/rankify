@@ -25,7 +25,13 @@ export async function getRawTrackStats(
 					name: true,
 					albumId: true,
 					album: {
-						select: { id: true, name: true, color: true, releaseDate: true },
+						select: {
+							id: true,
+							name: true,
+							color: true,
+							img: true,
+							releaseDate: true,
+						},
 					},
 				},
 			},
@@ -41,6 +47,7 @@ export async function getRawTrackStats(
 				id: album.id,
 				name: album.name,
 				color: album.color,
+				img: album.img,
 				releaseDate: album.releaseDate,
 			});
 		}
