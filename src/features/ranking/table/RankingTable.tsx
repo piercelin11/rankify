@@ -14,6 +14,7 @@ import SimpleDropdown from "@/components/dropdown/SimpleDropdown";
 import { dateToDashFormat } from "@/lib/utils";
 
 export default function RankingTable<T extends RankingListDataTypeExtend>({
+	artistId,
 	data,
 	columnKey,
 	currentSubmissionId,
@@ -38,7 +39,7 @@ export default function RankingTable<T extends RankingListDataTypeExtend>({
 	const currentSubmission = submissions.find(
 		(s) => s.id === currentSubmissionId
 	);
-	const latestSubmissionId = submissions[0].id;
+	const latestSubmissionId = submissions[0]?.id;
 
 	return (
 		<div className={className}>
@@ -51,12 +52,15 @@ export default function RankingTable<T extends RankingListDataTypeExtend>({
 							{
 								value: "average",
 								label: "Average",
-								href: `/artist/${data[0].artistId}?view=all-rankings`,
+								href: `/artist/${artistId}/all-rankings`,
 							},
 							{
 								value: "snapshot",
 								label: "Snapshot",
-								href: `/artist/${data[0].artistId}?submissionId=${latestSubmissionId}&view=all-rankings`,
+								href: latestSubmissionId
+									? `/artist/${artistId}/${latestSubmissionId}/all-rankings`
+									: undefined,
+								disabled: !latestSubmissionId,
 							},
 						]}
 						value={view}
@@ -72,7 +76,7 @@ export default function RankingTable<T extends RankingListDataTypeExtend>({
 								options={submissions.map((s) => ({
 									value: s.id,
 									label: dateToDashFormat(s.date),
-									href: `/artist/${data[0].artistId}?submissionId=${s.id}&view=all-rankings`,
+									href: `/artist/${artistId}/${s.id}/all-rankings`,
 								}))}
 							/>
 						</div>

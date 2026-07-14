@@ -131,38 +131,6 @@ export async function getAlbumRanking({
 	};
 }
 
-export async function getAlbumRankingSessions({ userId, artistId }: { userId: string; artistId: string }) {
-	cacheLife(CACHE_TIMES.LONG);
-	cacheTag(CACHE_TAGS.ARTIST(artistId));
-	cacheTag(CACHE_TAGS.RANKING(userId, artistId));
-
-
-	const albums = await db.album.findMany({
-		where: {
-			artistId,
-		},
-		include: {
-			submissions: {
-				where: {
-					userId,
-					status: "COMPLETED",
-					type: "ALBUM",
-				}
-			}
-		},
-		orderBy: {
-			releaseDate: "desc",
-		},
-	});
-
-	return albums.map((album) => {
-		return {
-			...album,
-			sessionCount: album.submissions.length,
-		};
-	});
-}
-
 export async function getAlbumComparisonOptions({
 	userId,
 	artistId,

@@ -8,6 +8,7 @@ export type AdvancedFilters = {
 };
 
 export type RankingTableProps<T extends RankingListDataTypeExtend> = {
+	artistId: string;
 	data: T[];
 	columnKey: (keyof T)[];
 	currentSubmissionId?: string;
