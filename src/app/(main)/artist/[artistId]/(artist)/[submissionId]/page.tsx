@@ -55,31 +55,34 @@ export default async function SnapshotPage({ params }: PageProps) {
 
 	return (
 		<div className="space-y-10 p-content">
-			<MyStatsToolbar
-				artistId={artistId}
-				activeTab="history"
-				latestSubmissionId={submissions[0].id}
-			/>
-
-			<div className="flex items-center gap-2">
-				<p className="text-sm text-muted-foreground">View stats from:</p>
-				<SimpleDropdown
-					size="sm"
-					className="w-fit min-w-36 border-transparent bg-secondary"
-					value={currentSubmission.id}
-					placeholder={dateToDashFormat(currentSubmission.date)}
-					options={submissions.map((s) => ({
-						value: s.id,
-						label: dateToDashFormat(s.date),
-						href: `/artist/${artistId}/${s.id}`,
-					}))}
+			<div className="flex items-center justify-between gap-4">
+				<MyStatsToolbar
+					artistId={artistId}
+					activeTab="history"
+					latestSubmissionId={submissions[0].id}
 				/>
+
+				<div className="flex items-center gap-2">
+					<p className="text-sm text-muted-foreground">View stats from:</p>
+					<SimpleDropdown
+						size="sm"
+						className="w-fit min-w-36 border-transparent bg-secondary"
+						value={currentSubmission.id}
+						placeholder={dateToDashFormat(currentSubmission.date)}
+						options={submissions.map((s) => ({
+							value: s.id,
+							label: dateToDashFormat(s.date),
+							href: `/artist/${artistId}/${s.id}`,
+						}))}
+					/>
+				</div>
 			</div>
 
 			<TopTracksCard
 				tracks={topTracks}
 				columnKey={["peak"]}
 				title="Your Top Tracks"
+				fullRankingHref={`/artist/${artistId}/${submissionId}/all-rankings`}
 			/>
 
 			<LinkedAlbumCharts albumStats={albumHistoryStats} />

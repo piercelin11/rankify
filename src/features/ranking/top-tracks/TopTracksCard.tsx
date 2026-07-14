@@ -9,12 +9,14 @@ type TopTracksCardProps = {
 	tracks: TopTracksItem[];
 	columnKey?: TopTracksColumnKey[];
 	title?: string;
+	fullRankingHref?: string;
 };
 
 export default function TopTracksCard({
 	tracks,
 	columnKey = ["highestRank"],
 	title = "Top Tracks",
+	fullRankingHref,
 }: TopTracksCardProps) {
 	if (tracks.length === 0) return null;
 
@@ -71,9 +73,17 @@ export default function TopTracksCard({
 					</Link>
 				))}
 			</div>
-			<Button variant="ghost" size="sm" className="mt-2">
-				Full ranking
-			</Button>
+			{fullRankingHref ? (
+				<Link href={fullRankingHref}>
+					<Button variant="ghost" size="sm" className="mt-2">
+						Full ranking
+					</Button>
+				</Link>
+			) : (
+				<Button variant="ghost" size="sm" className="mt-2">
+					Full ranking
+				</Button>
+			)}
 		</section>
 	);
 }
