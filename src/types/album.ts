@@ -41,7 +41,7 @@ export type AlbumStatsType = {
  * - Album Model: id, name, artistId, spotifyUrl, color, img, releaseDate, type
  * - AlbumRanking: rank, totalPoints
  * - RankingSubmission: createdAt
- * - 計算欄位: top25PercentCount, top50PercentCount, previousTotalPoints, pointsChange
+ * - 計算欄位: top5/10/25/50PercentCount, trackCount, tracks, previousTotalPoints, pointsChange
  */
 export type AlbumHistoryType = {
 	// === Album Model 欄位 ===
@@ -63,8 +63,34 @@ export type AlbumHistoryType = {
 	createdAt: Date;
 
 	// === 計算欄位 ===
+	trackCount: number;
+	top5PercentCount: number;
+	top10PercentCount: number;
 	top25PercentCount: number;
 	top50PercentCount: number;
 	previousTotalPoints?: number;
 	pointsChange?: number | null;
+
+	/** 歌曲明細，依 rank 升冪排序，用於 tooltip 顯示歌曲清單 */
+	tracks: { id: string; name: string; rank: number }[];
+};
+
+/**
+ * Album 圖表顯示契約型別
+ * 用於 LinkedAlbumCharts 系列元件（AlbumPercentileCard / AlbumRatioCard）
+ * AlbumStatsType 與 AlbumHistoryType 皆結構相容，可直接傳入
+ */
+export type AlbumChartStatsType = {
+	id: string;
+	name: string;
+	color: string | null;
+	releaseDate: Date;
+
+	trackCount: number;
+	top5PercentCount: number;
+	top10PercentCount: number;
+	top25PercentCount: number;
+	top50PercentCount: number;
+
+	tracks: { id: string; name: string; rank: number }[];
 };

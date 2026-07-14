@@ -69,7 +69,6 @@ export async function getAlbumsHistory({
 			artistId,
 			submissionId,
 			userId,
-			rankPercentile: { lte: 0.5 },
 			submission: { status: "COMPLETED" },
 			track: {
 				albumId: {
@@ -78,30 +77,56 @@ export async function getAlbumsHistory({
 			},
 		},
 		select: {
+			rank: true,
 			rankPercentile: true,
 			track: {
 				select: {
+					id: true,
+					name: true,
 					albumId: true,
 				},
 			},
 		},
 	});
 
+	const top5PercentMap = new Map<string, number>();
+	const top10PercentMap = new Map<string, number>();
 	const top25PercentMap = new Map<string, number>();
 	const top50PercentMap = new Map<string, number>();
+	const tracksByAlbumId = new Map<
+		string,
+		{ id: string; name: string; rank: number }[]
+	>();
 
 	percentileData.forEach((item) => {
 		const albumId = item.track.albumId;
 		if (!albumId) return;
 
-		const top50Count = top50PercentMap.get(albumId) || 0;
-		top50PercentMap.set(albumId, top50Count + 1);
+		const list = tracksByAlbumId.get(albumId) ?? [];
+		list.push({ id: item.track.id, name: item.track.name, rank: item.rank });
+		tracksByAlbumId.set(albumId, list);
 
+		if (item.rankPercentile <= 0.5) {
+			const top50Count = top50PercentMap.get(albumId) || 0;
+			top50PercentMap.set(albumId, top50Count + 1);
+		}
 		if (item.rankPercentile <= 0.25) {
 			const top25Count = top25PercentMap.get(albumId) || 0;
 			top25PercentMap.set(albumId, top25Count + 1);
 		}
+		if (item.rankPercentile <= 0.1) {
+			const top10Count = top10PercentMap.get(albumId) || 0;
+			top10PercentMap.set(albumId, top10Count + 1);
+		}
+		if (item.rankPercentile <= 0.05) {
+			const top5Count = top5PercentMap.get(albumId) || 0;
+			top5PercentMap.set(albumId, top5Count + 1);
+		}
 	});
+
+	for (const list of tracksByAlbumId.values()) {
+		list.sort((a, b) => a.rank - b.rank);
+	}
 
 	const currentDate = albumRanking[0].submission.createdAt;
 
@@ -155,10 +180,14 @@ export async function getAlbumsHistory({
 			submissionId,
 			createdAt: data.submission?.createdAt || new Date(),
 			// 計算欄位
+			trackCount: tracksByAlbumId.get(data.albumId)?.length ?? 0,
+			top5PercentCount: top5PercentMap.get(data.albumId) ?? 0,
+			top10PercentCount: top10PercentMap.get(data.albumId) ?? 0,
 			top25PercentCount: top25PercentMap.get(data.albumId) ?? 0,
 			top50PercentCount: top50PercentMap.get(data.albumId) ?? 0,
 			previousTotalPoints: prevPoints,
 			pointsChange: calculatePointsChange(data.points, prevPoints),
+			tracks: tracksByAlbumId.get(data.albumId) ?? [],
 		};
 	});
 

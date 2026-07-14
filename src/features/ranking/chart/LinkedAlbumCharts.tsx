@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { AlbumStatsType } from "@/types/album";
+import type { AlbumChartStatsType } from "@/types/album";
 import type { PercentileKey } from "./constants";
 import AlbumPercentileCard from "./AlbumPercentileCard";
 import AlbumRatioCard from "./AlbumRatioCard";
 import LinkToggleButton from "./components/LinkToggleButton";
 
 type Props = {
-	albumStats: AlbumStatsType[];
+	albumStats: AlbumChartStatsType[];
 };
 
 export default function LinkedAlbumCharts({ albumStats }: Props) {

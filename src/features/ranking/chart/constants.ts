@@ -1,4 +1,4 @@
-import type { AlbumStatsType } from "@/types/album";
+import type { AlbumChartStatsType } from "@/types/album";
 
 export type PercentileKey = "top5" | "top10" | "top25" | "top50";
 
@@ -6,7 +6,7 @@ export type PercentileOption = {
 	value: PercentileKey;
 	label: string;
 	field: keyof Pick<
-		AlbumStatsType,
+		AlbumChartStatsType,
 		| "top5PercentCount"
 		| "top10PercentCount"
 		| "top25PercentCount"
