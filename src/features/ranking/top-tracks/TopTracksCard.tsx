@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { PLACEHOLDER_PIC } from "@/constants/placeholder.constants";
-import type { TrackStatsType } from "@/types/track";
+import { Button } from "@/components/ui/button";
 import { TOP_TRACKS_COLUMNS, type TopTracksColumnKey } from "./columns";
+import type { TopTracksItem } from "./types";
 
 type TopTracksCardProps = {
-	tracks: TrackStatsType[];
+	tracks: TopTracksItem[];
 	columnKey?: TopTracksColumnKey[];
 	title?: string;
 };
@@ -38,7 +39,7 @@ export default function TopTracksCard({
 						className="flex items-center gap-3 px-4 py-2 transition-colors hover:bg-muted/50"
 					>
 						<div className="w-6 shrink-0 text-left font-numeric text-xl text-foreground">
-							0{track.overallRank}
+							0{track.rank}
 						</div>
 						<div className="flex min-w-0 flex-1 items-center gap-3">
 							<div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg lg:h-16 lg:w-16">
@@ -64,12 +65,15 @@ export default function TopTracksCard({
 								key={key}
 								className="w-[100px] shrink-0 text-right text-base"
 							>
-								{track[key]}
+								{track[key] ?? "—"}
 							</div>
 						))}
 					</Link>
 				))}
 			</div>
+			<Button variant="ghost" size="sm" className="mt-2">
+				Full ranking
+			</Button>
 		</section>
 	);
 }

@@ -1,6 +1,4 @@
-import type { TrackStatsType } from "@/types/track";
-
-export type TopTracksColumnKey = keyof Pick<TrackStatsType, "highestRank">;
+export type TopTracksColumnKey = "highestRank" | "peak";
 
 export type TopTracksColumnConfig = {
 	key: TopTracksColumnKey;
@@ -9,4 +7,5 @@ export type TopTracksColumnConfig = {
 
 export const TOP_TRACKS_COLUMNS: Record<TopTracksColumnKey, TopTracksColumnConfig> = {
 	highestRank: { key: "highestRank", header: "Peak" },
+	peak: { key: "peak", header: "Peak" },
 };

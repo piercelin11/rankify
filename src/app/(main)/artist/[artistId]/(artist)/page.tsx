@@ -4,21 +4,19 @@ import { calculateDateRangeFromSlug } from "@/lib/utils";
 import getAlbumsStats from "@/services/album/getAlbumsStats";
 import getTracksStats from "@/services/track/getTracksStats";
 import { getArtistRankingSubmissions } from "@/db/ranking";
+import MyStatsToolbar from "@/components/artist/MyStatsToolbar";
 import TopTracksCard from "@/features/ranking/top-tracks/TopTracksCard";
 import LinkedAlbumCharts from "@/features/ranking/chart/LinkedAlbumCharts";
-import { getRawTrackStats } from "@/features/album-points-lab/getRawTrackStats";
 import {
 	getAlbumScoreHistory,
 	getUnweightedAlbumScoreHistory,
 } from "@/features/album-points-lab/getAlbumScoreHistory";
 import LatestAlbumScoreChartCard from "@/features/ranking/album-ranking/LatestAlbumScoreChartCard";
-import { toLatestRankingItems } from "@/features/ranking/album-ranking/utils/toRankingItems";
+import { toAverageRankingItems } from "@/features/ranking/album-ranking/utils/toRankingItems";
 
 type PageProps = {
 	params: Promise<{ artistId: string }>;
 	searchParams: Promise<{
-		view?: string;
-		submissionId?: string;
 		range?: string;
 	}>;
 };
@@ -41,39 +39,38 @@ export default async function MyStatsPage({ params, searchParams }: PageProps) {
 	//TODO:處理沒有資料的回傳畫面
 	if (!latestSubmissionId) return null;
 
-	const [trackStats, albumStats, rawTrackStats, weightedHistory, unweightedHistory] =
+	const [trackStats, albumStats, weightedHistory, unweightedHistory] =
 		await Promise.all([
 			getTracksStats({ artistId, userId }),
 			getAlbumsStats({ artistId, userId, dateRange }),
-			getRawTrackStats(artistId, userId),
 			getAlbumScoreHistory({ artistId, userId }),
 			getUnweightedAlbumScoreHistory({ artistId, userId }),
 		]);
 
 	const topTracks = trackStats.slice(0, 5);
 
-	const albums = rawTrackStats?.albums ?? [];
-
-	const latestWeightedItems = toLatestRankingItems(weightedHistory, albums);
-	const latestUnweightedItems = toLatestRankingItems(
-		unweightedHistory,
-		albums
-	);
+	const weightedItems = toAverageRankingItems(albumStats, weightedHistory);
+	const unweightedItems = toAverageRankingItems(albumStats, unweightedHistory);
 
 	return (
 		<div className="space-y-10 p-content">
+			<MyStatsToolbar
+				artistId={artistId}
+				activeTab="overview"
+				latestSubmissionId={latestSubmissionId}
+			/>
+
 			<TopTracksCard
 				tracks={topTracks}
 				columnKey={["highestRank"]}
 				title="Your Top Tracks"
 			/>
-			
 
 			<LinkedAlbumCharts albumStats={albumStats} />
 
 			<LatestAlbumScoreChartCard
-				weightedItems={latestWeightedItems}
-				unweightedItems={latestUnweightedItems}
+				weightedItems={weightedItems}
+				unweightedItems={unweightedItems}
 			/>
 		</div>
 	);

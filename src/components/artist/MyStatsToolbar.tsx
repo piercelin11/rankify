@@ -2,7 +2,7 @@ import PillTabs from "../navigation/PillTabs";
 
 type Props = {
 	artistId: string;
-	activeTab: "overview" | "history" | "all-rankings";
+	activeTab: "overview" | "history";
 	latestSubmissionId: string;
 };
 
@@ -18,17 +18,12 @@ export default async function MyStatsToolbar({
 				{
 					label: "Overview",
 					value: "overview",
-					href: `/artist/${artistId}?view=overview`,
+					href: `/artist/${artistId}`,
 				},
 				{
 					label: "History",
 					value: "history",
 					href: `/artist/${artistId}/${latestSubmissionId}`,
-				},
-				{
-					label: "All Rankings",
-					value: "all-rankings",
-					href: `/artist/${artistId}?view=all-rankings`,
 				},
 			]}
 		/>

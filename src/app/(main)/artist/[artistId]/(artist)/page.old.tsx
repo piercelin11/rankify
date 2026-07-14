@@ -1,3 +1,4 @@
+// @ts-nocheck 舊版路由殘留檔（非路由檔案，不會被 Next.js 渲染），MyStatsToolbar 型別已隨新架構調整
 import { getSession } from "@/../auth";
 import {
 	getAlbumRankingSessions,

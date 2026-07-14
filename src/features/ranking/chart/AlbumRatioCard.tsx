@@ -4,14 +4,14 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import RatioBarChart from "@/components/charts/RatioBarChart";
 import InfoTooltip from "@/components/overlay/InfoTooltip";
-import type { AlbumStatsType } from "@/types/album";
+import type { AlbumChartStatsType } from "@/types/album";
 import { PERCENTILE_OPTIONS, type PercentileKey } from "./constants";
 import PercentileSelect from "./components/PercentileSelect";
 import ListDivider from "./components/ListDivider";
 import { getCompetitionRanks } from "./utils/ranking";
 
 type Props = {
-	albumStats: AlbumStatsType[];
+	albumStats: AlbumChartStatsType[];
 	title?: string;
 	percentile: PercentileKey;
 	onPercentileChange: (value: PercentileKey) => void;
