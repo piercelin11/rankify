@@ -15,7 +15,7 @@ export function useRankingTable<T extends RankingListDataTypeExtend>({
 	columns,
 }: {
 	data: T[];
-	columnKey?: (keyof T)[];
+	columnKey?: (keyof T | keyof typeof COLUMN_CONFIGS)[];
 	columns?: ColumnDef<T>[];
 }) {
 	const [globalFilter, setGlobalFilter] = useState("");

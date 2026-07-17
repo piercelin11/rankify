@@ -100,6 +100,7 @@ export type TrackHistoryType = {
 	// === 計算欄位 ===
 	peak: number;
 	achievement: AchievementType[];
+	totalCount: number;
 
 	// === 關聯資料 ===
 	album: {

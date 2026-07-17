@@ -37,7 +37,7 @@ export default async function SnapshotAllRankingsPage({ params }: PageProps) {
 				data={trackHistory}
 				submissions={submissions}
 				currentSubmissionId={submissionId}
-				columnKey={["peak", "achievement"]}
+				columnKey={["peak", "achievement", "significantChange"]}
 				availableAlbums={albums.map((album) => album.name)}
 				view="snapshot"
 			/>

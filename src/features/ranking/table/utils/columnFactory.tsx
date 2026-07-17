@@ -1,11 +1,20 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUp, ArrowDown, Plus, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import TrackCell from "../components/TrackCell";
 import type { RankingListDataTypeExtend } from "../types";
 import { Badge } from "@/components/ui/badge";
 
-export type ColumnType = "rank" | "track" | "number" | "change" | "achievement";
+export type ColumnType =
+	| "rank"
+	| "track"
+	| "number"
+	| "rankNumber"
+	| "decimal"
+	| "change"
+	| "achievement"
+	| "streak"
+	| "changePercent";
 
 export type ColumnConfig = {
 	key: string;
@@ -33,7 +42,14 @@ export const COLUMN_CONFIGS: Record<string, ColumnConfig> = {
 	peak: {
 		key: "peak",
 		header: "Peak",
-		type: "number",
+		type: "rankNumber",
+		size: NUMBER_SIZE,
+		sortDescFirst: false,
+	},
+	highestRank: {
+		key: "highestRank",
+		header: "Peak",
+		type: "rankNumber",
 		size: NUMBER_SIZE,
 		sortDescFirst: false,
 	},
@@ -54,7 +70,7 @@ export const COLUMN_CONFIGS: Record<string, ColumnConfig> = {
 	averageRank: {
 		key: "averageRank",
 		header: "Avg.",
-		type: "number",
+		type: "decimal",
 		size: NUMBER_SIZE,
 		sortDescFirst: false,
 	},
@@ -86,6 +102,20 @@ export const COLUMN_CONFIGS: Record<string, ColumnConfig> = {
 		size: NUMBER_SIZE,
 		sortDescFirst: true,
 	},
+	streak: {
+		key: "streak",
+		header: "Streak",
+		type: "streak",
+		size: NUMBER_SIZE,
+		sortDescFirst: true,
+	},
+	significantChange: {
+		key: "significantChange",
+		header: "",
+		type: "changePercent",
+		size: NUMBER_SIZE,
+		sortDescFirst: true,
+	},
 };
 
 // 欄位工廠函數
@@ -94,6 +124,9 @@ export const createRankingColumn = (
 ): ColumnDef<RankingListDataTypeExtend> => ({
 	accessorKey: config.key,
 	header: () => config.header,
+	cell: ({ getValue }) => (
+		<div className="font-numeric text-lg">{getValue() as number}</div>
+	),
 	size: config.size,
 	enableSorting: config.sortable ?? true,
 	sortDescFirst: config.sortDescFirst ?? false,
@@ -115,7 +148,20 @@ export const createNumberColumn = (
 	accessorKey: config.key,
 	header: () => <div className="text-right">{config.header}</div>,
 	cell: ({ getValue }) => (
-		<div className="font-mono text-right">{getValue() as number}</div>
+		<div className="font-numeric text-right">{getValue() as number}</div>
+	),
+	size: config.size,
+	enableSorting: config.sortable ?? true,
+	sortDescFirst: config.sortDescFirst ?? false,
+});
+
+export const createRankNumberColumn = (
+	config: ColumnConfig
+): ColumnDef<RankingListDataTypeExtend> => ({
+	accessorKey: config.key,
+	header: () => <div className="text-right">{config.header}</div>,
+	cell: ({ getValue }) => (
+		<div className="font-numeric text-right">#{getValue() as number}</div>
 	),
 	size: config.size,
 	enableSorting: config.sortable ?? true,
@@ -150,7 +196,7 @@ export const createChangeColumn = (
 				) : (
 					<ArrowDown className="h-3 w-3" />
 				)}
-				<span className="font-mono text-sm">{Math.abs(change)}</span>
+				<span className="font-numeric text-sm">{Math.abs(change)}</span>
 			</div>
 		);
 	},
@@ -172,12 +218,111 @@ export const createAchievementColumn = (
 					<Badge
 						key={achievemt}
 						variant={"outline"}
-						className="border-primary text-primary"
+						className="border-primary font-numeric text-primary"
 						size={"lg"}
 					>
 						{achievemt}
 					</Badge>
 				))}
+			</div>
+		);
+	},
+	size: config.size,
+});
+
+export const createDecimalColumn = (
+	config: ColumnConfig
+): ColumnDef<RankingListDataTypeExtend> => ({
+	accessorKey: config.key,
+	header: () => <div className="text-right">{config.header}</div>,
+	cell: ({ getValue }) => (
+		<div className="font-numeric text-right">
+			{(getValue() as number).toFixed(2)}
+		</div>
+	),
+	size: config.size,
+	enableSorting: config.sortable ?? true,
+	sortDescFirst: config.sortDescFirst ?? false,
+});
+
+export const createStreakColumn = (
+	config: ColumnConfig
+): ColumnDef<RankingListDataTypeExtend> => ({
+	id: config.key,
+	accessorFn: (row) =>
+		"hotStreak" in row ? row.hotStreak - row.coldStreak : 0,
+	header: () => <div className="text-right">{config.header}</div>,
+	enableSorting: config.sortable ?? true,
+	sortDescFirst: config.sortDescFirst ?? false,
+	cell: ({ row }) => {
+		const item = row.original;
+		if (!("hotStreak" in item))
+			return <div className="text-right text-secondary-foreground">-</div>;
+
+		const { hotStreak, coldStreak } = item;
+
+		if (hotStreak >= 3) {
+			return (
+				<div className="flex items-center justify-end gap-1.5">
+					<span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-primary">
+						<Plus className="h-3 w-3" />
+					</span>
+					<span className="font-numeric text-primary">X{hotStreak}</span>
+				</div>
+			);
+		}
+
+		if (coldStreak >= 3) {
+			return (
+				<div className="flex items-center justify-end gap-1.5">
+					<span className="flex h-6 w-6 items-center justify-center rounded-full bg-destructive/15 text-destructive">
+						<Minus className="h-3 w-3" />
+					</span>
+					<span className="font-numeric text-destructive">X{coldStreak}</span>
+				</div>
+			);
+		}
+
+		return <div className="text-right text-secondary-foreground">-</div>;
+	},
+	size: config.size,
+});
+
+const SIGNIFICANT_CHANGE_THRESHOLD = 0.2;
+
+export const createChangePercentColumn = (
+	config: ColumnConfig
+): ColumnDef<RankingListDataTypeExtend> => ({
+	id: config.key,
+	accessorFn: (row) =>
+		"totalCount" in row && row.rankChange
+			? Math.abs(row.rankChange) / row.totalCount
+			: 0,
+	header: () => <div className="text-right">{config.header}</div>,
+	enableSorting: config.sortable ?? true,
+	sortDescFirst: config.sortDescFirst ?? false,
+	cell: ({ row }) => {
+		const item = row.original;
+		if (!("totalCount" in item) || !item.rankChange)
+			return null;
+
+		const changeRatio = Math.abs(item.rankChange) / item.totalCount;
+		if (changeRatio < SIGNIFICANT_CHANGE_THRESHOLD) return null;
+
+		return (
+			<div className="flex justify-end">
+				<Badge
+					variant="outline"
+					size="lg"
+					className={cn(
+						"font-numeric",
+						item.rankChange > 0
+							? "border-primary text-primary"
+							: "border-destructive text-destructive"
+					)}
+				>
+					{item.rankChange > 0 ? "Surge" : "Slump"}
+				</Badge>
 			</div>
 		);
 	},
@@ -197,10 +342,18 @@ export const createColumn = (
 			return createTrackColumn(config);
 		case "number":
 			return createNumberColumn(config);
+		case "rankNumber":
+			return createRankNumberColumn(config);
+		case "decimal":
+			return createDecimalColumn(config);
 		case "change":
 			return createChangeColumn(config);
 		case "achievement":
 			return createAchievementColumn(config);
+		case "streak":
+			return createStreakColumn(config);
+		case "changePercent":
+			return createChangePercentColumn(config);
 		default:
 			throw new Error(`Unknown column type: ${config.type}`);
 	}

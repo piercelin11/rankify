@@ -148,6 +148,7 @@ export async function getTracksHistory({
 				peak: isNewPeak ? data.rank : historicalBest!,
 				achievement:
 					isNewPeak && historicalBest ? ["New Peak" as AchievementType] : [],
+				totalCount: trackIds.length,
 				// 關聯資料
 				album: data.track.album,
 			};

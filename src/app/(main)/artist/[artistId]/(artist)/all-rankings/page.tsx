@@ -32,7 +32,7 @@ export default async function AllRankingsPage({ params }: PageProps) {
 				artistId={artistId}
 				data={trackStats}
 				submissions={submissions}
-				columnKey={["highestRank"]}
+				columnKey={["streak", "averageRank", "highestRank"]}
 				availableAlbums={albums.map((album) => album.name)}
 				view="average"
 			/>
