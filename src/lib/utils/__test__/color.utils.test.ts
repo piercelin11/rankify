@@ -16,6 +16,7 @@ jest.mock("color-convert", () => ({
 }));
 
 import colorConvert from "color-convert";
+import { DEFAULT_COLOR } from "@/constants";
 import { adjustColor, adjustColorOpacity } from "../color.utils";
 const mockColorConvert = jest.mocked(colorConvert);
 
@@ -37,7 +38,7 @@ describe("adjustColor function", () => {
 			"should return DEFAULT_COLOR when hexColor is '%s'",
 			(hexColor, lightness, saturation) => {
 				const result = adjustColor(hexColor as any, lightness, saturation);
-				expect(result).toBe("#C3F75F"); // DEFAULT_COLOR from constants
+				expect(result).toBe(DEFAULT_COLOR);
 			}
 		);
 	});

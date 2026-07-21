@@ -50,7 +50,7 @@ export default function WindowVirtualizedTable<
 		router.push(`/artist/${item.artistId}/track/${item.id}`);
 	}
 	const { isStuck, sentinelRef } = useStickyState({
-		rootMargin: "50px",
+		rootMargin: "55px",
 		threshold: 0,
 	});
 
@@ -70,7 +70,8 @@ export default function WindowVirtualizedTable<
 
 	const virtualizer = useVirtualizer({
 		count: rows.length,
-		getScrollElement: () => listRef.current?.closest('[data-scroll-container]') as HTMLElement | null,
+		getScrollElement: () =>
+			listRef.current?.closest("[data-scroll-container]") as HTMLElement | null,
 		estimateSize: () => ROW_HEIGHT,
 		overscan: OVERSCAN,
 	});
@@ -107,14 +108,17 @@ export default function WindowVirtualizedTable<
 	return (
 		<div>
 			<div ref={sentinelRef} className="h-0" />
-			<div
-				className={cn(
-					"sticky top-header z-10 border-b",
-					isStuck ? "backdrop-blur bg-black" : ""
-				)}
-			>
+			<div className={cn("sticky top-header z-10")}>
+				<div
+					className={cn(
+						"absolute left-1/2 h-10 w-screen -translate-x-1/2 border-b backdrop-blur",
+						{
+							"bg-black/80": isStuck,
+						}
+					)}
+				/>
 				<Table>
-					<TableHeader className={cn({ "border-b": !isStuck })}>
+					<TableHeader className={cn({ "relative border-b": !isStuck })}>
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow
 								key={headerGroup.id}
@@ -140,8 +144,12 @@ export default function WindowVirtualizedTable<
 											{header.isPlaceholder ? null : (
 												<div
 													className={cn(
-														"flex items-center gap-2 text-secondary-foreground",
-														isLeftAligned ? "" : "justify-end"
+														"flex items-center gap-2",
+														{
+															"justify-end": !isLeftAligned,
+															"text-secondary-foreground": !isStuck,
+															"text-foreground": isStuck,
+														}
 													)}
 												>
 													{canSort ? (
@@ -150,8 +158,8 @@ export default function WindowVirtualizedTable<
 															onClick={header.column.getToggleSortingHandler()}
 															className={cn(
 																"flex items-center gap-1.5",
-																"appearance-none bg-transparent border-0 p-0",
-																"cursor-pointer hover:text-foreground transition-colors"
+																"appearance-none border-0 bg-transparent p-0",
+																"cursor-pointer transition-colors hover:text-foreground"
 															)}
 														>
 															<span>
